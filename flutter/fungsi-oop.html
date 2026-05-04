@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Function & OOP Dart — Arif Hidayah</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/flutter/course.css">
+</head>
+<body>
+    <div class="bg-grid" aria-hidden="true"></div>
+    <nav class="navbar scrolled" id="navbar">
+        <div class="nav-container" style="max-width: 1300px; padding: 0 32px;">
+            <a href="../index.html" class="nav-logo"><div class="logo-icon"><svg width="24" height="24" viewBox="0 0 28 28" fill="none"><path d="M14 2L26 8V20L14 26L2 20V8L14 2Z" stroke="currentColor" stroke-width="2" fill="none"/><circle cx="14" cy="14" r="3" fill="currentColor"/></svg></div><span class="logo-text" style="font-size:1.1rem;">Arif<span class="logo-accent">Hidayah</span></span></a>
+            <div class="nav-links"><a href="../index.html" class="nav-link">← Kembali ke Profil</a></div>
+            <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation"><span></span><span></span><span></span></button>
+        </div>
+    </nav>
+    <div class="mobile-menu" id="mobileMenu"><a href="../index.html" class="mobile-link" onclick="closeMobileMenu()">← Kembali ke Profil</a></div>
+
+    <main class="course-layout">
+        <aside class="course-sidebar" id="courseSidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-icon"><svg width="24" height="24" viewBox="0 0 40 40" fill="none"><path d="M22 6L8 20L13 25L32 6H22Z" fill="currentColor"/><path d="M22 18L13 27L18 32L32 18H22Z" fill="currentColor" opacity="0.7"/></svg></div>
+                <span class="sidebar-course-name">Flutter Fundamentals</span>
+            </div>
+            <div class="module-group">
+                <div class="module-group-title">Pengantar</div>
+                <a href="/flutter/index.html" class="module-link"><div class="module-link-icon">1</div><span>Pengenalan Flutter & Dart</span></a>
+                <a href="/flutter/instalasi.html" class="module-link"><div class="module-link-icon">2</div><span>Instalasi & Konfigurasi</span></a>
+            </div>
+            <div class="module-group">
+                <div class="module-group-title">Dart Fundamental</div>
+                <a href="/flutter/variabel.html" class="module-link"><div class="module-link-icon">3</div><span>Variabel & Tipe Data</span></a>
+                <a href="/flutter/fungsi-oop.html" class="module-link active"><div class="module-link-icon">4</div><span>Function & OOP</span></a>
+                <a href="/flutter/collection-async.html" class="module-link"><div class="module-link-icon">5</div><span>Collection & Async</span></a>
+            </div>
+            <div class="module-group">
+                <div class="module-group-title">Flutter UI</div>
+                <a href="#" class="module-link"><div class="module-link-icon">6</div><span>Widget Dasar</span></a>
+                <a href="#" class="module-link"><div class="module-link-icon">7</div><span>Layout & Responsive</span></a>
+                <a href="#" class="module-link"><div class="module-link-icon">8</div><span>Navigation & Routing</span></a>
+            </div>
+            <div class="module-group">
+                <div class="module-group-title">State & Data</div>
+                <a href="#" class="module-link"><div class="module-link-icon">9</div><span>State Management</span></a>
+                <a href="#" class="module-link"><div class="module-link-icon">10</div><span>REST API & HTTP</span></a>
+                <a href="#" class="module-link"><div class="module-link-icon">11</div><span>Local Storage</span></a>
+            </div>
+            <div class="module-group">
+                <div class="module-group-title">Proyek Akhir</div>
+                <a href="#" class="module-link"><div class="module-link-icon">12</div><span>Final Project</span></a>
+            </div>
+        </aside>
+
+        <article class="course-content">
+            <div class="breadcrumb">
+                <a href="../index.html">Home</a><span>›</span>
+                <a href="/flutter/index.html">Flutter</a><span>›</span>
+                <span style="color: var(--text-primary);">Function & OOP</span>
+            </div>
+
+            <header class="content-header">
+                <h1 class="content-title">Modul 4: Function & OOP di Dart</h1>
+                <div class="content-meta">
+                    <div class="meta-pill"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 5V8.5L10.5 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/></svg><span>Estimasi: 60 Menit</span></div>
+                    <div class="meta-pill"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="10" rx="1" stroke="currentColor" stroke-width="1.5"/><path d="M5 7h6M5 10h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><span>Teori & Praktikum</span></div>
+                </div>
+            </header>
+
+            <p class="content-text">Modul ini membahas cara menulis <strong>function</strong> di Dart serta pilar-pilar <strong>Object-Oriented Programming (OOP)</strong> yang menjadi fondasi utama pengembangan aplikasi Flutter.</p>
+
+            <div class="info-box">
+                <div class="info-box-header"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg><strong>Mengapa Modul Ini Penting?</strong></div>
+                <p>Di Flutter, <strong>semuanya adalah widget</strong>, dan setiap widget adalah sebuah <strong>class</strong>. Anda akan menulis puluhan class dan function setiap kali membangun aplikasi. Tanpa pemahaman kuat di modul ini, Anda akan kesulitan memahami cara kerja Flutter di modul-modul selanjutnya.</p>
+            </div>
+
+            <!-- Function Dasar -->
+            <h2 class="content-heading">Function Dasar</h2>
+            <p class="content-text">
+                Function (fungsi) adalah blok kode yang dapat dipanggil berulang kali. Di Dart, setiap function memiliki <strong>return type</strong> (tipe kembalian). Jika function tidak mengembalikan nilai, gunakan <code>void</code>. Jika body function hanya berisi satu ekspresi, Anda bisa menggunakan <strong>arrow syntax</strong> (<code>=></code>) untuk mempersingkat penulisan.
+            </p>
+            <div class="code-block">
+                <div class="code-block-header"><div class="code-block-dots"><span></span><span></span><span></span></div><span class="code-block-filename">function_dasar.dart</span><button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></div>
+                <pre class="code-block-body"><code><span class="hl-comment">// Function dengan return type</span>
+<span class="hl-keyword">int</span> tambah(<span class="hl-keyword">int</span> a, <span class="hl-keyword">int</span> b) {
+  <span class="hl-keyword">return</span> a + b;
+}
+
+<span class="hl-comment">// Arrow function (satu ekspresi)</span>
+<span class="hl-keyword">int</span> kali(<span class="hl-keyword">int</span> a, <span class="hl-keyword">int</span> b) => a * b;
+
+<span class="hl-comment">// Function tanpa return (void)</span>
+<span class="hl-keyword">void</span> spiout(<span class="hl-keyword">String</span> pesan) {
+  <span class="hl-func">print</span>(<span class="hl-string">'[LOG] $pesan'</span>);
+}
+
+<span class="hl-keyword">void</span> main() {
+  <span class="hl-func">print</span>(tambah(<span class="hl-number">3</span>, <span class="hl-number">5</span>));  <span class="hl-comment">// 8</span>
+  <span class="hl-func">print</span>(kali(<span class="hl-number">4</span>, <span class="hl-number">6</span>));    <span class="hl-comment">// 24</span>
+  spiout(<span class="hl-string">'Halo!'</span>);       <span class="hl-comment">// [LOG] Halo!</span>
+}</code></pre>
+            </div>
+
+            <p class="content-text">
+                <strong>Kapan menggunakan arrow function?</strong> Gunakan arrow (<code>=></code>) ketika body function hanya berisi satu baris ekspresi. Untuk logika yang lebih kompleks (if-else, loop, multi-statement), gunakan kurung kurawal biasa <code>{}</code>.
+            </p>
+
+            <!-- Named & Optional Parameters -->
+            <h2 class="content-heading">Named & Optional Parameters</h2>
+            <p class="content-text">Dart mendukung tiga jenis parameter yang membuat function sangat fleksibel:</p>
+            <ol class="content-list">
+                <li><strong>Positional (wajib)</strong> — parameter biasa yang harus diisi sesuai urutan. Contoh: <code>tambah(3, 5)</code></li>
+                <li><strong>Named (dengan <code>{}</code>)</strong> — parameter yang dipanggil dengan nama, sehingga urutan tidak penting dan kode lebih terbaca. Tambahkan <code>required</code> jika wajib diisi.</li>
+                <li><strong>Optional positional (dengan <code>[]</code>)</strong> — parameter yang boleh tidak diisi, biasanya diberi nilai default.</li>
+            </ol>
+
+            <div class="code-block">
+                <div class="code-block-header"><div class="code-block-dots"><span></span><span></span><span></span></div><span class="code-block-filename">parameters.dart</span><button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></div>
+                <pre class="code-block-body"><code><span class="hl-comment">// Named parameters (dengan {})</span>
+<span class="hl-keyword">void</span> profil({<span class="hl-keyword">required String</span> nama, <span class="hl-keyword">int</span> umur = <span class="hl-number">20</span>}) {
+  <span class="hl-func">print</span>(<span class="hl-string">'$nama, $umur tahun'</span>);
+}
+
+<span class="hl-comment">// Optional positional (dengan [])</span>
+<span class="hl-keyword">String</span> sapa(<span class="hl-keyword">String</span> nama, [<span class="hl-keyword">String</span> gelar = <span class="hl-string">''</span>]) {
+  <span class="hl-keyword">return</span> gelar.isEmpty ? <span class="hl-string">'Halo, $nama!'</span> : <span class="hl-string">'Halo, $gelar $nama!'</span>;
+}
+
+<span class="hl-keyword">void</span> main() {
+  profil(nama: <span class="hl-string">'Arif'</span>, umur: <span class="hl-number">28</span>);
+  profil(nama: <span class="hl-string">'Budi'</span>);  <span class="hl-comment">// umur pakai default 20</span>
+
+  <span class="hl-func">print</span>(sapa(<span class="hl-string">'Arif'</span>));           <span class="hl-comment">// Halo, Arif!</span>
+  <span class="hl-func">print</span>(sapa(<span class="hl-string">'Arif'</span>, <span class="hl-string">'Pak'</span>));    <span class="hl-comment">// Halo, Pak Arif!</span>
+}</code></pre>
+            </div>
+
+            <div class="info-box">
+                <div class="info-box-header"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg><strong>Kenapa Penting?</strong></div>
+                <p>Di Flutter, hampir semua Widget constructor menggunakan <strong>named parameters</strong>. Contoh: <code>Text('Hello', style: TextStyle(fontSize: 20))</code>. Memahami konsep ini krusial sebelum masuk ke Flutter UI.</p>
+            </div>
+
+            <!-- Class & Object -->
+            <h2 class="content-heading">Class & Object</h2>
+            <p class="content-text">Dart adalah bahasa <strong>100% object-oriented</strong>. Semua nilai di Dart adalah object, termasuk angka dan fungsi. Sebuah <strong>class</strong> adalah cetak biru (blueprint), sedangkan <strong>object</strong> adalah hasil nyata (instance) dari cetak biru tersebut.</p>
+            <p class="content-text">Komponen utama sebuah class:</p>
+            <ol class="content-list">
+                <li><strong>Properties</strong> — variabel yang dimiliki oleh class (menyimpan data/state).</li>
+                <li><strong>Constructor</strong> — function khusus yang dipanggil saat object dibuat. Di Dart, bisa menggunakan shorthand <code>this.nama</code> untuk langsung meng-assign parameter ke property.</li>
+                <li><strong>Method</strong> — function di dalam class yang bisa mengakses properties.</li>
+                <li><strong>Getter/Setter</strong> — cara elegan untuk mengakses atau mengubah property dengan logika tambahan.</li>
+            </ol>
+
+            <div class="code-block">
+                <div class="code-block-header"><div class="code-block-dots"><span></span><span></span><span></span></div><span class="code-block-filename">class_object.dart</span><button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></div>
+                <pre class="code-block-body"><code><span class="hl-keyword">class</span> Mahasiswa {
+  <span class="hl-comment">// Properties</span>
+  <span class="hl-keyword">String</span> nama;
+  <span class="hl-keyword">String</span> nim;
+  <span class="hl-keyword">double</span> ipk;
+
+  <span class="hl-comment">// Constructor</span>
+  Mahasiswa({
+    <span class="hl-keyword">required this</span>.nama,
+    <span class="hl-keyword">required this</span>.nim,
+    <span class="hl-keyword">this</span>.ipk = <span class="hl-number">0.0</span>,
+  });
+
+  <span class="hl-comment">// Method</span>
+  <span class="hl-keyword">String</span> info() => <span class="hl-string">'$nama ($nim) — IPK: $ipk'</span>;
+
+  <span class="hl-comment">// Getter</span>
+  <span class="hl-keyword">bool get</span> cumlaude => ipk >= <span class="hl-number">3.5</span>;
+}
+
+<span class="hl-keyword">void</span> main() {
+  <span class="hl-keyword">var</span> mhs = Mahasiswa(nama: <span class="hl-string">'Budi'</span>, nim: <span class="hl-string">'2021001'</span>, ipk: <span class="hl-number">3.75</span>);
+  <span class="hl-func">print</span>(mhs.info());      <span class="hl-comment">// Budi (2021001) — IPK: 3.75</span>
+  <span class="hl-func">print</span>(mhs.cumlaude);    <span class="hl-comment">// true</span>
+}</code></pre>
+            </div>
+
+            <div class="info-box">
+                <div class="info-box-header"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg><strong>Encapsulation: Private di Dart</strong></div>
+                <p>Dart tidak punya keyword <code>private</code> seperti Java. Sebagai gantinya, tambahkan <strong>underscore <code>_</code></strong> di depan nama property atau method untuk menjadikannya private <em>di level library/file</em>. Contoh: <code>String _password;</code> artinya property ini hanya bisa diakses dari file yang sama.</p>
+            </div>
+
+            <!-- Inheritance -->
+            <h2 class="content-heading">Inheritance (Pewarisan)</h2>
+            <p class="content-text">
+                <strong>Inheritance</strong> memungkinkan kita membuat class baru yang mewarisi seluruh property dan method dari class lain (parent). Gunakan keyword <code>extends</code>. Child class bisa meng-<em>override</em> (menimpa) method parent dengan anotasi <code>@override</code>. Ini juga mendemonstrasikan <strong>Polymorphism</strong> — objek child bisa diperlakukan sebagai objek parent.
+            </p>
+            <div class="code-block">
+                <div class="code-block-header"><div class="code-block-dots"><span></span><span></span><span></span></div><span class="code-block-filename">inheritance.dart</span><button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></div>
+                <pre class="code-block-body"><code><span class="hl-comment">// Parent class</span>
+<span class="hl-keyword">class</span> Hewan {
+  <span class="hl-keyword">String</span> nama;
+  Hewan(<span class="hl-keyword">this</span>.nama);
+
+  <span class="hl-keyword">void</span> suara() => <span class="hl-func">print</span>(<span class="hl-string">'$nama bersuara...'</span>);
+}
+
+<span class="hl-comment">// Child class (extends)</span>
+<span class="hl-keyword">class</span> Kucing <span class="hl-keyword">extends</span> Hewan {
+  Kucing(<span class="hl-keyword">String</span> nama) : <span class="hl-keyword">super</span>(nama);
+
+  <span class="hl-keyword">@override</span>
+  <span class="hl-keyword">void</span> suara() => <span class="hl-func">print</span>(<span class="hl-string">'$nama: Meow! 🐱'</span>);
+}
+
+<span class="hl-keyword">class</span> Anjing <span class="hl-keyword">extends</span> Hewan {
+  Anjing(<span class="hl-keyword">String</span> nama) : <span class="hl-keyword">super</span>(nama);
+
+  <span class="hl-keyword">@override</span>
+  <span class="hl-keyword">void</span> suara() => <span class="hl-func">print</span>(<span class="hl-string">'$nama: Woof! 🐶'</span>);
+}
+
+<span class="hl-keyword">void</span> main() {
+  <span class="hl-keyword">var</span> hewan = [Kucing(<span class="hl-string">'Milo'</span>), Anjing(<span class="hl-string">'Buddy'</span>)];
+  <span class="hl-keyword">for</span> (<span class="hl-keyword">var</span> h <span class="hl-keyword">in</span> hewan) {
+    h.suara(); <span class="hl-comment">// Polymorphism!</span>
+  }
+}</code></pre>
+            </div>
+
+            <p class="content-text">
+                Perhatikan pada <code>main()</code>, variabel <code>hewan</code> bertipe <code>List&lt;Hewan&gt;</code> namun berisi object <code>Kucing</code> dan <code>Anjing</code>. Ketika <code>h.suara()</code> dipanggil, Dart secara otomatis menjalankan versi method yang sesuai dengan tipe object sebenarnya — inilah <strong>polymorphism</strong> dalam aksi.
+            </p>
+
+            <!-- Abstract & Interface -->
+            <h2 class="content-heading">Abstract Class & Interface</h2>
+            <p class="content-text">
+                <strong>Abstract class</strong> adalah class yang <em>tidak bisa di-instantiate</em> (tidak bisa dibuat object-nya secara langsung). Fungsinya sebagai <strong>kontrak/blueprint</strong> yang memaksa child class untuk mengimplementasikan method-method tertentu. Ini sangat berguna untuk mendefinisikan "apa yang harus bisa dilakukan" tanpa menentukan "bagaimana caranya".
+            </p>
+            <div class="code-block">
+                <div class="code-block-header"><div class="code-block-dots"><span></span><span></span><span></span></div><span class="code-block-filename">abstract.dart</span><button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></div>
+                <pre class="code-block-body"><code><span class="hl-comment">// Abstract class — tidak bisa di-instantiate langsung</span>
+<span class="hl-keyword">abstract class</span> Bentuk {
+  <span class="hl-keyword">double</span> luas();      <span class="hl-comment">// abstract method</span>
+  <span class="hl-keyword">double</span> keliling();  <span class="hl-comment">// abstract method</span>
+
+  <span class="hl-keyword">void</span> info() {
+    <span class="hl-func">print</span>(<span class="hl-string">'Luas: ${luas()}, Keliling: ${keliling()}'</span>);
+  }
+}
+
+<span class="hl-keyword">class</span> Lingkaran <span class="hl-keyword">extends</span> Bentuk {
+  <span class="hl-keyword">double</span> radius;
+  Lingkaran(<span class="hl-keyword">this</span>.radius);
+
+  <span class="hl-keyword">@override</span>
+  <span class="hl-keyword">double</span> luas() => <span class="hl-number">3.14</span> * radius * radius;
+
+  <span class="hl-keyword">@override</span>
+  <span class="hl-keyword">double</span> keliling() => <span class="hl-number">2</span> * <span class="hl-number">3.14</span> * radius;
+}
+
+<span class="hl-keyword">class</span> Persegi <span class="hl-keyword">extends</span> Bentuk {
+  <span class="hl-keyword">double</span> sisi;
+  Persegi(<span class="hl-keyword">this</span>.sisi);
+
+  <span class="hl-keyword">@override</span>
+  <span class="hl-keyword">double</span> luas() => sisi * sisi;
+
+  <span class="hl-keyword">@override</span>
+  <span class="hl-keyword">double</span> keliling() => <span class="hl-number">4</span> * sisi;
+}
+
+<span class="hl-keyword">void</span> main() {
+  List&lt;Bentuk&gt; shapes = [Lingkaran(<span class="hl-number">7</span>), Persegi(<span class="hl-number">5</span>)];
+  <span class="hl-keyword">for</span> (<span class="hl-keyword">var</span> s <span class="hl-keyword">in</span> shapes) { s.info(); }
+}</code></pre>
+            </div>
+
+            <p class="content-text">
+                Perhatikan bahwa <code>Bentuk</code> memiliki method <code>info()</code> yang sudah ada implementasinya — ini membuktikan abstract class <strong>boleh</strong> memiliki method konkret. Hanya method tanpa body (<code>luas()</code> dan <code>keliling()</code>) yang wajib diimplementasikan oleh child class.
+            </p>
+
+            <div class="info-box">
+                <div class="info-box-header"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg><strong>Interface di Dart</strong></div>
+                <p>Dart tidak memiliki keyword <code>interface</code> secara eksplisit. Setiap class di Dart secara implisit sudah menjadi interface. Gunakan <code>implements</code> (bukan <code>extends</code>) jika Anda ingin memaksa class untuk mengimplementasikan <strong>seluruh</strong> method dan property dari class lain — tanpa mewarisi implementasinya.</p>
+            </div>
+
+            <!-- Mixin -->
+            <h2 class="content-heading">Mixin</h2>
+            <p class="content-text">
+                Dart tidak mendukung <em>multiple inheritance</em> (satu class extends banyak class). Sebagai solusinya, Dart menyediakan <strong>Mixin</strong> — sebuah mekanisme untuk "menempelkan" kemampuan tambahan ke class menggunakan keyword <code>with</code>. Satu class bisa menggunakan banyak mixin sekaligus.
+            </p>
+
+            <div class="code-block">
+                <div class="code-block-header"><div class="code-block-dots"><span></span><span></span><span></span></div><span class="code-block-filename">mixin.dart</span><button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></div>
+                <pre class="code-block-body"><code><span class="hl-keyword">mixin</span> BisaTerbang {
+  <span class="hl-keyword">void</span> terbang() => <span class="hl-func">print</span>(<span class="hl-string">'Terbang! ✈️'</span>);
+}
+
+<span class="hl-keyword">mixin</span> BisaBerenang {
+  <span class="hl-keyword">void</span> berenang() => <span class="hl-func">print</span>(<span class="hl-string">'Berenang! 🏊'</span>);
+}
+
+<span class="hl-keyword">class</span> Bebek <span class="hl-keyword">with</span> BisaTerbang, BisaBerenang {
+  <span class="hl-keyword">String</span> nama;
+  Bebek(<span class="hl-keyword">this</span>.nama);
+}
+
+<span class="hl-keyword">void</span> main() {
+  <span class="hl-keyword">var</span> donald = Bebek(<span class="hl-string">'Donald'</span>);
+  donald.terbang();    <span class="hl-comment">// Terbang! ✈️</span>
+  donald.berenang();   <span class="hl-comment">// Berenang! 🏊</span>
+}</code></pre>
+            </div>
+
+            <div class="info-box">
+                <div class="info-box-header"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg><strong>Rangkuman 4 Pilar OOP di Dart</strong></div>
+                <p><strong>Encapsulation</strong> — Menggunakan underscore <code>_</code> untuk membuat property/method private.</p>
+                <p><strong>Inheritance</strong> — <code>extends</code> untuk mewarisi dari parent class.</p>
+                <p><strong>Polymorphism</strong> — <code>@override</code> untuk mengubah perilaku method parent.</p>
+                <p><strong>Abstraction</strong> — <code>abstract class</code> untuk blueprint tanpa implementasi langsung.</p>
+            </div>
+
+            <!-- Nav -->
+            <div class="content-nav">
+                <div class="content-nav-item">
+                    <a href="/flutter/variabel.html" class="nav-btn nav-btn-prev">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                        <div><span class="nav-label">Sebelumnya</span><span class="nav-name">Variabel & Tipe Data</span></div>
+                    </a>
+                </div>
+                <div class="content-nav-item">
+                    <a href="/flutter/collection-async.html" class="nav-btn nav-btn-next">
+                        <div><span class="nav-label">Selanjutnya</span><span class="nav-name">Collection & Async</span></div>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </a>
+                </div>
+            </div>
+        </article>
+    </main>
+
+    <script>
+    const navbar=document.getElementById('navbar');window.addEventListener('scroll',()=>{navbar.classList.toggle('scrolled',window.scrollY>20)});
+    const navToggle=document.getElementById('navToggle'),mobileMenu=document.getElementById('mobileMenu');
+    if(navToggle&&mobileMenu){navToggle.addEventListener('click',()=>{navToggle.classList.toggle('active');mobileMenu.classList.toggle('active');document.body.style.overflow=mobileMenu.classList.contains('active')?'hidden':''})}
+    function closeMobileMenu(){navToggle?.classList.remove('active');mobileMenu?.classList.remove('active');document.body.style.overflow=''}
+    function copyCode(btn){const c=btn.closest('.code-block').querySelector('code');navigator.clipboard.writeText(c.textContent).then(()=>{btn.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>';setTimeout(()=>{btn.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>'},2000)})}
+    </script>
+</body>
+</html>

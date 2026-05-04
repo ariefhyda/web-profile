@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Teachable Machine — Flutter Advanced — Arif Hidayah</title>
+    <meta name="description" content="Membangun fitur AI di Flutter: image classification, object detection, text recognition, dan smart recommendations.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/flutter/course.css">
+</head>
+<body>
+    <div class="bg-grid" aria-hidden="true"></div>
+
+    <nav class="navbar scrolled" id="navbar">
+        <div class="nav-container" style="max-width: 1300px; padding: 0 32px;">
+            <a href="../index.html" class="nav-logo">
+                <div class="logo-icon">
+                    <svg width="24" height="24" viewBox="0 0 28 28" fill="none">
+                        <path d="M14 2L26 8V20L14 26L2 20V8L14 2Z" stroke="currentColor" stroke-width="2" fill="none"/>
+                        <circle cx="14" cy="14" r="3" fill="currentColor"/>
+                    </svg>
+                </div>
+                <span class="logo-text" style="font-size: 1.1rem;">Arif<span class="logo-accent">Hidayah</span></span>
+            </a>
+            <div class="nav-links">
+                <a href="../index.html" class="nav-link">← Kembali ke Profil</a>
+            </div>
+            <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </nav>
+
+    <div class="mobile-menu" id="mobileMenu">
+        <a href="../index.html" class="mobile-link" onclick="closeMobileMenu()">← Kembali ke Profil</a>
+    </div>
+
+        <main class="course-layout">
+        <aside class="course-sidebar" id="courseSidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-icon">
+                    <svg width="24" height="24" viewBox="0 0 40 40" fill="none">
+                        <path d="M22 6L8 20L13 25L32 6H22Z" fill="currentColor"/>
+                        <path d="M22 18L13 27L18 32L32 18H22Z" fill="currentColor" opacity="0.7"/>
+                    </svg>
+                </div>
+                <span class="sidebar-course-name">Flutter Advanced</span>
+            </div>
+            <div class="module-group">
+                <div class="module-group-title">Pendahuluan</div>
+                <a href="/flutter-advanced/index.html" class="module-link">
+                    <div class="module-link-icon">1</div>
+                    <span>Intro &amp; Setup ML Environment</span>
+                </a>
+            </div>
+            <div class="module-group">
+                <div class="module-group-title">Teachable Machine</div>
+                <a href="/flutter-advanced/teachable-machine.html" class="module-link">
+                    <div class="module-link-icon">2</div>
+                    <span>Google Teachable Machine</span>
+                </a>
+            </div>
+            <div class="module-group">
+                <div class="module-group-title">Implementasi ML</div>
+                <a href="/flutter-advanced/implementasi-model.html" class="module-link">
+                    <div class="module-link-icon">3</div>
+                    <span>Implementasi Model di Flutter</span>
+                </a>
+                <a href="/flutter-advanced/tflite-ondevice.html" class="module-link">
+                    <div class="module-link-icon">4</div>
+                    <span>TFLite &amp; On-Device ML</span>
+                </a>
+            </div>
+            <div class="module-group">
+                <div class="module-group-title">Google Stitch &amp; AI</div>
+                <a href="/flutter-advanced/google-stitch.html" class="module-link">
+                    <div class="module-link-icon">5</div>
+                    <span>Google Stitch</span>
+                </a>
+                <a href="/flutter-advanced/ai-features.html" class="module-link active">
+                    <div class="module-link-icon">6</div>
+                    <span>AI-Powered Features</span>
+                </a>
+            </div>
+            <div class="module-group">
+                <div class="module-group-title">Proyek</div>
+                <a href="/flutter-advanced/final-project.html" class="module-link">
+                    <div class="module-link-icon">7</div>
+                    <span>Final Project Advanced</span>
+                </a>
+            </div>
+        </aside>
+
+        <article class="course-content">
+            <div class="breadcrumb">
+                <a href="../index.html">Home</a> <span>&#8250;</span>
+                <a href="/flutter-advanced/index.html">Flutter Advanced</a> <span>&#8250;</span>
+                <span style="color: var(--text-primary);">AI-Powered Features</span>
+            </div>
+
+            <header class="content-header">
+                <h1 class="content-title">Modul 6: AI-Powered Features</h1>
+                <div class="content-meta">
+                    <div class="meta-pill">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 5V8.5L10.5 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/></svg>
+                        <span>Estimasi: 90 Menit</span>
+                    </div>
+                    <div class="meta-pill">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="10" rx="1" stroke="currentColor" stroke-width="1.5"/><path d="M5 7h6M5 10h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                        <span>Teori &amp; Praktikum</span>
+                    </div>
+                </div>
+            </header>
+
+            <p class="content-text">Setelah memahami fondasi TFLite dan tools AI dari Google, saatnya membangun <strong>fitur-fitur AI yang siap produksi</strong> di aplikasi Flutter. Modul ini membahas implementasi praktis menggunakan <strong>Google ML Kit</strong> &mdash; suite SDK on-device dari Google yang menyediakan API siap pakai untuk berbagai task ML.</p>
+
+            <div class="info-box">
+                <div class="info-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                    <strong>Mengapa Google ML Kit?</strong>
+                </div>
+                <p><strong>ML Kit</strong> menyediakan model pre-trained yang sudah dioptimasi untuk mobile. Anda <em>tidak perlu melatih model sendiri</em> &mdash; cukup panggil API-nya. Semua berjalan <strong>on-device</strong> (offline, cepat, privasi terjaga). Tersedia untuk Android dan iOS via plugin Flutter.</p>
+            </div>
+
+
+            <h2 class="content-heading">Setup Google ML Kit</h2>
+            <p class="content-text">Instal package sesuai fitur yang dibutuhkan. Setiap fitur ML Kit adalah package terpisah agar ukuran APK tetap kecil:</p>
+
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">Terminal</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-comment"># Tambahkan package Google ML Kit</span>
+flutter pub add google_mlkit_text_recognition
+flutter pub add google_mlkit_face_detection
+flutter pub add google_mlkit_object_detection
+flutter pub add google_mlkit_barcode_scanning</code></pre>
+            </div>
+            <div class="info-box">
+                <div class="info-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                    <strong>Catatan Ukuran APK</strong>
+                </div>
+                <p>Setiap package ML Kit menambah ~2-5 MB ke ukuran APK karena menyertakan model on-device. Instal <strong>hanya package yang Anda butuhkan</strong> untuk menjaga ukuran aplikasi tetap optimal.</p>
+            </div>
+
+
+            <h2 class="content-heading">1. Text Recognition (OCR)</h2>
+            <p class="content-text"><strong>OCR</strong> (Optical Character Recognition) mengekstrak teks dari gambar. Use case: scan dokumen, baca kartu nama, extract teks dari foto, input data otomatis.</p>
+
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">lib/services/ocr_service.dart</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-keyword">import</span> <span class="hl-string">'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart'</span>;
+
+<span class="hl-keyword">class</span> <span class="hl-func">OcrService</span> {
+  <span class="hl-keyword">final</span> _recognizer = TextRecognizer();
+
+  Future&lt;String&gt; <span class="hl-func">extractText</span>(String imagePath) <span class="hl-keyword">async</span> {
+    <span class="hl-keyword">final</span> inputImage = InputImage.<span class="hl-func">fromFilePath</span>(imagePath);
+    <span class="hl-keyword">final</span> result = <span class="hl-keyword">await</span> _recognizer.<span class="hl-func">processImage</span>(inputImage);
+
+    <span class="hl-comment">// Gabungkan semua teks yang terdeteksi</span>
+    <span class="hl-keyword">final</span> buffer = StringBuffer();
+    <span class="hl-keyword">for</span> (<span class="hl-keyword">final</span> block <span class="hl-keyword">in</span> result.blocks) {
+      <span class="hl-keyword">for</span> (<span class="hl-keyword">final</span> line <span class="hl-keyword">in</span> block.lines) {
+        buffer.<span class="hl-func">writeln</span>(line.text);
+      }
+    }
+    <span class="hl-keyword">return</span> buffer.<span class="hl-func">toString</span>();
+  }
+
+  <span class="hl-keyword">void</span> <span class="hl-func">dispose</span>() =&gt; _recognizer.<span class="hl-func">close</span>();
+}</code></pre>
+            </div>
+            <div class="info-box">
+                <div class="info-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                    <strong>Bahasa yang Didukung</strong>
+                </div>
+                <p>ML Kit Text Recognition mendukung <strong>Latin, Chinese, Devanagari, Japanese, dan Korean</strong>. Untuk bahasa Indonesia (Latin script), akurasi sangat tinggi &mdash; biasanya &gt;95% pada teks cetak yang jelas.</p>
+            </div>
+
+
+            <h2 class="content-heading">2. Face Detection</h2>
+            <p class="content-text">Deteksi wajah dengan fitur lengkap: landmark (mata, hidung, mulut), klasifikasi ekspresi (senyum, mata terbuka), dan head pose estimation.</p>
+
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">lib/services/face_service.dart</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-keyword">import</span> <span class="hl-string">'package:google_mlkit_face_detection/google_mlkit_face_detection.dart'</span>;
+
+<span class="hl-keyword">class</span> <span class="hl-func">FaceService</span> {
+  <span class="hl-keyword">final</span> _detector = FaceDetector(
+    options: FaceDetectorOptions(
+      enableClassification: <span class="hl-keyword">true</span>,  <span class="hl-comment">// smile & eye open probability</span>
+      enableLandmarks: <span class="hl-keyword">true</span>,       <span class="hl-comment">// posisi mata, hidung, mulut</span>
+      enableTracking: <span class="hl-keyword">true</span>,         <span class="hl-comment">// tracking ID per wajah</span>
+      performanceMode: FaceDetectorMode.accurate,
+    ),
+  );
+
+  Future&lt;List&lt;Map&lt;String, dynamic&gt;&gt;&gt; <span class="hl-func">detectFaces</span>(String path) <span class="hl-keyword">async</span> {
+    <span class="hl-keyword">final</span> input = InputImage.<span class="hl-func">fromFilePath</span>(path);
+    <span class="hl-keyword">final</span> faces = <span class="hl-keyword">await</span> _detector.<span class="hl-func">processImage</span>(input);
+
+    <span class="hl-keyword">return</span> faces.<span class="hl-func">map</span>((f) =&gt; {
+      <span class="hl-keyword">return</span> {
+        <span class="hl-string">'smile'</span>: f.smilingProbability,
+        <span class="hl-string">'leftEye'</span>: f.leftEyeOpenProbability,
+        <span class="hl-string">'rightEye'</span>: f.rightEyeOpenProbability,
+        <span class="hl-string">'headAngleY'</span>: f.headEulerAngleY,
+        <span class="hl-string">'bounds'</span>: f.boundingBox,
+      };
+    }).<span class="hl-func">toList</span>();
+  }
+
+  <span class="hl-keyword">void</span> <span class="hl-func">dispose</span>() =&gt; _detector.<span class="hl-func">close</span>();
+}</code></pre>
+            </div>
+
+            <p class="content-text">Use case populer untuk face detection:</p>
+            <ol class="content-list">
+                <li><strong>Verifikasi Selfie</strong><br>Pastikan user mengambil foto wajah yang valid (mata terbuka, menghadap depan) untuk KYC atau registrasi.</li>
+                <li><strong>Filter &amp; AR Effect</strong><br>Gunakan landmark wajah untuk menempatkan filter (kacamata, topi, mask) secara akurat di posisi yang tepat.</li>
+                <li><strong>Mood Detection</strong><br>Analisis <code>smilingProbability</code> untuk mendeteksi mood pengguna dan menyesuaikan UI/konten.</li>
+                <li><strong>Attendance System</strong><br>Deteksi dan tracking wajah untuk sistem absensi berbasis face recognition.</li>
+            </ol>
+
+            <h2 class="content-heading">3. Barcode &amp; QR Code Scanning</h2>
+            <p class="content-text">Scan berbagai format barcode dan QR code secara real-time. Mendukung: QR Code, EAN-13, Code 128, UPC-A, dan banyak lagi.</p>
+
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">lib/services/barcode_service.dart</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-keyword">import</span> <span class="hl-string">'package:google_mlkit_barcode_scanning/google_mlkit_barcode_scanning.dart'</span>;
+
+<span class="hl-keyword">class</span> <span class="hl-func">BarcodeService</span> {
+  <span class="hl-keyword">final</span> _scanner = BarcodeScanner(formats: [
+    BarcodeFormat.qrCode,
+    BarcodeFormat.ean13,
+    BarcodeFormat.code128,
+  ]);
+
+  Future&lt;List&lt;String&gt;&gt; <span class="hl-func">scan</span>(String imagePath) <span class="hl-keyword">async</span> {
+    <span class="hl-keyword">final</span> input = InputImage.<span class="hl-func">fromFilePath</span>(imagePath);
+    <span class="hl-keyword">final</span> barcodes = <span class="hl-keyword">await</span> _scanner.<span class="hl-func">processImage</span>(input);
+    <span class="hl-keyword">return</span> barcodes.<span class="hl-func">map</span>((b) =&gt; b.rawValue ?? <span class="hl-string">''</span>).<span class="hl-func">toList</span>();
+  }
+
+  <span class="hl-keyword">void</span> <span class="hl-func">dispose</span>() =&gt; _scanner.<span class="hl-func">close</span>();
+}</code></pre>
+            </div>
+            <div class="info-box">
+                <div class="info-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                    <strong>Format yang Didukung</strong>
+                </div>
+                <p>&bull; <strong>2D:</strong> QR Code, Aztec, Data Matrix, PDF417<br>&bull; <strong>1D:</strong> EAN-8, EAN-13, UPC-A, UPC-E, Code 39, Code 93, Code 128, ITF, Codabar<br>Scanner ML Kit jauh lebih reliable dibanding library barcode biasa karena menggunakan ML untuk mendeteksi barcode bahkan dalam kondisi blur atau miring.</p>
+            </div>
+
+
+            <h2 class="content-heading">4. Smart Recommendations</h2>
+            <p class="content-text">Kombinasikan hasil klasifikasi ML dengan <strong>business logic</strong> untuk memberikan rekomendasi cerdas kepada pengguna. Pattern ini menggabungkan model TFLite (Modul 3) dengan rule engine sederhana:</p>
+
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">lib/services/smart_recommender.dart</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-comment">// Pattern sederhana: rekomendasi berdasarkan klasifikasi</span>
+<span class="hl-keyword">class</span> <span class="hl-func">SmartRecommender</span> {
+  <span class="hl-keyword">final</span> Map&lt;String, List&lt;String&gt;&gt; _rules = {
+    <span class="hl-string">'kucing'</span>: [<span class="hl-string">'Makanan kucing premium'</span>, <span class="hl-string">'Mainan bulu'</span>, <span class="hl-string">'Pasir wangi'</span>],
+    <span class="hl-string">'anjing'</span>: [<span class="hl-string">'Dog food grain-free'</span>, <span class="hl-string">'Tali kekang'</span>, <span class="hl-string">'Bola karet'</span>],
+    <span class="hl-string">'burung'</span>: [<span class="hl-string">'Biji-bijian mix'</span>, <span class="hl-string">'Sangkar minimalis'</span>, <span class="hl-string">'Vitamin burung'</span>],
+  };
+
+  List&lt;String&gt; <span class="hl-func">getRecommendations</span>(
+      Map&lt;String, <span class="hl-keyword">double</span>&gt; classificationResult) {
+    <span class="hl-keyword">final</span> topLabel = classificationResult.entries.<span class="hl-func">first</span>.key;
+    <span class="hl-keyword">return</span> _rules[topLabel.<span class="hl-func">toLowerCase</span>()] ?? [<span class="hl-string">'Tidak ada rekomendasi'</span>];
+  }
+}</code></pre>
+            </div>
+            <div class="info-box">
+                <div class="info-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                    <strong>Evolusi Rekomendasi</strong>
+                </div>
+                <p>Pattern di atas menggunakan <strong>rule-based</strong> approach (cocok untuk MVP). Untuk produksi, Anda bisa meningkatkan ke:<br>&bull; <strong>Collaborative Filtering</strong> &mdash; rekomendasi berdasarkan behavior user lain yang serupa.<br>&bull; <strong>Content-Based</strong> &mdash; rekomendasi berdasarkan fitur item + preferensi user.<br>&bull; <strong>Hybrid</strong> &mdash; kombinasi keduanya, biasanya menggunakan model ML terpisah di server.</p>
+            </div>
+
+
+            <h2 class="content-heading">5. Object Detection</h2>
+            <p class="content-text">Berbeda dengan image classification (mengenali satu objek dominan), <strong>object detection</strong> mendeteksi <em>banyak objek sekaligus</em> beserta posisinya (bounding box) dalam gambar.</p>
+            <ol class="content-list">
+                <li><strong>ML Kit Object Detection</strong><br>Deteksi objek generik (5 kategori: fashion, food, home, place, plant) dengan bounding box. Cocok untuk aplikasi e-commerce dan inventory.</li>
+                <li><strong>Custom Model</strong><br>Gunakan model TFLite custom (dari Teachable Machine atau AutoML) untuk mendeteksi objek spesifik domain Anda.</li>
+                <li><strong>Real-Time Tracking</strong><br>Object detection + camera stream = tracking objek real-time. Cocok untuk AR, game, dan assistive technology.</li>
+            </ol>
+
+            <div class="info-box">
+                <div class="info-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                    <strong>ML Kit vs TFLite Custom Model</strong>
+                </div>
+                <p><strong>ML Kit</strong> &mdash; gunakan jika task Anda cocok dengan API bawaan (OCR, face, barcode, pose). Tidak perlu training, langsung pakai.<br><strong>TFLite Custom</strong> &mdash; gunakan jika Anda butuh model spesifik (klasifikasi jenis tanaman, deteksi penyakit kulit, dll). Perlu training via Teachable Machine atau tools lain.<br><br>Keduanya bisa digunakan <strong>bersamaan</strong> dalam satu aplikasi.</p>
+            </div>
+
+
+            <h2 class="content-heading">Arsitektur AI Features di Flutter</h2>
+            <p class="content-text">Berikut arsitektur yang direkomendasikan saat membangun fitur AI dalam aplikasi Flutter:</p>
+            <ol class="content-list">
+                <li><strong>Service Layer</strong><br>Setiap fitur AI dibungkus dalam class service terpisah (<code>OcrService</code>, <code>FaceService</code>, dll). Service bertanggung jawab atas inisialisasi, processing, dan cleanup resource ML.</li>
+                <li><strong>Controller/ViewModel</strong><br>Mengorkestrasikan flow antara UI dan service. Mengelola state (loading, result, error) menggunakan GetX, Provider, atau Riverpod.</li>
+                <li><strong>UI Layer</strong><br>Menampilkan hasil ML ke pengguna. Gunakan <code>CustomPainter</code> untuk overlay bounding box, landmark, atau teks di atas gambar.</li>
+                <li><strong>Dispose Pattern</strong><br>Selalu <code>close()</code> recognizer/detector saat tidak digunakan. ML Kit menggunakan native resource yang harus dilepas secara eksplisit.</li>
+            </ol>
+
+            <div class="info-box">
+                <div class="info-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                    <strong>Best Practices AI Features</strong>
+                </div>
+                <p>&bull; <strong>Loading state</strong> &mdash; selalu tampilkan indikator saat ML sedang memproses.<br>&bull; <strong>Error handling</strong> &mdash; tangani kasus gambar kosong, format tidak didukung, atau model gagal load.<br>&bull; <strong>Permission UX</strong> &mdash; jelaskan mengapa aplikasi butuh akses kamera/galeri sebelum meminta permission.<br>&bull; <strong>Hasil tidak sempurna</strong> &mdash; ML tidak 100% akurat. Berikan opsi koreksi manual ke pengguna.<br>&bull; <strong>Battery awareness</strong> &mdash; untuk fitur real-time, monitor penggunaan baterai dan beri opsi untuk mematikan.</p>
+            </div>
+            <div class="info-box">
+                <div class="info-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                    <strong>Rangkuman Modul 6</strong>
+                </div>
+                <p><strong>Google ML Kit</strong> &mdash; SDK on-device dengan API siap pakai (OCR, face, barcode, object detection).<br><strong>Text Recognition</strong> &mdash; ekstrak teks dari gambar, akurasi &gt;95% untuk teks cetak Latin.<br><strong>Face Detection</strong> &mdash; landmark, ekspresi, head pose, dan tracking multi-face.<br><strong>Barcode Scanner</strong> &mdash; 2D (QR) dan 1D (EAN, Code128) dengan ML-enhanced accuracy.<br><strong>Smart Recommendations</strong> &mdash; kombinasi ML classification + business rule engine.<br><strong>Arsitektur</strong> &mdash; Service layer &rarr; Controller &rarr; UI dengan dispose pattern.</p>
+            </div>
+
+            <div class="content-nav">
+                <div class="content-nav-item">
+                    <a href="/flutter-advanced/google-stitch.html" class="nav-btn nav-btn-prev">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                        <div><span class="nav-label">Sebelumnya</span><span class="nav-name">Google Stitch</span></div>
+                    </a>
+                </div>
+                <div class="content-nav-item">
+                    <a href="#" class="nav-btn nav-btn-next">
+                        <div><span class="nav-label">Selanjutnya</span><span class="nav-name">Final Project Advanced</span></div>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </a>
+                </div>
+            </div>
+        </article>
+    </main>
+    <script>
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+        navbar.classList.toggle('scrolled', window.scrollY > 20);
+    });
+    const navToggle = document.getElementById('navToggle');
+    const mobileMenu = document.getElementById('mobileMenu');
+    if (navToggle && mobileMenu) {
+        navToggle.addEventListener('click', () => {
+            navToggle.classList.toggle('active');
+            mobileMenu.classList.toggle('active');
+            document.body.style.overflow = mobileMenu.classList.contains('active') ? 'hidden' : '';
+        });
+    }
+    function closeMobileMenu() {
+        navToggle?.classList.remove('active');
+        mobileMenu?.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+    function copyCode(btn) {
+        const codeBlock = btn.closest('.code-block').querySelector('code');
+        navigator.clipboard.writeText(codeBlock.textContent).then(() => {
+            btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>';
+            setTimeout(() => {
+                btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+            }, 2000);
+        });
+    }
+    </script>
+</body>
+</html>

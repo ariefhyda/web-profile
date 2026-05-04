@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Variabel & Tipe Data Dart — Arif Hidayah</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/flutter/course.css">
+</head>
+<body>
+    <div class="bg-grid" aria-hidden="true"></div>
+    <nav class="navbar scrolled" id="navbar">
+        <div class="nav-container" style="max-width: 1300px; padding: 0 32px;">
+            <a href="../index.html" class="nav-logo">
+                <div class="logo-icon"><svg width="24" height="24" viewBox="0 0 28 28" fill="none"><path d="M14 2L26 8V20L14 26L2 20V8L14 2Z" stroke="currentColor" stroke-width="2" fill="none"/><circle cx="14" cy="14" r="3" fill="currentColor"/></svg></div>
+                <span class="logo-text" style="font-size: 1.1rem;">Arif<span class="logo-accent">Hidayah</span></span>
+            </a>
+            <div class="nav-links"><a href="../index.html" class="nav-link">← Kembali ke Profil</a></div>
+            <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation"><span></span><span></span><span></span></button>
+        </div>
+    </nav>
+    <div class="mobile-menu" id="mobileMenu"><a href="../index.html" class="mobile-link" onclick="closeMobileMenu()">← Kembali ke Profil</a></div>
+
+    <main class="course-layout">
+        <aside class="course-sidebar" id="courseSidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-icon"><svg width="24" height="24" viewBox="0 0 40 40" fill="none"><path d="M22 6L8 20L13 25L32 6H22Z" fill="currentColor"/><path d="M22 18L13 27L18 32L32 18H22Z" fill="currentColor" opacity="0.7"/></svg></div>
+                <span class="sidebar-course-name">Flutter Fundamentals</span>
+            </div>
+            <div class="module-group">
+                <div class="module-group-title">Pengantar</div>
+                <a href="/flutter/index.html" class="module-link"><div class="module-link-icon">1</div><span>Pengenalan Flutter & Dart</span></a>
+                <a href="/flutter/instalasi.html" class="module-link"><div class="module-link-icon">2</div><span>Instalasi & Konfigurasi</span></a>
+            </div>
+            <div class="module-group">
+                <div class="module-group-title">Dart Fundamental</div>
+                <a href="/flutter/variabel.html" class="module-link active"><div class="module-link-icon">3</div><span>Variabel & Tipe Data</span></a>
+                <a href="#" class="module-link"><div class="module-link-icon">4</div><span>Function & OOP</span></a>
+                <a href="/flutter/collection-async.html" class="module-link"><div class="module-link-icon">5</div><span>Collection & Async</span></a>
+            </div>
+            <div class="module-group">
+                <div class="module-group-title">Flutter UI</div>
+                <a href="#" class="module-link"><div class="module-link-icon">6</div><span>Widget Dasar</span></a>
+                <a href="#" class="module-link"><div class="module-link-icon">7</div><span>Layout & Responsive</span></a>
+                <a href="#" class="module-link"><div class="module-link-icon">8</div><span>Navigation & Routing</span></a>
+            </div>
+            <div class="module-group">
+                <div class="module-group-title">State & Data</div>
+                <a href="#" class="module-link"><div class="module-link-icon">9</div><span>State Management</span></a>
+                <a href="#" class="module-link"><div class="module-link-icon">10</div><span>REST API & HTTP</span></a>
+                <a href="#" class="module-link"><div class="module-link-icon">11</div><span>Local Storage (SQLite)</span></a>
+            </div>
+            <div class="module-group">
+                <div class="module-group-title">Proyek Akhir</div>
+                <a href="#" class="module-link"><div class="module-link-icon">12</div><span>Final Project</span></a>
+            </div>
+        </aside>
+
+        <article class="course-content">
+            <div class="breadcrumb">
+                <a href="../index.html">Home</a><span>›</span>
+                <a href="/flutter/index.html">Flutter</a><span>›</span>
+                <span style="color: var(--text-primary);">Variabel & Tipe Data</span>
+            </div>
+
+            <header class="content-header">
+                <h1 class="content-title">Modul 3: Variabel & Tipe Data di Dart</h1>
+                <div class="content-meta">
+                    <div class="meta-pill">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 5V8.5L10.5 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/></svg>
+                        <span>Estimasi: 50 Menit</span>
+                    </div>
+                    <div class="meta-pill">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="10" rx="1" stroke="currentColor" stroke-width="1.5"/><path d="M5 7h6M5 10h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                        <span>Teori & Praktikum</span>
+                    </div>
+                </div>
+            </header>
+
+            <p class="content-text">
+                Pada modul ini kita akan mempelajari cara mendeklarasikan variabel, memahami tipe-tipe data bawaan Dart, serta konsep penting <strong>Null Safety</strong> yang menjadi ciri khas Dart modern.
+            </p>
+
+            <!-- Deklarasi Variabel -->
+            <h2 class="content-heading">Deklarasi Variabel</h2>
+            <p class="content-text">
+                Dart menyediakan beberapa cara untuk mendeklarasikan variabel. Setiap cara memiliki karakteristik dan kegunaan berbeda:
+            </p>
+
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">variabel.dart</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)" title="Copy"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-keyword">void</span> main() {
+  <span class="hl-comment">// 1. var — tipe ditentukan otomatis (type inference)</span>
+  <span class="hl-keyword">var</span> nama = <span class="hl-string">'Arif'</span>;        <span class="hl-comment">// Dart tahu ini String</span>
+  <span class="hl-keyword">var</span> umur = <span class="hl-number">25</span>;              <span class="hl-comment">// Dart tahu ini int</span>
+
+  <span class="hl-comment">// 2. Deklarasi eksplisit — tipe ditulis langsung</span>
+  <span class="hl-keyword">String</span> kota = <span class="hl-string">'Tegal'</span>;
+  <span class="hl-keyword">int</span> semester = <span class="hl-number">5</span>;
+  <span class="hl-keyword">double</span> ipk = <span class="hl-number">3.85</span>;
+  <span class="hl-keyword">bool</span> aktif = <span class="hl-keyword">true</span>;
+
+  <span class="hl-comment">// 3. final — hanya bisa di-assign sekali</span>
+  <span class="hl-keyword">final</span> nim = <span class="hl-string">'2021001'</span>;
+  <span class="hl-comment">// nim = '2021002'; // ❌ ERROR!</span>
+
+  <span class="hl-comment">// 4. const — konstanta compile-time</span>
+  <span class="hl-keyword">const</span> pi = <span class="hl-number">3.14159</span>;
+  <span class="hl-keyword">const</span> maxRetry = <span class="hl-number">3</span>;
+}</code></pre>
+            </div>
+
+            <div class="info-box">
+                <div class="info-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                    <strong>final vs const</strong>
+                </div>
+                <p><code>final</code> — nilainya di-assign saat <em>runtime</em> dan tidak bisa diubah setelahnya. Cocok untuk nilai yang baru diketahui saat program berjalan (contoh: <code>final now = DateTime.now()</code>).</p>
+                <p><code>const</code> — nilainya harus sudah diketahui saat <em>compile-time</em>. Lebih optimal untuk nilai yang benar-benar konstan (contoh: <code>const pi = 3.14</code>).</p>
+            </div>
+
+            <!-- Tipe Data Dasar -->
+            <h2 class="content-heading">Tipe Data Dasar (Built-in Types)</h2>
+            <ol class="content-list">
+                <li><strong>int</strong> — Bilangan bulat tanpa desimal.<br><code>int umur = 25;</code></li>
+                <li><strong>double</strong> — Bilangan desimal (floating-point 64-bit).<br><code>double tinggi = 170.5;</code></li>
+                <li><strong>num</strong> — Supertype dari int dan double. Bisa menampung keduanya.<br><code>num nilai = 99;</code></li>
+                <li><strong>String</strong> — Teks/karakter. Bisa menggunakan kutip tunggal atau ganda.<br><code>String pesan = 'Halo Dunia';</code></li>
+                <li><strong>bool</strong> — Nilai logika: <code>true</code> atau <code>false</code>.<br><code>bool lulus = true;</code></li>
+                <li><strong>dynamic</strong> — Tipe fleksibel, bisa berubah ke tipe apapun saat runtime.<br><code>dynamic x = 10; x = 'teks';</code></li>
+            </ol>
+
+            <!-- String -->
+            <h2 class="content-heading">Operasi String</h2>
+            <p class="content-text">
+                Dart memiliki fitur <strong>String Interpolation</strong> yang sangat praktis menggunakan tanda <code>$</code> untuk menyisipkan variabel langsung di dalam string:
+            </p>
+
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">string_ops.dart</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)" title="Copy"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-keyword">void</span> main() {
+  <span class="hl-keyword">var</span> nama = <span class="hl-string">'Arif'</span>;
+  <span class="hl-keyword">var</span> umur = <span class="hl-number">25</span>;
+
+  <span class="hl-comment">// String Interpolation</span>
+  <span class="hl-func">print</span>(<span class="hl-string">'Nama saya $nama, umur $umur tahun'</span>);
+  <span class="hl-func">print</span>(<span class="hl-string">'Tahun lahir: ${<span class="hl-number">2026</span> - umur}'</span>);
+
+  <span class="hl-comment">// Method String bawaan</span>
+  <span class="hl-keyword">var</span> teks = <span class="hl-string">'  Hello Flutter  '</span>;
+  <span class="hl-func">print</span>(teks.trim());           <span class="hl-comment">// 'Hello Flutter'</span>
+  <span class="hl-func">print</span>(teks.toUpperCase());     <span class="hl-comment">// '  HELLO FLUTTER  '</span>
+  <span class="hl-func">print</span>(teks.contains(<span class="hl-string">'Flutter'</span>)); <span class="hl-comment">// true</span>
+  <span class="hl-func">print</span>(teks.replaceAll(<span class="hl-string">'Flutter'</span>, <span class="hl-string">'Dart'</span>));
+
+  <span class="hl-comment">// Multi-line String</span>
+  <span class="hl-keyword">var</span> paragraf = <span class="hl-string">'''
+Ini adalah string
+yang bisa lebih dari
+satu baris.
+'''</span>;
+}</code></pre>
+            </div>
+
+            <!-- Collections -->
+            <h2 class="content-heading">Tipe Data Collection</h2>
+            <p class="content-text">Dart memiliki tiga struktur data koleksi utama:</p>
+
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">collections.dart</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)" title="Copy"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-keyword">void</span> main() {
+  <span class="hl-comment">// ===== LIST (Array) =====</span>
+  List&lt;<span class="hl-keyword">String</span>&gt; matkul = [<span class="hl-string">'Flutter'</span>, <span class="hl-string">'Laravel'</span>, <span class="hl-string">'Data Mining'</span>];
+  matkul.add(<span class="hl-string">'IoT'</span>);
+  <span class="hl-func">print</span>(matkul[<span class="hl-number">0</span>]);       <span class="hl-comment">// 'Flutter'</span>
+  <span class="hl-func">print</span>(matkul.length);   <span class="hl-comment">// 4</span>
+
+  <span class="hl-comment">// ===== MAP (Key-Value) =====</span>
+  Map&lt;<span class="hl-keyword">String</span>, <span class="hl-keyword">dynamic</span>&gt; mahasiswa = {
+    <span class="hl-string">'nama'</span>: <span class="hl-string">'Budi'</span>,
+    <span class="hl-string">'nim'</span>: <span class="hl-string">'2021001'</span>,
+    <span class="hl-string">'ipk'</span>: <span class="hl-number">3.75</span>,
+  };
+  <span class="hl-func">print</span>(mahasiswa[<span class="hl-string">'nama'</span>]); <span class="hl-comment">// 'Budi'</span>
+
+  <span class="hl-comment">// ===== SET (Unik, tanpa duplikat) =====</span>
+  Set&lt;<span class="hl-keyword">int</span>&gt; angka = {<span class="hl-number">1</span>, <span class="hl-number">2</span>, <span class="hl-number">3</span>, <span class="hl-number">2</span>, <span class="hl-number">1</span>};
+  <span class="hl-func">print</span>(angka); <span class="hl-comment">// {1, 2, 3} — duplikat otomatis dihapus</span>
+}</code></pre>
+            </div>
+
+            <!-- Null Safety -->
+            <h2 class="content-heading">Null Safety</h2>
+            <p class="content-text">
+                Sejak Dart 2.12, <strong>Null Safety</strong> menjadi fitur wajib. Secara default, semua variabel <em>tidak boleh</em> bernilai <code>null</code>. Ini mencegah error <code>NullPointerException</code> yang sangat umum di bahasa lain.
+            </p>
+
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">null_safety.dart</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)" title="Copy"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-keyword">void</span> main() {
+  <span class="hl-comment">// Non-nullable (default) — WAJIB punya nilai</span>
+  <span class="hl-keyword">String</span> nama = <span class="hl-string">'Arif'</span>;
+  <span class="hl-comment">// String nama2; // ❌ ERROR: harus diinisialisasi</span>
+
+  <span class="hl-comment">// Nullable — boleh null (tambahkan ?)</span>
+  <span class="hl-keyword">String</span>? alamat;
+  <span class="hl-func">print</span>(alamat);  <span class="hl-comment">// null (OK, karena nullable)</span>
+
+  <span class="hl-comment">// Null-aware operator (?. dan ??)</span>
+  <span class="hl-func">print</span>(alamat?.length);         <span class="hl-comment">// null (aman, tidak crash)</span>
+  <span class="hl-func">print</span>(alamat ?? <span class="hl-string">'Belum diisi'</span>); <span class="hl-comment">// 'Belum diisi'</span>
+
+  <span class="hl-comment">// Late — inisialisasi ditunda</span>
+  <span class="hl-keyword">late</span> <span class="hl-keyword">String</span> token;
+  token = fetchToken();
+  <span class="hl-func">print</span>(token);
+}
+
+<span class="hl-keyword">String</span> fetchToken() => <span class="hl-string">'abc123xyz'</span>;</code></pre>
+            </div>
+
+            <div class="info-box">
+                <div class="info-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                    <strong>Rangkuman Operator Null Safety</strong>
+                </div>
+                <p><code>?</code> — Menandai variabel boleh null: <code>String? x;</code></p>
+                <p><code>?.</code> — Akses property hanya jika tidak null: <code>x?.length</code></p>
+                <p><code>??</code> — Nilai default jika null: <code>x ?? 'fallback'</code></p>
+                <p><code>!</code> — Memaksa non-null (hati-hati!): <code>x!.length</code></p>
+                <p><code>late</code> — Menunda inisialisasi variabel non-nullable</p>
+            </div>
+
+            <!-- Type Conversion -->
+            <h2 class="content-heading">Konversi Tipe Data</h2>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">konversi.dart</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)" title="Copy"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-keyword">void</span> main() {
+  <span class="hl-comment">// String → int</span>
+  <span class="hl-keyword">var</span> angkaStr = <span class="hl-string">'42'</span>;
+  <span class="hl-keyword">int</span> angka = <span class="hl-keyword">int</span>.parse(angkaStr);
+
+  <span class="hl-comment">// String → double</span>
+  <span class="hl-keyword">double</span> desimal = <span class="hl-keyword">double</span>.parse(<span class="hl-string">'3.14'</span>);
+
+  <span class="hl-comment">// int/double → String</span>
+  <span class="hl-keyword">String</span> teks = angka.toString();
+  <span class="hl-keyword">String</span> teks2 = desimal.toStringAsFixed(<span class="hl-number">1</span>); <span class="hl-comment">// '3.1'</span>
+
+  <span class="hl-comment">// int ↔ double</span>
+  <span class="hl-keyword">double</span> d = angka.toDouble();  <span class="hl-comment">// 42.0</span>
+  <span class="hl-keyword">int</span> i = desimal.toInt();       <span class="hl-comment">// 3 (terpotong)</span>
+}</code></pre>
+            </div>
+
+            <!-- Nav -->
+            <div class="content-nav">
+                <div class="content-nav-item">
+                    <a href="/flutter/instalasi.html" class="nav-btn nav-btn-prev">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                        <div><span class="nav-label">Sebelumnya</span><span class="nav-name">Instalasi & Konfigurasi</span></div>
+                    </a>
+                </div>
+                <div class="content-nav-item">
+                    <a href="/flutter/fungsi-oop.html" class="nav-btn nav-btn-next">
+                        <div><span class="nav-label">Selanjutnya</span><span class="nav-name">Function & OOP</span></div>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </a>
+                </div>
+            </div>
+        </article>
+    </main>
+
+    <script>
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => { navbar.classList.toggle('scrolled', window.scrollY > 20); });
+    const navToggle = document.getElementById('navToggle');
+    const mobileMenu = document.getElementById('mobileMenu');
+    if (navToggle && mobileMenu) {
+        navToggle.addEventListener('click', () => {
+            navToggle.classList.toggle('active'); mobileMenu.classList.toggle('active');
+            document.body.style.overflow = mobileMenu.classList.contains('active') ? 'hidden' : '';
+        });
+    }
+    function closeMobileMenu() { navToggle?.classList.remove('active'); mobileMenu?.classList.remove('active'); document.body.style.overflow = ''; }
+    function copyCode(btn) {
+        const codeBlock = btn.closest('.code-block').querySelector('code');
+        navigator.clipboard.writeText(codeBlock.textContent).then(() => {
+            btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>';
+            setTimeout(() => { btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>'; }, 2000);
+        });
+    }
+    </script>
+</body>
+</html>

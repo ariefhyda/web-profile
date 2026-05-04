@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Teachable Machine — Flutter Advanced — Arif Hidayah</title>
+    <meta name="description" content="Deep dive TensorFlow Lite: optimasi model, quantization, GPU delegate, dan real-time inference di Flutter.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/flutter/course.css">
+</head>
+<body>
+    <div class="bg-grid" aria-hidden="true"></div>
+
+    <nav class="navbar scrolled" id="navbar">
+        <div class="nav-container" style="max-width: 1300px; padding: 0 32px;">
+            <a href="../index.html" class="nav-logo">
+                <div class="logo-icon">
+                    <svg width="24" height="24" viewBox="0 0 28 28" fill="none">
+                        <path d="M14 2L26 8V20L14 26L2 20V8L14 2Z" stroke="currentColor" stroke-width="2" fill="none"/>
+                        <circle cx="14" cy="14" r="3" fill="currentColor"/>
+                    </svg>
+                </div>
+                <span class="logo-text" style="font-size: 1.1rem;">Arif<span class="logo-accent">Hidayah</span></span>
+            </a>
+            <div class="nav-links">
+                <a href="../index.html" class="nav-link">← Kembali ke Profil</a>
+            </div>
+            <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </nav>
+
+    <div class="mobile-menu" id="mobileMenu">
+        <a href="../index.html" class="mobile-link" onclick="closeMobileMenu()">← Kembali ke Profil</a>
+    </div>
+
+        <main class="course-layout">
+        <aside class="course-sidebar" id="courseSidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-icon">
+                    <svg width="24" height="24" viewBox="0 0 40 40" fill="none">
+                        <path d="M22 6L8 20L13 25L32 6H22Z" fill="currentColor"/>
+                        <path d="M22 18L13 27L18 32L32 18H22Z" fill="currentColor" opacity="0.7"/>
+                    </svg>
+                </div>
+                <span class="sidebar-course-name">Flutter Advanced</span>
+            </div>
+            <div class="module-group">
+                <div class="module-group-title">Pendahuluan</div>
+                <a href="/flutter-advanced/index.html" class="module-link">
+                    <div class="module-link-icon">1</div>
+                    <span>Intro &amp; Setup ML Environment</span>
+                </a>
+            </div>
+            <div class="module-group">
+                <div class="module-group-title">Teachable Machine</div>
+                <a href="/flutter-advanced/teachable-machine.html" class="module-link">
+                    <div class="module-link-icon">2</div>
+                    <span>Google Teachable Machine</span>
+                </a>
+            </div>
+            <div class="module-group">
+                <div class="module-group-title">Implementasi ML</div>
+                <a href="/flutter-advanced/implementasi-model.html" class="module-link">
+                    <div class="module-link-icon">3</div>
+                    <span>Implementasi Model di Flutter</span>
+                </a>
+                <a href="/flutter-advanced/tflite-ondevice.html" class="module-link active">
+                    <div class="module-link-icon">4</div>
+                    <span>TFLite &amp; On-Device ML</span>
+                </a>
+            </div>
+            <div class="module-group">
+                <div class="module-group-title">Google Stitch &amp; AI</div>
+                <a href="/flutter-advanced/google-stitch.html" class="module-link">
+                    <div class="module-link-icon">5</div>
+                    <span>Google Stitch</span>
+                </a>
+                <a href="/flutter-advanced/ai-features.html" class="module-link">
+                    <div class="module-link-icon">6</div>
+                    <span>AI-Powered Features</span>
+                </a>
+            </div>
+            <div class="module-group">
+                <div class="module-group-title">Proyek</div>
+                <a href="/flutter-advanced/final-project.html" class="module-link">
+                    <div class="module-link-icon">7</div>
+                    <span>Final Project Advanced</span>
+                </a>
+            </div>
+        </aside>
+
+        <article class="course-content">
+            <div class="breadcrumb">
+                <a href="../index.html">Home</a> <span>&#8250;</span>
+                <a href="/flutter-advanced/index.html">Flutter Advanced</a> <span>&#8250;</span>
+                <span style="color: var(--text-primary);">TFLite &amp; On-Device ML</span>
+            </div>
+
+            <header class="content-header">
+                <h1 class="content-title">Modul 4: TFLite &amp; On-Device ML</h1>
+                <div class="content-meta">
+                    <div class="meta-pill">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 5V8.5L10.5 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/></svg>
+                        <span>Estimasi: 90 Menit</span>
+                    </div>
+                    <div class="meta-pill">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="10" rx="1" stroke="currentColor" stroke-width="1.5"/><path d="M5 7h6M5 10h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                        <span>Teori &amp; Praktikum</span>
+                    </div>
+                </div>
+            </header>
+
+            <p class="content-text">Di modul sebelumnya, kita berhasil mengintegrasikan model TFLite ke Flutter. Sekarang saatnya memahami <strong>lebih dalam</strong> tentang TensorFlow Lite &mdash; arsitekturnya, teknik optimasi model, penggunaan hardware accelerator (GPU/NNAPI), dan cara menjalankan inferensi <strong>real-time</strong> dari kamera.</p>
+
+            <div class="info-box">
+                <div class="info-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                    <strong>Apa itu TensorFlow Lite?</strong>
+                </div>
+                <p><strong>TensorFlow Lite</strong> (TFLite) adalah framework open-source dari Google yang dirancang khusus untuk menjalankan model ML di perangkat <em>edge</em> &mdash; smartphone, IoT, embedded system &mdash; dengan footprint minimal. TFLite bukan untuk training, melainkan untuk <strong>inference</strong> (menjalankan prediksi).</p>
+            </div>
+
+
+            <h2 class="content-heading">Arsitektur TFLite di Mobile</h2>
+            <p class="content-text">Memahami arsitektur TFLite penting agar Anda bisa mengoptimasi pipeline ML di aplikasi Flutter:</p>
+            <ol class="content-list">
+                <li><strong>Model File (.tflite)</strong><br>File binary berisi graph operasi dan weight model yang sudah dioptimasi. Format FlatBuffer memungkinkan loading tanpa parsing &mdash; langsung memory-mapped.</li>
+                <li><strong>Interpreter</strong><br>Engine yang mengeksekusi model. Membaca input tensor, menjalankan setiap operasi secara berurutan, dan menghasilkan output tensor.</li>
+                <li><strong>Delegates</strong><br>Akselerator hardware opsional yang mendelegasikan operasi ke GPU, NNAPI (Android), atau Core ML (iOS) untuk performa lebih tinggi.</li>
+                <li><strong>Tensor</strong><br>Struktur data multi-dimensi (array) yang menjadi input dan output model. Setiap tensor punya shape, data type, dan ukuran tetap.</li>
+            </ol>
+
+            <div class="info-box">
+                <div class="info-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                    <strong>FlatBuffer vs Protobuf</strong>
+                </div>
+                <p>Model TensorFlow biasa menggunakan <strong>Protobuf</strong> (ratusan MB, perlu parsing). TFLite menggunakan <strong>FlatBuffer</strong> &mdash; format serialisasi yang bisa diakses langsung dari memori tanpa deserialisasi. Hasilnya: loading model 10-100x lebih cepat.</p>
+            </div>
+
+
+            <h2 class="content-heading">Quantization: Memperkecil Model</h2>
+            <p class="content-text"><strong>Quantization</strong> adalah teknik mengkonversi weight model dari floating-point 32-bit (FP32) ke integer 8-bit (INT8) atau float 16-bit (FP16). Ini menghasilkan model yang jauh lebih kecil dan cepat.</p>
+            <ol class="content-list">
+                <li><strong>Dynamic Range Quantization</strong><br>Paling mudah diterapkan. Weight dikonversi ke INT8 saat penyimpanan, tapi komputasi tetap di FP32. Ukuran model berkurang ~4x dengan penurunan akurasi minimal.</li>
+                <li><strong>Full Integer Quantization</strong><br>Semua operasi dijalankan dalam INT8. Butuh <em>representative dataset</em> untuk kalibrasi. Paling optimal untuk hardware yang mendukung operasi integer (NNAPI, Edge TPU).</li>
+                <li><strong>Float16 Quantization</strong><br>Weight dikonversi ke FP16. Ukuran berkurang 2x, kompatibel dengan GPU delegate. Akurasi hampir identik dengan FP32.</li>
+            </ol>
+
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">quantize_model.py</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-comment"># Python: Konversi model ke TFLite dengan quantization</span>
+<span class="hl-keyword">import</span> tensorflow <span class="hl-keyword">as</span> tf
+
+<span class="hl-comment"># Load model Keras/SavedModel</span>
+converter = tf.lite.TFLiteConverter.<span class="hl-func">from_saved_model</span>(<span class="hl-string">'saved_model/'</span>)
+
+<span class="hl-comment"># === Dynamic Range Quantization ===</span>
+converter.optimizations = [tf.lite.Optimize.DEFAULT]
+tflite_model = converter.<span class="hl-func">convert</span>()
+
+<span class="hl-keyword">with</span> <span class="hl-func">open</span>(<span class="hl-string">'model_quantized.tflite'</span>, <span class="hl-string">'wb'</span>) <span class="hl-keyword">as</span> f:
+    f.<span class="hl-func">write</span>(tflite_model)
+<span class="hl-func">print</span>(<span class="hl-string">'Model quantized!'</span>)</code></pre>
+            </div>
+            <div class="info-box">
+                <div class="info-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                    <strong>Kapan Menggunakan Quantization?</strong>
+                </div>
+                <p><strong>Selalu!</strong> Untuk deployment mobile, quantization hampir selalu menguntungkan. Panduan singkat:<br>&bull; <strong>Dynamic Range</strong> &mdash; default terbaik, cocok untuk hampir semua kasus.<br>&bull; <strong>Full INT8</strong> &mdash; jika target perangkat mendukung NNAPI/Edge TPU.<br>&bull; <strong>FP16</strong> &mdash; jika butuh akurasi tinggi + GPU delegate.</p>
+            </div>
+
+
+            <h2 class="content-heading">Hardware Delegates</h2>
+            <p class="content-text">Secara default, TFLite menjalankan operasi di <strong>CPU</strong>. Dengan <strong>delegates</strong>, operasi tertentu bisa didelegasikan ke hardware khusus untuk percepatan signifikan:</p>
+            <ol class="content-list">
+                <li><strong>GPU Delegate</strong><br>Memanfaatkan GPU mobile (Adreno, Mali, PowerVR) via OpenGL ES / OpenCL. Cocok untuk model dengan banyak operasi matrix (convolution, dense). Speedup: 2-7x vs CPU.</li>
+                <li><strong>NNAPI Delegate (Android)</strong><br>Android Neural Networks API &mdash; mendelegasikan ke akselerator terbaik yang tersedia (GPU, DSP, atau NPU). Performa sangat device-dependent. Terbaik di Pixel dan Samsung flagship.</li>
+                <li><strong>Core ML Delegate (iOS)</strong><br>Memanfaatkan Apple Neural Engine di chip A11+. Sangat efisien di perangkat Apple modern. Diakses via platform channel di Flutter.</li>
+            </ol>
+
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">lib/services/classifier_with_delegate.dart</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-keyword">import</span> <span class="hl-string">'package:tflite_flutter/tflite_flutter.dart'</span>;
+
+<span class="hl-keyword">enum</span> DelegateType { cpu, gpu, nnapi }
+
+<span class="hl-keyword">class</span> <span class="hl-func">ClassifierWithDelegate</span> {
+  Future&lt;Interpreter&gt; <span class="hl-func">_createInterpreter</span>(DelegateType delegate) <span class="hl-keyword">async</span> {
+    <span class="hl-keyword">final</span> options = InterpreterOptions();
+
+    <span class="hl-keyword">switch</span> (delegate) {
+      <span class="hl-keyword">case</span> DelegateType.gpu:
+        options.<span class="hl-func">addDelegate</span>(GpuDelegateV2());
+        <span class="hl-keyword">break</span>;
+      <span class="hl-keyword">case</span> DelegateType.nnapi:
+        options.useNnApiForAndroid = <span class="hl-keyword">true</span>;
+        <span class="hl-keyword">break</span>;
+      <span class="hl-keyword">case</span> DelegateType.cpu:
+        options.threads = <span class="hl-number">4</span>;
+        <span class="hl-keyword">break</span>;
+    }
+
+    <span class="hl-keyword">return</span> <span class="hl-keyword">await</span> Interpreter.<span class="hl-func">fromAsset</span>(
+      <span class="hl-string">'assets/ml/model.tflite'</span>,
+      options: options,
+    );
+  }
+}</code></pre>
+            </div>
+            <div class="info-box">
+                <div class="info-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                    <strong>Kapan GPU Delegate Tidak Membantu?</strong>
+                </div>
+                <p>GPU delegate <strong>tidak selalu lebih cepat</strong>. Beberapa kasus di mana CPU bisa lebih optimal:<br>&bull; Model sangat kecil (overhead transfer data ke GPU &gt; waktu komputasi).<br>&bull; Model menggunakan operasi yang tidak didukung GPU (custom ops).<br>&bull; Perangkat low-end dengan GPU lemah.<br>Selalu <strong>benchmark</strong> keduanya untuk model spesifik Anda.</p>
+            </div>
+
+
+            <h2 class="content-heading">Real-Time Inference dari Kamera</h2>
+            <p class="content-text">Salah satu use case paling powerful dari on-device ML adalah <strong>klasifikasi real-time</strong> dari stream kamera. Berikut pattern-nya menggunakan package <code>camera</code>:</p>
+
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">lib/pages/realtime_page.dart (pattern)</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-keyword">import</span> <span class="hl-string">'package:camera/camera.dart'</span>;
+<span class="hl-keyword">import</span> <span class="hl-string">'../services/classifier_service.dart'</span>;
+
+<span class="hl-keyword">class</span> _RealtimeState <span class="hl-keyword">extends</span> State&lt;RealtimePage&gt; {
+  CameraController? _camCtrl;
+  <span class="hl-keyword">final</span> _classifier = ClassifierService();
+  <span class="hl-keyword">bool</span> _isProcessing = <span class="hl-keyword">false</span>;
+  Map&lt;String, <span class="hl-keyword">double</span>&gt;? _results;
+
+  @override
+  <span class="hl-keyword">void</span> <span class="hl-func">initState</span>() {
+    <span class="hl-keyword">super</span>.initState();
+    _classifier.<span class="hl-func">loadModel</span>();
+    <span class="hl-func">_initCamera</span>();
+  }
+
+  Future&lt;<span class="hl-keyword">void</span>&gt; <span class="hl-func">_initCamera</span>() <span class="hl-keyword">async</span> {
+    <span class="hl-keyword">final</span> cameras = <span class="hl-keyword">await</span> <span class="hl-func">availableCameras</span>();
+    _camCtrl = CameraController(
+      cameras[<span class="hl-number">0</span>],
+      ResolutionPreset.medium,
+      enableAudio: <span class="hl-keyword">false</span>,
+      imageFormatGroup: ImageFormatGroup.yuv420,
+    );
+    <span class="hl-keyword">await</span> _camCtrl!.<span class="hl-func">initialize</span>();
+
+    <span class="hl-comment">// Stream setiap frame untuk klasifikasi</span>
+    _camCtrl!.<span class="hl-func">startImageStream</span>((CameraImage image) {
+      <span class="hl-keyword">if</span> (!_isProcessing && _classifier.isReady) {
+        _isProcessing = <span class="hl-keyword">true</span>;
+        <span class="hl-func">_classifyFrame</span>(image);
+      }
+    });
+    <span class="hl-func">setState</span>(() {});
+  }
+
+  <span class="hl-keyword">void</span> <span class="hl-func">_classifyFrame</span>(CameraImage camImg) {
+    <span class="hl-comment">// Konversi YUV420 ke RGB (img.Image), lalu ke Uint8List</span>
+    <span class="hl-keyword">final</span> results = _classifier.<span class="hl-func">classifyFromCameraImage</span>(camImg);
+    <span class="hl-keyword">if</span> (mounted) {
+      <span class="hl-func">setState</span>(() {
+        _results = results;
+        _isProcessing = <span class="hl-keyword">false</span>;
+      });
+    }
+  }
+}</code></pre>
+            </div>
+            <div class="info-box">
+                <div class="info-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                    <strong>Tips Performa Real-Time</strong>
+                </div>
+                <p>&bull; <strong>Konversi ImageFormat</strong> &mdash; Kamera Android mengirim format <code>YUV420</code>. Perlu dikonversi ke <code>RGB</code> sebelum masuk ke model.<br>&bull; <strong>Skip frame</strong> &mdash; jangan proses setiap frame. Proses 1 dari setiap 3-5 frame sudah cukup.<br>&bull; <strong>Resolusi rendah</strong> &mdash; gunakan <code>ResolutionPreset.medium</code> atau <code>low</code>.<br>&bull; <strong>Isolate</strong> &mdash; jalankan inferensi di background isolate agar UI tidak lag.<br>&bull; <strong>Dispose</strong> &mdash; selalu dispose controller dan delegate saat halaman ditutup.</p>
+            </div>
+
+            <div style="margin-top: 16px; margin-bottom: 32px; display: flex; gap: 12px; flex-wrap: wrap;">
+                <a href="assets/project-flutter/lib/pages/realtime_page.dart" target="_blank" class="nav-btn" style="display: inline-flex; width: auto; padding: 10px 20px; align-items: center; justify-content: center; border-radius: 8px;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                    <span style="margin-left: 8px; font-weight: 600;">Lihat Full Code: realtime_page.dart</span>
+                </a>
+                <a href="assets/project-flutter/lib/services/classifier_service.dart" target="_blank" class="nav-btn" style="display: inline-flex; width: auto; padding: 10px 20px; align-items: center; justify-content: center; border-radius: 8px;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                    <span style="margin-left: 8px; font-weight: 600;">Lihat Service: classifier_service.dart</span>
+                </a>
+            </div>
+
+            <h2 class="content-heading">Benchmarking Performa</h2>
+            <p class="content-text">Selalu ukur performa model Anda di perangkat target. Berikut cara mengukur waktu inferensi:</p>
+
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">Benchmark Inference Time</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-keyword">final</span> sw = Stopwatch()..<span class="hl-func">start</span>();
+
+<span class="hl-comment">// Jalankan inferensi</span>
+_interpreter.<span class="hl-func">run</span>(input, output);
+
+sw.<span class="hl-func">stop</span>();
+<span class="hl-func">print</span>(<span class="hl-string">'Inference time: ${sw.elapsedMilliseconds}ms'</span>);
+
+<span class="hl-comment">// Target performa:</span>
+<span class="hl-comment">// CPU:  30-100ms per frame</span>
+<span class="hl-comment">// GPU:  5-20ms per frame</span>
+<span class="hl-comment">// NNAPI: 3-15ms per frame</span></code></pre>
+            </div>
+
+            <div style="margin-top: 16px; margin-bottom: 32px; display: flex; gap: 12px; flex-wrap: wrap;">
+                <a href="assets/project-flutter/lib/services/classifier_with_delegate.dart" target="_blank" class="nav-btn" style="display: inline-flex; width: auto; padding: 10px 20px; align-items: center; justify-content: center; border-radius: 8px;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                    <span style="margin-left: 8px; font-weight: 600;">Lihat Service: classifier_with_delegate.dart</span>
+                </a>
+                <a href="assets/project-flutter/lib/pages/benchmark_page.dart" target="_blank" class="nav-btn" style="display: inline-flex; width: auto; padding: 10px 20px; align-items: center; justify-content: center; border-radius: 8px;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                    <span style="margin-left: 8px; font-weight: 600;">Lihat UI: benchmark_page.dart</span>
+                </a>
+            </div>
+
+            <h2 class="content-heading">Perbandingan Performa</h2>
+            <p class="content-text">Berikut estimasi performa untuk model MobileNet V2 (image classification) di berbagai konfigurasi:</p>
+            <div class="info-box">
+                <table style="width:100%; border-collapse: collapse; font-size: 0.95rem;">
+                    <thead>
+                        <tr style="border-bottom: 2px solid rgba(84,197,248,0.3);">
+                            <th style="text-align:left; padding:10px; color: #54c5f8;">Konfigurasi</th>
+                            <th style="text-align:center; padding:10px; color: #54c5f8;">Ukuran Model</th>
+                            <th style="text-align:center; padding:10px; color: #54c5f8;">Inference Time</th>
+                            <th style="text-align:center; padding:10px; color: #54c5f8;">Akurasi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                            <td style="padding:10px;">FP32 + CPU</td>
+                            <td style="text-align:center; padding:10px;">14 MB</td>
+                            <td style="text-align:center; padding:10px;">~80ms</td>
+                            <td style="text-align:center; padding:10px;">71.8%</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                            <td style="padding:10px;">FP32 + GPU</td>
+                            <td style="text-align:center; padding:10px;">14 MB</td>
+                            <td style="text-align:center; padding:10px;">~25ms</td>
+                            <td style="text-align:center; padding:10px;">71.8%</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                            <td style="padding:10px;">INT8 + CPU</td>
+                            <td style="text-align:center; padding:10px;">3.4 MB</td>
+                            <td style="text-align:center; padding:10px;">~45ms</td>
+                            <td style="text-align:center; padding:10px;">70.7%</td>
+                        </tr>
+                        <tr>
+                            <td style="padding:10px;">INT8 + NNAPI</td>
+                            <td style="text-align:center; padding:10px;">3.4 MB</td>
+                            <td style="text-align:center; padding:10px;">~10ms</td>
+                            <td style="text-align:center; padding:10px;">70.7%</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="info-box">
+                <div class="info-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                    <strong>Best Practices On-Device ML</strong>
+                </div>
+                <p>&bull; <strong>Pilih model yang tepat</strong> &mdash; MobileNet, EfficientNet-Lite dirancang khusus untuk mobile.<br>&bull; <strong>Quantize selalu</strong> &mdash; Dynamic range quantization adalah default yang aman.<br>&bull; <strong>Benchmark di device asli</strong> &mdash; emulator tidak representatif untuk performa ML.<br>&bull; <strong>Fallback strategy</strong> &mdash; jika GPU delegate gagal, fallback ke CPU secara graceful.<br>&bull; <strong>Batasi frekuensi inferensi</strong> &mdash; untuk real-time, 10-15 FPS sudah cukup smooth.<br>&bull; <strong>Monitor battery</strong> &mdash; inferensi terus-menerus bisa menguras baterai.</p>
+            </div>
+            <div class="info-box">
+                <div class="info-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                    <strong>Rangkuman Modul 4</strong>
+                </div>
+                <p><strong>TFLite</strong> &mdash; framework inference ringan menggunakan FlatBuffer format.<br><strong>Quantization</strong> &mdash; Dynamic Range (4x lebih kecil), Full INT8 (tercepat), FP16 (akurasi tinggi).<br><strong>Delegates</strong> &mdash; GPU (2-7x speedup), NNAPI (Android), Core ML (iOS).<br><strong>Real-time</strong> &mdash; gunakan <code>camera</code> + <code>startImageStream</code> + skip frame.<br><strong>Benchmark</strong> &mdash; selalu ukur di device asli, target &lt;50ms per frame.</p>
+            </div>
+
+            <div class="content-nav">
+                <div class="content-nav-item">
+                    <a href="/flutter-advanced/implementasi-model.html" class="nav-btn nav-btn-prev">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                        <div><span class="nav-label">Sebelumnya</span><span class="nav-name">Implementasi Model di Flutter</span></div>
+                    </a>
+                </div>
+                <div class="content-nav-item">
+                    <a href="#" class="nav-btn nav-btn-next">
+                        <div><span class="nav-label">Selanjutnya</span><span class="nav-name">Google Stitch</span></div>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </a>
+                </div>
+            </div>
+        </article>
+    </main>
+    <script>
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+        navbar.classList.toggle('scrolled', window.scrollY > 20);
+    });
+    const navToggle = document.getElementById('navToggle');
+    const mobileMenu = document.getElementById('mobileMenu');
+    if (navToggle && mobileMenu) {
+        navToggle.addEventListener('click', () => {
+            navToggle.classList.toggle('active');
+            mobileMenu.classList.toggle('active');
+            document.body.style.overflow = mobileMenu.classList.contains('active') ? 'hidden' : '';
+        });
+    }
+    function closeMobileMenu() {
+        navToggle?.classList.remove('active');
+        mobileMenu?.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+    function copyCode(btn) {
+        const codeBlock = btn.closest('.code-block').querySelector('code');
+        navigator.clipboard.writeText(codeBlock.textContent).then(() => {
+            btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>';
+            setTimeout(() => {
+                btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+            }, 2000);
+        });
+    }
+    </script>
+</body>
+</html>

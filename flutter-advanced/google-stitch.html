@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Teachable Machine — Flutter Advanced — Arif Hidayah</title>
+    <meta name="description" content="Mengenal Google Stitch: platform AI-native dari Google Labs untuk merancang UI/UX dan menghasilkan kode frontend secara otomatis.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/flutter/course.css">
+</head>
+<body>
+    <div class="bg-grid" aria-hidden="true"></div>
+
+    <nav class="navbar scrolled" id="navbar">
+        <div class="nav-container" style="max-width: 1300px; padding: 0 32px;">
+            <a href="../index.html" class="nav-logo">
+                <div class="logo-icon">
+                    <svg width="24" height="24" viewBox="0 0 28 28" fill="none">
+                        <path d="M14 2L26 8V20L14 26L2 20V8L14 2Z" stroke="currentColor" stroke-width="2" fill="none"/>
+                        <circle cx="14" cy="14" r="3" fill="currentColor"/>
+                    </svg>
+                </div>
+                <span class="logo-text" style="font-size: 1.1rem;">Arif<span class="logo-accent">Hidayah</span></span>
+            </a>
+            <div class="nav-links">
+                <a href="../index.html" class="nav-link">← Kembali ke Profil</a>
+            </div>
+            <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </nav>
+
+    <div class="mobile-menu" id="mobileMenu">
+        <a href="../index.html" class="mobile-link" onclick="closeMobileMenu()">← Kembali ke Profil</a>
+    </div>
+
+        <main class="course-layout">
+        <aside class="course-sidebar" id="courseSidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-icon">
+                    <svg width="24" height="24" viewBox="0 0 40 40" fill="none">
+                        <path d="M22 6L8 20L13 25L32 6H22Z" fill="currentColor"/>
+                        <path d="M22 18L13 27L18 32L32 18H22Z" fill="currentColor" opacity="0.7"/>
+                    </svg>
+                </div>
+                <span class="sidebar-course-name">Flutter Advanced</span>
+            </div>
+            <div class="module-group">
+                <div class="module-group-title">Pendahuluan</div>
+                <a href="/flutter-advanced/index.html" class="module-link">
+                    <div class="module-link-icon">1</div>
+                    <span>Intro &amp; Setup ML Environment</span>
+                </a>
+            </div>
+            <div class="module-group">
+                <div class="module-group-title">Teachable Machine</div>
+                <a href="/flutter-advanced/teachable-machine.html" class="module-link">
+                    <div class="module-link-icon">2</div>
+                    <span>Google Teachable Machine</span>
+                </a>
+            </div>
+            <div class="module-group">
+                <div class="module-group-title">Implementasi ML</div>
+                <a href="/flutter-advanced/implementasi-model.html" class="module-link">
+                    <div class="module-link-icon">3</div>
+                    <span>Implementasi Model di Flutter</span>
+                </a>
+                <a href="/flutter-advanced/tflite-ondevice.html" class="module-link">
+                    <div class="module-link-icon">4</div>
+                    <span>TFLite &amp; On-Device ML</span>
+                </a>
+            </div>
+            <div class="module-group">
+                <div class="module-group-title">Google Stitch &amp; AI</div>
+                <a href="/flutter-advanced/google-stitch.html" class="module-link active">
+                    <div class="module-link-icon">5</div>
+                    <span>Google Stitch</span>
+                </a>
+                <a href="/flutter-advanced/ai-features.html" class="module-link">
+                    <div class="module-link-icon">6</div>
+                    <span>AI-Powered Features</span>
+                </a>
+            </div>
+            <div class="module-group">
+                <div class="module-group-title">Proyek</div>
+                <a href="/flutter-advanced/final-project.html" class="module-link">
+                    <div class="module-link-icon">7</div>
+                    <span>Final Project Advanced</span>
+                </a>
+            </div>
+        </aside>
+
+        <article class="course-content">
+            <div class="breadcrumb">
+                <a href="../index.html">Home</a> <span>&#8250;</span>
+                <a href="/flutter-advanced/index.html">Flutter Advanced</a> <span>&#8250;</span>
+                <span style="color: var(--text-primary);">Google Stitch</span>
+            </div>
+
+            <header class="content-header">
+                <h1 class="content-title">Modul 5: Google Stitch</h1>
+                <div class="content-meta">
+                    <div class="meta-pill">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 5V8.5L10.5 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/></svg>
+                        <span>Estimasi: 60 Menit</span>
+                    </div>
+                    <div class="meta-pill">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="10" rx="1" stroke="currentColor" stroke-width="1.5"/><path d="M5 7h6M5 10h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                        <span>Teori &amp; Praktikum</span>
+                    </div>
+                </div>
+            </header>
+
+            <p class="content-text"><strong>Google Stitch</strong> adalah platform desain UI/UX berbasis AI dari <strong>Google Labs</strong> yang memungkinkan Anda merancang antarmuka aplikasi lengkap hanya dari <strong>deskripsi teks</strong>. Stitch menghasilkan layout multi-screen, design system, dan bahkan kode frontend &mdash; mempercepat workflow dari <em>ide ke prototipe</em> secara drastis.</p>
+
+            <div class="info-box">
+                <div class="info-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                    <strong>Asal Usul Stitch</strong>
+                </div>
+                <p>Google Stitch lahir dari akuisisi startup <strong>Galileo AI</strong> oleh Google. Platform ini diluncurkan melalui <strong>Google Labs</strong> pada Mei 2025, dan terus berkembang dengan fitur-fitur baru seperti infinite canvas, voice interaction, dan integrasi ke Google AI Studio.</p>
+            </div>
+
+
+            <h2 class="content-heading">Apa yang Bisa Dilakukan Stitch?</h2>
+            <p class="content-text">Stitch bukan sekadar generator gambar &mdash; ia memahami <strong>konteks UI/UX</strong> dan menghasilkan desain yang terstruktur:</p>
+            <ol class="content-list">
+                <li><strong>Prompt-to-UI Generation</strong><br>Deskripsikan antarmuka dalam bahasa natural, dan Stitch menghasilkan layout lengkap dengan komponen yang sesuai (button, card, form, navigation, dll).</li>
+                <li><strong>Multi-Screen Design</strong><br>Buat flow aplikasi lengkap: login &rarr; home &rarr; detail &rarr; checkout dalam satu sesi. Stitch menjaga konsistensi visual antar layar.</li>
+                <li><strong>Interactive Prototyping</strong><br>Hubungkan antar screen untuk membuat prototipe yang <em>clickable</em>. Simulasikan user flow tanpa menulis kode.</li>
+                <li><strong>Code Export</strong><br>Ekspor desain ke kode frontend (HTML/CSS, React, Tailwind). Kode yang dihasilkan bersih dan bisa langsung digunakan sebagai referensi.</li>
+                <li><strong>Iterasi via Natural Language</strong><br>&ldquo;Perbesar tombol login&rdquo;, &ldquo;Ganti warna jadi biru navy&rdquo; &mdash; cukup ketik instruksi dan Stitch memperbarui desain secara instan.</li>
+            </ol>
+
+            <div class="info-box">
+                <div class="info-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                    <strong>Stitch vs Figma</strong>
+                </div>
+                <p><strong>Figma</strong> &mdash; tool desain profesional untuk design system yang kompleks dan kolaborasi tim besar. Kurva belajar tinggi.<br><strong>Stitch</strong> &mdash; tool AI untuk <em>rapid prototyping</em> dan eksplorasi ide. Cocok untuk tahap awal, developer solo, atau validasi konsep cepat.<br><br>Keduanya saling melengkapi: gunakan <strong>Stitch</strong> untuk menghasilkan konsep awal, lalu <strong>Figma</strong> untuk refinement profesional.</p>
+            </div>
+
+
+            <h2 class="content-heading">Teknologi di Balik Stitch</h2>
+            <p class="content-text">Stitch didukung oleh teknologi AI canggih dari Google:</p>
+            <ol class="content-list">
+                <li><strong>Google Gemini</strong><br>Model AI multimodal yang memahami teks, gambar, dan konteks UI. Gemini menangani layout structure, logic komponen, dan konsistensi visual.</li>
+                <li><strong>Infinite Canvas</strong><br>Workspace tak terbatas untuk menempatkan iterasi desain secara berdampingan. Bandingkan variasi dan pilih yang terbaik.</li>
+                <li><strong>Voice Interaction</strong><br>Bicara langsung ke Stitch untuk memodifikasi desain secara real-time &mdash; tanpa mengetik.</li>
+                <li><strong>MCP Integration</strong><br>Model Context Protocol memungkinkan Stitch terhubung ke <strong>Google AI Studio</strong> dan coding agents untuk pipeline desain-ke-kode yang seamless.</li>
+            </ol>
+
+            <h2 class="content-heading">Praktikum: Mendesain UI dengan Stitch</h2>
+            <p class="content-text">Mari praktikkan membuat desain halaman login untuk aplikasi delivery food.</p>
+
+            <h2 class="content-heading">Step 1: Akses Google Stitch</h2>
+            <p class="content-text">Buka <a href="https://stitch.withgoogle.com" target="_blank" style="color: #54c5f8;">stitch.withgoogle.com</a> &rarr; login dengan akun Google &rarr; klik <strong>&ldquo;New Project&rdquo;</strong>. Platform ini gratis dengan kuota bulanan.</p>
+
+            <h2 class="content-heading">Step 2: Tulis Prompt Pertama</h2>
+            <p class="content-text">Kunci dari Stitch adalah <strong>prompt yang deskriptif</strong>. Semakin detail prompt Anda, semakin akurat hasilnya:</p>
+
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">Contoh Prompt</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-comment">// Contoh prompt untuk Google Stitch</span>
+
+<span class="hl-string">"Buatkan halaman login untuk aplikasi delivery food.
+Gunakan warna utama orange (#FF6B35) dan putih.
+Ada logo di atas, form email dan password,
+tombol Login besar, dan link Register di bawah.
+Style modern dengan rounded corners dan shadow."</span></code></pre>
+            </div>
+            <div class="info-box">
+                <div class="info-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                    <strong>Tips Menulis Prompt yang Baik</strong>
+                </div>
+                <p>&bull; <strong>Sebutkan konteks aplikasi</strong> &mdash; &ldquo;delivery food&rdquo;, &ldquo;fitness tracker&rdquo;, dll.<br>&bull; <strong>Definisikan warna</strong> &mdash; gunakan hex code untuk presisi.<br>&bull; <strong>Deskripsikan komponen</strong> &mdash; sebutkan elemen UI spesifik (form, card, bottom nav).<br>&bull; <strong>Tentukan style</strong> &mdash; modern, minimalis, glassmorphism, dll.</p>
+            </div>
+
+
+            <h2 class="content-heading">Step 3: Iterasi Desain</h2>
+            <p class="content-text">Setelah Stitch menghasilkan desain awal, Anda bisa <strong>menyempurnakannya</strong> dengan prompt tambahan. Tidak perlu mulai dari awal &mdash; cukup deskripsikan perubahan yang diinginkan:</p>
+
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">Prompt Iterasi</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-comment">// Prompt iterasi setelah desain pertama</span>
+
+<span class="hl-string">"Ubah tombol Login menjadi gradient orange ke kuning.
+Tambahkan opsi login dengan Google dan Apple.
+Perkecil logo 20% dan tambahkan tagline di bawahnya.
+Buat form field lebih tinggi (48px) dengan icon di kiri."</span></code></pre>
+            </div>
+
+
+            <h2 class="content-heading">Step 4: Export Kode</h2>
+            <p class="content-text">Setelah desain final, klik <strong>&ldquo;Export&rdquo;</strong> untuk mendapatkan kode frontend. Stitch menghasilkan HTML/CSS atau React yang terstruktur:</p>
+
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">Output HTML/CSS dari Stitch</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-comment">// Contoh output HTML/CSS dari Google Stitch</span>
+&lt;<span class="hl-keyword">div</span> class=<span class="hl-string">"login-container"</span>&gt;
+  &lt;<span class="hl-keyword">div</span> class=<span class="hl-string">"logo-section"</span>&gt;
+    &lt;img src=<span class="hl-string">"logo.svg"</span> alt=<span class="hl-string">"Logo"</span> /&gt;
+    &lt;<span class="hl-keyword">p</span> class=<span class="hl-string">"tagline"</span>&gt;Fresh food, delivered fast&lt;/<span class="hl-keyword">p</span>&gt;
+  &lt;/<span class="hl-keyword">div</span>&gt;
+  &lt;<span class="hl-keyword">form</span> class=<span class="hl-string">"login-form"</span>&gt;
+    &lt;<span class="hl-keyword">input</span> type=<span class="hl-string">"email"</span> placeholder=<span class="hl-string">"Email"</span> /&gt;
+    &lt;<span class="hl-keyword">input</span> type=<span class="hl-string">"password"</span> placeholder=<span class="hl-string">"Password"</span> /&gt;
+    &lt;<span class="hl-keyword">button</span> class=<span class="hl-string">"btn-login"</span>&gt;Login&lt;/<span class="hl-keyword">button</span>&gt;
+  &lt;/<span class="hl-keyword">form</span>&gt;
+&lt;/<span class="hl-keyword">div</span>&gt;</code></pre>
+            </div>
+
+
+            <h2 class="content-heading">Step 5: Konversi ke Flutter Widget</h2>
+            <p class="content-text">Stitch belum secara native menghasilkan kode Dart/Flutter, tapi output HTML/CSS-nya menjadi <strong>blueprint yang sangat akurat</strong> untuk dikonversi ke Flutter widget:</p>
+
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">lib/pages/login_page.dart</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-comment">// Konversi manual dari output Stitch ke Flutter Widget</span>
+<span class="hl-keyword">class</span> <span class="hl-func">LoginPage</span> <span class="hl-keyword">extends</span> StatelessWidget {
+  @override
+  Widget <span class="hl-func">build</span>(BuildContext context) {
+    <span class="hl-keyword">return</span> Scaffold(
+      body: Center(child: Padding(
+        padding: EdgeInsets.<span class="hl-func">all</span>(<span class="hl-number">32</span>),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            <span class="hl-comment">// Logo dari desain Stitch</span>
+            Image.<span class="hl-func">asset</span>(<span class="hl-string">'assets/logo.svg'</span>, height: <span class="hl-number">80</span>),
+            SizedBox(height: <span class="hl-number">8</span>),
+            Text(<span class="hl-string">'Fresh food, delivered fast'</span>,
+                style: TextStyle(color: Colors.grey)),
+            SizedBox(height: <span class="hl-number">40</span>),
+
+            <span class="hl-comment">// Form fields sesuai spesifikasi Stitch</span>
+            TextField(decoration: InputDecoration(
+              hintText: <span class="hl-string">'Email'</span>,
+              prefixIcon: Icon(Icons.email),
+              border: OutlineInputBorder(
+                  borderRadius: BorderRadius.<span class="hl-func">circular</span>(<span class="hl-number">12</span>)))),
+            SizedBox(height: <span class="hl-number">16</span>),
+            TextField(obscureText: <span class="hl-keyword">true</span>,
+              decoration: InputDecoration(
+              hintText: <span class="hl-string">'Password'</span>,
+              prefixIcon: Icon(Icons.lock),
+              border: OutlineInputBorder(
+                  borderRadius: BorderRadius.<span class="hl-func">circular</span>(<span class="hl-number">12</span>)))),
+            SizedBox(height: <span class="hl-number">24</span>),
+
+            <span class="hl-comment">// Gradient button dari Stitch</span>
+            Container(
+              width: <span class="hl-keyword">double</span>.infinity, height: <span class="hl-number">48</span>,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Color(<span class="hl-number">0xFFFF6B35</span>), Color(<span class="hl-number">0xFFFFB347</span>)]),
+                borderRadius: BorderRadius.<span class="hl-func">circular</span>(<span class="hl-number">12</span>)),
+              child: ElevatedButton(
+                onPressed: () {},
+                style: ElevatedButton.<span class="hl-func">styleFrom</span>(
+                  backgroundColor: Colors.transparent,
+                  shadowColor: Colors.transparent),
+                child: Text(<span class="hl-string">'Login'</span>,
+                    style: TextStyle(fontSize: <span class="hl-number">16</span>,
+                        fontWeight: FontWeight.bold)))),
+    ])));
+  }
+}</code></pre>
+            </div>
+            <div class="info-box">
+                <div class="info-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                    <strong>Workflow Stitch &rarr; Flutter</strong>
+                </div>
+                <p>Alur kerja yang direkomendasikan:<br><strong>1.</strong> Desain di Stitch (prompt &rarr; iterate &rarr; finalize)<br><strong>2.</strong> Export kode HTML/CSS sebagai referensi visual &amp; struktural<br><strong>3.</strong> Konversi manual ke Flutter widget (perhatikan spacing, warna, border radius)<br><strong>4.</strong> Gunakan AI coding assistant untuk mempercepat konversi<br><br>Di masa depan, Stitch kemungkinan akan mendukung ekspor langsung ke Dart/Flutter.</p>
+            </div>
+
+
+            <h2 class="content-heading">Use Case Stitch untuk Flutter Developer</h2>
+            <ol class="content-list">
+                <li><strong>Rapid Prototyping</strong><br>Validasi ide aplikasi dalam hitungan menit. Tunjukkan prototipe ke klien atau stakeholder sebelum menulis satu baris kode Flutter.</li>
+                <li><strong>Design Reference</strong><br>Gunakan output Stitch sebagai panduan visual saat membangun widget Flutter. Lebih cepat daripada mendesain dari nol di Figma.</li>
+                <li><strong>Eksplorasi Layout</strong><br>Generate 5-10 variasi layout dalam waktu singkat. Pilih yang paling cocok, lalu implementasikan di Flutter.</li>
+                <li><strong>Onboarding Klien</strong><br>Buat mockup aplikasi klien dalam meeting langsung. Stitch cukup cepat untuk demo real-time.</li>
+                <li><strong>Learning UI/UX</strong><br>Pelajari prinsip desain dengan melihat bagaimana Stitch menyusun layout, memilih spacing, dan mengatur hierarki visual.</li>
+            </ol>
+
+            <div class="info-box">
+                <div class="info-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                    <strong>Keterbatasan Stitch (Saat Ini)</strong>
+                </div>
+                <p>&bull; <strong>Belum ada export Dart/Flutter</strong> &mdash; konversi masih manual.<br>&bull; <strong>Kuota terbatas</strong> &mdash; versi gratis memiliki batas generasi per bulan.<br>&bull; <strong>Masih eksperimental</strong> &mdash; hasil bisa inkonsisten untuk desain yang sangat kompleks.<br>&bull; <strong>Perlu koneksi internet</strong> &mdash; semua processing dilakukan di cloud Google.<br>&bull; <strong>Bukan pengganti Figma</strong> &mdash; untuk design system enterprise, Figma tetap lebih mature.</p>
+            </div>
+            <div class="info-box">
+                <div class="info-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                    <strong>Rangkuman Modul 5</strong>
+                </div>
+                <p><strong>Google Stitch</strong> &mdash; platform AI dari Google Labs untuk desain UI/UX via natural language prompt.<br><strong>Powered by Gemini</strong> &mdash; menghasilkan layout terstruktur, bukan sekadar gambar.<br><strong>Workflow</strong> &mdash; prompt &rarr; generate &rarr; iterate &rarr; export &rarr; konversi ke Flutter.<br><strong>Export</strong> &mdash; HTML/CSS/React, digunakan sebagai blueprint untuk Flutter widget.<br><strong>Best for</strong> &mdash; rapid prototyping, design reference, dan eksplorasi layout.</p>
+            </div>
+
+            <div class="content-nav">
+                <div class="content-nav-item">
+                    <a href="/flutter-advanced/tflite-ondevice.html" class="nav-btn nav-btn-prev">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                        <div><span class="nav-label">Sebelumnya</span><span class="nav-name">TFLite &amp; On-Device ML</span></div>
+                    </a>
+                </div>
+                <div class="content-nav-item">
+                    <a href="#" class="nav-btn nav-btn-next">
+                        <div><span class="nav-label">Selanjutnya</span><span class="nav-name">AI-Powered Features</span></div>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </a>
+                </div>
+            </div>
+        </article>
+    </main>
+    <script>
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+        navbar.classList.toggle('scrolled', window.scrollY > 20);
+    });
+    const navToggle = document.getElementById('navToggle');
+    const mobileMenu = document.getElementById('mobileMenu');
+    if (navToggle && mobileMenu) {
+        navToggle.addEventListener('click', () => {
+            navToggle.classList.toggle('active');
+            mobileMenu.classList.toggle('active');
+            document.body.style.overflow = mobileMenu.classList.contains('active') ? 'hidden' : '';
+        });
+    }
+    function closeMobileMenu() {
+        navToggle?.classList.remove('active');
+        mobileMenu?.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+    function copyCode(btn) {
+        const codeBlock = btn.closest('.code-block').querySelector('code');
+        navigator.clipboard.writeText(codeBlock.textContent).then(() => {
+            btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>';
+            setTimeout(() => {
+                btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+            }, 2000);
+        });
+    }
+    </script>
+</body>
+</html>

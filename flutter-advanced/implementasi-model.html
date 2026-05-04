@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Teachable Machine — Flutter Advanced — Arif Hidayah</title>
+    <meta name="description" content="Modul Implementasi Model ML di Flutter: integrasi TFLite, image processing, dan real-time inference.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/flutter/course.css">
+</head>
+<body>
+    <div class="bg-grid" aria-hidden="true"></div>
+
+    <nav class="navbar scrolled" id="navbar">
+        <div class="nav-container" style="max-width: 1300px; padding: 0 32px;">
+            <a href="../index.html" class="nav-logo">
+                <div class="logo-icon">
+                    <svg width="24" height="24" viewBox="0 0 28 28" fill="none">
+                        <path d="M14 2L26 8V20L14 26L2 20V8L14 2Z" stroke="currentColor" stroke-width="2" fill="none"/>
+                        <circle cx="14" cy="14" r="3" fill="currentColor"/>
+                    </svg>
+                </div>
+                <span class="logo-text" style="font-size: 1.1rem;">Arif<span class="logo-accent">Hidayah</span></span>
+            </a>
+            <div class="nav-links">
+                <a href="../index.html" class="nav-link">← Kembali ke Profil</a>
+            </div>
+            <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </nav>
+
+    <div class="mobile-menu" id="mobileMenu">
+        <a href="../index.html" class="mobile-link" onclick="closeMobileMenu()">← Kembali ke Profil</a>
+    </div>
+
+        <main class="course-layout">
+        <aside class="course-sidebar" id="courseSidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-icon">
+                    <svg width="24" height="24" viewBox="0 0 40 40" fill="none">
+                        <path d="M22 6L8 20L13 25L32 6H22Z" fill="currentColor"/>
+                        <path d="M22 18L13 27L18 32L32 18H22Z" fill="currentColor" opacity="0.7"/>
+                    </svg>
+                </div>
+                <span class="sidebar-course-name">Flutter Advanced</span>
+            </div>
+            <div class="module-group">
+                <div class="module-group-title">Pendahuluan</div>
+                <a href="/flutter-advanced/index.html" class="module-link">
+                    <div class="module-link-icon">1</div>
+                    <span>Intro &amp; Setup ML Environment</span>
+                </a>
+            </div>
+            <div class="module-group">
+                <div class="module-group-title">Teachable Machine</div>
+                <a href="/flutter-advanced/teachable-machine.html" class="module-link">
+                    <div class="module-link-icon">2</div>
+                    <span>Google Teachable Machine</span>
+                </a>
+            </div>
+            <div class="module-group">
+                <div class="module-group-title">Implementasi ML</div>
+                <a href="/flutter-advanced/implementasi-model.html" class="module-link active">
+                    <div class="module-link-icon">3</div>
+                    <span>Implementasi Model di Flutter</span>
+                </a>
+                <a href="/flutter-advanced/tflite-ondevice.html" class="module-link">
+                    <div class="module-link-icon">4</div>
+                    <span>TFLite &amp; On-Device ML</span>
+                </a>
+            </div>
+            <div class="module-group">
+                <div class="module-group-title">Google Stitch &amp; AI</div>
+                <a href="/flutter-advanced/google-stitch.html" class="module-link">
+                    <div class="module-link-icon">5</div>
+                    <span>Google Stitch</span>
+                </a>
+                <a href="/flutter-advanced/ai-features.html" class="module-link">
+                    <div class="module-link-icon">6</div>
+                    <span>AI-Powered Features</span>
+                </a>
+            </div>
+            <div class="module-group">
+                <div class="module-group-title">Proyek</div>
+                <a href="/flutter-advanced/final-project.html" class="module-link">
+                    <div class="module-link-icon">7</div>
+                    <span>Final Project Advanced</span>
+                </a>
+            </div>
+        </aside>
+
+        <article class="course-content">
+            <div class="breadcrumb">
+                <a href="../index.html">Home</a> <span>&#8250;</span>
+                <a href="/flutter-advanced/index.html">Flutter Advanced</a> <span>&#8250;</span>
+                <span style="color: var(--text-primary);">Implementasi Model di Flutter</span>
+            </div>
+
+            <header class="content-header">
+                <h1 class="content-title">Modul 3: Implementasi Model di Flutter</h1>
+                <div class="content-meta">
+                    <div class="meta-pill">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 5V8.5L10.5 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/></svg>
+                        <span>Estimasi: 90 Menit</span>
+                    </div>
+                    <div class="meta-pill">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="10" rx="1" stroke="currentColor" stroke-width="1.5"/><path d="M5 7h6M5 10h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                        <span>Praktikum</span>
+                    </div>
+                </div>
+            </header>
+
+            <p class="content-text">Pada modul sebelumnya, kita sudah melatih model menggunakan <strong>Teachable Machine</strong> dan mengekspor file <code>.tflite</code>. Sekarang saatnya mengintegrasikan model tersebut ke dalam <strong>aplikasi Flutter</strong> &mdash; mulai dari setup dependency, load model, preprocessing gambar, hingga menampilkan hasil klasifikasi.</p>
+
+            <div class="info-box">
+                <div class="info-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                    <strong>Apa yang Akan Kita Bangun?</strong>
+                </div>
+                <p>Di akhir modul ini, Anda akan memiliki aplikasi Flutter yang bisa mengambil gambar dari <strong>kamera atau galeri</strong>, memprosesnya, lalu menampilkan hasil klasifikasi (misalnya: &ldquo;Batu 95%, Gunting 3%, Kertas 2%&rdquo;) menggunakan model TFLite yang sudah dilatih.</p>
+            </div>
+
+            <h2 class="content-heading">Step 1: Tambahkan Dependencies</h2>
+            <p class="content-text">Kita membutuhkan tiga package utama:</p>
+            <ol class="content-list">
+                <li><strong>tflite_flutter</strong><br>Package utama untuk menjalankan model TFLite di Flutter. Mendukung GPU delegate.</li>
+                <li><strong>image_picker</strong><br>Untuk mengambil gambar dari kamera atau galeri perangkat.</li>
+                <li><strong>image</strong><br>Library untuk memanipulasi gambar (resize, crop, konversi pixel) sebelum dimasukkan ke model.</li>
+            </ol>
+
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">Terminal</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-comment"># Jalankan di terminal project Flutter Anda</span>
+flutter pub add tflite_flutter
+flutter pub add image_picker
+flutter pub add image</code></pre>
+            </div>
+            <div class="info-box">
+                <div class="info-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                    <strong>Catatan Platform</strong>
+                </div>
+                <p><strong>Android:</strong> Tambahkan <code>minSdkVersion 21</code> di <code>android/app/build.gradle</code>.<br><strong>iOS:</strong> Tambahkan key <code>NSCameraUsageDescription</code> dan <code>NSPhotoLibraryUsageDescription</code> di <code>Info.plist</code>.</p>
+            </div>
+
+            <h2 class="content-heading">Step 2: Siapkan Assets Model</h2>
+            <p class="content-text">Pastikan file model dan label sudah ditempatkan di project:</p>
+
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">pubspec.yaml</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code>flutter:
+  assets:
+    - assets/ml/model.tflite
+    - assets/ml/labels.txt</code></pre>
+            </div>
+
+            <h2 class="content-heading">Step 3: Buat Classifier Service</h2>
+            <p class="content-text">Class terpisah <code>ClassifierService</code> bertanggung jawab untuk <strong>load model</strong>, <strong>preprocess gambar</strong>, dan <strong>menjalankan inferensi</strong> (prinsip <em>Separation of Concerns</em>).</p>
+
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">lib/services/classifier_service.dart</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-keyword">import</span> <span class="hl-string">'dart:io'</span>;
+<span class="hl-keyword">import</span> <span class="hl-string">'dart:typed_data'</span>;
+<span class="hl-keyword">import</span> <span class="hl-string">'package:flutter/services.dart'</span>;
+<span class="hl-keyword">import</span> <span class="hl-string">'package:tflite_flutter/tflite_flutter.dart'</span>;
+<span class="hl-keyword">import</span> <span class="hl-string">'package:image/image.dart'</span> <span class="hl-keyword">as</span> img;
+
+<span class="hl-keyword">class</span> <span class="hl-func">ClassifierService</span> {
+  Interpreter? _interpreter;
+  List&lt;String&gt;? _labels;
+  <span class="hl-keyword">static const int</span> inputSize = <span class="hl-number">224</span>;
+  <span class="hl-keyword">bool</span> _isReady = <span class="hl-keyword">false</span>;
+
+  <span class="hl-keyword">bool get</span> isReady =&gt; _isReady;
+
+  <span class="hl-comment">/// Load model dan labels dari assets</span>
+  Future&lt;<span class="hl-keyword">void</span>&gt; <span class="hl-func">loadModel</span>() <span class="hl-keyword">async</span> {
+    <span class="hl-keyword">try</span> {
+      <span class="hl-comment">// fromAsset() memerlukan path SAMA PERSIS dengan yang di pubspec.yaml</span>
+      _interpreter = <span class="hl-keyword">await</span> Interpreter.<span class="hl-func">fromAsset</span>(<span class="hl-string">'assets/ml/model.tflite'</span>);
+      <span class="hl-keyword">final</span> labelData = <span class="hl-keyword">await</span> rootBundle.<span class="hl-func">loadString</span>(<span class="hl-string">'assets/ml/labels.txt'</span>);
+      _labels = labelData.<span class="hl-func">split</span>(<span class="hl-string">'\n'</span>)
+          .<span class="hl-func">where</span>((l) =&gt; l.<span class="hl-func">trim</span>().isNotEmpty)
+          .<span class="hl-func">map</span>((l) =&gt; l.<span class="hl-func">replaceAll</span>(RegExp(<span class="hl-string">r'^\d+\s*'</span>), <span class="hl-string">''</span>))
+          .<span class="hl-func">toList</span>();
+      _isReady = <span class="hl-keyword">true</span>;
+      <span class="hl-func">print</span>(<span class="hl-string">'Model loaded successfully. Labels: $_labels'</span>);
+    } <span class="hl-keyword">catch</span> (e) {
+      <span class="hl-func">print</span>(<span class="hl-string">'Error loading model: $e'</span>);
+      _isReady = <span class="hl-keyword">false</span>;
+      <span class="hl-keyword">rethrow</span>;
+    }
+  }
+
+  <span class="hl-comment">/// Preprocess gambar — model memerlukan input uint8 (0-255)</span>
+  Uint8List <span class="hl-func">_preprocessImage</span>(File imageFile) {
+    <span class="hl-keyword">final</span> raw = img.<span class="hl-func">decodeImage</span>(imageFile.<span class="hl-func">readAsBytesSync</span>())!;
+    <span class="hl-keyword">final</span> resized = img.<span class="hl-func">copyResize</span>(raw, width: inputSize, height: inputSize);
+    <span class="hl-keyword">var</span> buf = Uint8List(<span class="hl-number">1</span> * inputSize * inputSize * <span class="hl-number">3</span>);
+    <span class="hl-keyword">int</span> idx = <span class="hl-number">0</span>;
+    <span class="hl-keyword">for</span> (<span class="hl-keyword">int</span> y = <span class="hl-number">0</span>; y &lt; inputSize; y++) {
+      <span class="hl-keyword">for</span> (<span class="hl-keyword">int</span> x = <span class="hl-number">0</span>; x &lt; inputSize; x++) {
+        <span class="hl-keyword">final</span> p = resized.<span class="hl-func">getPixel</span>(x, y);
+        buf[idx++] = p.r.<span class="hl-func">toInt</span>();
+        buf[idx++] = p.g.<span class="hl-func">toInt</span>();
+        buf[idx++] = p.b.<span class="hl-func">toInt</span>();
+      }
+    }
+    <span class="hl-keyword">return</span> buf;
+  }
+
+  <span class="hl-comment">/// Jalankan inferensi secara async (agar tidak memblokir UI thread)</span>
+  Future&lt;Map&lt;String, <span class="hl-keyword">double</span>&gt;&gt; <span class="hl-func">classify</span>(File imageFile) <span class="hl-keyword">async</span> {
+    <span class="hl-keyword">if</span> (!_isReady || _interpreter == <span class="hl-keyword">null</span> || _labels == <span class="hl-keyword">null</span>) {
+      <span class="hl-keyword">throw</span> Exception(<span class="hl-string">'Model belum dimuat. Panggil loadModel() terlebih dahulu.'</span>);
+    }
+
+    <span class="hl-comment">// Jalankan preprocessing di microtask terpisah agar UI tetap responsif</span>
+    <span class="hl-keyword">final</span> input = <span class="hl-keyword">await</span> Future(() {
+      <span class="hl-keyword">return</span> <span class="hl-func">_preprocessImage</span>(imageFile).<span class="hl-func">reshape</span>([<span class="hl-number">1</span>, inputSize, inputSize, <span class="hl-number">3</span>]);
+    });
+
+    <span class="hl-comment">// Output juga uint8 untuk model quantized</span>
+    <span class="hl-keyword">var</span> output = Uint8List(_labels!.length).<span class="hl-func">reshape</span>([<span class="hl-number">1</span>, _labels!.length]);
+    _interpreter!.<span class="hl-func">run</span>(input, output);
+
+    <span class="hl-comment">// Konversi output uint8 ke probabilitas (0.0 - 1.0)</span>
+    <span class="hl-keyword">final</span> results = &lt;String, <span class="hl-keyword">double</span>&gt;{};
+    <span class="hl-keyword">for</span> (<span class="hl-keyword">int</span> i = <span class="hl-number">0</span>; i &lt; _labels!.length; i++) {
+      results[_labels![i]] = (output[<span class="hl-number">0</span>][i] <span class="hl-keyword">as int</span>) / <span class="hl-number">255.0</span>;
+    }
+
+    <span class="hl-keyword">return</span> Map.<span class="hl-func">fromEntries</span>(results.entries.<span class="hl-func">toList</span>()
+      ..<span class="hl-func">sort</span>((a, b) =&gt; b.value.<span class="hl-func">compareTo</span>(a.value)));
+  }
+
+  <span class="hl-keyword">void</span> <span class="hl-func">dispose</span>() {
+    _interpreter?.<span class="hl-func">close</span>();
+  }
+}</code></pre>
+            </div>
+            <div class="info-box">
+                <div class="info-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                    <strong>Penjelasan Preprocessing</strong>
+                </div>
+                <p><strong>Resize 224&times;224</strong> &mdash; MobileNet membutuhkan input berukuran 224&times;224 pixel.<br><strong>Uint8 (0-255)</strong> &mdash; Model quantized menerima input pixel RGB langsung tanpa normalisasi.<br><strong>Shape [1, 224, 224, 3]</strong> &mdash; Batch=1, H=224, W=224, Channel=3 (RGB).<br><strong>Output Uint8</strong> &mdash; Output juga berupa uint8 (0-255), lalu dikonversi ke probabilitas (0.0-1.0) dengan membagi 255.</p>
+            </div>
+
+            <h2 class="content-heading">Step 4: Buat UI Klasifikasi</h2>
+            <p class="content-text">Halaman utama dengan tombol kamera/galeri, preview gambar, dan progress bar hasil klasifikasi:</p>
+
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">lib/pages/classify_page.dart</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-keyword">import</span> <span class="hl-string">'dart:io'</span>;
+<span class="hl-keyword">import</span> <span class="hl-string">'package:flutter/material.dart'</span>;
+<span class="hl-keyword">import</span> <span class="hl-string">'package:image_picker/image_picker.dart'</span>;
+<span class="hl-keyword">import</span> <span class="hl-string">'../services/classifier_service.dart'</span>;
+
+<span class="hl-keyword">class</span> <span class="hl-func">ClassifyPage</span> <span class="hl-keyword">extends</span> StatefulWidget {
+  @override
+  State&lt;ClassifyPage&gt; <span class="hl-func">createState</span>() =&gt; _ClassifyPageState();
+}
+
+<span class="hl-keyword">class</span> _ClassifyPageState <span class="hl-keyword">extends</span> State&lt;ClassifyPage&gt; {
+  <span class="hl-keyword">final</span> _classifier = ClassifierService();
+  <span class="hl-keyword">final</span> _picker = ImagePicker();
+  File? _selectedImage;
+  Map&lt;String, <span class="hl-keyword">double</span>&gt;? _results;
+  <span class="hl-keyword">bool</span> _isLoading = <span class="hl-keyword">false</span>;
+  <span class="hl-keyword">bool</span> _modelLoading = <span class="hl-keyword">true</span>;
+  String? _errorMessage;
+
+  @override
+  <span class="hl-keyword">void</span> <span class="hl-func">initState</span>() {
+    <span class="hl-keyword">super</span>.initState();
+    <span class="hl-func">_initModel</span>();
+  }
+
+  <span class="hl-comment">/// Inisialisasi model dengan await dan error handling</span>
+  Future&lt;<span class="hl-keyword">void</span>&gt; <span class="hl-func">_initModel</span>() <span class="hl-keyword">async</span> {
+    <span class="hl-keyword">try</span> {
+      <span class="hl-keyword">await</span> _classifier.<span class="hl-func">loadModel</span>();
+      <span class="hl-func">setState</span>(() {
+        _modelLoading = <span class="hl-keyword">false</span>;
+      });
+    } <span class="hl-keyword">catch</span> (e) {
+      <span class="hl-func">setState</span>(() {
+        _modelLoading = <span class="hl-keyword">false</span>;
+        _errorMessage = <span class="hl-string">'Gagal memuat model: $e'</span>;
+      });
+    }
+  }
+
+  Future&lt;<span class="hl-keyword">void</span>&gt; <span class="hl-func">_pickAndClassify</span>(ImageSource src) <span class="hl-keyword">async</span> {
+    <span class="hl-keyword">final</span> picked = <span class="hl-keyword">await</span> _picker.<span class="hl-func">pickImage</span>(source: src);
+    <span class="hl-keyword">if</span> (picked == <span class="hl-keyword">null</span>) <span class="hl-keyword">return</span>;
+
+    <span class="hl-func">setState</span>(() {
+      _selectedImage = File(picked.path);
+      _isLoading = <span class="hl-keyword">true</span>;
+      _results = <span class="hl-keyword">null</span>;
+      _errorMessage = <span class="hl-keyword">null</span>;
+    });
+
+    <span class="hl-keyword">try</span> {
+      <span class="hl-comment">// classify() sekarang async, jadi UI thread tidak terblokir</span>
+      <span class="hl-keyword">final</span> res = <span class="hl-keyword">await</span> _classifier.<span class="hl-func">classify</span>(_selectedImage!);
+      <span class="hl-func">setState</span>(() {
+        _results = res;
+        _isLoading = <span class="hl-keyword">false</span>;
+      });
+    } <span class="hl-keyword">catch</span> (e) {
+      <span class="hl-func">setState</span>(() {
+        _isLoading = <span class="hl-keyword">false</span>;
+        _errorMessage = <span class="hl-string">'Gagal mengklasifikasi gambar: $e'</span>;
+      });
+    }
+  }
+
+  @override
+  Widget <span class="hl-func">build</span>(BuildContext context) {
+    <span class="hl-keyword">return</span> Scaffold(
+      appBar: AppBar(title: Text(<span class="hl-string">'Image Classifier'</span>)),
+      body: _modelLoading
+          ? Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CircularProgressIndicator(),
+                  SizedBox(height: <span class="hl-number">16</span>),
+                  Text(<span class="hl-string">'Memuat model...'</span>),
+                ],
+              ),
+            )
+          : SingleChildScrollView(
+              padding: EdgeInsets.<span class="hl-func">all</span>(<span class="hl-number">20</span>),
+              child: Column(children: [
+                <span class="hl-keyword">if</span> (_errorMessage != <span class="hl-keyword">null</span>)
+                  Card(
+                    color: Colors.red.shade50,
+                    child: Padding(
+                      padding: EdgeInsets.<span class="hl-func">all</span>(<span class="hl-number">16</span>),
+                      child: Row(children: [
+                        Icon(Icons.error_outline, color: Colors.red),
+                        SizedBox(width: <span class="hl-number">12</span>),
+                        Expanded(child: Text(_errorMessage!,
+                            style: TextStyle(color: Colors.red.shade800))),
+                      ]),
+                    ),
+                  ),
+                <span class="hl-keyword">if</span> (_selectedImage != <span class="hl-keyword">null</span>) ...[
+                  SizedBox(height: <span class="hl-number">16</span>),
+                  ClipRRect(
+                    borderRadius: BorderRadius.<span class="hl-func">circular</span>(<span class="hl-number">16</span>),
+                    child: Image.<span class="hl-func">file</span>(_selectedImage!,
+                        height: <span class="hl-number">250</span>, fit: BoxFit.cover)),
+                ],
+                SizedBox(height: <span class="hl-number">20</span>),
+                Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                  ElevatedButton.<span class="hl-func">icon</span>(
+                    onPressed: _isLoading
+                        ? <span class="hl-keyword">null</span>
+                        : () =&gt; <span class="hl-func">_pickAndClassify</span>(ImageSource.camera),
+                    icon: Icon(Icons.camera_alt),
+                    label: Text(<span class="hl-string">'Kamera'</span>)),
+                  SizedBox(width: <span class="hl-number">12</span>),
+                  OutlinedButton.<span class="hl-func">icon</span>(
+                    onPressed: _isLoading
+                        ? <span class="hl-keyword">null</span>
+                        : () =&gt; <span class="hl-func">_pickAndClassify</span>(ImageSource.gallery),
+                    icon: Icon(Icons.photo_library),
+                    label: Text(<span class="hl-string">'Galeri'</span>)),
+                ]),
+                SizedBox(height: <span class="hl-number">24</span>),
+                <span class="hl-keyword">if</span> (_isLoading)
+                  Column(children: [
+                    CircularProgressIndicator(),
+                    SizedBox(height: <span class="hl-number">8</span>),
+                    Text(<span class="hl-string">'Mengklasifikasi gambar...'</span>),
+                  ]),
+                <span class="hl-keyword">if</span> (_results != <span class="hl-keyword">null</span>)
+                  ..._results!.entries.<span class="hl-func">map</span>((e) =&gt; Padding(
+                    padding: EdgeInsets.<span class="hl-func">symmetric</span>(vertical: <span class="hl-number">4</span>),
+                    child: Row(children: [
+                      Expanded(flex: <span class="hl-number">3</span>, child: Text(e.key,
+                          style: TextStyle(fontWeight: FontWeight.w600))),
+                      Expanded(flex: <span class="hl-number">7</span>, child: LinearProgressIndicator(
+                          value: e.value, minHeight: <span class="hl-number">12</span>,
+                          borderRadius: BorderRadius.<span class="hl-func">circular</span>(<span class="hl-number">6</span>))),
+                      SizedBox(width: <span class="hl-number">8</span>),
+                      Text(<span class="hl-string">'${(e.value * 100).toStringAsFixed(1)}%'</span>),
+                    ]))),
+              ]),
+            ),
+    );
+  }
+
+  @override
+  <span class="hl-keyword">void</span> <span class="hl-func">dispose</span>() {
+    _classifier.<span class="hl-func">dispose</span>();
+    <span class="hl-keyword">super</span>.dispose();
+  }
+}</code></pre>
+            </div>
+
+            <h2 class="content-heading">Step 5: Update main.dart</h2>
+            <p class="content-text">Hubungkan halaman klasifikasi ke entry point aplikasi:</p>
+
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">lib/main.dart</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-keyword">import</span> <span class="hl-string">'package:flutter/material.dart'</span>;
+<span class="hl-keyword">import</span> <span class="hl-string">'pages/classify_page.dart'</span>;
+
+<span class="hl-keyword">void</span> <span class="hl-func">main</span>() =&gt; <span class="hl-func">runApp</span>(MyApp());
+
+<span class="hl-keyword">class</span> <span class="hl-func">MyApp</span> <span class="hl-keyword">extends</span> StatelessWidget {
+  @override
+  Widget <span class="hl-func">build</span>(BuildContext context) {
+    <span class="hl-keyword">return</span> MaterialApp(
+      title: <span class="hl-string">'Flutter ML Classifier'</span>,
+      theme: ThemeData(colorSchemeSeed: Colors.deepPurple, useMaterial3: <span class="hl-keyword">true</span>),
+      home: ClassifyPage(),
+    );
+  }
+}</code></pre>
+            </div>
+
+            <h2 class="content-heading">Alur Kerja Lengkap</h2>
+            <p class="content-text">Ringkasan alur dari input gambar hingga output klasifikasi:</p>
+            <ol class="content-list">
+                <li><strong>User memilih gambar</strong><br>Dari kamera atau galeri menggunakan <code>image_picker</code>.</li>
+                <li><strong>Preprocessing</strong><br>Gambar di-resize ke 224&times;224. Untuk model quantized, pixel dikirim langsung sebagai uint8 (0-255).</li>
+                <li><strong>Inference</strong><br>Data dimasukkan ke model via <code>Interpreter.run()</code>. Output: array probabilitas per kelas.</li>
+                <li><strong>Post-processing</strong><br>Array output dipetakan ke nama label, diurutkan berdasarkan confidence.</li>
+                <li><strong>Tampilkan Hasil</strong><br>UI menampilkan progress bar untuk setiap kelas beserta persentasenya.</li>
+            </ol>
+
+            <div class="info-box">
+                <div class="info-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                    <strong>Troubleshooting</strong>
+                </div>
+                <p><strong>Error &ldquo;Cannot load model&rdquo;</strong> &mdash; Pastikan path di pubspec.yaml benar dan sudah run <code>flutter pub get</code>.<br><strong>Hasil selalu sama</strong> &mdash; Cek preprocessing (resize) dan pastikan tipe input sesuai model (Uint8 untuk quantized, Float32 untuk float model).<br><strong>App stuck loading</strong> &mdash; Pastikan <code>loadModel()</code> di-<code>await</code> dengan benar dan <code>classify()</code> bersifat async.<br><strong>Crash di iOS</strong> &mdash; Pastikan permission kamera di Info.plist.</p>
+            </div>
+            <div class="info-box">
+                <div class="info-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                    <strong>Rangkuman Modul 3</strong>
+                </div>
+                <p><strong>tflite_flutter</strong> &mdash; package untuk menjalankan model TFLite di Flutter.<br><strong>Preprocessing</strong> &mdash; resize 224&times;224 + input Uint8 (0-255) untuk model quantized.<br><strong>ClassifierService</strong> &mdash; class terpisah dengan nullable fields, <code>isReady</code> flag, dan async classify.<br><strong>Error Handling</strong> &mdash; try-catch di loadModel dan classify, error message di UI.<br><strong>ImagePicker</strong> &mdash; akses kamera dan galeri.<br><strong>Output</strong> &mdash; Map label-confidence ditampilkan sebagai progress bar.</p>
+            </div>
+
+            <div class="content-nav">
+                <div class="content-nav-item">
+                    <a href="/flutter-advanced/teachable-machine.html" class="nav-btn nav-btn-prev">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                        <div><span class="nav-label">Sebelumnya</span><span class="nav-name">Google Teachable Machine</span></div>
+                    </a>
+                </div>
+                <div class="content-nav-item">
+                    <a href="#" class="nav-btn nav-btn-next">
+                        <div><span class="nav-label">Selanjutnya</span><span class="nav-name">TFLite &amp; On-Device ML</span></div>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </a>
+                </div>
+            </div>
+        </article>
+    </main>
+    <script>
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+        navbar.classList.toggle('scrolled', window.scrollY > 20);
+    });
+    const navToggle = document.getElementById('navToggle');
+    const mobileMenu = document.getElementById('mobileMenu');
+    if (navToggle && mobileMenu) {
+        navToggle.addEventListener('click', () => {
+            navToggle.classList.toggle('active');
+            mobileMenu.classList.toggle('active');
+            document.body.style.overflow = mobileMenu.classList.contains('active') ? 'hidden' : '';
+        });
+    }
+    function closeMobileMenu() {
+        navToggle?.classList.remove('active');
+        mobileMenu?.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+    function copyCode(btn) {
+        const codeBlock = btn.closest('.code-block').querySelector('code');
+        navigator.clipboard.writeText(codeBlock.textContent).then(() => {
+            btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>';
+            setTimeout(() => {
+                btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+            }, 2000);
+        });
+    }
+    </script>
+</body>
+</html>
