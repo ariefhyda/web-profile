@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Web Profile Arif Hidayah dan platform materi ajar mahasiswa untuk mata kuliah Mobile, Web Development, dan Data Mining.">
+    <title>Arif Hidayah — Platform Profil & Materi Ajar</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Animated Background -->
+    <div class="bg-grid" aria-hidden="true"></div>
+    <div class="bg-glow bg-glow-1" aria-hidden="true"></div>
+    <div class="bg-glow bg-glow-2" aria-hidden="true"></div>
+    <div class="bg-glow bg-glow-3" aria-hidden="true"></div>
+
+    <!-- Floating Particles -->
+    <div class="particles" id="particles" aria-hidden="true"></div>
+
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <a href="#" class="nav-logo">
+                <div class="logo-icon">
+                    <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+                        <path d="M14 2L26 8V20L14 26L2 20V8L14 2Z" stroke="currentColor" stroke-width="2" fill="none"/>
+                        <path d="M14 10L20 13V19L14 22L8 19V13L14 10Z" fill="currentColor" opacity="0.6"/>
+                        <circle cx="14" cy="14" r="3" fill="currentColor"/>
+                    </svg>
+                </div>
+                <span class="logo-text">Arif<span class="logo-accent">Hidayah</span></span>
+            </a>
+            <div class="nav-links">
+                <a href="#home" class="nav-link active">Home</a>
+                <a href="#about" class="nav-link">Profil</a>
+                <a href="#experience" class="nav-link">Pengalaman</a>
+                <a href="#education" class="nav-link">Pendidikan</a>
+                <a href="#courses" class="nav-link">Materi Belajar</a>
+            </div>
+            <button class="nav-cta" onclick="scrollToSection('courses')">
+                Akses Materi
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <path d="M6 3L11 8L6 13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+            </button>
+            <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu" id="mobileMenu">
+        <a href="#home" class="mobile-link" onclick="closeMobileMenu()">Home</a>
+        <a href="#about" class="mobile-link" onclick="closeMobileMenu()">Profil</a>
+        <a href="#experience" class="mobile-link" onclick="closeMobileMenu()">Pengalaman</a>
+        <a href="#education" class="mobile-link" onclick="closeMobileMenu()">Pendidikan</a>
+        <a href="#courses" class="mobile-link" onclick="closeMobileMenu()">Materi</a>
+        <button class="nav-cta mobile-cta" onclick="scrollToSection('courses'); closeMobileMenu();">Mulai Belajar</button>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+        <div class="hero-container">
+            <div class="hero-badge">
+                <span class="badge-dot"></span>
+                <span>Lecturer & Full-Stack Developer</span>
+            </div>
+            <h1 class="hero-title">
+                Halo, Saya <span class="gradient-text">Arif Hidayah</span>
+            </h1>
+            <p class="hero-subtitle">
+                Dosen dan Web Developer dari Tegal dengan passion di bidang pendidikan dan inovasi teknologi. 
+                Selamat datang di platform personal saya untuk berbagi <strong>profil profesional</strong> dan <strong>materi pembelajaran mahasiswa</strong>.
+            </p>
+            <div class="hero-actions">
+                <button class="btn btn-primary" onclick="scrollToSection('courses')">
+                    <span>Materi Kuliah Mahasiswa</span>
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <path d="M7 4L13 10L7 16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+                <button class="btn btn-secondary" onclick="scrollToSection('about')">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.5"/>
+                        <path d="M10 7V11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        <circle cx="10" cy="13.5" r="0.75" fill="currentColor"/>
+                    </svg>
+                    <span>Kenali Saya</span>
+                </button>
+            </div>
+            <div class="hero-stats">
+                <div class="stat-item">
+                    <span class="stat-number" data-target="5">0</span>
+                    <span class="stat-label">+ Tahun Pengalaman</span>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat-item">
+                    <span class="stat-number" data-target="3">0</span>
+                    <span class="stat-label">Mata Kuliah Diajar</span>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat-item">
+                    <span class="stat-number" data-target="15">0</span>
+                    <span class="stat-label">+ Tech Skills</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hero Visual -->
+        <div class="hero-visual">
+            <div class="code-window">
+                <div class="code-header">
+                    <div class="code-dots">
+                        <span class="dot red"></span>
+                        <span class="dot yellow"></span>
+                        <span class="dot green"></span>
+                    </div>
+                    <span class="code-title">profile.json</span>
+                </div>
+                <div class="code-body">
+                    <pre><code>{
+  <span class="code-string">"name"</span>: <span class="code-string">"Arif Hidayah"</span>,
+  <span class="code-string">"roles"</span>: [
+    <span class="code-string">"Lecturer"</span>,
+    <span class="code-string">"Full-Stack Web Developer"</span>
+  ],
+  <span class="code-string">"location"</span>: <span class="code-string">"Tegal, ID"</span>,
+  <span class="code-string">"skills"</span>: {
+    <span class="code-string">"languages"</span>: [<span class="code-string">"JavaScript"</span>, <span class="code-string">"PHP"</span>, <span class="code-string">"Python"</span>, <span class="code-string">"C++"</span>],
+    <span class="code-string">"frameworks"</span>: [<span class="code-string">"Laravel"</span>, <span class="code-string">"Flutter"</span>, <span class="code-string">"Bootstrap"</span>],
+    <span class="code-string">"other"</span>: [<span class="code-string">"Data Science"</span>, <span class="code-string">"Machine Learning"</span>]
+  },
+  <span class="code-string">"teaching_ratio"</span>: {
+    <span class="code-string">"practice"</span>: <span class="code-string">"70%"</span>,
+    <span class="code-string">"theory"</span>: <span class="code-string">"30%"</span>
+  }
+}</code></pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scroll Indicator -->
+        <div class="scroll-indicator">
+            <div class="scroll-mouse">
+                <div class="scroll-wheel"></div>
+            </div>
+            <span>Scroll ke bawah</span>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="about" id="about">
+        <div class="section-container">
+            <div class="about-grid">
+                <div class="about-content">
+                    <span class="section-tag">Profil Saya</span>
+                    <h2 class="section-title" style="text-align: left;">Pendidikan & Inovasi</h2>
+                    <p class="about-text">
+                        Saya memadukan pengalaman industri sebagai Full-Stack Developer dengan dedikasi di bidang akademik sebagai Dosen.
+                        Gelar Magister Komputer (S2) saya dari Politeknik Elektronika Negeri Surabaya membekali saya dalam Riset Keilmuan, AI, dan Software Engineering.
+                    </p>
+                    <div class="about-highlights">
+                        <div class="highlight-item">
+                            <div class="highlight-icon">✦</div>
+                            <div>
+                                <strong>Akademisi (Dosen)</strong>
+                                <p>Mengajar dengan porsi 70% praktikum dan 30% teori untuk memperkembangkan pemahaman mahasiswa dalam Data Mining, Mobile Dev, dan Web Framework.</p>
+                            </div>
+                        </div>
+                        <div class="highlight-item">
+                            <div class="highlight-icon">✦</div>
+                            <div>
+                                <strong>Software Engineer</strong>
+                                <p>Berpengalaman mendevelop aplikasi skala pemerintahan (Surabaya City) menggunakan Laravel, PostgreSQL, Python, dan Linux.</p>
+                            </div>
+                        </div>
+                        <div class="highlight-item">
+                            <div class="highlight-icon">✦</div>
+                            <div>
+                                <strong>Tersertifikasi</strong>
+                                <p>Artificial Intelligence, AWS Cloud Practitioner Essentials, dan kompetensi Web Development.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="about-visual">
+                    <div class="visual-card">
+                        <div class="visual-orbits">
+                            <div class="orbit orbit-1">
+                                <div class="orbit-dot" style="--delay: 0s;">
+                                    <span>💻</span>
+                                </div>
+                            </div>
+                            <div class="orbit orbit-2">
+                                <div class="orbit-dot" style="--delay: -3s;">
+                                    <span>🤖</span>
+                                </div>
+                            </div>
+                            <div class="orbit orbit-3">
+                                <div class="orbit-dot" style="--delay: -6s;">
+                                    <span>🧠</span>
+                                </div>
+                            </div>
+                            <div class="orbit-center">
+                                <span>👨‍🏫</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Experience / Features Section -->
+    <section class="features" id="experience">
+        <div class="section-container">
+            <div class="section-header">
+                <span class="section-tag">Work Experience</span>
+                <h2 class="section-title">Pengalaman Kerja</h2>
+                <p class="section-desc">Karier profesional lintas sektor: dari industri software house hingga pemerintahan dan pendidikan tinggi.</p>
+            </div>
+
+            <div class="features-grid">
+                <div class="feature-card" data-delay="0">
+                    <div class="feature-icon">
+                        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+                            <path d="M12 12L17 14.5L12 17V12Z" fill="currentColor"/>
+                            <path d="M4 8C4 6.89543 4.89543 6 6 6H22C23.1046 6 24 6.89543 24 8V20C24 21.1046 23.1046 22 22 22H6C4.89543 22 4 21.1046 4 20V8Z" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">Universitas Harkat Negeri</h3>
+                    <p style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 8px;">Dosen • Tegal (2025 - Present)</p>
+                    <p class="feature-desc">Mengkampu mata kuliah Data Mining, Mobile Programming, dan Web Framework (Laravel).</p>
+                </div>
+
+                <div class="feature-card" data-delay="100">
+                    <div class="feature-icon">
+                        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+                            <path d="M10 14L13 17L18 11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M7 4H21L24 8V22C24 23.1 23.1 24 22 24H6C4.9 24 4 23.1 4 22V8L7 4Z" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">Politeknik Harapan Bersama</h3>
+                    <p style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 8px;">Dosen • Tegal (2024 - 2025)</p>
+                    <p class="feature-desc">Fokus mengajar pada Game Development, SAD, Web & Mobile Framework kepada mahasiswa.</p>
+                </div>
+
+                <div class="feature-card" data-delay="200">
+                    <div class="feature-icon">
+                        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+                            <rect x="3" y="6" width="22" height="16" rx="3" stroke="currentColor" stroke-width="2"/>
+                            <path d="M8 12H10M8 16H14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            <circle cx="20" cy="14" r="3" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">Pemkot Surabaya (Dinsos)</h3>
+                    <p style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 8px;">Full-Stack Web Dev • (2021 - 2024)</p>
+                    <p class="feature-desc">Membangun sistem pengolahan data welfare dan RESTful API, meningkatkan efektivitas kinerja hingga 200%.</p>
+                </div>
+
+                <div class="feature-card" data-delay="300">
+                    <div class="feature-icon">
+                        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+                            <path d="M14 4L18 8H24V22H4V8H10L14 4Z" stroke="currentColor" stroke-width="2"/>
+                            <path d="M10 15L13 18L18 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">Magistra Utama</h3>
+                    <p style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 8px;">Instruktur • Surabaya (2020 - 2021)</p>
+                    <p class="feature-desc">Mempraktikkan strategi pembelajaran untuk Android dan Visual Basic dengan pendekatan data manipulasi dan logika.</p>
+                </div>
+
+                <div class="feature-card" data-delay="400">
+                    <div class="feature-icon">
+                        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+                            <circle cx="14" cy="10" r="5" stroke="currentColor" stroke-width="2"/>
+                            <path d="M6 24C6 20 9.58 17 14 17C18.42 17 22 20 22 24" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">PT Nocola IoT Solution</h3>
+                    <p style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 8px;">Web Developer • Cilacap (2018 - 2019)</p>
+                    <p class="feature-desc">Lead proyek integrasi sistem (CodeIgniter, MySQL, Linux) bersama tim dari divisi field dan developer.</p>
+                </div>
+
+                <div class="feature-card" data-delay="500">
+                    <div class="feature-icon">
+                        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+                            <path d="M4 14C4 8.48 8.48 4 14 4C19.52 4 24 8.48 24 14C24 19.52 19.52 24 14 24" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            <path d="M14 4V14L20 20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">SCTI</h3>
+                    <p style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 8px;">Web Developer • Semarang (2016)</p>
+                    <p class="feature-desc">Internship mendevelop website event ticketing (PHP, MySQL) bersama tim 5 mahasiswa.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Roadmap / Education -->
+    <section class="roadmap" id="education">
+        <div class="section-container">
+            <div class="section-header">
+                <span class="section-tag">Education</span>
+                <h2 class="section-title">Riwayat Pendidikan</h2>
+                <p class="section-desc">Latar belakang keilmuan yang mendasari karir dan kompetensi saya</p>
+            </div>
+
+            <div class="roadmap-timeline">
+                <div class="timeline-line"></div>
+
+                <div class="timeline-item" data-step="S2">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <h3>Master of Computer Engineering</h3>
+                        <p style="font-weight: 600; color: #a78bfa;">PENS (Politeknik Elektronika Negeri Surabaya) | 2019-2023</p>
+                        <p><strong>GPA: 3.73/4.0.</strong> Berfokus pada Software Engineering, Computer Vision, Artificial Intelligence, dan Data Science.</p>
+                    </div>
+                </div>
+
+                <div class="timeline-item" data-step="S1">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <h3>Bachelor of Computer Engineering</h3>
+                        <p style="font-weight: 600; color: #54c5f8;">Politeknik Harapan Bersama | 2014-2018</p>
+                        <p><strong>GPA: 3.93/4.0.</strong> Lulusan Terbaik (Best Graduate 2018). Berfokus pada Web Programming, Mobile Programming, dan Cloud Computing.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Courses Section -->
+    <section class="courses" id="courses">
+        <div class="section-container">
+            <div class="section-header">
+                <span class="section-tag">Mahasiswa</span>
+                <h2 class="section-title">Materi Belajar & Modul</h2>
+                <p class="section-desc">Pilih mata kuliah di bawah ini untuk mengakses slide, modul, dan source code project praktikum.</p>
+            </div>
+
+            <div class="courses-grid">
+                <!-- Flutter Card -->
+                <div class="course-card" id="card-flutter" data-tilt>
+                    <div class="card-glow card-glow-flutter"></div>
+                    <div class="card-content">
+                        <div class="card-icon card-icon-flutter">
+                            <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+                                <path d="M22 6L8 20L13 25L32 6H22Z" fill="currentColor"/>
+                                <path d="M22 18L13 27L18 32L32 18H22Z" fill="currentColor" opacity="0.7"/>
+                            </svg>
+                        </div>
+                        <div class="card-badge">Mobile Development</div>
+                        <h3 class="card-title">Flutter (Mobile)</h3>
+                        <p class="card-desc">
+                            Materi kuliah pemrograman mobile (micro framework) untuk mendevelop aplikasi cross-platform.
+                        </p>
+                        <div class="card-topics">
+                            <span class="topic-tag">Dart Basics</span>
+                            <span class="topic-tag">Widgets</span>
+                            <span class="topic-tag">State Management</span>
+                            <span class="topic-tag">REST API</span>
+                        </div>
+                        <a href="flutter.html" class="card-link">
+                            <span>Akses Materi</span>
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                <path d="M4 10H16M12 6L16 10L12 14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </a>
+                    </div>
+                    <div class="card-pattern">
+                        <svg width="200" height="200" viewBox="0 0 200 200" fill="none" opacity="0.03">
+                            <path d="M100 20L40 80L60 100L140 20H100Z" fill="currentColor"/>
+                            <path d="M100 60L60 100L80 120L140 60H100Z" fill="currentColor"/>
+                            <path d="M100 100L60 140L80 160L140 100H100Z" fill="currentColor"/>
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- Laravel Card -->
+                <div class="course-card" id="card-laravel" data-tilt>
+                    <div class="card-glow card-glow-laravel"></div>
+                    <div class="card-content">
+                        <div class="card-icon card-icon-laravel">
+                            <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+                                <path d="M8 10L14 6L26 14L20 18L8 10Z" fill="currentColor"/>
+                                <path d="M26 14V26L20 30V18L26 14Z" fill="currentColor" opacity="0.8"/>
+                                <path d="M8 10V22L14 26V14L8 10Z" fill="currentColor" opacity="0.6"/>
+                                <path d="M14 26L20 30L26 26" stroke="currentColor" stroke-width="1.5"/>
+                            </svg>
+                        </div>
+                        <div class="card-badge">Web Development</div>
+                        <h3 class="card-title">Laravel (Web)</h3>
+                        <p class="card-desc">
+                            Materi kuliah Web Framework membahas PHP MVC Backend untuk website modern.
+                        </p>
+                        <div class="card-topics">
+                            <span class="topic-tag">MVC Pattern</span>
+                            <span class="topic-tag">Eloquent ORM</span>
+                            <span class="topic-tag">Blade Template</span>
+                            <span class="topic-tag">Auth</span>
+                        </div>
+                        <a href="laravel.html" class="card-link">
+                            <span>Akses Materi</span>
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                <path d="M4 10H16M12 6L16 10L12 14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </a>
+                    </div>
+                    <div class="card-pattern">
+                        <svg width="200" height="200" viewBox="0 0 200 200" fill="none" opacity="0.03">
+                            <rect x="40" y="40" width="120" height="120" rx="8" fill="currentColor"/>
+                            <rect x="60" y="60" width="80" height="80" rx="4" fill="currentColor"/>
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- Data Mining Card -->
+                <div class="course-card" id="card-datamining" data-tilt>
+                    <div class="card-glow card-glow-datamining"></div>
+                    <div class="card-content">
+                        <div class="card-icon card-icon-datamining">
+                            <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+                                <circle cx="14" cy="14" r="4" stroke="currentColor" stroke-width="2"/>
+                                <circle cx="28" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
+                                <circle cx="20" cy="28" r="4" stroke="currentColor" stroke-width="2"/>
+                                <circle cx="32" cy="26" r="2.5" stroke="currentColor" stroke-width="2"/>
+                                <path d="M17 16L18 24M18 14L25.5 12.5M23 26L29.5 26" stroke="currentColor" stroke-width="1.5" stroke-dasharray="2 2"/>
+                            </svg>
+                        </div>
+                        <div class="card-badge">Data Science</div>
+                        <h3 class="card-title">Data Mining</h3>
+                        <p class="card-desc">
+                            Materi analisis dataset yang mengungkap pola, clustering, aturan asosiasi, dan klasifikasi.
+                        </p>
+                        <div class="card-topics">
+                            <span class="topic-tag">Preprocessing</span>
+                            <span class="topic-tag">Classification</span>
+                            <span class="topic-tag">Clustering</span>
+                            <span class="topic-tag">Python</span>
+                        </div>
+                        <a href="datamining/index.html" class="card-link">
+                            <span>Akses Materi</span>
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                <path d="M4 10H16M12 6L16 10L12 14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </a>
+                    </div>
+                    <div class="card-pattern">
+                        <svg width="200" height="200" viewBox="0 0 200 200" fill="none" opacity="0.03">
+                            <circle cx="60" cy="60" r="30" fill="currentColor"/>
+                            <circle cx="140" cy="60" r="20" fill="currentColor"/>
+                            <circle cx="100" cy="140" r="35" fill="currentColor"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -> Contact -->
+    <section class="cta-section" id="contact">
+        <div class="section-container">
+            <div class="cta-card">
+                <div class="cta-glow"></div>
+                <h2 class="cta-title">Mari Terhubung!</h2>
+                <p class="cta-desc">Terbuka untuk kolaborasi riset, proyek pengembangan perangkat lunak, maupun relasi akademik.</p>
+                <div class="cta-buttons" style="display: flex; justify-content: center; gap: 16px;">
+                    <a href="mailto:hyda.arif@gmail.com" class="btn btn-primary btn-lg">
+                        <span>Email Saya</span>
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" stroke="currentColor" stroke-width="2"/>
+                            <path d="M22 6l-10 7L2 6" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                    </a>
+                    <a href="https://linkedin.com/in/arif-hidayah/" target="_blank" class="btn btn-secondary btn-lg" style="padding: 18px 36px;">
+                        <span>LinkedIn</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="section-container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <a href="#" class="nav-logo">
+                        <div class="logo-icon">
+                            <svg width="24" height="24" viewBox="0 0 28 28" fill="none">
+                                <path d="M14 2L26 8V20L14 26L2 20V8L14 2Z" stroke="currentColor" stroke-width="2" fill="none"/>
+                                <circle cx="14" cy="14" r="3" fill="currentColor"/>
+                            </svg>
+                        </div>
+                        <span class="logo-text">Arif<span class="logo-accent">Hidayah</span></span>
+                    </a>
+                    <p class="footer-tagline">Web Profil Personal dan Platform Materi Ajar Interaktif Mahasiswa Tegal & Sekitarnya.</p>
+                </div>
+                <div class="footer-links-group">
+                    <h4>Materi Perkuliahan</h4>
+                    <a href="#courses">Mobile Dev (Flutter)</a>
+                    <a href="#courses">Web Dev (Laravel)</a>
+                    <a href="#courses">Data Mining</a>
+                </div>
+                <div class="footer-links-group">
+                    <h4>Navigasi</h4>
+                    <a href="#home">Home</a>
+                    <a href="#about">Profil</a>
+                    <a href="#experience">Pengalaman Kerja</a>
+                    <a href="#education">Riwayat Pendidikan</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>© 2026 Arif Hidayah. Dibuat dengan ❤️ untuk kemajuan pendidikan teknologi.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

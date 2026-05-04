@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>K-Nearest Neighbors (KNN) — Arif Hidayah</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/datamining/course.css">
+    
+    <style>
+        .sim-container {
+            position: relative; width: 100%; height: 400px; background: rgba(30, 30, 45, 0.6); 
+            border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); overflow: hidden;
+            cursor: crosshair; margin-bottom: 12px; margin-top: 16px;
+        }
+        .sim-dot {
+            position: absolute; width: 12px; height: 12px; border-radius: 50%;
+            transform: translate(-50%, -50%); transition: opacity 0.3s ease;
+            box-shadow: 0 0 6px rgba(0,0,0,0.5); z-index: 2;
+        }
+        .sim-dot:hover { transform: translate(-50%, -50%) scale(1.5); cursor: pointer; }
+        .sim-line {
+            position: absolute; height: 2px; background: rgba(255, 255, 255, 0.4);
+            transform-origin: 0 50%; pointer-events: none; z-index: 1; border-radius: 2px;
+        }
+        .math-expr {
+            background: rgba(255,255,255,0.05); padding: 16px; border-radius: 8px; 
+            font-family: 'JetBrains Mono', monospace; text-align: center; margin: 16px 0;
+            color: var(--accent-datamining, #4ade80); border: 1px solid rgba(255,255,255,0.1);
+        }
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+            margin-top: 1.5rem;
+        }
+        .metric-card {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+        .metric-card h3 {
+            color: white; margin-top: 0; font-size: 1.25rem; font-weight: 600;
+            display: flex; align-items: center; gap: 8px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px;
+        }
+        .pro-con-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;
+        }
+        .pro-card, .con-card {
+            padding: 1.5rem; border-radius: 8px;
+        }
+        .pro-card {
+            background: rgba(74, 222, 128, 0.1); border: 1px solid rgba(74, 222, 128, 0.2);
+        }
+        .con-card {
+            background: rgba(255, 107, 107, 0.1); border: 1px solid rgba(255, 107, 107, 0.2);
+        }
+        @media (max-width: 768px) {
+            .pro-con-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-grid" aria-hidden="true"></div>
+
+    <nav class="navbar scrolled" id="navbar">
+        <div class="nav-container" style="max-width: 1300px; padding: 0 32px;">
+            <a href="../index.html" class="nav-logo">
+                <div class="logo-icon">
+                    <svg width="24" height="24" viewBox="0 0 28 28" fill="none">
+                        <path d="M14 2L26 8V20L14 26L2 20V8L14 2Z" stroke="currentColor" stroke-width="2" fill="none"/>
+                        <circle cx="14" cy="14" r="3" fill="currentColor"/>
+                    </svg>
+                </div>
+                <span class="logo-text" style="font-size: 1.1rem;">Arif<span class="logo-accent">Hidayah</span></span>
+            </a>
+            <div class="nav-links">
+                <a href="../index.html" class="nav-link">← Kembali ke Profil</a>
+            </div>
+            <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </nav>
+
+    <div class="mobile-menu" id="mobileMenu">
+        <a href="../index.html" class="mobile-link" onclick="closeMobileMenu()">← Kembali ke Profil</a>
+    </div>
+
+    <main class="course-layout">
+        <aside class="course-sidebar" id="courseSidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-icon">
+                    <svg width="24" height="24" viewBox="0 0 40 40" fill="none">
+                        <circle cx="14" cy="14" r="4" stroke="currentColor" stroke-width="2"/>
+                        <circle cx="28" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
+                        <circle cx="20" cy="28" r="4" stroke="currentColor" stroke-width="2"/>
+                        <path d="M17 16L18 24M18 14L25.5 12.5" stroke="currentColor" stroke-width="1.5" stroke-dasharray="2 2"/>
+                    </svg>
+                </div>
+                <span class="sidebar-course-name">Data Mining</span>
+            </div>
+
+            <div class="module-group">
+                <div class="module-group-title">Pengantar</div>
+                <a href="/datamining/index.html" class="module-link">
+                    <div class="module-link-icon">1</div>
+                    <span>Konsep Data Mining</span>
+                </a>
+                <a href="/datamining/mengenal-data.html" class="module-link">
+                    <div class="module-link-icon">2</div>
+                    <span>Mengenal Data</span>
+                </a>
+            </div>
+
+            <div class="module-group">
+                <div class="module-group-title">Data Preprocessing</div>
+                <a href="/datamining/cleaning.html" class="module-link">
+                    <div class="module-link-icon">3</div>
+                    <span>Cleaning</span>
+                </a>
+                <a href="/datamining/transformasi.html" class="module-link">
+                    <div class="module-link-icon">4</div>
+                    <span>Transformation</span>
+                </a>
+                <a href="#" class="module-link">
+                    <div class="module-link-icon">4</div>
+                    <span>Data Reduction (PCA)</span>
+                </a>
+            </div>
+
+            <div class="module-group">
+                <div class="module-group-title">Classification</div>
+                <a href="/datamining/knn.html" class="module-link active">
+                    <div class="module-link-icon">5</div>
+                    <span>K-Nearest Neighbors (KNN)</span>
+                </a>
+                <a href="#" class="module-link">
+                    <div class="module-link-icon">6</div>
+                    <span>Naïve Bayes</span>
+                </a>
+                <a href="#" class="module-link">
+                    <div class="module-link-icon">7</div>
+                    <span>Decision Tree (C4.5)</span>
+                </a>
+            </div>
+
+            <div class="module-group">
+                <div class="module-group-title">Clustering</div>
+                <a href="#" class="module-link">
+                    <div class="module-link-icon">7</div>
+                    <span>K-Means Clustering</span>
+                </a>
+                <a href="#" class="module-link">
+                    <div class="module-link-icon">8</div>
+                    <span>Hierarchical Clustering</span>
+                </a>
+            </div>
+        </aside>
+
+        <article class="course-content">
+            <div class="breadcrumb">
+                <a href="../index.html">Home</a>
+                <span>›</span>
+                <a href="index.html">Data Mining</a>
+                <span>›</span>
+                <span style="color: var(--text-primary);">K-Nearest Neighbors (KNN)</span>
+            </div>
+
+            <header class="content-header">
+                <h1 class="content-title">Modul 5: K-Nearest Neighbors (KNN)</h1>
+                <div class="content-meta">
+                    <div class="meta-pill">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 5V8.5L10.5 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/></svg>
+                        <span>Estimasi: 45 Menit</span>
+                    </div>
+                    <div class="meta-pill">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="10" rx="1" stroke="currentColor" stroke-width="1.5"/><path d="M5 7h6M5 10h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                        <span>Classification</span>
+                    </div>
+                </div>
+            </header>
+
+            <p class="content-text" style="font-size: 1.1rem; line-height: 1.8;">
+                K-Nearest Neighbors (KNN) adalah algoritma <em>supervised learning</em> yang sangat populer, intuitif, dan tangguh. Algoritma ini secara khusus efektif untuk digunakan dalam permasalahan klasifikasi pola spasial maupun numerik.
+            </p>
+
+            <h2 class="content-heading">1. Konsep Inti KNN</h2>
+            <p class="content-text">
+                Asas utama pemikiran algoritma KNN mengandalkan prinsip <strong>"Kemiripan atau Kedekatan"</strong>. Ada sebuah pepatah populer yang mendeskripsikan ini: <em>"Beri tahu saya siapa teman atau tetangga Anda, dan saya akan memberi tahu siapa Anda."</em><br><br>
+                Jika Anda menjumpai objek yang belum dikenal jenisnya, namun objek tersebut diletakkan berdesakan dengan objek kelas A yang jumlahnya dominan, maka objek tak dikenal tersebut memiliki probabilitas tertinggi diklasifikasikan sebagai keluarga kelas A.
+            </p>
+
+            <div class="info-box">
+                <div class="info-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                    <strong>Lazy Learner Algorithm</strong>
+                </div>
+                <p>KNN termasuk dalam kategori ekstrim <em>Instance-based learning</em> atau <em>Lazy Learner</em>. Mengapa disebut pemalas? Karena algoritma ini tidak melakukan komputasi pembentukan model matematis apa pun saat fase <strong>Training</strong>. Ia hanya 'menghafal' atau meletakkan kumpulan <em>dataset</em> pelatihannya di memori. Seluruh proses pengukuran dan komputasi yang berat (klasifikasi) baru dikerjakan pada detik terakhir ketika datang data baru (fase <strong>Testing</strong>).</p>
+            </div>
+
+            <h2 class="content-heading">2. Cara Kerja KNN</h2>
+            <p class="content-text">Langkah-langkah yang dilalui algoritma KNN ketika ada sebuah data poin baru (data *query*) cukup sistematis dan sederhana:</p>
+            <ol class="content-list">
+                <li><strong>Tentukan Nilai <code>K</code></strong> — Tentukan bilangan bulat positif `K`, yaitu jumlah tetangga terdekat yang ingin dijadikan penasihat (referensi).</li>
+                <li><strong>Hitung Seluruh Jarak</strong> — Algoritma akan menghitung jarak dari data *query* (yang belum diketahui labelnya) menuju seluruh data-data lain yang menyusun himpunan *dataset training*.</li>
+                <li><strong>Urutkan Berdasar Jarak Terkecil</strong> — Hasil kalkulasi jarak diurutkan (*sorting*) dari nilai yang paling kecil ke yang paling besar guna mengidentifikasi *K* data terdekat (*nearest neighbors*).</li>
+                <li><strong>Proses Voting Kelompok (Majority Vote)</strong> — Himpun label/kategori dari *K* tetangga yang berjarak paling intim tersebut. Kelas dengan suara dominan (kemunculan terbanyak) dari kumpulan sampel itu akan dinobatkan sebagai hasil klasifikasi akhir dari data *query*.</li>
+            </ol>
+
+            <h2 class="content-heading">3. Visualisasi Interaktif Majority Vote</h2>
+            <p class="content-text">
+                Cobalah simulasi langsung bagaimana proses <strong>Majority Vote</strong> mencari tetangga dan menarik jarak ke kumpulan *cluster* yang tersedia.
+            </p>
+
+            <!-- Interactive KNN Visualizer -->
+            <div style="background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.05); padding: 20px; border-radius: 12px; margin-bottom: 2rem;">
+                <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; margin-bottom: 8px; gap: 16px;">
+                    <div>
+                        <span style="font-weight: 600; font-size: 1.1rem; display: block; margin-bottom: 4px;">🎯 Prediksi Data Baru</span>
+                        <span style="font-size: 0.85rem; color: #a1a1aa;">Silakan sesuaikan parameter `K` dan <strong>Klik pada kotak di bawah</strong> untuk meletakkan titik baru.</span>
+                    </div>
+                    <div style="display: flex; gap: 12px; align-items: center; background: rgba(255,255,255,0.05); padding: 8px 16px; border-radius: 8px;">
+                        <label style="font-weight: 500; font-size: 0.9rem;">Nilai K:</label>
+                        <input type="number" id="kValue" value="3" min="1" max="15" step="2" style="background: #2a2a35; color: white; border: 1px solid #444; padding: 4px 12px; border-radius: 6px; width: 60px; font-weight: bold; text-align: center;">
+                        <button id="resetSim" style="padding: 6px 16px; background: #3b82f6; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 500; transition: 0.2s;">Reset Data</button>
+                    </div>
+                </div>
+                
+                <div class="sim-container" id="simArea">
+                    <!-- Dots will be generated here -->
+                </div>
+                <div id="simStatus" style="font-size: 0.95rem; color: #e2e8f0; font-family: 'JetBrains Mono', monospace; background: rgba(0,0,0,0.3); padding: 12px; border-radius: 8px;">
+                    Menunggu masukan data baru...
+                </div>
+            </div>
+
+            <h2 class="content-heading">4. Pengukuran Jarak (Distance Metrics)</h2>
+            <p class="content-text">
+                Jantung perhitungan dari K-Nearest Neighbors berada pada fungsi metrik komputasi jaraknya. Ada beberapa metrik jarak populer yang sering dipakai, dan ketiganya berakar dari keluarga yang sama.
+            </p>
+
+            <div class="metrics-grid">
+                
+                <!-- Euclidean -->
+                <div class="metric-card">
+                    <h3>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent-datamining)" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg> 
+                        Euclidean Distance
+                    </h3>
+                    <p class="content-text" style="font-size: 0.95rem;">Euclidean merupakan jarak paling konvensional dan merepresentasikan jarak lurus (garis potong tercepat) dari titik A ke titik B dalam ruang geometri. Metrik ini sangat sensitif terhadap beda magnitud berskala rasio dan baik diterapkan di atribut tipe numerik murni berdimensi rendah.</p>
+                    <div class="math-expr">
+                        Jarak = √( Σ(x_i - y_i)² )
+                    </div>
+                    <div class="code-block" style="margin-top: 10px;">
+                        <div class="code-block-header">
+                            <span class="code-block-filename" style="margin-left:8px;">python</span>
+                        </div>
+                        <pre class="code-block-body" style="padding: 12px;"><code><span class="hl-keyword">import</span> math
+<span class="hl-keyword">def</span> hitung_euclidean(pt1, pt2):
+    <span class="hl-keyword">return</span> math.sqrt(<span class="hl-func">sum</span>((x - y)**<span class="hl-number">2</span> <span class="hl-keyword">for</span> x, y <span class="hl-keyword">in</span> <span class="hl-func">zip</span>(pt1, pt2)))
+
+<span class="hl-func">print</span>(<span class="hl-string">"Euclidean:"</span>, hitung_euclidean((<span class="hl-number">1</span>, <span class="hl-number">2</span>), (<span class="hl-number">4</span>, <span class="hl-number">6</span>))) <span class="hl-comment"># Hasil: 5.0</span></code></pre>
+                    </div>
+                </div>
+
+                <!-- Manhattan -->
+                <div class="metric-card">
+                    <h3>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#f472b6" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+                        Manhattan Distance (City Block)
+                    </h3>
+                    <p class="content-text" style="font-size: 0.95rem;">Bayangkan Anda berada di tengah blok-blok kota yang berbentuk *grid*, satu-satunya cara Anda bermanuver hanyalah mengikuti perempatan jalan raya vertikal/horisontal tanpa bisa menembus bangunan secara diagonal. Konsep rute bersudut 90-derajat ini disebut Jarak Manhattan yang diukur dari penjumlahan murni selisih absolut.</p>
+                    <div class="math-expr" style="color: #f472b6;">
+                        Jarak = Σ|x_i - y_i|
+                    </div>
+                    <div class="code-block" style="margin-top: 10px;">
+                        <div class="code-block-header">
+                            <span class="code-block-filename" style="margin-left:8px;">python</span>
+                        </div>
+                        <pre class="code-block-body" style="padding: 12px;"><code><span class="hl-keyword">def</span> hitung_manhattan(pt1, pt2):
+    <span class="hl-keyword">return</span> <span class="hl-func">sum</span>(<span class="hl-func">abs</span>(x - y) <span class="hl-keyword">for</span> x, y <span class="hl-keyword">in</span> <span class="hl-func">zip</span>(pt1, pt2))
+
+<span class="hl-func">print</span>(<span class="hl-string">"Manhattan:"</span>, hitung_manhattan((<span class="hl-number">1</span>, <span class="hl-number">2</span>), (<span class="hl-number">4</span>, <span class="hl-number">6</span>))) <span class="hl-comment"># Hasil: 7</span></code></pre>
+                    </div>
+                </div>
+
+                <!-- Minkowski -->
+                <div class="metric-card">
+                    <h3>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2"><path d="M12 2l9 4-9 4-9-4 9-4zm0 8l9 4-9 4-9-4 9-4zm0 8l9 4-9 4-9-4 9-4z"/></svg>
+                        Minkowski Distance
+                    </h3>
+                    <p class="content-text" style="font-size: 0.95rem;">Minkowski merupakan metrik bentuk dasar atau formulasi umum (*generalization*) pembentuk perhitungan baik Jarak Manhattan maupun Euclidean. Perhitungan ini bergantung pada konstanta atau ordo `p`. <br>Jika nilai <strong>p = 1</strong>, formula perlahan bertransformasi menjadi jarak Manhattan. <br>Jika nilai <strong>p = 2</strong>, nilainya bertransformasi menjadi kesatuan jarak Euclidean.</p>
+                    <div class="math-expr" style="color: #60a5fa;">
+                        Jarak = ( Σ|x_i - y_i|^p )^(1/p)
+                    </div>
+                    <div class="code-block" style="margin-top: 10px;">
+                        <div class="code-block-header">
+                            <span class="code-block-filename" style="margin-left:8px;">python</span>
+                        </div>
+                        <pre class="code-block-body" style="padding: 12px;"><code><span class="hl-keyword">def</span> hitung_minkowski(pt1, pt2, p):
+    <span class="hl-keyword">return</span> <span class="hl-func">sum</span>(<span class="hl-func">abs</span>(x - y)**p <span class="hl-keyword">for</span> x, y <span class="hl-keyword">in</span> <span class="hl-func">zip</span>(pt1, pt2))**(1/p)
+
+<span class="hl-comment"># Menguji Minkowski tipe Manhattan (p=1)</span>
+<span class="hl-func">print</span>(<span class="hl-string">"P=1 (Manhattan):"</span>, hitung_minkowski((<span class="hl-number">1</span>, <span class="hl-number">2</span>), (<span class="hl-number">4</span>, <span class="hl-number">6</span>), <span class="hl-number">1</span>)) 
+<span class="hl-comment"># Menguji Minkowski tipe Euclidean (p=2)</span>
+<span class="hl-func">print</span>(<span class="hl-string">"P=2 (Euclidean):"</span>, hitung_minkowski((<span class="hl-number">1</span>, <span class="hl-number">2</span>), (<span class="hl-number">4</span>, <span class="hl-number">6</span>), <span class="hl-number">2</span>))</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <h2 class="content-heading">5. Menentukan Nilai K yang Tepat</h2>
+            <p class="content-text">Satu-satunya parameter penentu di algoritma ini adalah besaran tetangga (`K`). Memastikan besarnya nilai K merupakan bentuk perimbangan (bias-variance trade-off).</p>
+            <ol class="content-list">
+                <li><strong>Jika nilai K sangat kecil (misal K=1):</strong> Potensi <em>overfitting</em> menjadi tinggi dan batas desisi sangat responsif/runcing. Kelemahannya adalah prediksi rentan tergoyahkan oleh data yang berisik (*Noise*/*Outlier*).</li>
+                <li><strong>Jika nilai K terlampau besar:</strong> Akurasinya lebih halus, batas pemisah melunak. Tetapi jika *K* diubah ekstrem menyentuh ratusan mendekati total panjang data poin populasi, maka model akan senantiasa *underfitting* (sistem cenderung terus menunjuk kepada kelas paling mayoritas mutlak yang ada di populasi).</li>
+            </ol>
+            <div class="info-box">
+                <div class="info-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    <strong>Tips Praktis (*Rule of Thumb*)</strong>
+                </div>
+                <p>Tidak ada panduan saklek berapa nilai terbaik untuk dipakai. Praktisi Data Science lazim bereksperimen mematok nilai akar pangkat dua (sqrt) ukuran dari himpunan dataset <em>training</em> sebagai titik tolok permulaan yang rasional (misal N = 100 baris, dicoba di K=10). Sebaiknya diset ke angka <strong>Ganjil</strong> agar proses *majority vote* tak berujung poin seri jika klasifikasi berdistribusi biner (genap).</p>
+            </div>
+
+
+            <h2 class="content-heading">6. Kelebihan dan Kekurangan KNN</h2>
+            <p class="content-text">Walaupun algoritma *timeless* legendaris ini sangat serbaguna, algoritma KNN menyimpan keuntungan maupun risiko komputasi pada skenario real-world:</p>
+
+            <div class="pro-con-grid">
+                <div class="pro-card">
+                    <h3 style="color: #4ade80; margin-top: 0; font-size: 1.2rem; display: flex; align-items: center; gap: 8px;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                        Kelebihan
+                    </h3>
+                    <ul style="color: rgba(255,255,255,0.85); padding-left: 1.2rem; list-style-type: disc; margin: 0; line-height: 1.6;">
+                        <li>Sangat lugas, mudah diimplementasi, dan amat sangat mudah dijelaskan kepada pihak non-teknis (<em>interpretable</em>).</li>
+                        <li>Proses <em>Training Time</em> bernilai 0 (nihil). Dataset secara real-time dapat dinamis bermutasi setiap waktu tanpa perlu melakukan retrain.</li>
+                        <li>Intrinsik dirancang menyelaraskan batas probabilitas <em>non-linier</em> secara alami. Dapat memecahkan problem multikelas.</li>
+                    </ul>
+                </div>
+                <div class="con-card">
+                    <h3 style="color: #ff6b6b; margin-top: 0; font-size: 1.2rem; display: flex; align-items: center; gap: 8px;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                        Kelemahan (Kekurangan)
+                    </h3>
+                    <ul style="color: rgba(255,255,255,0.85); padding-left: 1.2rem; list-style-type: disc; margin: 0; line-height: 1.6;">
+                        <li><strong>Mahal & Lambat saat Pemrosesan:</strong> Beban algoritmanya bertumpu pada fase klasifikasi karena wajib membandingkan titik metrik jarak *query* baru menuju jutaan baris *dataset history*.</li>
+                        <li>Bencana <em>Curse of Dimensionality</em> mengintai jika dataset memiliki kolom fitur berlebihan (sangat fatal bagi validitas jarak Euclidean).</li>
+                        <li>Sensitif terhadap skala dari data mentah. Jika data tidak mematuhi kaidah standar Normalisasi / Transformasi, hasil klasifikasinya cenderung bias ke angka beresolusi masif.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Challenge Time -->
+            <h2 class="content-heading">7. Challenge Time!</h2>
+            <div class="info-box" style="margin-bottom: 2rem; border-left: 4px solid var(--accent-datamining);">
+                <div class="info-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent-datamining)" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                    <strong>Tantangan Praktik Langsung</strong>
+                </div>
+                <p>Saatnya menguji pemahaman Anda! Buatlah model prediktif klasifikasi sederhana menggunakan K-Nearest Neighbors pada dataset nyata tentang prediksi kemunculan Diabetes. Gunakan <em>library</em> <code>kagglehub</code> terbaru untuk mengunduh dataset secara langsung ke dalam environment Python Anda:</p>
+                
+                <div class="code-block" style="margin-top: 10px;">
+                    <div class="code-block-header">
+                        <div class="code-block-dots">
+                            <span></span><span></span><span></span>
+                        </div>
+                        <span class="code-block-filename" style="margin-left:8px;">knn_diabetes.py</span>
+                        <button class="code-copy-btn" onclick="copyCode(this)" title="Copy to clipboard">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                        </button>
+                    </div>
+                    <pre class="code-block-body" style="padding: 12px;"><code><span class="hl-keyword">import</span> kagglehub
+<span class="hl-keyword">import</span> pandas <span class="hl-keyword">as</span> pd
+
+<span class="hl-comment"># Unduh dataset Pima Indians Diabetes Database langsung dari Kaggle</span>
+path = kagglehub.dataset_download(<span class="hl-string">"uciml/pima-indians-diabetes-database"</span>)
+<span class="hl-func">print</span>(<span class="hl-string">"Path dataset Anda disimpan di:"</span>, path)
+
+<span class="hl-comment"># Tugas Anda: Load data CSV di dalam path di atas menggunakan Pandas,</span>
+<span class="hl-comment"># lakukan Min-Max Normalization pada fiturnya, lalu jalankan KNeighborsClassifier.</span></code></pre>
+                </div>
+            </div>
+
+            <!-- Navigation Button -->
+            <div class="content-nav" style="margin-top: 3rem;">
+                <div class="content-nav-item">
+                    <a href="transformasi.html" class="nav-btn nav-btn-prev">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="15 18 9 12 15 6"></polyline>
+                        </svg>
+                        <div>
+                            <span class="nav-label">Sebelumnya</span>
+                            <span class="nav-name">Transformation</span>
+                        </div>
+                    </a>
+                </div>
+                <div class="content-nav-item">
+                    <a href="#" class="nav-btn nav-btn-next">
+                        <div>
+                            <span class="nav-label">Selanjutnya</span>
+                            <span class="nav-name">Naïve Bayes</span>
+                        </div>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+
+        </article>
+    </main>
+
+    <!-- Scripts -->
+    <script>
+    // System Nav interaction
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+        navbar.classList.toggle('scrolled', window.scrollY > 20);
+    });
+
+    const navToggle = document.getElementById('navToggle');
+    const mobileMenu = document.getElementById('mobileMenu');
+    if (navToggle && mobileMenu) {
+        navToggle.addEventListener('click', () => {
+            navToggle.classList.toggle('active');
+            mobileMenu.classList.toggle('active');
+            document.body.style.overflow = mobileMenu.classList.contains('active') ? 'hidden' : '';
+        });
+    }
+    function closeMobileMenu() {
+        navToggle?.classList.remove('active');
+        mobileMenu?.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+
+    // Interactive Visualization KNN
+    const simArea = document.getElementById('simArea');
+    const simStatus = document.getElementById('simStatus');
+    const kValueInput = document.getElementById('kValue');
+    let points = [];
+    
+    // Konfigurasi Cluster Warna
+    const classes = [
+        { name: 'Kategori Merah', color: '#ff6b6b' },
+        { name: 'Kategori Biru', color: '#60a5fa' },
+        { name: 'Kategori Hijau', color: '#4ade80' }
+    ];
+
+    function initSim() {
+        simArea.innerHTML = '';
+        points = [];
+        
+        // Generate dataset 3 cluster random yang statis-ish
+        const centroids = [
+            { x: 30, y: 30, classIdx: 0 },
+            { x: 70, y: 35, classIdx: 1 },
+            { x: 50, y: 70, classIdx: 2 }
+        ];
+
+        centroids.forEach(center => {
+            for (let i = 0; i < 15; i++) {
+                // Tambah scatter area agar menyebar natural
+                const px = center.x + (Math.random() * 26 - 13);
+                const py = center.y + (Math.random() * 26 - 13);
+                if (px > 5 && px < 95 && py > 5 && py < 95) {
+                    addOriginalPoint(px, py, center.classIdx);
+                }
+            }
+        });
+        simStatus.innerHTML = 'Data *history* berhasil dibentuk area virtual sebesar <span style="font-weight:bold; color:var(--accent-datamining)">' + points.length + ' baris data observasi.</span><br>-> Klik pada bidang di atas untuk mengumpankan baris baru dan mentrigger perhitungan K-Nearest Neighbors.';
+    }
+
+    function addOriginalPoint(x, y, classIdx) {
+        const id = 'pt_' + Math.random().toString(36).substr(2, 6);
+        const pt = { id, x, y, classIdx };
+        points.push(pt);
+        
+        const dot = document.createElement('div');
+        dot.className = 'sim-dot';
+        dot.style.left = x + '%';
+        dot.style.top = y + '%';
+        dot.style.background = classes[classIdx].color;
+        dot.dataset.id = id;
+        simArea.appendChild(dot);
+    }
+
+    simArea.addEventListener('click', (e) => {
+        // Hilangkan garis jarak yang lama dan normalkan visal (reset focus opasitas)
+        document.querySelectorAll('.sim-line').forEach(el => el.remove());
+        document.querySelectorAll('.sim-dot').forEach(el => {
+            el.style.opacity = '1';
+        });
+        
+        const rect = simArea.getBoundingClientRect();
+        // Konversi koordinat mouse klik ke percentage canvas
+        const x = ((e.clientX - rect.left) / rect.width) * 100;
+        const y = ((e.clientY - rect.top) / rect.height) * 100;
+        
+        let k = parseInt(kValueInput.value);
+        if(isNaN(k) || k < 1) {
+            k = 1; kValueInput.value = 1;
+        }
+
+        // Kalkulasi Euclidean Distance murni dari point X,Y ke seluruh baris points
+        const distances = points.map(p => {
+            const dx = p.x - x;
+            const dy = p.y - y;
+            return {
+                point: p,
+                dist: Math.sqrt(dx*dx + dy*dy)
+            };
+        });
+        
+        // Sorting urutan dari yang paling berjarak terdekat
+        distances.sort((a, b) => a.dist - b.dist);
+        // Slice / Ambil tetangga sejawat sebanyak K teratas
+        const kNearest = distances.slice(0, k);
+        const kNearestIds = kNearest.map(n => n.point.id);
+        
+        // Analisis Hitung Voting Klasifikasi Mayoritas 
+        const votes = [0, 0, 0];
+        kNearest.forEach(n => {
+            votes[n.point.classIdx]++;
+        });
+        
+        let maxVote = -1;
+        let predictedClass = 0;
+        votes.forEach((v, idx) => {
+            if(v > maxVote) {
+                 maxVote = v;
+                 predictedClass = idx;
+            }
+        });
+        
+        // Visualisasi: Tambahkan point baru yang baru diprediksi
+        const newDotId = 'new_' + Math.random().toString(36).substr(2, 6);
+        const newDot = document.createElement('div');
+        newDot.className = 'sim-dot';
+        newDot.id = newDotId;
+        newDot.style.left = x + '%';
+        newDot.style.top = y + '%';
+        newDot.style.width = '16px';
+        newDot.style.height = '16px';
+        newDot.style.border = '2px solid white';
+        newDot.style.background = classes[predictedClass].color;
+        newDot.style.zIndex = '10';
+        newDot.title = "Data Query / Baru";
+        simArea.appendChild(newDot);
+        
+        // Visualisasi: Meredupkan titik yang bukan tetangga untuk fokus presentasi UI
+        document.querySelectorAll('.sim-dot').forEach(el => {
+            if (el.dataset.id && !kNearestIds.includes(el.dataset.id) && el.id !== newDotId) {
+                el.style.opacity = '0.15';
+            }
+        });
+
+        // Visualisasi: Render Animasi Garis Penghubung
+        kNearest.forEach(n => {
+            const line = document.createElement('div');
+            line.className = 'sim-line';
+            
+            // Konversi pure pixel untuk transformasi visual line scale/rotate CSS
+            const px1 = x * rect.width / 100;
+            const py1 = y * rect.height / 100;
+            const px2 = n.point.x * rect.width / 100;
+            const py2 = n.point.y * rect.height / 100;
+            
+            const length = Math.sqrt(Math.pow(px2-px1, 2) + Math.pow(py2-py1, 2));
+            const angle = Math.atan2(py2 - py1, px2 - px1) * 180 / Math.PI;
+            
+            line.style.width = length + 'px';
+            line.style.left = x + '%';
+            line.style.top = y + '%';
+            line.style.transform = `rotate(${angle}deg)`;
+            
+            simArea.appendChild(line);
+        });
+        
+        // Render Rekap Voting ke Teks Panel Eksekusi
+        let detailVotesString = [];
+        classes.forEach((c, idx) => {
+            if(votes[idx] > 0) {
+                detailVotesString.push(`<span style="color:${c.color}">${votes[idx]} vote ${c.name}</span>`);
+            }
+        });
+
+        simStatus.innerHTML = `Baris data baru dieksekusi! Algoritma mendeteksi ${k} tetangga terdekat dengan detail majority vote: ${detailVotesString.join(', ')}.<br>Hasil Keputusan (Klasifikasi Terpilih) = <span style="color:${classes[predictedClass].color}; font-weight:bold; font-size: 1.1rem; text-decoration:underline;">${classes[predictedClass].name}</span>.`;
+    });
+
+    document.getElementById('resetSim').addEventListener('click', () => {
+        initSim();
+    });
+    
+    // Copy Code function implementation
+    function copyCode(btn) {
+        const codeBlock = btn.closest('.code-block').querySelector('code');
+        navigator.clipboard.writeText(codeBlock.textContent).then(() => {
+            btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>';
+            setTimeout(() => {
+                btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+            }, 2000);
+        });
+    }
+
+    // Boot up the visualizer
+    initSim();
+    </script>
+</body>
+</html>
