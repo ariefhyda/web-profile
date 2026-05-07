@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Decision Tree (C4.5) — Data Mining — Arif Hidayah</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/datamining/course.css">
+    <style>
+        .formula-box {
+            background-color: var(--surface-light);
+            padding: 24px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 24px;
+            border: 1px solid var(--border-color);
+            overflow-x: auto;
+        }
+
+        .formula-box span {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.1rem;
+        }
+
+        .interactive-container {
+            background-color: var(--surface-light);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 32px;
+            margin-top: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 24px;
+            position: relative;
+        }
+
+        .tree-node {
+            background-color: var(--bg-color);
+            border: 2px solid var(--primary-color);
+            border-radius: 8px;
+            padding: 16px 24px;
+            text-align: center;
+            min-width: 250px;
+            position: relative;
+            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        .tree-node h4 {
+            margin-bottom: 16px;
+            color: var(--text-primary);
+        }
+
+        .node-options {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .node-btn {
+            background-color: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .node-btn:hover:not(:disabled) {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+            background-color: rgba(84, 197, 248, 0.1);
+        }
+
+        .node-btn.selected {
+            background-color: var(--primary-color);
+            color: #0f172a;
+            border-color: var(--primary-color);
+        }
+
+        .node-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .tree-leaf {
+            background-color: rgba(84, 197, 248, 0.1);
+            border: 2px dashed var(--primary-color);
+            border-radius: 8px;
+            padding: 20px 32px;
+            text-align: center;
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        .tree-leaf.leaf-yes {
+            border-color: #4ade80;
+            background-color: rgba(74, 222, 128, 0.1);
+        }
+
+        .tree-leaf.leaf-no {
+            border-color: #f87171;
+            background-color: rgba(248, 113, 113, 0.1);
+        }
+
+        .path-arrow {
+            width: 2px;
+            height: 30px;
+            background-color: var(--primary-color);
+            margin: 0 auto;
+            position: relative;
+            animation: fadeInDown 0.3s ease forwards;
+        }
+
+        .path-arrow::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: -4px;
+            width: 0;
+            height: 0;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-top: 6px solid var(--primary-color);
+        }
+
+        .path-label {
+            position: absolute;
+            top: 50%;
+            left: 15px;
+            transform: translateY(-50%);
+            font-size: 0.8rem;
+            color: var(--primary-color);
+            font-weight: 600;
+            background: var(--surface-light);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .hidden { display: none !important; }
+
+        @keyframes popIn {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; height: 0; }
+            to { opacity: 1; height: 30px; }
+        }
+
+        .btn-reset {
+            background-color: transparent;
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            margin-top: 24px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-reset:hover {
+            color: var(--text-primary);
+            border-color: var(--text-primary);
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-grid" aria-hidden="true"></div>
+
+    <nav class="navbar scrolled" id="navbar">
+        <!-- Navbar content injected by course-layout.js -->
+    </nav>
+
+    <div class="mobile-menu" id="mobileMenu">
+        <!-- Mobile menu content injected by course-layout.js -->
+    </div>
+
+    <main class="course-layout">
+        
+        <aside class="course-sidebar" id="courseSidebar">
+            <!-- Sidebar content injected by course-layout.js -->
+        </aside>
+
+        <article class="course-content">
+            
+            <div class="breadcrumb">
+                <a href="../index.html">Home</a>
+                <span>›</span>
+                <a href="index.html">Data Mining</a>
+                <span>›</span>
+                <span style="color: var(--text-primary);">Decision Tree</span>
+            </div>
+
+            <header class="content-header">
+                <h1 class="content-title">Modul 8: Decision Tree (Pohon Keputusan) & C4.5</h1>
+                <div class="content-meta">
+                    <div class="meta-pill">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 5V8.5L10.5 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/></svg>
+                        <span>Estimasi: 60 Menit</span>
+                    </div>
+                    <div class="meta-pill">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="10" rx="1" stroke="currentColor" stroke-width="1.5"/><path d="M5 7h6M5 10h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                        <span>Teori & Interaktif</span>
+                    </div>
+                </div>
+            </header>
+
+            <p class="content-text">
+                <strong>Decision Tree (Pohon Keputusan)</strong> adalah salah satu metode klasifikasi paling populer karena mudah diinterpretasikan oleh manusia. Algoritma ini memecah dataset menjadi himpunan bagian yang lebih kecil dan homogen berdasarkan aturan "Jika-Maka" (<em>If-Then rules</em>), membentuk struktur seperti pohon terbalik.
+            </p>
+
+            <div class="info-box">
+                <div class="info-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                    <strong>Struktur Decision Tree</strong>
+                </div>
+                <p>
+                    &bull; <strong>Root Node (Akar)</strong>: Atribut paling membedakan data.<br>
+                    &bull; <strong>Internal Node (Cabang)</strong>: Atribut pengujian yang membagi data lebih lanjut.<br>
+                    &bull; <strong>Leaf Node (Daun)</strong>: Hasil akhir / keputusan / kelas target.
+                </p>
+            </div>
+
+            <h2 class="content-heading">Algoritma C4.5: Membangun Pohon</h2>
+            <p class="content-text">
+                Bagaimana kita menentukan atribut mana yang menjadi akar atau cabang? Algoritma <strong>C4.5</strong> (pengembangan dari ID3) menggunakan konsep <strong>Entropy</strong> dan <strong>Gain Ratio</strong> dari Teori Informasi.
+            </p>
+
+            <h3 style="font-size: 1.2rem; font-weight: 600; margin-bottom: 12px; color: var(--text-primary);">1. Entropy</h3>
+            <p class="content-text">
+                Entropy mengukur tingkat ketidakteraturan (<em>impurity</em>) atau keacakan dari sebuah dataset. Jika data semuanya memiliki kelas yang sama, Entropy = 0 (murni). Jika terbagi rata 50/50, Entropy = 1.
+            </p>
+            <div class="formula-box">
+                <span>Entropy(S) = ∑ -p<sub>i</sub> * log<sub>2</sub>(p<sub>i</sub>)</span>
+            </div>
+
+            <h3 style="font-size: 1.2rem; font-weight: 600; margin-bottom: 12px; color: var(--text-primary);">2. Information Gain</h3>
+            <p class="content-text">
+                Gain mengukur seberapa banyak "informasi" atau pengurangan Entropy yang kita dapatkan dengan membagi data berdasarkan atribut tertentu.
+            </p>
+            <div class="formula-box">
+                <span>Gain(S, A) = Entropy(S) - ∑ (|S<sub>v</sub>| / |S|) * Entropy(S<sub>v</sub>)</span>
+            </div>
+            
+            <p class="content-text">
+                <strong>Catatan Penting:</strong> C4.5 menyempurnakan <em>Information Gain</em> dengan menggunakan <strong>Gain Ratio</strong> untuk menghindari bias terhadap atribut yang memiliki banyak nilai unik.
+            </p>
+
+            <h2 class="content-heading">Interactive: Simulasi Decision Tree (Play Tennis)</h2>
+            <p class="content-text">
+                Mari kita simulasikan bagaimana Decision Tree mengklasifikasi data. Pohon di bawah ini telah dilatih menggunakan dataset "Play Tennis" yang memprediksi apakah seseorang akan bermain tenis atau tidak. Klik opsi untuk menyusuri cabang!
+            </p>
+
+            <div class="interactive-container" id="treeContainer">
+                <!-- Root Node -->
+                <div class="tree-node" id="node-root">
+                    <h4>Cuaca (Outlook)?</h4>
+                    <div class="node-options">
+                        <button class="node-btn" onclick="makeChoice('root', 'Sunny')">Sunny</button>
+                        <button class="node-btn" onclick="makeChoice('root', 'Overcast')">Overcast</button>
+                        <button class="node-btn" onclick="makeChoice('root', 'Rainy')">Rainy</button>
+                    </div>
+                </div>
+
+                <!-- Path Elements Container -->
+                <div id="treePath"></div>
+
+                <!-- Reset Button -->
+                <button class="btn-reset" onclick="resetTree()">🔄 Ulangi Simulasi</button>
+            </div>
+
+            <h2 class="content-heading" style="margin-top: 40px;">Implementasi di Python</h2>
+            <p class="content-text">
+                Pustaka <code>scikit-learn</code> menggunakan algoritma <strong>CART</strong> (Classification and Regression Trees), yang mirip dengan C4.5 tetapi menghasilkan pohon biner dan menggunakan <em>Gini Impurity</em> secara default (meskipun bisa diatur ke Entropy).
+            </p>
+
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">decision_tree_sklearn.py</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-keyword">from</span> sklearn.tree <span class="hl-keyword">import</span> DecisionTreeClassifier
+<span class="hl-keyword">from</span> sklearn.preprocessing <span class="hl-keyword">import</span> LabelEncoder
+<span class="hl-keyword">from</span> sklearn <span class="hl-keyword">import</span> tree
+<span class="hl-keyword">import</span> pandas <span class="hl-keyword">as</span> pd
+<span class="hl-keyword">import</span> matplotlib.pyplot <span class="hl-keyword">as</span> plt
+
+<span class="hl-comment"># 1. Dataset dan Preprocessing (sama seperti algoritma lain)</span>
+<span class="hl-comment"># Pastikan fitur dikonversi menjadi numerik</span>
+df = pd.<span class="hl-func">read_csv</span>(<span class="hl-string">'play_tennis.csv'</span>)
+X = df.iloc[:, :-1].<span class="hl-func">apply</span>(LabelEncoder().fit_transform)
+y = df.iloc[:, -1]
+
+<span class="hl-comment"># 2. Inisialisasi Decision Tree (Menggunakan Entropy)</span>
+clf = <span class="hl-func">DecisionTreeClassifier</span>(criterion=<span class="hl-string">'entropy'</span>, random_state=<span class="hl-number">42</span>)
+
+<span class="hl-comment"># 3. Latih Model</span>
+clf.<span class="hl-func">fit</span>(X, y)
+
+<span class="hl-comment"># 4. Visualisasi Pohon (Menghasilkan grafik plot)</span>
+plt.<span class="hl-func">figure</span>(figsize=(<span class="hl-number">12</span>,<span class="hl-number">8</span>))
+tree.<span class="hl-func">plot_tree</span>(clf, feature_names=X.columns, class_names=clf.classes_, filled=<span class="hl-keyword">True</span>)
+plt.<span class="hl-func">show</span>()
+
+<span class="hl-comment"># 5. Prediksi Data Baru</span>
+prediksi = clf.<span class="hl-func">predict</span>([[<span class="hl-number">2</span>, <span class="hl-number">0</span>, <span class="hl-number">1</span>, <span class="hl-number">0</span>]]) <span class="hl-comment"># Misal: Sunny, Hot, High, Weak</span>
+<span class="hl-func">print</span>(<span class="hl-string">"Prediksi:"</span>, prediksi[<span class="hl-number">0</span>])</code></pre>
+            </div>
+
+            <div class="content-nav">
+                <div class="content-nav-item">
+                    <a href="/datamining/naive-bayes.html" class="nav-btn nav-btn-prev">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                        <div><span class="nav-label">Sebelumnya</span><span class="nav-name">Naïve Bayes</span></div>
+                    </a>
+                </div>
+                <div class="content-nav-item">
+                    <a href="#" class="nav-btn nav-btn-next">
+                        <div><span class="nav-label">Selanjutnya</span><span class="nav-name">K-Means Clustering</span></div>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </a>
+                </div>
+            </div>
+
+        </article>
+    </main>
+
+    <script src="/datamining/course-layout.js"></script>
+    <script>
+        function makeChoice(nodeId, choice) {
+            // Disable other buttons in the same node
+            const node = document.getElementById(`node-${nodeId}`);
+            const buttons = node.querySelectorAll('.node-btn');
+            buttons.forEach(btn => {
+                if(btn.innerText === choice) {
+                    btn.classList.add('selected');
+                } else {
+                    btn.disabled = true;
+                }
+            });
+
+            const pathContainer = document.getElementById('treePath');
+            
+            // Build the next node/leaf based on logic
+            let html = '';
+            
+            if (nodeId === 'root') {
+                if (choice === 'Sunny') {
+                    html = `
+                        <div class="path-arrow"><span class="path-label">Sunny</span></div>
+                        <div class="tree-node" id="node-humidity">
+                            <h4>Kelembaban (Humidity)?</h4>
+                            <div class="node-options">
+                                <button class="node-btn" onclick="makeChoice('humidity', 'High')">High</button>
+                                <button class="node-btn" onclick="makeChoice('humidity', 'Normal')">Normal</button>
+                            </div>
+                        </div>
+                    `;
+                } else if (choice === 'Overcast') {
+                    html = `
+                        <div class="path-arrow"><span class="path-label">Overcast</span></div>
+                        <div class="tree-leaf leaf-yes">
+                            <h3 style="margin-bottom: 8px;">Murni! (Entropy = 0)</h3>
+                            <h2 style="font-weight: 800;">YES (Bermain Tenis)</h2>
+                        </div>
+                    `;
+                } else if (choice === 'Rainy') {
+                    html = `
+                        <div class="path-arrow"><span class="path-label">Rainy</span></div>
+                        <div class="tree-node" id="node-wind">
+                            <h4>Angin (Wind)?</h4>
+                            <div class="node-options">
+                                <button class="node-btn" onclick="makeChoice('wind', 'Strong/True')">Strong/True</button>
+                                <button class="node-btn" onclick="makeChoice('wind', 'Weak/False')">Weak/False</button>
+                            </div>
+                        </div>
+                    `;
+                }
+            } else if (nodeId === 'humidity') {
+                if (choice === 'High') {
+                    html = `
+                        <div class="path-arrow"><span class="path-label">High</span></div>
+                        <div class="tree-leaf leaf-no">
+                            <h2 style="font-weight: 800;">NO (Tidak Bermain)</h2>
+                        </div>
+                    `;
+                } else if (choice === 'Normal') {
+                    html = `
+                        <div class="path-arrow"><span class="path-label">Normal</span></div>
+                        <div class="tree-leaf leaf-yes">
+                            <h2 style="font-weight: 800;">YES (Bermain Tenis)</h2>
+                        </div>
+                    `;
+                }
+            } else if (nodeId === 'wind') {
+                if (choice === 'Strong/True') {
+                    html = `
+                        <div class="path-arrow"><span class="path-label">Strong/True</span></div>
+                        <div class="tree-leaf leaf-no">
+                            <h2 style="font-weight: 800;">NO (Tidak Bermain)</h2>
+                        </div>
+                    `;
+                } else if (choice === 'Weak/False') {
+                    html = `
+                        <div class="path-arrow"><span class="path-label">Weak/False</span></div>
+                        <div class="tree-leaf leaf-yes">
+                            <h2 style="font-weight: 800;">YES (Bermain Tenis)</h2>
+                        </div>
+                    `;
+                }
+            }
+
+            pathContainer.insertAdjacentHTML('beforeend', html);
+            
+            // Scroll down a bit
+            pathContainer.lastElementChild.scrollIntoView({behavior: "smooth", block: "nearest"});
+        }
+
+        function resetTree() {
+            // Clear path container
+            document.getElementById('treePath').innerHTML = '';
+            
+            // Reset root buttons
+            const rootNode = document.getElementById('node-root');
+            const buttons = rootNode.querySelectorAll('.node-btn');
+            buttons.forEach(btn => {
+                btn.classList.remove('selected');
+                btn.disabled = false;
+            });
+        }
+
+        function copyCode(btn) {
+            const codeBlock = btn.closest('.code-block').querySelector('code');
+            navigator.clipboard.writeText(codeBlock.textContent).then(() => {
+                btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>';
+                setTimeout(() => {
+                    btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+                }, 2000);
+            });
+        }
+    </script>
+</body>
+</html>

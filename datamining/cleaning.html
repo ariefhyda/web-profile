@@ -19,103 +19,22 @@
 
     <!-- Navigation -->
     <nav class="navbar scrolled" id="navbar">
-        <div class="nav-container" style="max-width: 1300px; padding: 0 32px;">
-            <a href="../index.html" class="nav-logo">
-                <div class="logo-icon">
-                    <svg width="24" height="24" viewBox="0 0 28 28" fill="none">
-                        <path d="M14 2L26 8V20L14 26L2 20V8L14 2Z" stroke="currentColor" stroke-width="2" fill="none"/>
-                        <circle cx="14" cy="14" r="3" fill="currentColor"/>
-                    </svg>
-                </div>
-                <span class="logo-text" style="font-size: 1.1rem;">Arif<span class="logo-accent">Hidayah</span></span>
-            </a>
-            <div class="nav-links">
-                <a href="../index.html" class="nav-link">← Kembali ke Profil</a>
-            </div>
-            <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
-                <span></span><span></span><span></span>
-            </button>
-        </div>
+        <!-- Navbar content injected by course-layout.js -->
     </nav>
 
-    <!-- Mobile Menu -->
+
     <div class="mobile-menu" id="mobileMenu">
-        <a href="../index.html" class="mobile-link" onclick="closeMobileMenu()">← Kembali ke Profil</a>
+        <!-- Mobile menu content injected by course-layout.js -->
     </div>
+
 
     <!-- Course Layout -->
     <main class="course-layout">
         
-        <!-- Sidebar Navigation -->
         <aside class="course-sidebar" id="courseSidebar">
-            <div class="sidebar-header">
-                <div class="sidebar-icon">
-                    <svg width="24" height="24" viewBox="0 0 40 40" fill="none">
-                        <circle cx="14" cy="14" r="4" stroke="currentColor" stroke-width="2"/>
-                        <circle cx="28" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
-                        <circle cx="20" cy="28" r="4" stroke="currentColor" stroke-width="2"/>
-                        <path d="M17 16L18 24M18 14L25.5 12.5" stroke="currentColor" stroke-width="1.5" stroke-dasharray="2 2"/>
-                    </svg>
-                </div>
-                <span class="sidebar-course-name">Data Mining</span>
-            </div>
-
-            <div class="module-group">
-                <div class="module-group-title">Pengantar</div>
-                <a href="index.html" class="module-link">
-                    <div class="module-link-icon">1</div>
-                    <span>Konsep Data Mining</span>
-                </a>
-                <a href="#" class="module-link">
-                    <div class="module-link-icon">2</div>
-                    <span>Mengenal Data</span>
-                </a>
-            </div>
-
-            <div class="module-group">
-                <div class="module-group-title">Data Preprocessing</div>
-                <a href="cleaning.html" class="module-link active">
-                    <div class="module-link-icon">3</div>
-                    <span>Cleaning</span>
-                </a>
-                <a href="transformasi.html" class="module-link">
-                    <div class="module-link-icon">4</div>
-                    <span>Transformation</span>
-                </a>
-                <a href="#" class="module-link">
-                    <div class="module-link-icon">4</div>
-                    <span>Data Reduction (PCA)</span>
-                </a>
-            </div>
-
-            <div class="module-group">
-                <div class="module-group-title">Classification</div>
-                <a href="#" class="module-link">
-                    <div class="module-link-icon">5</div>
-                    <span>K-Nearest Neighbors (KNN)</span>
-                </a>
-                <a href="#" class="module-link">
-                    <div class="module-link-icon">6</div>
-                    <span>Naïve Bayes</span>
-                </a>
-                <a href="#" class="module-link">
-                    <div class="module-link-icon">7</div>
-                    <span>Decision Tree (C4.5)</span>
-                </a>
-            </div>
-
-            <div class="module-group">
-                <div class="module-group-title">Clustering</div>
-                <a href="#" class="module-link">
-                    <div class="module-link-icon">7</div>
-                    <span>K-Means Clustering</span>
-                </a>
-                <a href="#" class="module-link">
-                    <div class="module-link-icon">8</div>
-                    <span>Hierarchical Clustering</span>
-                </a>
-            </div>
+            <!-- Sidebar content injected by course-sidebar.js -->
         </aside>
+
 
         <!-- Main Content Area -->
         <article class="course-content">
@@ -325,30 +244,12 @@ df[<span class="hl-string">'harga'</span>] = df[<span class="hl-string">'harga'<
         </article>
     </main>
 
+    <script src="/datamining/course-layout.js"></script>
+
     <!-- Global Javascript Functions -->
     <script>
-    // Navbar effect
-    const navbar = document.getElementById('navbar');
-    window.addEventListener('scroll', () => {
-        navbar.classList.toggle('scrolled', window.scrollY > 20);
-    });
+    // Navigation logic handled by course-layout.js
 
-    // Mobile navigation toggle
-    const navToggle = document.getElementById('navToggle');
-    const mobileMenu = document.getElementById('mobileMenu');
-    if (navToggle && mobileMenu) {
-        navToggle.addEventListener('click', () => {
-            navToggle.classList.toggle('active');
-            mobileMenu.classList.toggle('active');
-            document.body.style.overflow = mobileMenu.classList.contains('active') ? 'hidden' : '';
-        });
-    }
-    
-    function closeMobileMenu() {
-        navToggle?.classList.remove('active');
-        mobileMenu?.classList.remove('active');
-        document.body.style.overflow = '';
-    }
 
     // Fungsi salin/copy kode
     function copyCode(btn) {

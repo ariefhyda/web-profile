@@ -15,84 +15,20 @@
     <div class="bg-grid" aria-hidden="true"></div>
 
     <nav class="navbar scrolled" id="navbar">
-        <div class="nav-container" style="max-width: 1300px; padding: 0 32px;">
-            <a href="../index.html" class="nav-logo">
-                <div class="logo-icon">
-                    <svg width="24" height="24" viewBox="0 0 28 28" fill="none">
-                        <path d="M14 2L26 8V20L14 26L2 20V8L14 2Z" stroke="currentColor" stroke-width="2" fill="none"/>
-                        <circle cx="14" cy="14" r="3" fill="currentColor"/>
-                    </svg>
-                </div>
-                <span class="logo-text" style="font-size: 1.1rem;">Arif<span class="logo-accent">Hidayah</span></span>
-            </a>
-            <div class="nav-links">
-                <a href="../index.html" class="nav-link">← Kembali ke Profil</a>
-            </div>
-            <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
-                <span></span><span></span><span></span>
-            </button>
-        </div>
+        <!-- Navbar content injected by course-layout.js -->
     </nav>
 
+
     <div class="mobile-menu" id="mobileMenu">
-        <a href="../index.html" class="mobile-link" onclick="closeMobileMenu()">← Kembali ke Profil</a>
+        <!-- Mobile menu content injected by course-layout.js -->
     </div>
 
+
     <main class="course-layout">
-                <aside class="course-sidebar" id="courseSidebar">
-            <div class="sidebar-header">
-                <div class="sidebar-icon">
-                    <svg width="24" height="24" viewBox="0 0 40 40" fill="none">
-                        <path d="M22 6L8 20L13 25L32 6H22Z" fill="currentColor"/>
-                        <path d="M22 18L13 27L18 32L32 18H22Z" fill="currentColor" opacity="0.7"/>
-                    </svg>
-                </div>
-                <span class="sidebar-course-name">Flutter Advanced</span>
-            </div>
-                        <div class="module-group">
-                <div class="module-group-title">Pendahuluan</div>
-                <a href="/flutter-advanced/index.html" class="module-link">
-                    <div class="module-link-icon">1</div>
-                    <span>Intro &amp; Setup ML Environment</span>
-                </a>
-            </div>
-            <div class="module-group">
-                <div class="module-group-title">Teachable Machine</div>
-                <a href="/flutter-advanced/teachable-machine.html" class="module-link active">
-                    <div class="module-link-icon">2</div>
-                    <span>Google Teachable Machine</span>
-                </a>
-            </div>
-            <div class="module-group">
-                <div class="module-group-title">Implementasi ML</div>
-                <a href="/flutter-advanced/implementasi-model.html" class="module-link">
-                    <div class="module-link-icon">3</div>
-                    <span>Implementasi Model di Flutter</span>
-                </a>
-                <a href="/flutter-advanced/tflite-ondevice.html" class="module-link">
-                    <div class="module-link-icon">4</div>
-                    <span>TFLite &amp; On-Device ML</span>
-                </a>
-            </div>
-            <div class="module-group">
-                <div class="module-group-title">Google Stitch &amp; AI</div>
-                <a href="/flutter-advanced/google-stitch.html" class="module-link">
-                    <div class="module-link-icon">5</div>
-                    <span>Google Stitch</span>
-                </a>
-                <a href="/flutter-advanced/ai-features.html" class="module-link">
-                    <div class="module-link-icon">6</div>
-                    <span>AI-Powered Features</span>
-                </a>
-            </div>
-            <div class="module-group">
-                <div class="module-group-title">Proyek</div>
-                <a href="/flutter-advanced/final-project.html" class="module-link">
-                    <div class="module-link-icon">7</div>
-                    <span>Final Project Advanced</span>
-                </a>
-            </div>
+        <aside class="course-sidebar" id="courseSidebar">
+            <!-- Sidebar content injected by course-layout.js -->
         </aside>
+
 
         <article class="course-content">
             <div class="breadcrumb">
@@ -294,25 +230,10 @@ flutter:
         </article>
     </main>
 
+    <script src="/flutter-advanced/course-layout.js"></script>
     <script>
-    const navbar = document.getElementById('navbar');
-    window.addEventListener('scroll', () => {
-        navbar.classList.toggle('scrolled', window.scrollY > 20);
-    });
-    const navToggle = document.getElementById('navToggle');
-    const mobileMenu = document.getElementById('mobileMenu');
-    if (navToggle && mobileMenu) {
-        navToggle.addEventListener('click', () => {
-            navToggle.classList.toggle('active');
-            mobileMenu.classList.toggle('active');
-            document.body.style.overflow = mobileMenu.classList.contains('active') ? 'hidden' : '';
-        });
-    }
-    function closeMobileMenu() {
-        navToggle?.classList.remove('active');
-        mobileMenu?.classList.remove('active');
-        document.body.style.overflow = '';
-    }
+    // Navigation logic handled by course-layout.js
+
     function copyCode(btn) {
         const codeBlock = btn.closest('.code-block').querySelector('code');
         navigator.clipboard.writeText(codeBlock.textContent).then(() => {

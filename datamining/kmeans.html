@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>K-Means Clustering — Data Mining — Arif Hidayah</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/datamining/course.css">
+    <style>
+        .interactive-container {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
+            margin-top: 24px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .interactive-header {
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .controls {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+            position: relative;
+            z-index: 20;
+        }
+
+        .control-label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .control-input {
+            width: 60px;
+            padding: 6px 12px;
+            border-radius: 6px;
+            background-color: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            font-family: inherit;
+            outline: none;
+        }
+
+        .btn-action {
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            z-index: 20;
+        }
+
+        .btn-action:hover {
+            border-color: var(--accent-datamining);
+            color: var(--accent-datamining);
+            background-color: rgba(167, 139, 250, 0.1);
+        }
+
+        .btn-primary {
+            background-color: var(--accent-datamining);
+            color: #0f172a;
+            border: 1px solid var(--accent-datamining);
+        }
+
+        .btn-primary:hover {
+            background-color: transparent;
+            color: var(--accent-datamining);
+        }
+        
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background-color: transparent;
+            color: var(--text-secondary);
+            border-color: var(--border-color);
+            pointer-events: none;
+        }
+
+        .canvas-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            display: flex;
+            justify-content: center;
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            position: relative;
+            z-index: 5;
+        }
+
+        canvas {
+            cursor: crosshair;
+            display: block;
+        }
+
+        .status-bar {
+            margin-top: 16px;
+            padding: 12px 16px;
+            background-color: rgba(167, 139, 250, 0.1);
+            border: 1px solid rgba(167, 139, 250, 0.3);
+            border-radius: 6px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            color: var(--accent-datamining);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            background-color: var(--accent-datamining);
+            color: #0f172a;
+            margin-right: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-grid" aria-hidden="true"></div>
+
+    <nav class="navbar scrolled" id="navbar">
+        <!-- Navbar content injected by course-layout.js -->
+    </nav>
+
+    <div class="mobile-menu" id="mobileMenu">
+        <!-- Mobile menu content injected by course-layout.js -->
+    </div>
+
+    <main class="course-layout">
+        
+        <aside class="course-sidebar" id="courseSidebar">
+            <!-- Sidebar content injected by course-layout.js -->
+        </aside>
+
+        <article class="course-content">
+            
+            <div class="breadcrumb">
+                <a href="../index.html">Home</a>
+                <span>›</span>
+                <a href="index.html">Data Mining</a>
+                <span>›</span>
+                <span style="color: var(--text-primary);">K-Means Clustering</span>
+            </div>
+
+            <header class="content-header">
+                <h1 class="content-title">Modul 9: K-Means Clustering</h1>
+                <div class="content-meta">
+                    <div class="meta-pill">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 5V8.5L10.5 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/></svg>
+                        <span>Estimasi: 60 Menit</span>
+                    </div>
+                    <div class="meta-pill">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="10" rx="1" stroke="currentColor" stroke-width="1.5"/><path d="M5 7h6M5 10h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                        <span>Teori & Interaktif Visual</span>
+                    </div>
+                </div>
+            </header>
+
+            <p class="content-text">
+                Berbeda dengan algoritma yang telah kita pelajari sebelumnya (KNN, Naïve Bayes, Decision Tree) yang merupakan <strong>Supervised Learning</strong> (Data memiliki target/label), <strong>K-Means Clustering</strong> adalah algoritma <strong>Unsupervised Learning</strong>.
+            </p>
+
+            <p class="content-text">
+                Tujuan dari K-Means adalah untuk menemukan kelompok (<em>cluster</em>) dalam data di mana label atau targetnya tidak diketahui. Algoritma ini akan mengelompokkan data yang memiliki karakteristik mirip ke dalam satu <em>cluster</em> yang sama. Huruf <strong>"K"</strong> merepresentasikan jumlah cluster yang ingin dibentuk.
+            </p>
+
+            <div class="info-box">
+                <div class="info-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                    <strong>Cara Kerja K-Means</strong>
+                </div>
+                <ol style="margin-left: 20px; margin-top: 8px;">
+                    <li>Tentukan jumlah cluster <strong>K</strong>.</li>
+                    <li>Pilih K titik secara acak dari dataset sebagai pusat cluster awal (<strong>Centroid</strong>).</li>
+                    <li><strong>Assignment</strong>: Hitung jarak setiap data ke seluruh centroid, lalu kelompokkan data ke centroid yang paling dekat.</li>
+                    <li><strong>Update</strong>: Hitung nilai rata-rata (mean) dari setiap kelompok untuk mencari titik pusat yang baru, lalu geser centroid ke titik tersebut.</li>
+                    <li>Ulangi langkah 3 dan 4 sampai centroid tidak lagi berpindah (Konvergen).</li>
+                </ol>
+            </div>
+
+            <h2 class="content-heading">Interactive: Visualisasi Proses K-Means</h2>
+            <p class="content-text">
+                Untuk memahami cara kerjanya, mari kita coba visualisasi interaktif di bawah ini. Anda dapat mengklik pada kanvas untuk menambahkan titik data, lalu tekan tombol untuk melihat bagaimana proses penentuan pusat cluster (centroid) dan pergeserannya terjadi langkah demi langkah.
+            </p>
+
+            <div class="interactive-container">
+                <div class="interactive-header">
+                    <div>
+                        <h3 style="margin-bottom: 4px;">Simulator K-Means 2D</h3>
+                        <p style="color: var(--text-secondary); font-size: 0.85rem;">Klik di area hitam untuk menambah data, atau gunakan Generate.</p>
+                    </div>
+                    <div class="controls">
+                        <label class="control-label">
+                            K = 
+                            <input type="number" id="kValue" class="control-input" value="3" min="2" max="6">
+                        </label>
+                        <button class="btn-action" onclick="generateData()">Generate Data</button>
+                        <button class="btn-action" onclick="clearCanvas()">Clear</button>
+                    </div>
+                </div>
+
+                <div class="canvas-wrapper">
+                    <canvas id="kmeansCanvas" width="700" height="400"></canvas>
+                </div>
+
+                <div class="controls" style="margin-top: 20px; justify-content: center; gap: 16px;">
+                    <button class="btn-action btn-primary" id="btnAuto" onclick="autoStart()" style="background: var(--accent-datamining); color: #0f172a; padding: 12px 24px; font-weight: 700;">🚀 Mulai Simulasi (Auto)</button>
+                    <button class="btn-action btn-primary" id="btnInit" onclick="initCentroids()">1. Acak Centroid Baru</button>
+                    <button class="btn-action btn-primary" id="btnStep" onclick="stepKMeans()" disabled>2. Next Step</button>
+                    <button class="btn-action btn-primary" id="btnRun" onclick="runKMeansFull()" disabled>▶ Run to End</button>
+                    <button class="btn-action" style="border-color: #f87171; color: #f87171;" onclick="clearCanvas()">🗑️ Hapus Semua Data</button>
+                </div>
+
+                <div class="status-bar" id="statusBar">
+                    <span class="status-badge">Status</span> Menunggu data... Tambahkan titik atau klik Generate Data.
+                </div>
+            </div>
+
+            <h2 class="content-heading" style="margin-top: 40px;">Metode Elbow (Mencari K Optimal)</h2>
+            <p class="content-text">
+                Dalam praktiknya, kita seringkali tidak tahu berapa nilai K (jumlah cluster) yang paling tepat. Salah satu cara paling umum adalah menggunakan <strong>Elbow Method</strong> (Metode Siku).
+            </p>
+            <p class="content-text">
+                Kita menjalankan K-Means berulang kali dengan nilai K yang berbeda (misal K=1 sampai 10), lalu menghitung <strong>WCSS (Within-Cluster Sum of Squares)</strong>, yaitu total kuadrat jarak antara setiap titik dengan centroidnya. Saat diplot ke grafik, kita mencari "siku" (<em>elbow</em>)—titik di mana penurunan WCSS mulai melambat secara drastis.
+            </p>
+
+            <h2 class="content-heading">Implementasi di Python</h2>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">kmeans_clustering.py</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-keyword">from</span> sklearn.cluster <span class="hl-keyword">import</span> KMeans
+<span class="hl-keyword">import</span> pandas <span class="hl-keyword">as</span> pd
+<span class="hl-keyword">import</span> matplotlib.pyplot <span class="hl-keyword">as</span> plt
+
+<span class="hl-comment"># 1. Load Data (Pastikan hanya fitur numerik, tidak ada label target!)</span>
+df = pd.<span class="hl-func">read_csv</span>(<span class="hl-string">'customer_data.csv'</span>)
+X = df[[<span class="hl-string">'Annual Income'</span>, <span class="hl-string">'Spending Score'</span>]]
+
+<span class="hl-comment"># 2. Elbow Method untuk mencari K optimal</span>
+wcss = []
+<span class="hl-keyword">for</span> i <span class="hl-keyword">in</span> <span class="hl-func">range</span>(<span class="hl-number">1</span>, <span class="hl-number">11</span>):
+    kmeans = <span class="hl-func">KMeans</span>(n_clusters=i, init=<span class="hl-string">'k-means++'</span>, random_state=<span class="hl-number">42</span>)
+    kmeans.<span class="hl-func">fit</span>(X)
+    wcss.<span class="hl-func">append</span>(kmeans.inertia_) <span class="hl-comment"># inertia_ = nilai WCSS</span>
+
+<span class="hl-comment"># (Optional) Plot grafik WCSS vs K untuk melihat sikunya</span>
+
+<span class="hl-comment"># 3. Latih model dengan K yang terpilih (misal siku di K=5)</span>
+kmeans = <span class="hl-func">KMeans</span>(n_clusters=<span class="hl-number">5</span>, init=<span class="hl-string">'k-means++'</span>, random_state=<span class="hl-number">42</span>)
+y_kmeans = kmeans.<span class="hl-func">fit_predict</span>(X)
+
+<span class="hl-comment"># 4. Lihat Hasil Cluster</span>
+df[<span class="hl-string">'Cluster'</span>] = y_kmeans
+<span class="hl-func">print</span>(df.<span class="hl-func">head</span>())</code></pre>
+            </div>
+
+            <div class="content-nav">
+                <div class="content-nav-item">
+                    <a href="/datamining/decision-tree.html" class="nav-btn nav-btn-prev">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                        <div><span class="nav-label">Sebelumnya</span><span class="nav-name">Decision Tree (C4.5)</span></div>
+                    </a>
+                </div>
+                <div class="content-nav-item">
+                    <a href="/datamining/hierarchical.html" class="nav-btn nav-btn-next">
+                        <div><span class="nav-label">Selanjutnya</span><span class="nav-name">Hierarchical Clustering</span></div>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </a>
+                </div>
+            </div>
+
+        </article>
+    </main>
+
+    <script src="/datamining/course-layout.js"></script>
+    <script>
+        window.onerror = function(msg, url, line) {
+            alert("Error: " + msg + "\nLine: " + line);
+            return false;
+        };
+
+        const canvas = document.getElementById('kmeansCanvas');
+        const ctx = canvas.getContext('2d');
+        const width = canvas.width;
+        const height = canvas.height;
+
+        let points = [];
+        let centroids = [];
+        let currentStep = 0; // 0 = ready to assign, 1 = ready to update centroids
+        let isConverged = false;
+        let animationId = null;
+        let timeoutId = null;
+
+        const colors = [
+            '#ef4444', // Red
+            '#3b82f6', // Blue
+            '#10b981', // Green
+            '#f59e0b', // Yellow/Orange
+            '#8b5cf6', // Purple
+            '#06b6d4'  // Cyan
+        ];
+
+        // Canvas Click to add point
+        canvas.addEventListener('click', (e) => {
+            if (isConverged || centroids.length > 0) {
+                // If running or converged, clicking resets everything and starts over
+                clearCanvas();
+                return; // Do not add a point on reset
+            }
+            
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            points.push({x, y, cluster: -1});
+            updateButtonStates();
+            draw();
+            updateStatus("Titik ditambahkan. Tambahkan lagi atau klik Acak Centroid.");
+        });
+
+        function updateButtonStates() {
+            const hasPoints = points.length > 0;
+            const hasCentroids = centroids.length > 0;
+            
+            document.getElementById('btnInit').disabled = !hasPoints;
+            document.getElementById('btnStep').disabled = !hasCentroids || isConverged;
+            document.getElementById('btnRun').disabled = !hasCentroids || isConverged;
+            document.getElementById('kValue').disabled = hasCentroids && !isConverged;
+            
+            if (hasCentroids || isConverged) {
+                canvas.style.cursor = 'pointer';
+            } else {
+                canvas.style.cursor = 'crosshair';
+            }
+        }
+
+        function clearCanvas() {
+            points = [];
+            centroids = [];
+            currentStep = 0;
+            isConverged = false;
+            clearTimeout(timeoutId);
+            cancelAnimationFrame(animationId);
+            updateButtonStates();
+            draw();
+            updateStatus("Kanvas dibersihkan. Tambahkan data baru.");
+        }
+
+        function generateData() {
+            if (centroids.length > 0) clearCanvas();
+            
+            // Create 3-5 random cluster centers
+            const numBlobs = Math.floor(Math.random() * 3) + 3;
+            const blobs = [];
+            for(let i=0; i<numBlobs; i++){
+                blobs.push({
+                    cx: 100 + Math.random() * (width - 200),
+                    cy: 100 + Math.random() * (height - 200),
+                    std: 20 + Math.random() * 30
+                });
+            }
+
+            // Generate points around blobs
+            for (let i = 0; i < 200; i++) {
+                const blob = blobs[Math.floor(Math.random() * blobs.length)];
+                
+                // Box-Muller transform for normal distribution
+                let u = 0, v = 0;
+                while(u === 0) u = Math.random();
+                while(v === 0) v = Math.random();
+                let z0 = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+                let z1 = Math.sqrt(-2.0 * Math.log(u)) * Math.sin(2.0 * Math.PI * v);
+                
+                let x = blob.cx + z0 * blob.std;
+                let y = blob.cy + z1 * blob.std;
+
+                // constrain to canvas
+                x = Math.max(10, Math.min(width - 10, x));
+                y = Math.max(10, Math.min(height - 10, y));
+
+                points.push({x, y, cluster: -1});
+            }
+            updateButtonStates();
+            draw();
+            updateStatus(`${points.length} titik data di-generate. Silakan mulai K-Means.`);
+        }
+
+        function autoStart() {
+            if (points.length === 0) {
+                generateData();
+            }
+            initCentroids();
+            setTimeout(runKMeansFull, 500);
+        }
+
+        function initCentroids() {
+            if (points.length === 0) {
+                alert("Tambahkan data terlebih dahulu!");
+                return;
+            }
+            
+            const k = parseInt(document.getElementById('kValue').value);
+            if (points.length < k) {
+                alert("Jumlah data harus lebih besar atau sama dengan nilai K!");
+                return;
+            }
+
+            // Randomly pick K points as initial centroids (Forgy method)
+            centroids = [];
+            const shuffled = [...points].sort(() => 0.5 - Math.random());
+            for (let i = 0; i < k; i++) {
+                centroids.push({
+                    x: shuffled[i].x,
+                    y: shuffled[i].y,
+                    cluster: i
+                });
+            }
+
+            // Reset points
+            points.forEach(p => p.cluster = -1);
+            
+            currentStep = 0;
+            isConverged = false;
+            
+            updateButtonStates();
+            draw();
+            updateStatus(`Centroid diinisialisasi secara acak (K=${k}). Tekan 'Next Step' untuk assign data.`);
+        }
+
+        function getDistance(p1, p2) {
+            return Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2));
+        }
+
+        function assignPoints() {
+            let changed = false;
+            points.forEach(p => {
+                let minDist = Infinity;
+                let closestCluster = -1;
+                
+                centroids.forEach((c, index) => {
+                    const dist = getDistance(p, c);
+                    if (dist < minDist) {
+                        minDist = dist;
+                        closestCluster = index;
+                    }
+                });
+
+                if (p.cluster !== closestCluster) {
+                    changed = true;
+                    p.cluster = closestCluster;
+                }
+            });
+            return changed;
+        }
+
+        function updateCentroidPositions() {
+            let maxShift = 0;
+            const k = centroids.length;
+            
+            for (let i = 0; i < k; i++) {
+                const clusterPoints = points.filter(p => p.cluster === i);
+                if (clusterPoints.length > 0) {
+                    const sumX = clusterPoints.reduce((sum, p) => sum + p.x, 0);
+                    const sumY = clusterPoints.reduce((sum, p) => sum + p.y, 0);
+                    const newX = sumX / clusterPoints.length;
+                    const newY = sumY / clusterPoints.length;
+                    
+                    const shift = getDistance(centroids[i], {x: newX, y: newY});
+                    if (shift > maxShift) maxShift = shift;
+                    
+                    centroids[i].x = newX;
+                    centroids[i].y = newY;
+                }
+            }
+            return maxShift;
+        }
+
+        function stepKMeans() {
+            if (isConverged) return;
+
+            if (currentStep === 0) {
+                // Step: Assign points to nearest centroid
+                const pointsChanged = assignPoints();
+                if (!pointsChanged && centroids.length > 0) {
+                    // Even if points didn't change, we need to check if centroids will shift
+                    // Actually, if points don't change, centroids won't change either.
+                    isConverged = true;
+                }
+                updateStatus("Langkah: Data dikelompokkan ke centroid terdekat.");
+                currentStep = 1;
+            } else {
+                // Step: Update centroid positions
+                const maxShift = updateCentroidPositions();
+                if (maxShift < 0.1) {
+                    isConverged = true;
+                }
+                updateStatus("Langkah: Centroid dipindahkan ke rata-rata kelompok.");
+                currentStep = 0;
+            }
+
+            draw();
+
+            if (isConverged) {
+                updateStatus("🎉 ALGORITMA KONVERGEN! Anda dapat mengacak centroid lagi untuk mencoba hasil lain.", true);
+                updateButtonStates();
+            }
+        }
+
+        function runKMeansFull() {
+            if (isConverged) return;
+            
+            document.getElementById('btnStep').disabled = true;
+            document.getElementById('btnRun').disabled = true;
+            
+            function animate() {
+                if(!isConverged) {
+                    stepKMeans();
+                    timeoutId = setTimeout(() => {
+                        animationId = requestAnimationFrame(animate);
+                    }, 400); // delay to see the visual changes
+                }
+            }
+            animate();
+        }
+
+        function updateStatus(text, highlight = false) {
+            const bar = document.getElementById('statusBar');
+            bar.innerHTML = `<span class="status-badge">Status</span> ${text}`;
+            if(highlight) {
+                bar.style.backgroundColor = "rgba(74, 222, 128, 0.1)";
+                bar.style.borderColor = "rgba(74, 222, 128, 0.3)";
+                bar.style.color = "#4ade80";
+            } else {
+                bar.style.backgroundColor = "rgba(167, 139, 250, 0.1)";
+                bar.style.borderColor = "rgba(167, 139, 250, 0.3)";
+                bar.style.color = "var(--accent-datamining)";
+            }
+        }
+
+        function draw() {
+            // Clear canvas
+            ctx.fillStyle = '#0f172a'; // match bg-color
+            ctx.fillRect(0, 0, width, height);
+
+            // Draw connecting lines if assigned
+            if (currentStep === 1 || isConverged) {
+                ctx.globalAlpha = 0.2;
+                points.forEach(p => {
+                    if (p.cluster !== -1) {
+                        ctx.beginPath();
+                        ctx.moveTo(p.x, p.y);
+                        ctx.lineTo(centroids[p.cluster].x, centroids[p.cluster].y);
+                        ctx.strokeStyle = colors[p.cluster % colors.length];
+                        ctx.lineWidth = 1;
+                        ctx.stroke();
+                    }
+                });
+                ctx.globalAlpha = 1.0;
+            }
+
+            // Draw points
+            points.forEach(p => {
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
+                ctx.fillStyle = p.cluster === -1 ? 'rgba(255,255,255,0.5)' : colors[p.cluster % colors.length];
+                ctx.fill();
+                if(p.cluster !== -1) {
+                    ctx.strokeStyle = '#0f172a';
+                    ctx.lineWidth = 1;
+                    ctx.stroke();
+                }
+            });
+
+            // Draw centroids
+            centroids.forEach(c => {
+                // Draw a cross
+                ctx.beginPath();
+                ctx.moveTo(c.x - 8, c.y - 8);
+                ctx.lineTo(c.x + 8, c.y + 8);
+                ctx.moveTo(c.x + 8, c.y - 8);
+                ctx.lineTo(c.x - 8, c.y + 8);
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 4;
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.moveTo(c.x - 8, c.y - 8);
+                ctx.lineTo(c.x + 8, c.y + 8);
+                ctx.moveTo(c.x + 8, c.y - 8);
+                ctx.lineTo(c.x - 8, c.y + 8);
+                ctx.strokeStyle = colors[c.cluster % colors.length];
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                // Draw a circle around it
+                ctx.beginPath();
+                ctx.arc(c.x, c.y, 10, 0, Math.PI * 2);
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+            });
+        }
+
+        // Initial setup
+        generateData();
+
+        function copyCode(btn) {
+            const codeBlock = btn.closest('.code-block').querySelector('code');
+            navigator.clipboard.writeText(codeBlock.textContent).then(() => {
+                btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>';
+                setTimeout(() => {
+                    btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+                }, 2000);
+            });
+        }
+    </script>
+</body>
+</html>

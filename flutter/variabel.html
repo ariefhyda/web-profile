@@ -13,51 +13,19 @@
 <body>
     <div class="bg-grid" aria-hidden="true"></div>
     <nav class="navbar scrolled" id="navbar">
-        <div class="nav-container" style="max-width: 1300px; padding: 0 32px;">
-            <a href="../index.html" class="nav-logo">
-                <div class="logo-icon"><svg width="24" height="24" viewBox="0 0 28 28" fill="none"><path d="M14 2L26 8V20L14 26L2 20V8L14 2Z" stroke="currentColor" stroke-width="2" fill="none"/><circle cx="14" cy="14" r="3" fill="currentColor"/></svg></div>
-                <span class="logo-text" style="font-size: 1.1rem;">Arif<span class="logo-accent">Hidayah</span></span>
-            </a>
-            <div class="nav-links"><a href="../index.html" class="nav-link">← Kembali ke Profil</a></div>
-            <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation"><span></span><span></span><span></span></button>
-        </div>
+        <!-- Navbar content injected by course-layout.js -->
     </nav>
-    <div class="mobile-menu" id="mobileMenu"><a href="../index.html" class="mobile-link" onclick="closeMobileMenu()">← Kembali ke Profil</a></div>
+
+    <div class="mobile-menu" id="mobileMenu">
+        <!-- Mobile menu content injected by course-layout.js -->
+    </div>
+
 
     <main class="course-layout">
         <aside class="course-sidebar" id="courseSidebar">
-            <div class="sidebar-header">
-                <div class="sidebar-icon"><svg width="24" height="24" viewBox="0 0 40 40" fill="none"><path d="M22 6L8 20L13 25L32 6H22Z" fill="currentColor"/><path d="M22 18L13 27L18 32L32 18H22Z" fill="currentColor" opacity="0.7"/></svg></div>
-                <span class="sidebar-course-name">Flutter Fundamentals</span>
-            </div>
-            <div class="module-group">
-                <div class="module-group-title">Pengantar</div>
-                <a href="/flutter/index.html" class="module-link"><div class="module-link-icon">1</div><span>Pengenalan Flutter & Dart</span></a>
-                <a href="/flutter/instalasi.html" class="module-link"><div class="module-link-icon">2</div><span>Instalasi & Konfigurasi</span></a>
-            </div>
-            <div class="module-group">
-                <div class="module-group-title">Dart Fundamental</div>
-                <a href="/flutter/variabel.html" class="module-link active"><div class="module-link-icon">3</div><span>Variabel & Tipe Data</span></a>
-                <a href="#" class="module-link"><div class="module-link-icon">4</div><span>Function & OOP</span></a>
-                <a href="/flutter/collection-async.html" class="module-link"><div class="module-link-icon">5</div><span>Collection & Async</span></a>
-            </div>
-            <div class="module-group">
-                <div class="module-group-title">Flutter UI</div>
-                <a href="#" class="module-link"><div class="module-link-icon">6</div><span>Widget Dasar</span></a>
-                <a href="#" class="module-link"><div class="module-link-icon">7</div><span>Layout & Responsive</span></a>
-                <a href="#" class="module-link"><div class="module-link-icon">8</div><span>Navigation & Routing</span></a>
-            </div>
-            <div class="module-group">
-                <div class="module-group-title">State & Data</div>
-                <a href="#" class="module-link"><div class="module-link-icon">9</div><span>State Management</span></a>
-                <a href="#" class="module-link"><div class="module-link-icon">10</div><span>REST API & HTTP</span></a>
-                <a href="#" class="module-link"><div class="module-link-icon">11</div><span>Local Storage (SQLite)</span></a>
-            </div>
-            <div class="module-group">
-                <div class="module-group-title">Proyek Akhir</div>
-                <a href="#" class="module-link"><div class="module-link-icon">12</div><span>Final Project</span></a>
-            </div>
+            <!-- Sidebar content injected by course-layout.js -->
         </aside>
+
 
         <article class="course-content">
             <div class="breadcrumb">
@@ -294,18 +262,10 @@ satu baris.
         </article>
     </main>
 
+    <script src="/flutter/course-layout.js"></script>
     <script>
-    const navbar = document.getElementById('navbar');
-    window.addEventListener('scroll', () => { navbar.classList.toggle('scrolled', window.scrollY > 20); });
-    const navToggle = document.getElementById('navToggle');
-    const mobileMenu = document.getElementById('mobileMenu');
-    if (navToggle && mobileMenu) {
-        navToggle.addEventListener('click', () => {
-            navToggle.classList.toggle('active'); mobileMenu.classList.toggle('active');
-            document.body.style.overflow = mobileMenu.classList.contains('active') ? 'hidden' : '';
-        });
-    }
-    function closeMobileMenu() { navToggle?.classList.remove('active'); mobileMenu?.classList.remove('active'); document.body.style.overflow = ''; }
+    // Navigation logic handled by course-layout.js
+
     function copyCode(btn) {
         const codeBlock = btn.closest('.code-block').querySelector('code');
         navigator.clipboard.writeText(codeBlock.textContent).then(() => {

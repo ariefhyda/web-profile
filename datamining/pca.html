@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Reduction (PCA) — Data Mining — Arif Hidayah</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/datamining/course.css">
+    <style>
+        .interactive-container {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
+            margin-top: 24px;
+            margin-bottom: 40px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .interactive-header {
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-action {
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            pointer-events: auto;
+        }
+
+        .btn-action:hover {
+            border-color: var(--accent-datamining);
+            color: var(--accent-datamining);
+            background-color: rgba(167, 139, 250, 0.1);
+        }
+
+        .btn-primary {
+            background-color: var(--accent-datamining);
+            color: #0f172a;
+            border: 1px solid var(--accent-datamining);
+        }
+
+        .btn-primary:hover {
+            background-color: transparent;
+            color: var(--accent-datamining);
+        }
+
+        .canvas-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            display: flex;
+            justify-content: center;
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            position: relative;
+        }
+
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-grid" aria-hidden="true"></div>
+
+    <nav class="navbar scrolled" id="navbar">
+        <!-- Navbar content injected by course-layout.js -->
+    </nav>
+
+    <div class="mobile-menu" id="mobileMenu">
+        <!-- Mobile menu content injected by course-layout.js -->
+    </div>
+
+    <main class="course-layout">
+        
+        <aside class="course-sidebar" id="courseSidebar">
+            <!-- Sidebar content injected by course-layout.js -->
+        </aside>
+
+        <article class="course-content">
+            
+            <div class="breadcrumb">
+                <a href="../index.html">Home</a>
+                <span>›</span>
+                <a href="index.html">Data Mining</a>
+                <span>›</span>
+                <span style="color: var(--text-primary);">Data Reduction (PCA)</span>
+            </div>
+
+            <header class="content-header">
+                <h1 class="content-title">Modul 5: Data Reduction dengan PCA</h1>
+                <div class="content-meta">
+                    <div class="meta-pill">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 5V8.5L10.5 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/></svg>
+                        <span>Estimasi: 45 Menit</span>
+                    </div>
+                    <div class="meta-pill">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="10" rx="1" stroke="currentColor" stroke-width="1.5"/><path d="M5 7h6M5 10h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                        <span>Teori & Visualisasi</span>
+                    </div>
+                </div>
+            </header>
+
+            <p class="content-text">
+                Semakin banyak fitur (dimensi) yang kita miliki dalam sebuah dataset, semakin kompleks algoritma akan memprosesnya. Terkadang, fitur-fitur tersebut sangat berkorelasi tinggi, redundant, atau membawa <em>noise</em> yang tidak bermanfaat. Masalah ini dikenal sebagai <strong>Curse of Dimensionality</strong>. 
+            </p>
+            <p class="content-text">
+                Oleh karena itu, kita butuh teknik <strong>Data Reduction</strong>. Salah satu yang paling fundamental dan ampuh adalah <strong>Principal Component Analysis (PCA)</strong>.
+            </p>
+
+            <div class="info-box">
+                <div class="info-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                    <strong>Bagaimana PCA Bekerja?</strong>
+                </div>
+                <ol style="margin-left: 20px; margin-top: 8px;">
+                    <li><strong>Standarisasi:</strong> menyamakan skala rentang variabel kontinu sehingga semua variabel berkontribusi secara adil.</li>
+                    <li><strong>Matriks Kovarians (Covariance Matrix):</strong> Dihitung untuk mengidentifikasi tingkat korelasi atau keterkaitan antar variabel/fitur.</li>
+                    <li><strong>Eigenvectors dan Eigenvalues:</strong> Dihitung dari matriks kovarians untuk menentukan arah (Principal Components) yang memiliki variansi / rentang sebaran terbesar.</li>
+                    <li><strong>Proyeksi:</strong> Data dirotasi dan diproyeksikan ke vektor komponen utama. Ini memungkinkan kita membuang dimensi/fitur dengan variansi kecil tanpa kehilangan esensi pola datanya.</li>
+                </ol>
+            </div>
+
+            <h2 class="content-heading">Interactive: Visualisasi PCA di Ruang 2D</h2>
+            <p class="content-text">
+                Di bawah ini adalah ilustrasi bagaimana PCA berkerja pada sekumpulan titik yang tersebar acak (dengan sedikit korelasi) di ruang 2D. Algoritma akan menghitung matriks kovarians dan mencari nilai <em>Eigen</em>-nya untuk menetapkan sebuah garis <strong>Principal Component 1 (PC1)</strong> di mana variansi titiknya paling lebar, dan <strong>PC2</strong> yang dipastikan selalu berpotongan tegak lurus secara ortogonal dengan PC1.
+            </p>
+
+            <div class="interactive-container">
+                <div class="interactive-header">
+                    <div>
+                        <h3 style="margin-bottom: 4px;">Simulator Arah PCA</h3>
+                        <p style="color: var(--text-secondary); font-size: 0.85rem;">Klik 'Generate Data Acak' untuk melihat variasi sebaran baru.</p>
+                    </div>
+                    <div class="controls">
+                        <button class="btn-action" onclick="generatePCAData()">Generate Data Acak</button>
+                    </div>
+                </div>
+
+                <div class="canvas-wrapper">
+                    <canvas id="pcaCanvas" width="700" height="400"></canvas>
+                </div>
+
+                <div class="controls" style="margin-top: 20px; justify-content: center; gap: 16px;">
+                    <button class="btn-action btn-primary" id="btnCalcPCA" onclick="calculatePCA()" style="background: var(--accent-datamining); color: #0f172a; padding: 12px 24px; font-weight: 700;">Temukan Principal Component</button>
+                </div>
+            </div>
+
+            <h2 class="content-heading">Implementasi di Python</h2>
+            <p class="content-text">
+                Dengan Python dan <em>Scikit-Learn</em>, kita bisa secara praktis mereduksi dataset yang misalnya memiliki ratusan fitur/kolom menjadi 2 atau 3 fitur komponen utama (PC1, PC2) untuk kebutuhan visualisasi di Scatter Plot 2D atau 3D.
+            </p>
+
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">pca_example.py</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-keyword">from</span> sklearn.decomposition <span class="hl-keyword">import</span> PCA
+<span class="hl-keyword">from</span> sklearn.preprocessing <span class="hl-keyword">import</span> StandardScaler
+<span class="hl-keyword">import</span> pandas <span class="hl-keyword">as</span> pd
+
+<span class="hl-comment"># 1. Asumsikan 'df' adalah dataframe yang memiliki 30 dimensi/kolom fitur</span>
+X = df.<span class="hl-func">drop</span>(<span class="hl-string">'target'</span>, axis=<span class="hl-number">1</span>)
+
+<span class="hl-comment"># 2. Standarisasi Data (Wajib dilakukan sebelum PCA)</span>
+scaler = <span class="hl-func">StandardScaler</span>()
+X_scaled = scaler.<span class="hl-func">fit_transform</span>(X)
+
+<span class="hl-comment"># 3. Inisialisasi PCA untuk reduksi menjadi 2 dimensi (2 Principal Components)</span>
+pca = <span class="hl-func">PCA</span>(n_components=<span class="hl-number">2</span>)
+X_pca = pca.<span class="hl-func">fit_transform</span>(X_scaled)
+
+<span class="hl-comment"># 4. Memasukkannya kembali ke DataFrame yang lebih ringkas</span>
+df_pca = pd.<span class="hl-func">DataFrame</span>(data=X_pca, columns=[<span class="hl-string">'PC1'</span>, <span class="hl-string">'PC2'</span>])
+<span class="hl-func">print</span>(df_pca.<span class="hl-func">head</span>())
+
+<span class="hl-comment"># Melihat persentase variansi pola data yang sukses dipertahankan / dirangkum oleh PC</span>
+<span class="hl-func">print</span>(<span class="hl-string">"Explained Variance Ratio:"</span>, pca.explained_variance_ratio_)</code></pre>
+            </div>
+
+            <div class="content-nav">
+                <div class="content-nav-item">
+                    <a href="/datamining/transformasi.html" class="nav-btn nav-btn-prev">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                        <div><span class="nav-label">Sebelumnya</span><span class="nav-name">Transformation</span></div>
+                    </a>
+                </div>
+                <div class="content-nav-item">
+                    <a href="/datamining/knn.html" class="nav-btn nav-btn-next">
+                        <div><span class="nav-label">Selanjutnya</span><span class="nav-name">K-Nearest Neighbors (KNN)</span></div>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </a>
+                </div>
+            </div>
+
+        </article>
+    </main>
+
+    <script src="/datamining/course-layout.js"></script>
+    <script>
+        const canvas = document.getElementById('pcaCanvas');
+        const ctx = canvas.getContext('2d');
+        const width = canvas.width;
+        const height = canvas.height;
+        let points = [];
+        let pc1 = null;
+        let pc2 = null;
+        let meanX = 0;
+        let meanY = 0;
+
+        function generatePCAData() {
+            points = [];
+            pc1 = null;
+            pc2 = null;
+            const cx = width / 2;
+            const cy = height / 2;
+            
+            // Randomly tilt the distribution angle
+            const angle = (Math.random() - 0.5) * Math.PI; 
+            
+            // Variances (spread)
+            const spreadX = 100 + Math.random() * 100;
+            const spreadY = 20 + Math.random() * 40;
+            
+            for (let i = 0; i < 200; i++) {
+                // Box-Muller transform for normal distribution
+                let u = 0, v = 0;
+                while(u === 0) u = Math.random();
+                while(v === 0) v = Math.random();
+                let z0 = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+                let z1 = Math.sqrt(-2.0 * Math.log(u)) * Math.sin(2.0 * Math.PI * v);
+                
+                let px = z0 * spreadX;
+                let py = z1 * spreadY;
+                
+                // Rotate points
+                let rotX = px * Math.cos(angle) - py * Math.sin(angle);
+                let rotY = px * Math.sin(angle) + py * Math.cos(angle);
+                
+                points.push({ x: cx + rotX, y: cy + rotY });
+            }
+            drawPCA();
+        }
+
+        function calculatePCA() {
+            if (points.length === 0) return;
+            
+            // 1. Calculate Mean (Pusat Data)
+            meanX = points.reduce((sum, p) => sum + p.x, 0) / points.length;
+            meanY = points.reduce((sum, p) => sum + p.y, 0) / points.length;
+            
+            // 2. Calculate Covariance Matrix
+            let covXX = 0, covYY = 0, covXY = 0;
+            for(let p of points) {
+                let dx = p.x - meanX;
+                let dy = p.y - meanY;
+                covXX += dx * dx;
+                covYY += dy * dy;
+                covXY += dx * dy;
+            }
+            covXX /= (points.length - 1);
+            covYY /= (points.length - 1);
+            covXY /= (points.length - 1);
+
+            // 3. Calculate Eigenvalues
+            const trace = covXX + covYY;
+            const det = covXX * covYY - covXY * covXY;
+            const lambda1 = (trace + Math.sqrt(trace * trace - 4 * det)) / 2;
+            const lambda2 = (trace - Math.sqrt(trace * trace - 4 * det)) / 2;
+
+            // 4. Calculate Eigenvectors
+            let ev1x, ev1y;
+            if (covXY !== 0) {
+                ev1x = lambda1 - covYY;
+                ev1y = covXY;
+            } else {
+                ev1x = 1; ev1y = 0;
+            }
+            // Normalize eigenvector 1
+            let mag1 = Math.sqrt(ev1x*ev1x + ev1y*ev1y);
+            ev1x /= mag1; ev1y /= mag1;
+
+            // Eigenvector 2 is orthogonal to Eigenvector 1
+            let ev2x = -ev1y;
+            let ev2y = ev1x;
+
+            // Adjust drawing length proportional to variance (eigenvalue)
+            let drawScale = 1.5; 
+            pc1 = { dx: ev1x, dy: ev1y, length: Math.sqrt(lambda1) * drawScale }; 
+            pc2 = { dx: ev2x, dy: ev2y, length: Math.sqrt(lambda2) * drawScale };
+
+            drawPCA();
+        }
+
+        function drawPCA() {
+            ctx.fillStyle = '#0f172a';
+            ctx.fillRect(0, 0, width, height);
+
+            // Draw data points
+            points.forEach(p => {
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(84, 197, 248, 0.7)';
+                ctx.fill();
+            });
+
+            if (pc1 && pc2) {
+                // Draw mean center
+                ctx.beginPath();
+                ctx.arc(meanX, meanY, 6, 0, Math.PI * 2);
+                ctx.fillStyle = '#ffffff';
+                ctx.fill();
+
+                // Draw PC1 (Principal Component)
+                ctx.beginPath();
+                ctx.moveTo(meanX - pc1.dx * pc1.length, meanY - pc1.dy * pc1.length);
+                ctx.lineTo(meanX + pc1.dx * pc1.length, meanY + pc1.dy * pc1.length);
+                ctx.strokeStyle = '#a78bfa'; // Purple accent
+                ctx.lineWidth = 4;
+                ctx.stroke();
+
+                // Draw PC2 (Orthogonal)
+                ctx.beginPath();
+                ctx.moveTo(meanX - pc2.dx * pc2.length, meanY - pc2.dy * pc2.length);
+                ctx.lineTo(meanX + pc2.dx * pc2.length, meanY + pc2.dy * pc2.length);
+                ctx.strokeStyle = '#f87171'; // Red accent
+                ctx.lineWidth = 3;
+                ctx.stroke();
+
+                // Legend
+                ctx.fillStyle = '#a78bfa';
+                ctx.font = 'bold 14px "Inter", sans-serif';
+                ctx.fillText("PC1 (Variansi Utama)", 20, 30);
+                
+                ctx.fillStyle = '#f87171';
+                ctx.fillText("PC2 (Orthogonal)", 20, 50);
+            }
+        }
+
+        // Initialize with random dataset
+        generatePCAData();
+
+        function copyCode(btn) {
+            const codeBlock = btn.closest('.code-block').querySelector('code');
+            navigator.clipboard.writeText(codeBlock.textContent).then(() => {
+                btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>';
+                setTimeout(() => {
+                    btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+                }, 2000);
+            });
+        }
+    </script>
+</body>
+</html>

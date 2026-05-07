@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hierarchical Clustering — Data Mining — Arif Hidayah</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/datamining/course.css">
+    <style>
+        .interactive-container {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
+            margin-top: 24px;
+            margin-bottom: 40px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .interactive-header {
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .controls {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+            position: relative;
+            z-index: 20;
+        }
+
+        .btn-action {
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            z-index: 20;
+            pointer-events: auto;
+        }
+
+        .btn-action:hover {
+            border-color: var(--accent-datamining);
+            color: var(--accent-datamining);
+            background-color: rgba(167, 139, 250, 0.1);
+        }
+
+        .btn-primary {
+            background-color: var(--accent-datamining);
+            color: #0f172a;
+            border: 1px solid var(--accent-datamining);
+        }
+
+        .btn-primary:hover {
+            background-color: transparent;
+            color: var(--accent-datamining);
+        }
+        
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background-color: transparent;
+            color: var(--text-secondary);
+            border-color: var(--border-color);
+            pointer-events: none;
+        }
+
+        .canvas-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            display: flex;
+            justify-content: center;
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            position: relative;
+            z-index: 5;
+        }
+
+        canvas {
+            cursor: crosshair;
+            display: block;
+        }
+
+        .status-bar {
+            margin-top: 16px;
+            padding: 12px 16px;
+            background-color: rgba(167, 139, 250, 0.1);
+            border: 1px solid rgba(167, 139, 250, 0.3);
+            border-radius: 6px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            color: var(--accent-datamining);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            background-color: var(--accent-datamining);
+            color: #0f172a;
+            margin-right: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-grid" aria-hidden="true"></div>
+
+    <nav class="navbar scrolled" id="navbar">
+        <!-- Navbar content injected by course-layout.js -->
+    </nav>
+
+    <div class="mobile-menu" id="mobileMenu">
+        <!-- Mobile menu content injected by course-layout.js -->
+    </div>
+
+    <main class="course-layout">
+        
+        <aside class="course-sidebar" id="courseSidebar">
+            <!-- Sidebar content injected by course-layout.js -->
+        </aside>
+
+        <article class="course-content">
+            
+            <div class="breadcrumb">
+                <a href="../index.html">Home</a>
+                <span>›</span>
+                <a href="index.html">Data Mining</a>
+                <span>›</span>
+                <span style="color: var(--text-primary);">Hierarchical Clustering</span>
+            </div>
+
+            <header class="content-header">
+                <h1 class="content-title">Modul 10: Hierarchical Clustering</h1>
+                <div class="content-meta">
+                    <div class="meta-pill">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 5V8.5L10.5 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/></svg>
+                        <span>Estimasi: 45 Menit</span>
+                    </div>
+                    <div class="meta-pill">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="10" rx="1" stroke="currentColor" stroke-width="1.5"/><path d="M5 7h6M5 10h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                        <span>Teori & Praktik</span>
+                    </div>
+                </div>
+            </header>
+
+            <p class="content-text">
+                Selain K-Means, algoritma pengelompokan yang sangat populer adalah <strong>Hierarchical Clustering</strong>. Jika K-Means mencoba membagi data ke dalam sejumlah klaster secara langsung, Hierarchical Clustering membangun sebuah hierarki klaster tanpa perlu mengetahui jumlah kelompok di awal.
+            </p>
+
+            <p class="content-text">
+                Ada dua pendekatan utama dalam algoritma ini:
+            </p>
+            <ul class="content-list">
+                <li><strong>Agglomerative (Bottom-Up)</strong>: Setiap titik data dimulai sebagai klasternya sendiri. Kemudian, pasangan klaster yang paling mirip digabungkan langkah demi langkah sampai hanya tersisa satu klaster besar. Pendekatan ini yang paling sering digunakan.</li>
+                <li><strong>Divisive (Top-Down)</strong>: Kebalikan dari Agglomerative. Dimulai dengan semua titik data dalam satu klaster besar, lalu dipecah perlahan-lahan hingga setiap titik data menjadi klasternya sendiri.</li>
+            </ul>
+
+            <h2 class="content-heading">Metode Jarak Antar Klaster (Linkage)</h2>
+            <p class="content-text">
+                Dalam proses menggabungkan klaster (Agglomerative), kita harus menghitung jarak tidak hanya antar titik, tapi <strong>antar klaster</strong>. Ada beberapa kriteria penggabungan (<em>Linkage Criteria</em>) yang menentukan jarak ini:
+            </p>
+
+            <div class="info-box">
+                <div class="info-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                    <strong>Tipe-Tipe Linkage</strong>
+                </div>
+                <ol style="margin-left: 20px; margin-top: 8px;">
+                    <li><strong>Single Linkage (Jarak Terdekat):</strong> Jarak antara dua klaster didefinisikan sebagai jarak minimum antara anggota satu klaster dengan anggota klaster lainnya. Cenderung membentuk klaster yang memanjang (chaining).</li>
+                    <li><strong>Complete Linkage (Jarak Terjauh):</strong> Jarak didefinisikan sebagai jarak maksimum antara anggota klaster satu dan lainnya. Membentuk klaster yang lebih padat dan berbentuk bola.</li>
+                    <li><strong>Average Linkage (Jarak Rata-rata):</strong> Menghitung rata-rata jarak antara seluruh pasangan titik data di kedua klaster. Merupakan kompromi antara Single dan Complete Linkage.</li>
+                    <li><strong>Ward's Method:</strong> Menggabungkan dua klaster yang menghasilkan peningkatan varians terkecil (Within-Cluster Sum of Squares) secara keseluruhan. Sangat efektif untuk meminimalisasi varians dan sering menjadi pilihan default.</li>
+                </ol>
+            </div>
+
+            <h2 class="content-heading">Interactive: Visualisasi Agglomerative Clustering</h2>
+            <p class="content-text">
+                Mari kita simulasikan proses Agglomerative (Bottom-Up) dengan pendekatan <strong>Single Linkage</strong>. Pada setiap langkah, algoritma akan mencari dua klaster (atau titik awal) dengan jarak terdekat lalu menggabungkannya menjadi satu klaster besar.
+            </p>
+
+            <div class="interactive-container">
+                <div class="interactive-header">
+                    <div>
+                        <h3 style="margin-bottom: 4px;">Simulator Hierarchical (Agglomerative)</h3>
+                        <p style="color: var(--text-secondary); font-size: 0.85rem;">Klik di area hitam untuk menambah titik data, atau gunakan Generate.</p>
+                    </div>
+                    <div class="controls">
+                        <button class="btn-action" onclick="generateDataHC()">Generate Data</button>
+                        <button class="btn-action" onclick="clearCanvasHC()">Clear</button>
+                    </div>
+                </div>
+
+                <div class="canvas-wrapper">
+                    <canvas id="hcCanvas" width="700" height="400"></canvas>
+                </div>
+
+                <div class="controls" style="margin-top: 20px; justify-content: center; gap: 16px;">
+                    <button class="btn-action btn-primary" id="btnAutoHC" onclick="autoStartHC()" style="background: var(--accent-datamining); color: #0f172a; padding: 12px 24px; font-weight: 700;">🚀 Mulai Simulasi (Auto)</button>
+                    <button class="btn-action btn-primary" id="btnStepHC" onclick="stepHC()">1. Gabungkan Klaster Terdekat</button>
+                    <button class="btn-action btn-primary" id="btnRunHC" onclick="runHCFull()">▶ Run to End</button>
+                    <button class="btn-action" style="border-color: #f87171; color: #f87171;" onclick="clearCanvasHC()">🗑️ Reset Data</button>
+                </div>
+
+                <div class="status-bar" id="statusBarHC">
+                    <span class="status-badge">Status</span> Menunggu data... Tambahkan titik atau klik Generate Data.
+                </div>
+            </div>
+
+            <h2 class="content-heading">Dendrogram</h2>
+            <p class="content-text">
+                Salah satu keunggulan terbesar Hierarchical Clustering adalah hasilnya dapat divisualisasikan dalam bentuk struktur pohon yang disebut <strong>Dendrogram</strong>. Dendrogram membantu kita melihat urutan penggabungan klaster secara vertikal dan mempermudah kita untuk memotong pohon tersebut pada level tertentu guna menentukan jumlah klaster yang optimal.
+            </p>
+
+            <h2 class="content-heading">Implementasi di Python</h2>
+            <p class="content-text">
+                Biasanya, kita menggunakan <code>scipy</code> untuk membuat visualisasi Dendrogram, dan <code>scikit-learn</code> untuk menerapkan model Agglomerative Clustering.
+            </p>
+
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">hierarchical_clustering.py</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-keyword">import</span> pandas <span class="hl-keyword">as</span> pd
+<span class="hl-keyword">import</span> matplotlib.pyplot <span class="hl-keyword">as</span> plt
+<span class="hl-keyword">import</span> scipy.cluster.hierarchy <span class="hl-keyword">as</span> sch
+<span class="hl-keyword">from</span> sklearn.cluster <span class="hl-keyword">import</span> AgglomerativeClustering
+
+<span class="hl-comment"># 1. Load Data</span>
+df = pd.<span class="hl-func">read_csv</span>(<span class="hl-string">'customer_data.csv'</span>)
+X = df[[<span class="hl-string">'Annual Income'</span>, <span class="hl-string">'Spending Score'</span>]]
+
+<span class="hl-comment"># 2. Membuat Dendrogram (untuk mencari K optimal)</span>
+plt.<span class="hl-func">figure</span>(figsize=(<span class="hl-number">10</span>, <span class="hl-number">7</span>))
+plt.<span class="hl-func">title</span>(<span class="hl-string">"Customer Dendrogram"</span>)
+dendrogram = sch.<span class="hl-func">dendrogram</span>(sch.<span class="hl-func">linkage</span>(X, method=<span class="hl-string">'ward'</span>))
+plt.<span class="hl-func">show</span>()
+
+<span class="hl-comment"># Berdasarkan dendrogram, kita bisa memilih threshold untuk memotong pohon.</span>
+<span class="hl-comment"># Misal, kita temukan K optimal = 5</span>
+
+<span class="hl-comment"># 3. Latih Model Agglomerative Clustering</span>
+hc = <span class="hl-func">AgglomerativeClustering</span>(n_clusters=<span class="hl-number">5</span>, metric=<span class="hl-string">'euclidean'</span>, linkage=<span class="hl-string">'ward'</span>)
+y_hc = hc.<span class="hl-func">fit_predict</span>(X)
+
+<span class="hl-comment"># 4. Tambahkan label klaster ke dataset</span>
+df[<span class="hl-string">'Cluster'</span>] = y_hc
+<span class="hl-func">print</span>(df.<span class="hl-func">head</span>())</code></pre>
+            </div>
+
+            <div class="content-nav">
+                <div class="content-nav-item">
+                    <a href="/datamining/kmeans.html" class="nav-btn nav-btn-prev">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                        <div><span class="nav-label">Sebelumnya</span><span class="nav-name">K-Means Clustering</span></div>
+                    </a>
+                </div>
+                <div class="content-nav-item">
+                    <a href="/datamining/index.html" class="nav-btn nav-btn-next" style="background: var(--accent-datamining); color: #0f172a; border-color: var(--accent-datamining);">
+                        <div><span class="nav-label">Selesai</span><span class="nav-name" style="font-weight: 800;">Kembali ke Index</span></div>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                    </a>
+                </div>
+            </div>
+
+        </article>
+    </main>
+
+    <script src="/datamining/course-layout.js"></script>
+    <script>
+        const hcCanvas = document.getElementById('hcCanvas');
+        const hcCtx = hcCanvas.getContext('2d');
+        const hcWidth = hcCanvas.width;
+        const hcHeight = hcCanvas.height;
+
+        let hcPoints = [];
+        let hcClusters = [];
+        let hcConnections = []; 
+        let hcIsConverged = false;
+        let hcAnimationId = null;
+        let hcTimeoutId = null;
+        let nextClusterId = 0;
+
+        const hcColors = [
+            '#ef4444', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#06b6d4',
+            '#f472b6', '#a3e635', '#2dd4bf', '#fbbf24', '#c084fc', '#fb7185'
+        ];
+
+        function getDistanceHC(p1, p2) {
+            return Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2));
+        }
+
+        hcCanvas.addEventListener('click', (e) => {
+            if (hcIsConverged || hcConnections.length > 0) {
+                clearCanvasHC();
+                return;
+            }
+            const rect = hcCanvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            let id = nextClusterId++;
+            let pt = { x, y, id: id };
+            hcPoints.push(pt);
+            hcClusters.push({
+                id: id,
+                points: [pt],
+                color: hcColors[id % hcColors.length]
+            });
+            updateButtonStatesHC();
+            drawHC();
+            updateStatusHC("Titik ditambahkan. Tambahkan lagi atau klik Gabungkan.");
+        });
+
+        function clearCanvasHC() {
+            hcPoints = [];
+            hcClusters = [];
+            hcConnections = [];
+            hcIsConverged = false;
+            nextClusterId = 0;
+            clearTimeout(hcTimeoutId);
+            cancelAnimationFrame(hcAnimationId);
+            updateButtonStatesHC();
+            drawHC();
+            updateStatusHC("Kanvas dibersihkan. Tambahkan data baru.");
+        }
+
+        function generateDataHC() {
+            clearCanvasHC();
+            const numPoints = 25; 
+            for (let i = 0; i < numPoints; i++) {
+                let x = 50 + Math.random() * (hcWidth - 100);
+                let y = 50 + Math.random() * (hcHeight - 100);
+                let id = nextClusterId++;
+                let pt = { x, y, id: id };
+                hcPoints.push(pt);
+                hcClusters.push({
+                    id: id,
+                    points: [pt],
+                    color: hcColors[id % hcColors.length]
+                });
+            }
+            updateButtonStatesHC();
+            drawHC();
+            updateStatusHC(`${numPoints} titik data di-generate. Silakan mulai simulasi.`);
+        }
+
+        function autoStartHC() {
+            if (hcPoints.length === 0) generateDataHC();
+            setTimeout(runHCFull, 500);
+        }
+
+        function stepHC() {
+            if (hcClusters.length <= 1) {
+                hcIsConverged = true;
+                updateButtonStatesHC();
+                updateStatusHC("🎉 SEMUA DATA TELAH TERGABUNG MENJADI 1 KLASTER!", true);
+                return;
+            }
+
+            // Find closest pair of clusters using Single Linkage
+            let minDist = Infinity;
+            let mergeI = -1;
+            let mergeJ = -1;
+            let closestP1 = null;
+            let closestP2 = null;
+
+            for (let i = 0; i < hcClusters.length; i++) {
+                for (let j = i + 1; j < hcClusters.length; j++) {
+                    let c1 = hcClusters[i];
+                    let c2 = hcClusters[j];
+                    
+                    for (let p1 of c1.points) {
+                        for (let p2 of c2.points) {
+                            let d = getDistanceHC(p1, p2);
+                            if (d < minDist) {
+                                minDist = d;
+                                mergeI = i;
+                                mergeJ = j;
+                                closestP1 = p1;
+                                closestP2 = p2;
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (mergeI !== -1 && mergeJ !== -1) {
+                let c1 = hcClusters[mergeI];
+                let c2 = hcClusters[mergeJ];
+
+                let newColor = c1.points.length > c2.points.length ? c1.color : c2.color;
+                
+                let newCluster = {
+                    id: nextClusterId++,
+                    points: [...c1.points, ...c2.points],
+                    color: newColor
+                };
+
+                hcConnections.push({
+                    p1: closestP1,
+                    p2: closestP2,
+                    color: newColor
+                });
+
+                hcClusters.splice(mergeJ, 1);
+                hcClusters.splice(mergeI, 1);
+                hcClusters.push(newCluster);
+
+                updateStatusHC(`Langkah: Dua klaster terdekat digabungkan (Jarak: ${minDist.toFixed(1)}). Sisa Klaster: ${hcClusters.length}`);
+            }
+
+            drawHC();
+
+            if (hcClusters.length <= 1) {
+                hcIsConverged = true;
+                updateButtonStatesHC();
+                updateStatusHC("🎉 SEMUA DATA TELAH TERGABUNG MENJADI 1 KLASTER!", true);
+            }
+        }
+
+        function runHCFull() {
+            if (hcIsConverged || hcClusters.length <= 1) return;
+            
+            document.getElementById('btnStepHC').disabled = true;
+            document.getElementById('btnRunHC').disabled = true;
+            document.getElementById('btnAutoHC').disabled = true;
+            
+            function animate() {
+                if(!hcIsConverged && hcClusters.length > 1) {
+                    stepHC();
+                    hcTimeoutId = setTimeout(() => {
+                        hcAnimationId = requestAnimationFrame(animate);
+                    }, 400); 
+                }
+            }
+            animate();
+        }
+
+        function updateButtonStatesHC() {
+            const hasPoints = hcPoints.length > 0;
+            const canMerge = hcClusters.length > 1;
+            
+            document.getElementById('btnStepHC').disabled = !canMerge;
+            document.getElementById('btnRunHC').disabled = !canMerge;
+            document.getElementById('btnAutoHC').disabled = !hasPoints && !canMerge; 
+            
+            hcCanvas.style.cursor = (hcIsConverged || hcConnections.length > 0) ? 'pointer' : 'crosshair';
+        }
+
+        function updateStatusHC(text, highlight = false) {
+            const bar = document.getElementById('statusBarHC');
+            if(!bar) return;
+            bar.innerHTML = `<span class="status-badge">Status</span> ${text}`;
+            if(highlight) {
+                bar.style.backgroundColor = "rgba(74, 222, 128, 0.1)";
+                bar.style.borderColor = "rgba(74, 222, 128, 0.3)";
+                bar.style.color = "#4ade80";
+            } else {
+                bar.style.backgroundColor = "rgba(167, 139, 250, 0.1)";
+                bar.style.borderColor = "rgba(167, 139, 250, 0.3)";
+                bar.style.color = "var(--accent-datamining)";
+            }
+        }
+
+        function drawHC() {
+            hcCtx.fillStyle = '#0f172a';
+            hcCtx.fillRect(0, 0, hcWidth, hcHeight);
+
+            hcCtx.lineWidth = 2;
+            hcConnections.forEach(conn => {
+                hcCtx.beginPath();
+                hcCtx.moveTo(conn.p1.x, conn.p1.y);
+                hcCtx.lineTo(conn.p2.x, conn.p2.y);
+                hcCtx.strokeStyle = conn.color;
+                hcCtx.globalAlpha = 0.6;
+                hcCtx.stroke();
+            });
+            hcCtx.globalAlpha = 1.0;
+
+            hcClusters.forEach(cluster => {
+                cluster.points.forEach(p => {
+                    hcCtx.beginPath();
+                    hcCtx.arc(p.x, p.y, 5, 0, Math.PI * 2);
+                    hcCtx.fillStyle = cluster.color;
+                    hcCtx.fill();
+                    hcCtx.strokeStyle = '#ffffff';
+                    hcCtx.lineWidth = 1;
+                    hcCtx.stroke();
+                });
+            });
+        }
+
+        // Initial setup
+        generateDataHC();
+
+        function copyCode(btn) {
+            const codeBlock = btn.closest('.code-block').querySelector('code');
+            navigator.clipboard.writeText(codeBlock.textContent).then(() => {
+                btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>';
+                setTimeout(() => {
+                    btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+                }, 2000);
+            });
+        }
+    </script>
+</body>
+</html>
