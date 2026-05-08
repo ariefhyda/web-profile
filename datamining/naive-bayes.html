@@ -121,6 +121,86 @@
         
         .decision-yes { color: #4ade80; }
         .decision-no { color: #f87171; }
+
+        /* Dataset Table Styling */
+        .dataset-table-container {
+            margin-top: 24px;
+            margin-bottom: 32px;
+            overflow-x: auto;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            background-color: var(--surface-light);
+        }
+
+        .dataset-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+            text-align: left;
+        }
+
+        .dataset-table th {
+            background-color: rgba(84, 197, 248, 0.1);
+            color: var(--text-primary);
+            font-weight: 600;
+            padding: 12px 16px;
+            border-bottom: 2px solid var(--border-color);
+            white-space: nowrap;
+        }
+
+        .dataset-table td {
+            padding: 10px 16px;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        .dataset-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .dataset-table tr:hover {
+            background-color: rgba(255, 255, 255, 0.02);
+        }
+
+        .badge-play {
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .badge-yes { background-color: rgba(74, 222, 128, 0.2); color: #4ade80; }
+        .badge-no { background-color: rgba(248, 113, 113, 0.2); color: #f87171; }
+
+        .download-container {
+            margin-top: 16px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .btn-download {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background-color: rgba(34, 197, 94, 0.1);
+            color: #4ade80;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .btn-download:hover {
+            background-color: rgba(34, 197, 94, 0.2);
+            transform: translateY(-1px);
+        }
+
+        .btn-download svg {
+            width: 18px;
+            height: 18px;
+        }
     </style>
 </head>
 <body>
@@ -195,6 +275,40 @@
             <h2 class="content-heading">Interactive: Prediksi Bermain Tenis</h2>
             <p class="content-text">
                 Mari kita praktikkan menggunakan dataset klasik "Play Tennis". Kita akan memprediksi apakah seseorang akan bermain tenis atau tidak berdasarkan kondisi cuaca. 
+            </p>
+
+            <div class="dataset-table-container">
+                <table class="dataset-table">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Outlook</th>
+                            <th>Temperature</th>
+                            <th>Humidity</th>
+                            <th>Windy</th>
+                            <th>Play Tennis (Target)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>1</td><td>Sunny</td><td>Hot</td><td>High</td><td>False</td><td><span class="badge-play badge-no">No</span></td></tr>
+                        <tr><td>2</td><td>Sunny</td><td>Hot</td><td>High</td><td>True</td><td><span class="badge-play badge-no">No</span></td></tr>
+                        <tr><td>3</td><td>Overcast</td><td>Hot</td><td>High</td><td>False</td><td><span class="badge-play badge-yes">Yes</span></td></tr>
+                        <tr><td>4</td><td>Rainy</td><td>Mild</td><td>High</td><td>False</td><td><span class="badge-play badge-yes">Yes</span></td></tr>
+                        <tr><td>5</td><td>Rainy</td><td>Cool</td><td>Normal</td><td>False</td><td><span class="badge-play badge-yes">Yes</span></td></tr>
+                        <tr><td>6</td><td>Rainy</td><td>Cool</td><td>Normal</td><td>True</td><td><span class="badge-play badge-no">No</span></td></tr>
+                        <tr><td>7</td><td>Overcast</td><td>Cool</td><td>Normal</td><td>True</td><td><span class="badge-play badge-yes">Yes</span></td></tr>
+                        <tr><td>8</td><td>Sunny</td><td>Mild</td><td>High</td><td>False</td><td><span class="badge-play badge-no">No</span></td></tr>
+                        <tr><td>9</td><td>Sunny</td><td>Cool</td><td>Normal</td><td>False</td><td><span class="badge-play badge-yes">Yes</span></td></tr>
+                        <tr><td>10</td><td>Rainy</td><td>Mild</td><td>Normal</td><td>False</td><td><span class="badge-play badge-yes">Yes</span></td></tr>
+                        <tr><td>11</td><td>Sunny</td><td>Mild</td><td>Normal</td><td>True</td><td><span class="badge-play badge-yes">Yes</span></td></tr>
+                        <tr><td>12</td><td>Overcast</td><td>Mild</td><td>High</td><td>True</td><td><span class="badge-play badge-yes">Yes</span></td></tr>
+                        <tr><td>13</td><td>Overcast</td><td>Hot</td><td>Normal</td><td>False</td><td><span class="badge-play badge-yes">Yes</span></td></tr>
+                        <tr><td>14</td><td>Rainy</td><td>Mild</td><td>High</td><td>True</td><td><span class="badge-play badge-no">No</span></td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <p class="content-text">
                 Cobalah ubah-ubah nilai fitur di bawah ini dan lihat bagaimana Naïve Bayes menghitung keputusannya secara langsung!
             </p>
 
@@ -267,6 +381,13 @@
                         Keputusan: -
                     </div>
                 </div>
+            </div>
+
+            <div class="download-container">
+                <a href="/datamining/materi/Example-NaiveBayes.xlsx" class="btn-download" download>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    Download Dataset (Excel)
+                </a>
             </div>
 
             <h2 class="content-heading" style="margin-top: 40px;">Implementasi di Python</h2>
