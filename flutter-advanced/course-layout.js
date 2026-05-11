@@ -32,6 +32,12 @@ const courseConfig = {
             ]
         },
         {
+            group: "YOLO (You Only Look Once)",
+            items: [
+                { title: "Materi YOLO", url: "/flutter-advanced/yolo.html", icon: "4" }
+            ]
+        },
+        {
             group: "Google Stitch & AI",
             items: [
                 { title: "Google Stitch", url: "/flutter-advanced/google-stitch.html", icon: "5" },
