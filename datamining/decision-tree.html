@@ -639,7 +639,99 @@
             </div>
 
             <p class="content-text" style="margin-top: 24px;">
-                Karena <strong>Outlook</strong> memiliki Gain tertinggi, ia dipilih sebagai pemisah utama (Root). Proses ini kemudian diulangi secara rekursif untuk setiap cabang hingga semua data terklasifikasi dengan sempurna atau mencapai kriteria henti.
+                Karena <strong>Outlook</strong> memiliki Gain tertinggi, ia dipilih sebagai pemisah utama (Root). Namun, proses belum selesai! Kita harus melanjutkan proses pembagian ini secara rekursif untuk cabang yang belum "murni" (Entropy &gt; 0).
+            </p>
+
+            <h3 style="font-size: 1.2rem; font-weight: 600; margin-top: 40px; margin-bottom: 16px; color: var(--text-primary);">Langkah 4: Melanjutkan Cabang "Outlook"</h3>
+            <p class="content-text">
+                Atribut <strong>Outlook</strong> membagi 14 data menjadi 3 cabang: <strong>Overcast</strong>, <strong>Sunny</strong>, dan <strong>Rainy</strong>. Mari kita evaluasi masing-masing cabang untuk melihat apakah kita perlu membaginya lagi.
+            </p>
+
+            <div class="info-box" style="background: rgba(74, 222, 128, 0.05); border-color: rgba(74, 222, 128, 0.2); margin-top: 16px;">
+                <div class="info-box-header" style="color: #4ade80;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    <strong>Cabang 1: Overcast (Selesai!)</strong>
+                </div>
+                <div style="font-size: 0.95rem; color: var(--text-secondary); line-height: 1.8;">
+                    <p>
+                        Dari 4 data pada cabang Overcast, <strong>semuanya menghasilkan target "YES"</strong>. Ingat pada perhitungan sebelumnya, Entropy-nya adalah <strong>0</strong>.<br>
+                        Karena datanya sudah murni (semua YES), cabang ini langsung menjadi <strong>Leaf Node (Daun) "YES"</strong>. Tidak perlu perhitungan lebih lanjut.
+                    </p>
+                </div>
+            </div>
+
+            <div class="info-box" style="background: rgba(84, 197, 248, 0.05); border-color: rgba(84, 197, 248, 0.2); margin-top: 24px;">
+                <div class="info-box-header" style="color: var(--primary-color);">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+                    <strong>Cabang 2: Sunny (Perlu Dibagi Lagi)</strong>
+                </div>
+                <div style="font-size: 0.95rem; color: var(--text-secondary); line-height: 1.8;">
+                    <p>
+                        Pada cabang <strong>Sunny</strong>, terdapat 5 data yang masih bercampur (2 YES, 3 NO) dengan Entropy = 0.971.<br>
+                        Kita harus mencari atribut mana (antara <em>Humidity</em>, <em>Windy</em>, atau <em>Temperature</em>) yang memiliki Gain tertinggi untuk membagi ke-5 data ini.
+                    </p>
+                    <div style="margin-top: 16px; background: rgba(0,0,0,0.15); padding: 16px; border-radius: 8px;">
+                        <p style="font-weight: 600; color: var(--text-primary); margin-bottom: 8px;">A. Mari kita hitung Gain untuk "Humidity" (Khusus 5 data Sunny):</p>
+                        <ul style="margin-left: 20px; margin-bottom: 12px; list-style-type: disc;">
+                            <li><strong>High</strong>: Ada 3 data (Semuanya NO) &rarr; Entropy = <strong style="color: #4ade80;">0</strong> (Murni)</li>
+                            <li><strong>Normal</strong>: Ada 2 data (Semuanya YES) &rarr; Entropy = <strong style="color: #4ade80;">0</strong> (Murni)</li>
+                        </ul>
+                        <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; background: rgba(0,0,0,0.2); padding: 12px; border-radius: 6px; margin-bottom: 16px;">
+                            Gain(Humidity|Sunny) = 0.971 - [ (3/5 * 0) + (2/5 * 0) ] = <strong style="color: var(--primary-color); font-size: 1.05rem;">0.971</strong>
+                        </div>
+
+                        <p style="font-weight: 600; color: var(--text-primary); margin-bottom: 8px;">B. Jika kita hitung atribut lain pada cabang Sunny:</p>
+                        <ul style="margin-left: 20px; margin-bottom: 0; list-style-type: disc;">
+                            <li>Gain(Temperature|Sunny) = 0.571</li>
+                            <li>Gain(Windy|Sunny) = 0.020</li>
+                        </ul>
+                    </div>
+                    <div style="margin-top: 16px; padding-top: 16px; border-top: 1px dashed rgba(255,255,255,0.1);">
+                        <p><strong>Kesimpulan Cabang Sunny:</strong><br>
+                        <strong>Humidity</strong> memiliki Gain tertinggi (0.971). Maka, di bawah cabang Sunny kita pasang <strong>Humidity</strong> sebagai node.<br>
+                        Karena percabangan Humidity (High dan Normal) keduanya menghasilkan Entropy = 0, pembagian selesai! <em>(High &rarr; NO, Normal &rarr; YES)</em>.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-box" style="background: rgba(244, 63, 94, 0.05); border-color: rgba(244, 63, 94, 0.2); margin-top: 24px; margin-bottom: 40px;">
+                <div class="info-box-header" style="color: #f43f5e;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+                    <strong>Cabang 3: Rainy (Perlu Dibagi Lagi)</strong>
+                </div>
+                <div style="font-size: 0.95rem; color: var(--text-secondary); line-height: 1.8;">
+                    <p>
+                        Pada cabang <strong>Rainy</strong>, terdapat 5 data yang masih bercampur (3 YES, 2 NO) dengan Entropy = 0.971.<br>
+                        Sama seperti sebelumnya, kita cari Gain tertinggi dari sisa atribut untuk membagi data ini.
+                    </p>
+                    <div style="margin-top: 16px; background: rgba(0,0,0,0.15); padding: 16px; border-radius: 8px;">
+                        <p style="font-weight: 600; color: var(--text-primary); margin-bottom: 8px;">A. Mari kita hitung Gain untuk "Windy" (Khusus 5 data Rainy):</p>
+                        <ul style="margin-left: 20px; margin-bottom: 12px; list-style-type: disc;">
+                            <li><strong>False (Weak)</strong>: Ada 3 data (Semuanya YES) &rarr; Entropy = <strong style="color: #4ade80;">0</strong> (Murni)</li>
+                            <li><strong>True (Strong)</strong>: Ada 2 data (Semuanya NO) &rarr; Entropy = <strong style="color: #4ade80;">0</strong> (Murni)</li>
+                        </ul>
+                        <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; background: rgba(0,0,0,0.2); padding: 12px; border-radius: 6px; margin-bottom: 16px;">
+                            Gain(Windy|Rainy) = 0.971 - [ (3/5 * 0) + (2/5 * 0) ] = <strong style="color: #f43f5e; font-size: 1.05rem;">0.971</strong>
+                        </div>
+
+                        <p style="font-weight: 600; color: var(--text-primary); margin-bottom: 8px;">B. Jika kita hitung atribut lain pada cabang Rainy:</p>
+                        <ul style="margin-left: 20px; margin-bottom: 0; list-style-type: disc;">
+                            <li>Gain(Temperature|Rainy) = 0.020</li>
+                            <li>Gain(Humidity|Rainy) = 0.020</li>
+                        </ul>
+                    </div>
+                    <div style="margin-top: 16px; padding-top: 16px; border-top: 1px dashed rgba(255,255,255,0.1);">
+                        <p><strong>Kesimpulan Cabang Rainy:</strong><br>
+                        <strong>Windy</strong> memiliki Gain tertinggi (0.971). Maka, di bawah cabang Rainy kita pasang <strong>Windy</strong> sebagai node.<br>
+                        Karena percabangannya menghasilkan Entropy = 0, pembagian selesai! <em>(False &rarr; YES, True &rarr; NO)</em>.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <p class="content-text" style="margin-bottom: 32px; padding: 20px; background: rgba(74, 222, 128, 0.05); border: 1px solid rgba(74, 222, 128, 0.3); border-radius: 8px;">
+                🎉 <strong>Selesai!</strong> Karena semua cabang di ujung sudah mencapai titik murni (Entropy = 0), struktur pohon tidak perlu dibagi lagi. Gambar struktur pohon di atas adalah hasil final dari seluruh tahapan perhitungan rekursif ini.
             </p>
 
             <h2 class="content-heading">Interactive: Simulasi Decision Tree (Play Tennis)</h2>
