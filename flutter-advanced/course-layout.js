@@ -19,14 +19,16 @@ const courseConfig = {
         {
             group: "Teachable Machine",
             items: [
-                { title: "Google Teachable Machine", url: "/flutter-advanced/teachable-machine.html", icon: "2" }
+                { title: "Google Teachable Machine", url: "/flutter-advanced/teachable-machine.html", icon: "2" },
+                { title: "Image Project", url: "/flutter-advanced/tm-image.html", icon: "2.1" },
+                { title: "Audio Project", url: "/flutter-advanced/tm-audio.html", icon: "2.2" },
+                { title: "Pose Project", url: "/flutter-advanced/tm-pose.html", icon: "2.3" }
             ]
         },
         {
             group: "Implementasi ML",
             items: [
-                { title: "Implementasi Model di Flutter", url: "/flutter-advanced/implementasi-model.html", icon: "3" },
-                { title: "TFLite & On-Device ML", url: "/flutter-advanced/tflite-ondevice.html", icon: "4" }
+                { title: "TFLite & On-Device ML", url: "/flutter-advanced/tflite-ondevice.html", icon: "3" }
             ]
         },
         {

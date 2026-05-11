@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio Project — Teachable Machine — Arif Hidayah</title>
+    <meta name="description" content="Tutorial membuat model klasifikasi suara dengan Teachable Machine dan implementasinya di Flutter.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/flutter/course.css">
+</head>
+<body>
+    <div class="bg-grid" aria-hidden="true"></div>
+
+    <nav class="navbar scrolled" id="navbar"></nav>
+    <div class="mobile-menu" id="mobileMenu"></div>
+
+    <main class="course-layout">
+        <aside class="course-sidebar" id="courseSidebar"></aside>
+
+        <article class="course-content">
+            <div class="breadcrumb">
+                <a href="../index.html">Home</a>
+                <span>›</span>
+                <a href="/flutter-advanced/index.html">Flutter Advanced</a>
+                <span>›</span>
+                <a href="/flutter-advanced/teachable-machine.html">Teachable Machine</a>
+                <span>›</span>
+                <span style="color: var(--text-primary);">Audio Project</span>
+            </div>
+
+            <header class="content-header">
+                <h1 class="content-title">Modul 2.2: Audio Project</h1>
+                <div class="content-meta">
+                    <div class="meta-pill">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 5V8.5L10.5 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/></svg>
+                        <span>Estimasi: 45 Menit</span>
+                    </div>
+                    <div class="meta-pill">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="10" rx="1" stroke="currentColor" stroke-width="1.5"/><path d="M5 7h6M5 10h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                        <span>Praktikum</span>
+                    </div>
+                </div>
+            </header>
+
+            <p class="content-text">Audio Project memungkinkan Anda melatih model untuk mengenali suara pendek (biasanya 1 detik). Teachable Machine mengubah suara menjadi <strong>Spectrogram</strong> (representasi visual suara) agar bisa diproses oleh arsitektur model gambar.</p>
+
+            <h2 class="content-heading">Langkah Praktikum 1: Membuat Model Suara di Teachable Machine</h2>
+            <p class="content-text">Pembuatan model suara memiliki tantangan yang berbeda dengan gambar. Dalam project audio, kita berurusan dengan <em>durasi rekaman</em> dan <em>noise</em> sekitar. Mari kita buat model yang bisa membedakan <strong>"Suara Tepuk Tangan"</strong>, <strong>"Suara Bersiul"</strong>, dan <strong>Keadaan Hening</strong>.</p>
+            
+            <h3 style="margin-top: 2rem; margin-bottom: 0.5rem; color: var(--accent-flutter);">Step 1: Perekaman Wajib (Background Noise)</h3>
+            <p class="content-text">Buka <a href="https://teachablemachine.withgoogle.com/" target="_blank" style="color: var(--accent-flutter); text-decoration: none;">Teachable Machine</a> lalu pilih <strong>Audio Project</strong>. Anda akan melihat hal pertama yang <strong>WAJIB</strong> dilakukan adalah mengisi kelas <em>Background Noise</em>.</p>
+            <ul style="margin-left: 1.5rem; margin-bottom: 1.5rem;" class="content-text">
+                <li style="margin-bottom: 0.5rem;"><strong>Mengapa wajib?</strong> Mikrofon ponsel dan laptop selalu menangkap suara dengungan ruangan (AC, kipas, angin, atau jalanan). Model harus tahu seperti apa "suara kosong" di ruangan Anda, agar tidak salah mengira noise tersebut sebagai sebuah perintah.</li>
+                <li><strong>Cara rekam:</strong> Klik tombol <strong>Mic</strong> pada kelas Background Noise. Klik tombol <strong>Record 20 Seconds</strong> dan diamlah. Biarkan mikrofon merekam suara hening ruangan Anda selama 20 detik penuh. Sistem kemudian akan otomatis memecah rekaman tersebut menjadi potongan-potongan sampel kecil berdurasi 1 detik.</li>
+            </ul>
+
+            <h3 style="margin-top: 2rem; margin-bottom: 0.5rem; color: var(--accent-flutter);">Step 2: Mendefinisikan Kelas Perintah (Dataset Gathering)</h3>
+            <p class="content-text">Setelah Background Noise terpenuhi, kita siap membuat kelas untuk suara perintah yang ingin dikenali.</p>
+            <div class="data-collection-grid">
+                <div class="data-card">
+                    <div class="data-card-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5v14M7 5v14M22 10v4M2 10v4"/></svg>
+                    </div>
+                    <div class="data-card-content">
+                        <h3>Ubah Nama Kelas</h3>
+                        <p>Ganti nama <em>Class 2</em> menjadi <strong>"Tepuk"</strong>. Kemudian, klik <em>Add a class</em> untuk menambahkan kelas baru dan beri nama <strong>"Siul"</strong>.</p>
+                    </div>
+                </div>
+                <div class="data-card">
+                    <div class="data-card-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+                    </div>
+                    <div class="data-card-content">
+                        <h3>Rekam Sampel</h3>
+                        <p>Klik <strong>Mic</strong> di kelas "Tepuk". Rekam suara tepukan tangan Anda berulang-ulang hingga terkumpul minimal <strong>20-30 detik total rekaman</strong>.</p>
+                    </div>
+                </div>
+                <div class="data-card">
+                    <div class="data-card-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    </div>
+                    <div class="data-card-content">
+                        <h3>Konsistensi Jarak</h3>
+                        <p>Lakukan hal yang sama untuk "Siul". Usahakan menjaga jarak konsisten antara sumber suara dan mikrofon agar data lebih akurat.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-box" style="margin-top: 1.5rem;">
+                <div class="info-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                    <strong>Tips Praktikum</strong>
+                </div>
+                <p>Saat merekam suara tepuk tangan atau siulan, pastikan ada sedikit jeda di antara bunyinya. Teachable Machine akan otomatis menangkap dan mengekstrak audio Anda ke dalam <em>potongan 1 detik</em>. Jika suara terlalu rapat dan terpotong di tengah, kualitas dataset untuk dipelajari model akan menurun.</p>
+            </div>
+
+            <h3 style="margin-top: 2rem; margin-bottom: 0.5rem; color: var(--accent-flutter);">Step 3: Training & Rahasia "Spectrogram"</h3>
+            <p class="content-text">Setelah data terkumpul, klik tombol <strong>Train Model</strong>. Proses ini memakan waktu beberapa saat. Sambil menunggu, tahukah Anda apa yang sebenarnya dipelajari oleh model?</p>
+            <p class="content-text">Teachable Machine tidak benar-benar mempelajari "suara" dalam bentuk gelombangnya langsung. Ia mengubah gelombang audio mentah Anda menjadi gambar 2D yang disebut <strong>Spectrogram</strong> (gambar visual yang merepresentasikan frekuensi dan amplitudo suara dari waktu ke waktu). Model Machine Learning kemudian dilatih untuk mengenali <em>pola visual</em> dari gambar Spectrogram tersebut. Inilah mengapa arsitektur model AI untuk audio seringkali menggunakan teknologi yang sama dengan pengenalan gambar (CNN / Convolutional Neural Network)!</p>
+
+            <h3 style="margin-top: 2rem; margin-bottom: 0.5rem; color: var(--accent-flutter);">Step 4: Uji Coba & Export Model</h3>
+            <p class="content-text">Setelah proses training selesai, area <strong>Preview</strong> di sebelah kanan akan aktif. Cobalah bertepuk tangan, bersiul, atau sekadar diam. Bar persentase harusnya bergerak dan mendeteksi suara yang ia dengar secara real-time.</p>
+            <p class="content-text">Jika pendeteksinya sudah akurat dan memuaskan, saatnya membawa model ini ke project Flutter Anda:</p>
+            <ul style="margin-left: 1.5rem; margin-bottom: 1.5rem;" class="content-text">
+                <li style="margin-bottom: 0.5rem;">Klik tombol <strong>Export Model</strong>.</li>
+                <li style="margin-bottom: 0.5rem;">Pilih tab <strong>TensorFlow Lite</strong> (format standar untuk menjalankan model AI di perangkat mobile).</li>
+                <li style="margin-bottom: 0.5rem;">Pilih model <strong>Quantized</strong>. Sangat disarankan memilih tipe ini karena model akan dikompresi sehingga ukuran filenya jauh lebih kecil dan sangat ringan saat dijalankan pada RAM HP, tanpa mengurangi akurasi secara signifikan.</li>
+                <li>Terakhir, klik <strong>Download my model</strong>. Anda akan mendapatkan file berformat <code>.tflite</code> dan <code>labels.txt</code> yang dikemas dalam sebuah file ZIP.</li>
+            </ul>
+
+            <h2 class="content-heading" id="implementasi-flutter">Langkah Praktikum 2: Implementasi di Flutter dengan GetX</h2>
+            <p class="content-text">Kita akan membangun aplikasi klasifikasi audio menggunakan arsitektur folder standar dari <strong>GetCLI</strong>. Terdapat dua fitur utama: Klasifikasi dari Upload Audio (.wav) dan Realtime dari Mikrofon.</p>
+            
+            <h3 style="margin-top: 2rem; margin-bottom: 0.5rem; color: var(--accent-flutter);">Step 1: Persiapan Proyek & Dependencies</h3>
+            <p class="content-text">Pastikan Anda sudah menginstal <code>get_cli</code> secara global. Buat proyek baru dan masuk ke foldernya:</p>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">Terminal</span>
+                </div>
+                <pre class="code-block-body"><code>get create project:klasifikasi_audio
+cd klasifikasi_audio</code></pre>
+            </div>
+            
+            <p class="content-text">Salin model Teachable Machine Anda (<code>soundclassifier_with_metadata.tflite</code> dan <code>labels.txt</code>) ke dalam folder <code>assets/ml/</code>. Kemudian, instal package yang dibutuhkan:</p>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">Terminal</span>
+                </div>
+                <pre class="code-block-body"><code>flutter pub add get tflite_flutter permission_handler record file_picker</code></pre>
+            </div>
+
+            <h3 style="margin-top: 2rem; margin-bottom: 0.5rem; color: var(--accent-flutter);">Step 2: Konfigurasi Pubspec & Android</h3>
+            <p class="content-text">Tambahkan aset ke dalam konfigurasi <code>pubspec.yaml</code>:</p>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">pubspec.yaml</span>
+                </div>
+                <pre class="code-block-body"><code>  assets:
+    - assets/ml/labels.txt
+    - assets/ml/soundclassifier_with_metadata.tflite</code></pre>
+            </div>
+            <p class="content-text"><strong>Konfigurasi Android:</strong> Tambahkan izin mikrofon di <code>android/app/src/main/AndroidManifest.xml</code> sebelum tag <code>&lt;application&gt;</code>:</p>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">AndroidManifest.xml</span>
+                </div>
+                <pre class="code-block-body"><code>&lt;uses-permission android:name="android.permission.RECORD_AUDIO" /&gt;</code></pre>
+            </div>
+            <p class="content-text">Buka <code>android/app/build.gradle.kts</code> dan perbarui nilai <code>compileSdk</code>, <code>minSdk</code>, dan <code>ndkVersion</code>:</p>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">build.gradle.kts</span>
+                </div>
+                <pre class="code-block-body"><code>android {
+    namespace = "com.example.klasifikasi_audio"
+    compileSdk = 36
+    ndkVersion = "27.0.12077973"
+    
+    defaultConfig {
+        minSdk = 23
+    }
+}</code></pre>
+            </div>
+
+            <h3 style="margin-top: 2rem; margin-bottom: 0.5rem; color: var(--accent-flutter);">Step 3: Membuat Modul GetX</h3>
+            <p class="content-text">Gunakan GetCLI untuk membuat modul (Halaman) baru untuk fitur upload audio dan realtime audio:</p>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">Terminal</span>
+                </div>
+                <pre class="code-block-body"><code>get create page:upload_audio
+get create page:realtime_audio</code></pre>
+            </div>
+
+            <h3 style="margin-top: 2rem; margin-bottom: 0.5rem; color: var(--accent-flutter);">Step 4: Penulisan Kode Modul</h3>
+            <p class="content-text"><strong>A. Modul Home (Landing Page)</strong><br>Ubah <code>lib/app/modules/home/views/home_view.dart</code> agar menjadi menu pilihan klasifikasi:</p>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">home_view.dart</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code>import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import '../../../routes/app_pages.dart';
+import '../controllers/home_controller.dart';
+
+class HomeView extends GetView&lt;HomeController&gt; {
+  const HomeView({super.key});
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Audio Classification')),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ElevatedButton(
+              onPressed: () =&gt; Get.toNamed(Routes.UPLOAD_AUDIO),
+              child: const Text('Klasifikasi dari Upload Audio'),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () =&gt; Get.toNamed(Routes.REALTIME_AUDIO),
+              child: const Text('Klasifikasi Audio Realtime'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}</code></pre>
+            </div>
+
+            <p class="content-text"><strong>B. Modul Upload Audio</strong><br>Buka <code>lib/app/modules/upload_audio/controllers/upload_audio_controller.dart</code>:</p>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">upload_audio_controller.dart</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body" style="max-height: 400px; overflow-y: auto;"><code>import 'dart:io';
+import 'dart:typed_data';
+import 'package:file_picker/file_picker.dart';
+import 'package:flutter/services.dart';
+import 'package:get/get.dart';
+import 'package:tflite_flutter/tflite_flutter.dart';
+
+class UploadAudioController extends GetxController {
+  Interpreter? _interpreter;
+  List&lt;String&gt; _labels = [];
+
+  final selectedFileName = "No file selected".obs;
+  final predictedLabel = "Select a WAV file".obs;
+  final confidence = 0.0.obs;
+
+  static const int _expectedInputSize = 15600;
+
+  @override
+  void onInit() {
+    super.onInit();
+    _loadModelAndLabels();
+  }
+
+  @override
+  void onClose() {
+    _interpreter?.close();
+    super.onClose();
+  }
+
+  Future&lt;void&gt; _loadModelAndLabels() async {
+    try {
+      final labelData = await rootBundle.loadString('assets/ml/labels.txt');
+      _labels = labelData.split('\n').where((line) =&gt; line.isNotEmpty)
+          .map((line) =&gt; line.split(' ').sublist(1).join(' ')).toList();
+
+      _interpreter = await Interpreter.fromAsset('assets/ml/soundclassifier_with_metadata.tflite');
+    } catch (e) {
+      predictedLabel.value = "Failed to load model: $e";
+    }
+  }
+
+  Future&lt;void&gt; pickAndClassifyFile() async {
+    try {
+      FilePickerResult? result = await FilePicker.pickFiles(type: FileType.audio);
+
+      if (result != null && result.files.isNotEmpty) {
+        String? path = result.files.first.path;
+        if (path != null) {
+          selectedFileName.value = result.files.first.name;
+          predictedLabel.value = "Processing...";
+          confidence.value = 0.0;
+
+          File file = File(path);
+          Uint8List bytes = await file.readAsBytes();
+
+          int headerSize = 44; // WAV header
+          if (bytes.length &lt;= headerSize) {
+            predictedLabel.value = "Invalid audio file";
+            return;
+          }
+
+          Uint8List audioData = bytes.sublist(headerSize);
+          Int16List int16Data = audioData.buffer.asInt16List(audioData.offsetInBytes, audioData.lengthInBytes ~/ 2);
+
+          List&lt;int&gt; samplesToProcess = [];
+          if (int16Data.length &gt;= _expectedInputSize) {
+            samplesToProcess = int16Data.sublist(0, _expectedInputSize);
+          } else {
+            samplesToProcess = int16Data.toList();
+            while (samplesToProcess.length &lt; _expectedInputSize) {
+              samplesToProcess.add(0);
+            }
+          }
+
+          _runInference(samplesToProcess);
+        }
+      }
+    } catch (e) {
+      predictedLabel.value = "Error picking file: $e";
+    }
+  }
+
+  void _runInference(List&lt;int&gt; pcmData) {
+    if (_interpreter == null || _labels.isEmpty) return;
+
+    List&lt;double&gt; inputData = pcmData.map((e) =&gt; e / 32768.0).toList();
+    var input = [inputData];
+    var output = List.filled(1, List.filled(_labels.length, 0.0));
+
+    try {
+      _interpreter!.run(input, output);
+      List&lt;double&gt; probabilities = output[0];
+      
+      double maxProb = 0.0;
+      int maxIndex = -1;
+      for (int i = 0; i &lt; probabilities.length; i++) {
+        if (probabilities[i] &gt; maxProb) {
+          maxProb = probabilities[i];
+          maxIndex = i;
+        }
+      }
+
+      if (maxIndex != -1) {
+        predictedLabel.value = _labels[maxIndex];
+        confidence.value = maxProb;
+      }
+    } catch (e) {
+      predictedLabel.value = "Inference error";
+    }
+  }
+}</code></pre>
+            </div>
+
+            <p class="content-text">Buka <code>lib/app/modules/upload_audio/views/upload_audio_view.dart</code>:</p>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">upload_audio_view.dart</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body" style="max-height: 400px; overflow-y: auto;"><code>import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import '../controllers/upload_audio_controller.dart';
+
+class UploadAudioView extends GetView&lt;UploadAudioController&gt; {
+  const UploadAudioView({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Upload Audio Classification')),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.audio_file, size: 100, color: Colors.blueAccent),
+              const SizedBox(height: 16),
+              Obx(() =&gt; Text(controller.selectedFileName.value, style: const TextStyle(color: Colors.grey))),
+              const SizedBox(height: 32),
+              Obx(() =&gt; Text(controller.predictedLabel.value, style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold))),
+              const SizedBox(height: 16),
+              Obx(() =&gt; controller.confidence.value &gt; 0
+                  ? Column(
+                      children: [
+                        Text('Confidence: ${(controller.confidence.value * 100).toStringAsFixed(1)}%'),
+                        LinearProgressIndicator(value: controller.confidence.value, color: Colors.deepPurple),
+                      ],
+                    )
+                  : const SizedBox.shrink()),
+              const SizedBox(height: 48),
+              ElevatedButton.icon(
+                onPressed: controller.pickAndClassifyFile,
+                icon: const Icon(Icons.upload_file),
+                label: const Text('Pilih Audio (.wav)'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}</code></pre>
+            </div>
+
+            <p class="content-text"><strong>C. Modul Realtime Audio</strong><br>Buka <code>lib/app/modules/realtime_audio/controllers/realtime_audio_controller.dart</code>:</p>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">realtime_audio_controller.dart</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body" style="max-height: 400px; overflow-y: auto;"><code>import 'dart:async';
+import 'dart:typed_data';
+import 'package:flutter/services.dart';
+import 'package:get/get.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:record/record.dart';
+import 'package:tflite_flutter/tflite_flutter.dart';
+
+class RealtimeAudioController extends GetxController {
+  final _audioRecorder = AudioRecorder();
+  StreamSubscription&lt;Uint8List&gt;? _audioStreamSubscription;
+  Interpreter? _interpreter;
+  List&lt;String&gt; _labels = [];
+
+  final isRecording = false.obs;
+  final predictedLabel = "Loading...".obs;
+  final confidence = 0.0.obs;
+
+  static const int _sampleRate = 16000;
+  static const int _expectedInputSize = 15600;
+  
+  List&lt;int&gt; _audioBuffer = [];
+
+  @override
+  void onInit() {
+    super.onInit();
+    _loadModelAndLabels();
+  }
+
+  @override
+  void onClose() {
+    _stopRecording();
+    _audioRecorder.dispose();
+    _interpreter?.close();
+    super.onClose();
+  }
+
+  Future&lt;void&gt; _loadModelAndLabels() async {
+    try {
+      final labelData = await rootBundle.loadString('assets/ml/labels.txt');
+      _labels = labelData.split('\n').where((line) =&gt; line.isNotEmpty)
+          .map((line) =&gt; line.split(' ').sublist(1).join(' ')).toList();
+
+      _interpreter = await Interpreter.fromAsset('assets/ml/soundclassifier_with_metadata.tflite');
+      predictedLabel.value = "Ready to record";
+    } catch (e) {
+      predictedLabel.value = "Failed to load model";
+    }
+  }
+
+  Future&lt;void&gt; toggleRecording() async {
+    if (isRecording.value) {
+      await _stopRecording();
+    } else {
+      await _startRecording();
+    }
+  }
+
+  Future&lt;void&gt; _startRecording() async {
+    try {
+      var status = await Permission.microphone.request();
+      if (status != PermissionStatus.granted) {
+        predictedLabel.value = "Microphone permission denied";
+        return;
+      }
+
+      if (await _audioRecorder.hasPermission()) {
+        final stream = await _audioRecorder.startStream(const RecordConfig(
+          encoder: AudioEncoder.pcm16bits,
+          sampleRate: _sampleRate,
+          numChannels: 1,
+        ));
+
+        _audioBuffer.clear();
+        isRecording.value = true;
+        predictedLabel.value = "Listening...";
+
+        _audioStreamSubscription = stream.listen((Uint8List data) {
+          _processAudioData(data);
+        });
+      }
+    } catch (e) {
+      predictedLabel.value = "Error starting record: $e";
+    }
+  }
+
+  Future&lt;void&gt; _stopRecording() async {
+    await _audioStreamSubscription?.cancel();
+    _audioStreamSubscription = null;
+    await _audioRecorder.stop();
+    isRecording.value = false;
+    predictedLabel.value = "Ready to record";
+    confidence.value = 0.0;
+  }
+
+  void _processAudioData(Uint8List data) {
+    Int16List int16Data = data.buffer.asInt16List(data.offsetInBytes, data.lengthInBytes ~/ 2);
+    _audioBuffer.addAll(int16Data);
+
+    if (_audioBuffer.length &gt;= _expectedInputSize) {
+      List&lt;int&gt; samplesToProcess = _audioBuffer.sublist(_audioBuffer.length - _expectedInputSize);
+      _audioBuffer = _audioBuffer.sublist(_audioBuffer.length - (_expectedInputSize ~/ 2));
+      _runInference(samplesToProcess);
+    }
+  }
+
+  void _runInference(List&lt;int&gt; pcmData) {
+    if (_interpreter == null || _labels.isEmpty) return;
+
+    List&lt;double&gt; inputData = pcmData.map((e) =&gt; e / 32768.0).toList();
+    var input = [inputData];
+    var output = List.filled(1, List.filled(_labels.length, 0.0));
+
+    try {
+      _interpreter!.run(input, output);
+      List&lt;double&gt; probabilities = output[0];
+      
+      double maxProb = 0.0;
+      int maxIndex = -1;
+      for (int i = 0; i &lt; probabilities.length; i++) {
+        if (probabilities[i] &gt; maxProb) {
+          maxProb = probabilities[i];
+          maxIndex = i;
+        }
+      }
+
+      if (maxIndex != -1) {
+        predictedLabel.value = _labels[maxIndex];
+        confidence.value = maxProb;
+      }
+    } catch (e) {}
+  }
+}</code></pre>
+            </div>
+
+            <p class="content-text">Buka <code>lib/app/modules/realtime_audio/views/realtime_audio_view.dart</code>:</p>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">realtime_audio_view.dart</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body" style="max-height: 400px; overflow-y: auto;"><code>import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import '../controllers/realtime_audio_controller.dart';
+
+class RealtimeAudioView extends GetView&lt;RealtimeAudioController&gt; {
+  const RealtimeAudioView({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Realtime Audio Classification')),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Obx(() =&gt; Icon(controller.isRecording.value ? Icons.mic : Icons.mic_none, size: 100, color: controller.isRecording.value ? Colors.red : Colors.grey)),
+              const SizedBox(height: 32),
+              Obx(() =&gt; Text(controller.predictedLabel.value, style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold))),
+              const SizedBox(height: 16),
+              Obx(() =&gt; controller.confidence.value &gt; 0
+                  ? Column(
+                      children: [
+                        Text('Confidence: ${(controller.confidence.value * 100).toStringAsFixed(1)}%'),
+                        LinearProgressIndicator(value: controller.confidence.value, color: Colors.deepPurple),
+                      ],
+                    )
+                  : const SizedBox.shrink()),
+              const SizedBox(height: 48),
+              Obx(() =&gt; ElevatedButton.icon(
+                onPressed: controller.toggleRecording,
+                icon: Icon(controller.isRecording.value ? Icons.stop : Icons.play_arrow),
+                label: Text(controller.isRecording.value ? 'Stop Recording' : 'Start Recording'),
+              )),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}</code></pre>
+            </div>
+
+            <h3 style="margin-top: 2rem; margin-bottom: 0.5rem; color: var(--accent-flutter);">Step 5: Menjalankan Aplikasi</h3>
+            <p class="content-text">Sekarang arsitektur modular Anda sudah lengkap. Hubungkan device (yang mendukung mikrofon dan penyimpanan) dan jalankan <code>flutter run</code>. Anda akan masuk ke Landing Page untuk memilih antara mengetes model menggunakan berkas audio <code>.wav</code> (Upload) atau Realtime melalui mikrofon!</p>
+
+            <div class="info-box" style="background: rgba(255, 107, 107, 0.05); border-color: var(--accent-laravel); margin-top: 2rem;">
+                <div class="info-box-header" style="color: var(--accent-laravel);">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                    <strong>Tantangan Audio ML (Penting)</strong>
+                </div>
+                <p>Audio sangat rentan terhadap <strong>perubahan lingkungan (Noise)</strong>. Model yang dilatih di ruangan tertutup (hening) mungkin akan gagal mengenali suara jika Anda mengujinya di ruangan yang ramai. Pastikan merekam sampel <em>Background Noise</em> dari berbagai kondisi ruangan (kipas angin, jalanan) agar akurasi model lebih tangguh di dunia nyata.</p>
+            </div>
+
+            <!-- Nav -->
+            <div class="content-nav">
+                <div class="content-nav-item">
+                    <a href="/flutter-advanced/tm-image.html" class="nav-btn nav-btn-prev">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                        <div><span class="nav-label">Sebelumnya</span><span class="nav-name">Image Project</span></div>
+                    </a>
+                </div>
+                <div class="content-nav-item">
+                    <a href="/flutter-advanced/tm-pose.html" class="nav-btn nav-btn-next">
+                        <div><span class="nav-label">Selanjutnya</span><span class="nav-name">Pose Project</span></div>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </a>
+                </div>
+            </div>
+        </article>
+    </main>
+
+    <script src="/flutter-advanced/course-layout.js"></script>
+</body>
+</html>

@@ -65,151 +65,83 @@
 
             <!-- Jenis Project -->
             <h2 class="content-heading">Jenis Project di Teachable Machine</h2>
-            <p class="content-text">Teachable Machine mendukung tiga jenis project klasifikasi. Masing-masing sudah dioptimalkan untuk use case tertentu:</p>
-            <ol class="content-list">
-                <li><strong>Image Project</strong><br>Klasifikasi gambar berdasarkan kelas yang Anda tentukan. Contoh: mengenali jenis buah (apel vs jeruk vs mangga), deteksi ekspresi wajah (senang vs sedih), atau klasifikasi sampah (organik vs anorganik).</li>
-                <li><strong>Audio Project</strong><br>Klasifikasi suara/bunyi secara real-time. Contoh: mengenali perintah suara ("lampu nyala", "lampu mati"), membedakan jenis instrumen musik, atau mendeteksi suara batuk.</li>
-                <li><strong>Pose Project</strong><br>Klasifikasi pose tubuh menggunakan kamera. Contoh: mengenali gerakan olahraga (squat vs push-up), deteksi postur duduk yang salah, atau gesture-based control.</li>
-            </ol>
-
-            <div class="info-box">
-                <div class="info-box-header">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
-                    <strong>Mana yang Paling Sering Digunakan?</strong>
+            <p class="content-text">Teachable Machine mendukung tiga jenis project klasifikasi utama. Masing-masing dioptimalkan untuk kebutuhan yang berbeda:</p>
+            
+            <div class="project-grid">
+                <div class="project-card">
+                    <div class="project-card-header">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+                        <h3>Image Project</h3>
+                    </div>
+                    <p>Klasifikasi objek melalui gambar. Menggunakan <strong>MobileNet V2</strong> sebagai base model. Sangat cocok untuk deteksi benda, wajah, atau klasifikasi kategori visual.</p>
+                    <a href="/flutter-advanced/tm-image.html" class="project-link">Buka Modul Image →</a>
                 </div>
-                <p>Untuk pengembangan Flutter, <strong>Image Project</strong> adalah yang paling umum karena Flutter memiliki akses langsung ke kamera dan galeri. Audio dan Pose project membutuhkan plugin tambahan namun tetap bisa diintegrasikan.</p>
+
+                <div class="project-card">
+                    <div class="project-card-header">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+                        <h3>Audio Project</h3>
+                    </div>
+                    <p>Klasifikasi suara pendek berdurasi 1 detik. Menggunakan teknik <strong>Spectrogram</strong> untuk mengubah suara menjadi "gambar" sebelum diproses oleh model.</p>
+                    <a href="/flutter-advanced/tm-audio.html" class="project-link">Buka Modul Audio →</a>
+                </div>
+
+                <div class="project-card">
+                    <div class="project-card-header">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="3"/><path d="M6 22V11l6-2 6 2v11"/><path d="M9 13v9"/><path d="M15 13v9"/></svg>
+                        <h3>Pose Project</h3>
+                    </div>
+                    <p>Klasifikasi gerakan tubuh. Menggunakan model <strong>PoseNet</strong> untuk mendeteksi 17 titik kunci (keypoints) tubuh seperti siku, lutut, dan bahu.</p>
+                    <a href="/flutter-advanced/tm-pose.html" class="project-link">Buka Modul Pose →</a>
+                </div>
             </div>
 
             <!-- Cara Kerja -->
             <h2 class="content-heading">Cara Kerja Teachable Machine</h2>
             <p class="content-text">Di balik antarmuka yang sederhana, Teachable Machine menggunakan teknik <strong>Transfer Learning</strong> — sebuah pendekatan di mana model yang sudah dilatih sebelumnya (pre-trained model) di-<em>fine-tune</em> dengan data baru Anda.</p>
-            <ol class="content-list">
-                <li><strong>Base Model: MobileNet</strong><br>Teachable Machine menggunakan <strong>MobileNet</strong> sebagai backbone — arsitektur CNN ringan buatan Google yang sudah dilatih dengan jutaan gambar dari ImageNet. MobileNet sudah "paham" fitur visual dasar (garis, bentuk, tekstur).</li>
-                <li><strong>Transfer Learning</strong><br>Daripada melatih model dari nol (yang butuh ribuan gambar dan GPU powerful), Teachable Machine hanya melatih <strong>lapisan terakhir</strong> dari MobileNet menggunakan data Anda. Ini jauh lebih cepat dan hanya butuh puluhan sampel per kelas.</li>
-                <li><strong>Training di Browser</strong><br>Proses training dilakukan langsung di browser menggunakan <strong>TensorFlow.js</strong> dan WebGL. Data Anda <em>tidak dikirim ke server Google</em> — semua diproses secara lokal.</li>
-            </ol>
+            
+            <div class="data-collection-grid">
+                <div class="data-card">
+                    <div class="data-card-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+                    </div>
+                    <div class="data-card-content">
+                        <h3>Base Model: MobileNet</h3>
+                        <p>Menggunakan arsitektur CNN ringan buatan Google yang sudah dilatih dengan jutaan gambar. Model ini sudah memahami fitur visual dasar secara komprehensif.</p>
+                    </div>
+                </div>
+                <div class="data-card">
+                    <div class="data-card-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                    </div>
+                    <div class="data-card-content">
+                        <h3>Transfer Learning</h3>
+                        <p>Hanya melatih <strong>lapisan terakhir</strong> dari MobileNet menggunakan data Anda. Proses ini jauh lebih cepat dan efisien dibandingkan melatih model dari nol.</p>
+                    </div>
+                </div>
+                <div class="data-card">
+                    <div class="data-card-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                    </div>
+                    <div class="data-card-content">
+                        <h3>Training di Browser</h3>
+                        <p>Semua proses kalkulasi <em>training</em> dijalankan langsung di browser menggunakan <strong>TensorFlow.js</strong>. Privasi terjamin karena data tidak dikirim ke server.</p>
+                    </div>
+                </div>
+            </div>
 
+            <h2 class="content-heading">Mengapa Menggunakan Teachable Machine?</h2>
             <div class="info-box">
                 <div class="info-box-header">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
-                    <strong>Berapa Data yang Dibutuhkan?</strong>
+                    <strong>Keuntungan Utama</strong>
                 </div>
-                <p>Tidak ada angka pasti, namun sebagai pedoman:<br>• <strong>Minimum:</strong> 20-30 sampel per kelas<br>• <strong>Rekomendasi:</strong> 50-100 sampel per kelas<br>• <strong>Tips:</strong> Variasikan sudut, pencahayaan, dan latar belakang agar model lebih robust. Semakin beragam data, semakin baik generalisasinya.</p>
-            </div>
-
-            <!-- Langkah Praktikum -->
-            <h2 class="content-heading">Langkah Praktikum: Melatih Model Pertama</h2>
-            <p class="content-text">Mari kita praktikkan langsung membuat model klasifikasi gambar sederhana — misalnya mengenali <strong>batu, gunting, kertas</strong> dari tangan.</p>
-
-            <h2 class="content-heading">Step 1: Buka Teachable Machine</h2>
-            <p class="content-text">Kunjungi <a href="https://teachablemachine.withgoogle.com" target="_blank" style="color: #54c5f8;">teachablemachine.withgoogle.com</a> → klik <strong>"Get Started"</strong> → pilih <strong>"Image Project"</strong> → pilih <strong>"Standard image model"</strong>.</p>
-
-            <h2 class="content-heading">Step 2: Siapkan Kelas & Data</h2>
-            <p class="content-text">Buat 3 kelas dan isi masing-masing dengan minimal 30 sampel gambar:</p>
-            <ol class="content-list">
-                <li><strong>Kelas "Batu"</strong><br>Klik "Webcam" → tunjukkan tangan mengepal (batu) ke kamera → tahan tombol "Hold to Record" untuk mengambil banyak gambar sekaligus. Variasikan posisi dan sudut tangan.</li>
-                <li><strong>Kelas "Gunting"</strong><br>Ulangi langkah yang sama dengan pose tangan gunting (dua jari terbuka).</li>
-                <li><strong>Kelas "Kertas"</strong><br>Ulangi dengan telapak tangan terbuka (kertas).</li>
-            </ol>
-
-            <div class="info-box">
-                <div class="info-box-header">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
-                    <strong>Tips Pengambilan Data</strong>
-                </div>
-                <p>• Gunakan <strong>latar belakang yang bervariasi</strong> — bukan hanya satu tempat<br>• <strong>Ubah jarak</strong> tangan ke kamera (dekat, sedang, jauh)<br>• Ambil dari <strong>berbagai sudut</strong> (kiri, kanan, atas, bawah)<br>• Pastikan <strong>pencahayaan cukup</strong>, hindari backlight yang kuat</p>
-            </div>
-
-            <h2 class="content-heading">Step 3: Training Model</h2>
-            <p class="content-text">Setelah data siap, klik tombol <strong>"Train Model"</strong>. Proses training biasanya memakan waktu 30 detik hingga 2 menit tergantung jumlah data. Anda bisa melihat progress training secara real-time.</p>
-
-            <div class="info-box">
-                <div class="info-box-header">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
-                    <strong>Pengaturan Training (Advanced)</strong>
-                </div>
-                <p>Klik <strong>"Advanced"</strong> di bawah tombol Train untuk mengatur:<br>• <strong>Epochs</strong> — jumlah iterasi training (default: 50). Naikkan jika akurasi rendah.<br>• <strong>Batch Size</strong> — jumlah sampel per batch (default: 16). Biarkan default kecuali data sangat banyak.<br>• <strong>Learning Rate</strong> — kecepatan belajar (default: 0.001). Turunkan jika model <em>overfitting</em>.</p>
-            </div>
-
-            <h2 class="content-heading">Step 4: Testing Model</h2>
-            <p class="content-text">Setelah training selesai, panel <strong>"Preview"</strong> akan aktif secara otomatis. Arahkan tangan Anda ke webcam dan lihat apakah model bisa mengenali pose <em>batu</em>, <em>gunting</em>, atau <em>kertas</em> dengan benar. Perhatikan <strong>confidence score</strong> (persentase keyakinan) untuk setiap kelas.</p>
-            <p class="content-text">Jika akurasi belum memuaskan:</p>
-            <ol class="content-list">
-                <li><strong>Tambah data</strong><br>Kelas dengan akurasi rendah biasanya kekurangan variasi data. Tambah lebih banyak sampel dengan sudut/pencahayaan berbeda.</li>
-                <li><strong>Cek class imbalance</strong><br>Pastikan jumlah sampel antar kelas tidak terlalu timpang (misalnya 100 vs 20). Idealnya seimbang.</li>
-                <li><strong>Naikkan epochs</strong><br>Buka Advanced settings dan naikkan epochs menjadi 100-200 untuk training lebih lama.</li>
-            </ol>
-
-            <!-- Export -->
-            <h2 class="content-heading">Step 5: Export Model</h2>
-            <p class="content-text">Ini adalah langkah paling krusial — mengekspor model agar bisa digunakan di Flutter.</p>
-            <ol class="content-list">
-                <li><strong>Klik "Export Model"</strong><br>Di panel Preview, klik tombol <strong>"Export Model"</strong>.</li>
-                <li><strong>Pilih Tab "TensorFlow Lite"</strong><br>Dari tiga opsi (TF.js, TF, TFLite), pilih <strong>"TensorFlow Lite"</strong> karena format ini yang digunakan di Flutter.</li>
-                <li><strong>Pilih Quantization</strong><br>Pilih <strong>"Quantized"</strong> (bukan Floating point). Model quantized berukuran 4x lebih kecil dan lebih cepat di mobile, dengan penurunan akurasi minimal.</li>
-                <li><strong>Download File</strong><br>Klik <strong>"Download my model"</strong>. Anda akan mendapat file ZIP berisi:<br>• <code>model_unquant.tflite</code> — file model<br>• <code>labels.txt</code> — daftar nama kelas</li>
-            </ol>
-
-            <div class="code-block">
-                <div class="code-block-header">
-                    <div class="code-block-dots"><span></span><span></span><span></span></div>
-                    <span class="code-block-filename">labels.txt</span>
-                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
-                </div>
-                <pre class="code-block-body"><code><span class="hl-comment"># Isi file labels.txt yang dihasilkan</span>
-<span class="hl-number">0</span> Batu
-<span class="hl-number">1</span> Gunting
-<span class="hl-number">2</span> Kertas</code></pre>
-            </div>
-
-            <!-- Struktur File -->
-            <h2 class="content-heading">Menempatkan Model di Project Flutter</h2>
-            <p class="content-text">Setelah file model didownload, tempatkan ke dalam project Flutter Anda:</p>
-
-            <div class="code-block">
-                <div class="code-block-header">
-                    <div class="code-block-dots"><span></span><span></span><span></span></div>
-                    <span class="code-block-filename">Struktur Folder</span>
-                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
-                </div>
-                <pre class="code-block-body"><code>my_flutter_app/
-+-- assets/
-|   +-- ml/
-|       +-- model.tflite      <span class="hl-comment"># File model dari Teachable Machine</span>
-|       +-- labels.txt        <span class="hl-comment"># Daftar label kelas</span>
-+-- lib/
-|   +-- main.dart
-+-- pubspec.yaml              <span class="hl-comment"># Daftarkan assets di sini</span></code></pre>
-            </div>
-
-            <div class="code-block">
-                <div class="code-block-header">
-                    <div class="code-block-dots"><span></span><span></span><span></span></div>
-                    <span class="code-block-filename">pubspec.yaml</span>
-                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
-                </div>
-                <pre class="code-block-body"><code><span class="hl-comment"># Tambahkan di bagian flutter:</span>
-flutter:
-  assets:
-    - assets/ml/model.tflite
-    - assets/ml/labels.txt</code></pre>
-            </div>
-
-            <div class="info-box">
-                <div class="info-box-header">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
-                    <strong>Apa Selanjutnya?</strong>
-                </div>
-                <p>Model sudah siap! Di modul berikutnya (<strong>Implementasi Model di Flutter</strong>), kita akan mengintegrasikan model TFLite ini ke dalam aplikasi Flutter menggunakan package <code>tflite_flutter</code>, memproses input gambar dari kamera, dan menampilkan hasil klasifikasi secara real-time.</p>
-            </div>
-
-            <!-- Rangkuman -->
-            <div class="info-box">
-                <div class="info-box-header">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
-                    <strong>Rangkuman Modul 2</strong>
-                </div>
-                <p><strong>Teachable Machine</strong> — platform no-code dari Google untuk training model ML di browser.</p><p><strong>Transfer Learning</strong> — teknik memanfaatkan pre-trained model (MobileNet) agar training cepat dengan data sedikit.</p><p><strong>3 Jenis Project</strong> — Image, Audio, dan Pose classification.</p><p><strong>Export ke TFLite</strong> — pilih format Quantized untuk ukuran kecil dan performa optimal di mobile.</p><p><strong>Data Privasi</strong> — semua data diproses lokal di browser, tidak dikirim ke server Google.</p>
+                <ul class="content-list">
+                    <li><strong>Tanpa Coding:</strong> Fokus pada kualitas data dan label daripada arsitektur model.</li>
+                    <li><strong>Eksperimen Cepat:</strong> Validasi ide Machine Learning Anda dalam hitungan menit.</li>
+                    <li><strong>Privasi Terjamin:</strong> Seluruh proses training terjadi di browser Anda, data tidak pernah meninggalkan perangkat.</li>
+                    <li><strong>Support TFLite:</strong> Mudah diintegrasikan ke aplikasi Android, iOS, maupun Flutter.</li>
+                </ul>
             </div>
 
             <!-- Nav -->
@@ -221,8 +153,8 @@ flutter:
                     </a>
                 </div>
                 <div class="content-nav-item">
-                    <a href="#" class="nav-btn nav-btn-next">
-                        <div><span class="nav-label">Selanjutnya</span><span class="nav-name">Implementasi Model di Flutter</span></div>
+                    <a href="/flutter-advanced/tm-image.html" class="nav-btn nav-btn-next">
+                        <div><span class="nav-label">Selanjutnya</span><span class="nav-name">Image Project</span></div>
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
                     </a>
                 </div>

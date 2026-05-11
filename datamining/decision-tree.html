@@ -172,6 +172,176 @@
             color: var(--text-primary);
             border-color: var(--text-primary);
         }
+
+        /* Dataset Table Styling */
+        .dataset-table-container {
+            margin-top: 24px;
+            margin-bottom: 32px;
+            overflow-x: auto;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            background-color: var(--surface-light);
+        }
+
+        .dataset-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+            text-align: left;
+        }
+
+        .dataset-table th {
+            background-color: rgba(84, 197, 248, 0.1);
+            color: var(--text-primary);
+            font-weight: 600;
+            padding: 12px 16px;
+            border-bottom: 2px solid var(--border-color);
+            white-space: nowrap;
+        }
+
+        .dataset-table td {
+            padding: 10px 16px;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        .dataset-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .dataset-table tr:hover {
+            background-color: rgba(255, 255, 255, 0.02);
+        }
+
+        .badge-play {
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .badge-yes { background-color: rgba(74, 222, 128, 0.2); color: #4ade80; }
+        .badge-no { background-color: rgba(248, 113, 113, 0.2); color: #f87171; }
+
+        /* Tree Diagram Visualization Styling */
+        .tree-viz-section {
+            margin-top: 40px;
+            margin-bottom: 48px;
+            background: rgba(15, 23, 42, 0.3);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 40px 20px;
+            overflow-x: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .tree-viz-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 600px;
+        }
+
+        .tree-viz-node {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+
+        .node-box {
+            background: var(--surface-light);
+            border: 2px solid var(--primary-color);
+            border-radius: 8px;
+            padding: 12px 20px;
+            font-weight: 700;
+            color: var(--text-primary);
+            z-index: 2;
+            box-shadow: 0 4px 12px rgba(84, 197, 248, 0.15);
+            min-width: 120px;
+            text-align: center;
+        }
+
+        .leaf-box {
+            border-radius: 8px;
+            padding: 10px 18px;
+            font-weight: 800;
+            z-index: 2;
+            min-width: 80px;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .leaf-yes {
+            background: rgba(34, 197, 94, 0.1);
+            border: 2px solid #4ade80;
+            color: #4ade80;
+        }
+
+        .leaf-no {
+            background: rgba(239, 68, 68, 0.1);
+            border: 2px solid #f87171;
+            color: #f87171;
+        }
+
+        .tree-viz-branches {
+            display: flex;
+            justify-content: center;
+            position: relative;
+            padding-top: 40px;
+            width: 100%;
+        }
+
+        .tree-viz-branches::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 2px;
+            height: 20px;
+            background: var(--border-color);
+        }
+
+        .tree-viz-branch {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            padding: 0 15px;
+            flex: 1;
+        }
+
+        .tree-viz-branch::before {
+            content: '';
+            position: absolute;
+            top: -20px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--border-color);
+        }
+
+        .tree-viz-branch:first-child::before {
+            left: 50%;
+        }
+
+        .tree-viz-branch:last-child::before {
+            right: 50%;
+        }
+
+        .branch-label-viz {
+            position: absolute;
+            top: -35px;
+            background: var(--bg-color);
+            padding: 2px 8px;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+            white-space: nowrap;
+        }
     </style>
 </head>
 <body>
@@ -222,13 +392,49 @@
             <div class="info-box">
                 <div class="info-box-header">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
-                    <strong>Struktur Decision Tree</strong>
+                    <strong>Komponen Pohon</strong>
                 </div>
                 <p>
                     &bull; <strong>Root Node (Akar)</strong>: Atribut paling membedakan data.<br>
                     &bull; <strong>Internal Node (Cabang)</strong>: Atribut pengujian yang membagi data lebih lanjut.<br>
                     &bull; <strong>Leaf Node (Daun)</strong>: Hasil akhir / keputusan / kelas target.
                 </p>
+            </div>
+
+            <h2 class="content-heading">Dataset: Kasus Play Tennis</h2>
+            <p class="content-text">
+                Untuk memahami bagaimana pohon keputusan dibangun, kita akan menggunakan dataset klasik <strong>Play Tennis</strong>. Dataset ini berisi 14 catatan kondisi cuaca dan keputusan apakah akan bermain tenis atau tidak.
+            </p>
+
+            <div class="dataset-table-container">
+                <table class="dataset-table">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Outlook</th>
+                            <th>Temperature</th>
+                            <th>Humidity</th>
+                            <th>Windy</th>
+                            <th>Play Tennis (Target)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>1</td><td>Sunny</td><td>Hot</td><td>High</td><td>False</td><td><span class="badge-play badge-no">No</span></td></tr>
+                        <tr><td>2</td><td>Sunny</td><td>Hot</td><td>High</td><td>True</td><td><span class="badge-play badge-no">No</span></td></tr>
+                        <tr><td>3</td><td>Overcast</td><td>Hot</td><td>High</td><td>False</td><td><span class="badge-play badge-yes">Yes</span></td></tr>
+                        <tr><td>4</td><td>Rainy</td><td>Mild</td><td>High</td><td>False</td><td><span class="badge-play badge-yes">Yes</span></td></tr>
+                        <tr><td>5</td><td>Rainy</td><td>Cool</td><td>Normal</td><td>False</td><td><span class="badge-play badge-yes">Yes</span></td></tr>
+                        <tr><td>6</td><td>Rainy</td><td>Cool</td><td>Normal</td><td>True</td><td><span class="badge-play badge-no">No</span></td></tr>
+                        <tr><td>7</td><td>Overcast</td><td>Cool</td><td>Normal</td><td>True</td><td><span class="badge-play badge-yes">Yes</span></td></tr>
+                        <tr><td>8</td><td>Sunny</td><td>Mild</td><td>High</td><td>False</td><td><span class="badge-play badge-no">No</span></td></tr>
+                        <tr><td>9</td><td>Sunny</td><td>Cool</td><td>Normal</td><td>False</td><td><span class="badge-play badge-yes">Yes</span></td></tr>
+                        <tr><td>10</td><td>Rainy</td><td>Mild</td><td>Normal</td><td>False</td><td><span class="badge-play badge-yes">Yes</span></td></tr>
+                        <tr><td>11</td><td>Sunny</td><td>Mild</td><td>Normal</td><td>True</td><td><span class="badge-play badge-yes">Yes</span></td></tr>
+                        <tr><td>12</td><td>Overcast</td><td>Mild</td><td>High</td><td>True</td><td><span class="badge-play badge-yes">Yes</span></td></tr>
+                        <tr><td>13</td><td>Overcast</td><td>Hot</td><td>Normal</td><td>False</td><td><span class="badge-play badge-yes">Yes</span></td></tr>
+                        <tr><td>14</td><td>Rainy</td><td>Mild</td><td>High</td><td>True</td><td><span class="badge-play badge-no">No</span></td></tr>
+                    </tbody>
+                </table>
             </div>
 
             <h2 class="content-heading">Algoritma C4.5: Membangun Pohon</h2>
@@ -256,9 +462,138 @@
                 <strong>Catatan Penting:</strong> C4.5 menyempurnakan <em>Information Gain</em> dengan menggunakan <strong>Gain Ratio</strong> untuk menghindari bias terhadap atribut yang memiliki banyak nilai unik.
             </p>
 
+            <h2 class="content-heading">Visualisasi Struktur Pohon</h2>
+            <p class="content-text">
+                Berdasarkan dataset di atas, inilah struktur <strong>Decision Tree</strong> yang dihasilkan oleh algoritma C4.5. Perhatikan bagaimana setiap percabangan memperkecil Entropy hingga mencapai daun (keputusan akhir).
+            </p>
+
+            <div class="tree-viz-section">
+                <div class="tree-viz-wrapper">
+                    <!-- Root -->
+                    <div class="tree-viz-node">
+                        <div class="node-box">Cuaca (Outlook)</div>
+                        <div class="tree-viz-branches">
+                            <!-- Sunny -->
+                            <div class="tree-viz-branch">
+                                <span class="branch-label-viz">Sunny</span>
+                                <div class="tree-viz-node">
+                                    <div class="node-box">Humidity</div>
+                                    <div class="tree-viz-branches">
+                                        <div class="tree-viz-branch">
+                                            <span class="branch-label-viz">High</span>
+                                            <div class="leaf-box leaf-no">NO</div>
+                                        </div>
+                                        <div class="tree-viz-branch">
+                                            <span class="branch-label-viz">Normal</span>
+                                            <div class="leaf-box leaf-yes">YES</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Overcast -->
+                            <div class="tree-viz-branch">
+                                <span class="branch-label-viz">Overcast</span>
+                                <div class="leaf-box leaf-yes">YES</div>
+                            </div>
+                            <!-- Rainy -->
+                            <div class="tree-viz-branch">
+                                <span class="branch-label-viz">Rainy</span>
+                                <div class="tree-viz-node">
+                                    <div class="node-box">Windy</div>
+                                    <div class="tree-viz-branches">
+                                        <div class="tree-viz-branch">
+                                            <span class="branch-label-viz">Strong</span>
+                                            <div class="leaf-box leaf-no">NO</div>
+                                        </div>
+                                        <div class="tree-viz-branch">
+                                            <span class="branch-label-viz">Weak</span>
+                                            <div class="leaf-box leaf-yes">YES</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h2 class="content-heading">Bedah Kasus: Menentukan Root Node</h2>
+            <p class="content-text">
+                Mengapa <strong>Cuaca (Outlook)</strong> menjadi akar (Root), bukan Kelembaban atau Angin? Mari kita bedah perhitungannya berdasarkan dataset di atas.
+            </p>
+
+            <div class="info-box" style="background: rgba(84, 197, 248, 0.05); border-color: rgba(84, 197, 248, 0.2);">
+                <div class="info-box-header" style="color: var(--primary-color);">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                    <strong>Langkah 1: Hitung Entropy Total</strong>
+                </div>
+                <p>
+                    Dari 14 data: <strong>9 YES</strong> dan <strong>5 NO</strong>.<br>
+                    Entropy(Total) = -(9/14 * log2(9/14)) - (5/14 * log2(5/14)) = <strong>0.940</strong>
+                </p>
+            </div>
+
+            <div class="info-box" style="background: rgba(167, 139, 250, 0.05); border-color: rgba(167, 139, 250, 0.2);">
+                <div class="info-box-header" style="color: #a78bfa;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                    <strong>Langkah 2: Hitung Gain untuk Atribut "Outlook"</strong>
+                </div>
+                <div style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6;">
+                    <p>&bull; <strong>Sunny</strong> (5 data: 2 Yes, 3 No) &rarr; Entropy = 0.971</p>
+                    <p>&bull; <strong>Overcast</strong> (4 data: 4 Yes, 0 No) &rarr; Entropy = 0 (Murni!)</p>
+                    <p>&bull; <strong>Rainy</strong> (5 data: 3 Yes, 2 No) &rarr; Entropy = 0.971</p>
+                    <p style="margin-top: 12px; padding-top: 12px; border-top: 1px dashed rgba(255,255,255,0.1);">
+                        <strong>Gain(Outlook)</strong> = 0.940 - [(5/14 * 0.971) + (4/14 * 0) + (5/14 * 0.971)] = <strong>0.246</strong>
+                    </p>
+                </div>
+            </div>
+
+            <div class="interactive-container" style="background: transparent; border: none; padding: 0; align-items: flex-start; gap: 16px;">
+                <p class="content-text">
+                    Jika kita menghitung atribut lainnya dengan cara yang sama, kita akan mendapatkan:
+                </p>
+                <div style="width: 100%; overflow-x: auto;">
+                    <table class="dataset-table" style="min-width: 400px;">
+                        <thead>
+                            <tr>
+                                <th>Atribut</th>
+                                <th>Information Gain</th>
+                                <th>Keterangan</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr style="background: rgba(84, 197, 248, 0.1);">
+                                <td style="color: var(--primary-color); font-weight: 700;">Outlook</td>
+                                <td style="font-weight: 700;">0.246</td>
+                                <td>Paling Tinggi &rarr; Jadi Root</td>
+                            </tr>
+                            <tr>
+                                <td>Humidity</td>
+                                <td>0.151</td>
+                                <td>-</td>
+                            </tr>
+                            <tr>
+                                <td>Windy</td>
+                                <td>0.048</td>
+                                <td>-</td>
+                            </tr>
+                            <tr>
+                                <td>Temperature</td>
+                                <td>0.029</td>
+                                <td>-</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <p class="content-text" style="margin-top: 24px;">
+                Karena <strong>Outlook</strong> memiliki Gain tertinggi, ia dipilih sebagai pemisah utama (Root). Proses ini kemudian diulangi secara rekursif untuk setiap cabang hingga semua data terklasifikasi dengan sempurna atau mencapai kriteria henti.
+            </p>
+
             <h2 class="content-heading">Interactive: Simulasi Decision Tree (Play Tennis)</h2>
             <p class="content-text">
-                Mari kita simulasikan bagaimana Decision Tree mengklasifikasi data. Pohon di bawah ini telah dilatih menggunakan dataset "Play Tennis" yang memprediksi apakah seseorang akan bermain tenis atau tidak. Klik opsi untuk menyusuri cabang!
+                Mari kita simulasikan bagaimana Decision Tree mengklasifikasi data berdasarkan pohon yang sudah terbentuk. Klik opsi pada pohon di bawah ini untuk menyusuri cabang dan melihat keputusan akhirnya!
             </p>
 
             <div class="interactive-container" id="treeContainer">
@@ -326,8 +661,8 @@ prediksi = clf.<span class="hl-func">predict</span>([[<span class="hl-number">2<
                     </a>
                 </div>
                 <div class="content-nav-item">
-                    <a href="#" class="nav-btn nav-btn-next">
-                        <div><span class="nav-label">Selanjutnya</span><span class="nav-name">K-Means Clustering</span></div>
+                    <a href="/datamining/evaluasi-model.html" class="nav-btn nav-btn-next">
+                        <div><span class="nav-label">Selanjutnya</span><span class="nav-name">Evaluasi Model</span></div>
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
                     </a>
                 </div>

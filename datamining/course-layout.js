@@ -33,14 +33,15 @@ const courseConfig = {
             items: [
                 { title: "K-Nearest Neighbors (KNN)", url: "/datamining/knn.html", icon: "6" },
                 { title: "Naïve Bayes", url: "/datamining/naive-bayes.html", icon: "7" },
-                { title: "Decision Tree (C4.5)", url: "/datamining/decision-tree.html", icon: "8" }
+                { title: "Decision Tree (C4.5)", url: "/datamining/decision-tree.html", icon: "8" },
+                { title: "Evaluasi Model", url: "/datamining/evaluasi-model.html", icon: "9" }
             ]
         },
         {
             group: "Clustering",
             items: [
-                { title: "K-Means Clustering", url: "/datamining/kmeans.html", icon: "9" },
-                { title: "Hierarchical Clustering", url: "/datamining/hierarchical.html", icon: "10" }
+                { title: "K-Means Clustering", url: "/datamining/kmeans.html", icon: "10" },
+                { title: "Hierarchical Clustering", url: "/datamining/hierarchical.html", icon: "11" }
             ]
         }
     ]
