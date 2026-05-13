@@ -135,6 +135,43 @@
             color: var(--primary-color);
             flex-shrink: 0;
         }
+
+        /* Badge Styles */
+        .badge {
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .badge-pos { background: rgba(34, 197, 94, 0.15); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.3); }
+        .badge-neg { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+
+        /* Table Styles */
+        .table-container {
+            margin: 24px 0;
+            overflow-x: auto;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+        .dataset-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+        .dataset-table th {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 12px 16px;
+            text-align: left;
+            color: var(--text-secondary);
+            font-weight: 600;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .dataset-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            color: var(--text-primary);
+        }
     </style>
 </head>
 <body>
@@ -197,19 +234,19 @@
                     </div>
                     <div class="matrix-grid">
                         <div class="matrix-cell cell-tp">
-                            <div class="cell-value" id="val-tp">90</div>
+                            <div class="cell-value" id="val-tp">3</div>
                             <div class="cell-label">True Positive (TP)</div>
                         </div>
                         <div class="matrix-cell cell-fp">
-                            <div class="cell-value" id="val-fp">10</div>
+                            <div class="cell-value" id="val-fp">1</div>
                             <div class="cell-label">False Positive (FP)</div>
                         </div>
                         <div class="matrix-cell cell-fn">
-                            <div class="cell-value" id="val-fn">5</div>
+                            <div class="cell-value" id="val-fn">2</div>
                             <div class="cell-label">False Negative (FN)</div>
                         </div>
                         <div class="matrix-cell cell-tn">
-                            <div class="cell-value" id="val-tn">95</div>
+                            <div class="cell-value" id="val-tn">4</div>
                             <div class="cell-label">True Negative (TN)</div>
                         </div>
                     </div>
@@ -219,14 +256,128 @@
             <div class="info-box">
                 <div class="info-box-header">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
-                    <strong>Memahami Istilah</strong>
+                    <strong>Tips Menghafal (Logika 2 Kata)</strong>
                 </div>
-                <p>
-                    &bull; <strong>TP</strong>: Data positif diprediksi Positif (Benar).<br>
-                    &bull; <strong>TN</strong>: Data negatif diprediksi Negatif (Benar).<br>
-                    &bull; <strong>FP</strong>: Data negatif diprediksi Positif (Salah - *Type I Error*).<br>
-                    &bull; <strong>FN</strong>: Data positif diprediksi Negatif (Salah - *Type II Error*).
-                </p>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 12px;">
+                    <div style="background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
+                        <span style="color: var(--primary-color); font-weight: 700; display: block; margin-bottom: 4px;">1. Kata Kedua (P/N):</span>
+                        Apa yang <strong>DIKATAKAN</strong> oleh model?<br>
+                        <small style="opacity: 0.7;">P = Model bilang Positif, N = Model bilang Negatif</small>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
+                        <span style="color: var(--primary-color); font-weight: 700; display: block; margin-bottom: 4px;">2. Kata Pertama (T/F):</span>
+                        Apakah ucapan model itu <strong>BENAR</strong>?<br>
+                        <small style="opacity: 0.7;">T = Ucapannya Benar, F = Ucapannya Salah</small>
+                    </div>
+                </div>
+                <div style="margin-top: 20px; font-size: 0.95rem; line-height: 1.6;">
+                    &bull; <strong style="color: #4ade80;">TP (True Positive)</strong>: Model bilang Positif, dan itu <strong>BENAR</strong>.<br>
+                    &bull; <strong style="color: #4ade80;">TN (True Negative)</strong>: Model bilang Negatif, dan itu <strong>BENAR</strong>.<br>
+                    &bull; <strong style="color: #f87171;">FP (False Positive)</strong>: Model bilang Positif, tapi itu <strong>SALAH</strong> (Aslinya Negatif).<br>
+                    &bull; <strong style="color: #f87171;">FN (False Negative)</strong>: Model bilang Negatif, tapi itu <strong>SALAH</strong> (Aslinya Positif).
+                </div>
+            </div>
+
+            <h3 class="content-heading" style="font-size: 1.25rem; margin-top: 32px;">Studi Kasus: Deteksi Virus</h3>
+            <p class="content-text">
+                Mari kita lihat data dari 10 pasien untuk memahami bagaimana 4 nilai ini dihitung dalam praktik:
+            </p>
+
+            <div class="table-container">
+                <table class="dataset-table">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Kondisi Asli (Actual)</th>
+                            <th>Prediksi Model</th>
+                            <th>Kategori</th>
+                            <th>Analisis</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="background: rgba(34, 197, 94, 0.05);">
+                            <td>1</td>
+                            <td><span class="badge badge-pos">POSITIF</span></td>
+                            <td><span class="badge badge-pos">POSITIF</span></td>
+                            <td><strong style="color: #4ade80;">TP</strong></td>
+                            <td>Benar! Pasien sakit dideteksi sakit.</td>
+                        </tr>
+                        <tr style="background: rgba(34, 197, 94, 0.05);">
+                            <td>2</td>
+                            <td><span class="badge badge-neg">NEGATIF</span></td>
+                            <td><span class="badge badge-neg">NEGATIF</span></td>
+                            <td><strong style="color: #4ade80;">TN</strong></td>
+                            <td>Benar! Pasien sehat dideteksi sehat.</td>
+                        </tr>
+                        <tr style="background: rgba(239, 68, 68, 0.05);">
+                            <td>3</td>
+                            <td><span class="badge badge-pos">POSITIF</span></td>
+                            <td><span class="badge badge-neg">NEGATIF</span></td>
+                            <td><strong style="color: #f87171;">FN</strong></td>
+                            <td><strong>Salah!</strong> (Missed). Orang sakit dibilang sehat.</td>
+                        </tr>
+                        <tr style="background: rgba(239, 68, 68, 0.05);">
+                            <td>4</td>
+                            <td><span class="badge badge-neg">NEGATIF</span></td>
+                            <td><span class="badge badge-pos">POSITIF</span></td>
+                            <td><strong style="color: #f87171;">FP</strong></td>
+                            <td><strong>Salah!</strong> (False Alarm). Orang sehat dibilang sakit.</td>
+                        </tr>
+                        <tr style="background: rgba(34, 197, 94, 0.05);">
+                            <td>5</td>
+                            <td><span class="badge badge-pos">POSITIF</span></td>
+                            <td><span class="badge badge-pos">POSITIF</span></td>
+                            <td><strong style="color: #4ade80;">TP</strong></td>
+                            <td>Benar!</td>
+                        </tr>
+                        <tr style="background: rgba(34, 197, 94, 0.05);">
+                            <td>6</td>
+                            <td><span class="badge badge-neg">NEGATIF</span></td>
+                            <td><span class="badge badge-neg">NEGATIF</span></td>
+                            <td><strong style="color: #4ade80;">TN</strong></td>
+                            <td>Benar!</td>
+                        </tr>
+                        <tr style="background: rgba(34, 197, 94, 0.05);">
+                            <td>7</td>
+                            <td><span class="badge badge-neg">NEGATIF</span></td>
+                            <td><span class="badge badge-neg">NEGATIF</span></td>
+                            <td><strong style="color: #4ade80;">TN</strong></td>
+                            <td>Benar!</td>
+                        </tr>
+                        <tr style="background: rgba(239, 68, 68, 0.05);">
+                            <td>8</td>
+                            <td><span class="badge badge-pos">POSITIF</span></td>
+                            <td><span class="badge badge-neg">NEGATIF</span></td>
+                            <td><strong style="color: #f87171;">FN</strong></td>
+                            <td><strong>Salah!</strong></td>
+                        </tr>
+                        <tr style="background: rgba(34, 197, 94, 0.05);">
+                            <td>9</td>
+                            <td><span class="badge badge-pos">POSITIF</span></td>
+                            <td><span class="badge badge-pos">POSITIF</span></td>
+                            <td><strong style="color: #4ade80;">TP</strong></td>
+                            <td>Benar!</td>
+                        </tr>
+                        <tr style="background: rgba(34, 197, 94, 0.05);">
+                            <td>10</td>
+                            <td><span class="badge badge-neg">NEGATIF</span></td>
+                            <td><span class="badge badge-neg">NEGATIF</span></td>
+                            <td><strong style="color: #4ade80;">TN</strong></td>
+                            <td>Benar!</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="info-box" style="margin-top: 16px; background: rgba(84, 197, 248, 0.05); border-color: rgba(84, 197, 248, 0.2);">
+                <div style="font-weight: 700; margin-bottom: 8px; color: var(--primary-color);">Hasil Perhitungan:</div>
+                <div style="display: flex; gap: 24px; font-family: 'JetBrains Mono', monospace; font-size: 0.9rem;">
+                    <span>TP: 3</span>
+                    <span>TN: 4</span>
+                    <span>FP: 1</span>
+                    <span>FN: 2</span>
+                </div>
+                <p style="margin-top: 8px; font-size: 0.85rem;">Total Data = 10. Nilai-nilai inilah yang kemudian dimasukkan ke dalam Confusion Matrix.</p>
             </div>
 
             <h2 class="content-heading">2. Metrik Utama</h2>
@@ -275,19 +426,19 @@
                 <div class="calculator-grid">
                     <div class="input-group">
                         <label>True Positive (TP)</label>
-                        <input type="number" id="input-tp" class="input-field" value="90" oninput="updateMetrics()">
+                        <input type="number" id="input-tp" class="input-field" value="3" oninput="updateMetrics()">
                     </div>
                     <div class="input-group">
                         <label>False Positive (FP)</label>
-                        <input type="number" id="input-fp" class="input-field" value="10" oninput="updateMetrics()">
+                        <input type="number" id="input-fp" class="input-field" value="1" oninput="updateMetrics()">
                     </div>
                     <div class="input-group">
                         <label>False Negative (FN)</label>
-                        <input type="number" id="input-fn" class="input-field" value="5" oninput="updateMetrics()">
+                        <input type="number" id="input-fn" class="input-field" value="2" oninput="updateMetrics()">
                     </div>
                     <div class="input-group">
                         <label>True Negative (TN)</label>
-                        <input type="number" id="input-tn" class="input-field" value="95" oninput="updateMetrics()">
+                        <input type="number" id="input-tn" class="input-field" value="4" oninput="updateMetrics()">
                     </div>
                 </div>
 
