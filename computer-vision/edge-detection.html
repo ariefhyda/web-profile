@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Deteksi tepi (Edge Detection) — algoritma Sobel, Prewitt, dan Canny untuk Computer Vision menggunakan OpenCV Python.">
+    <title>Deteksi Tepi (Edge Detection) — Computer Vision</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/computer-vision/course.css">
+</head>
+<body>
+    <div class="bg-grid" aria-hidden="true"></div>
+    <nav class="navbar scrolled" id="navbar"></nav>
+    <div class="mobile-menu" id="mobileMenu"></div>
+
+    <main class="course-layout">
+        <aside class="course-sidebar" id="courseSidebar"></aside>
+        <article class="course-content">
+
+            <div class="breadcrumb">
+                <a href="../index.html">Home</a><span>›</span>
+                <a href="index.html">Computer Vision</a><span>›</span>
+                <span style="color: var(--text-primary);">Deteksi Tepi</span>
+            </div>
+
+            <header class="content-header">
+                <h1 class="content-title">Modul 5: Deteksi Tepi (Edge Detection)</h1>
+                <div class="content-meta">
+                    <div class="meta-pill">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 5V8.5L10.5 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/></svg>
+                        <span>Estimasi: 75 Menit</span>
+                    </div>
+                    <div class="meta-pill">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="10" rx="1" stroke="currentColor" stroke-width="1.5"/><path d="M5 7h6M5 10h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                        <span>Teori, Simulasi & Praktikum</span>
+                    </div>
+                </div>
+            </header>
+
+            <p class="content-text">
+                <strong>Edge Detection</strong> (deteksi tepi) merupakan salah satu operasi paling fundamental dalam Computer Vision. Tepi dalam citra merepresentasikan batas antara dua region yang berbeda — perubahan tajam pada intensitas pixel yang menandakan kontur objek, tekstur, atau bayangan.
+            </p>
+
+            <h2 class="content-heading">Mengapa Edge Detection Penting?</h2>
+            <p class="content-text">
+                Edge detection berfungsi sebagai langkah pra-proses (<em>preprocessing</em>) yang krusial karena:
+            </p>
+            <ol class="content-list">
+                <li><strong>Reduksi Data</strong><br>Mengubah citra berukuran besar menjadi representasi ringkas berupa garis-garis tepi, mengurangi data hingga 90% tanpa kehilangan informasi struktural penting.</li>
+                <li><strong>Segmentasi Objek</strong><br>Tepi membantu memisahkan objek dari latar belakang, menjadi dasar untuk proses segmentasi dan identifikasi kontur.</li>
+                <li><strong>Feature Extraction</strong><br>Banyak deskriptor fitur (HOG, SIFT) memanfaatkan informasi gradient/tepi sebagai komponen utama.</li>
+                <li><strong>Scene Understanding</strong><br>Peta tepi memberikan informasi struktural tentang bentuk, batas, dan hubungan geometris antar objek.</li>
+            </ol>
+
+            <h2 class="content-heading">Konsep Matematika: Gradien Citra</h2>
+            <p class="content-text">
+                Tepi didefinisikan sebagai lokasi di mana terjadi <strong>perubahan drastis pada intensitas pixel</strong>. Secara matematis, ini dihitung menggunakan <em>turunan pertama</em> (gradient) dari fungsi intensitas citra.
+            </p>
+            <p class="content-text">
+                Untuk citra 2D f(x,y), gradien dihitung pada dua arah:
+            </p>
+
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">gradient_formula.txt</span>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-comment"># Gradien pada arah X (horizontal)</span>
+Gx = ∂f/∂x ≈ f(x+1, y) − f(x−1, y)
+
+<span class="hl-comment"># Gradien pada arah Y (vertikal)</span>
+Gy = ∂f/∂y ≈ f(x, y+1) − f(x, y−1)
+
+<span class="hl-comment"># Magnitude (kekuatan tepi)</span>
+|G| = √(Gx² + Gy²)
+
+<span class="hl-comment"># Arah tepi</span>
+θ = arctan(Gy / Gx)</code></pre>
+            </div>
+
+            <h2 class="content-heading">Algoritma Edge Detection</h2>
+
+            <h3 style="font-size: 1.1rem; font-weight: 600; color: var(--text-primary); margin: 28px 0 10px;">1. Operator Sobel</h3>
+            <p class="content-text">
+                Menggunakan kernel konvolusi 3×3 untuk menghitung gradien arah X dan Y secara terpisah, dengan memberikan bobot lebih pada pixel terdekat:
+            </p>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">sobel_kernels.txt</span>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-comment"># Kernel Sobel X (deteksi tepi vertikal)</span>
+Kx = [[-1,  0,  1],
+      [-2,  0,  2],
+      [-1,  0,  1]]
+
+<span class="hl-comment"># Kernel Sobel Y (deteksi tepi horizontal)</span>
+Ky = [[-1, -2, -1],
+      [ 0,  0,  0],
+      [ 1,  2,  1]]</code></pre>
+            </div>
+
+            <h3 style="font-size: 1.1rem; font-weight: 600; color: var(--text-primary); margin: 28px 0 10px;">2. Canny Edge Detector</h3>
+            <p class="content-text">
+                Dikembangkan oleh John Canny (1986), merupakan detektor tepi paling populer dan dianggap sebagai <em>gold standard</em>. Canny memiliki 4 tahapan:
+            </p>
+            <ol class="content-list">
+                <li><strong>Gaussian Blur</strong><br>Menghaluskan citra untuk mengurangi noise. Ukuran kernel Gaussian memengaruhi tingkat smoothing.</li>
+                <li><strong>Gradient Calculation</strong><br>Menghitung magnitude dan arah gradien menggunakan operator Sobel.</li>
+                <li><strong>Non-Maximum Suppression (NMS)</strong><br>Menipiskan tepi menjadi lebar 1 pixel dengan menekan nilai non-maksimum di sepanjang arah gradien.</li>
+                <li><strong>Double Thresholding & Edge Tracking</strong><br>Menerapkan dua threshold (tinggi dan rendah) untuk mengkategorikan tepi menjadi strong, weak, dan non-edge. Kemudian melakukan <em>hysteresis</em> — weak edge yang terhubung dengan strong edge dipertahankan.</li>
+            </ol>
+
+            <!-- Interactive Canny Simulator -->
+            <div class="interactive-box" id="cannySimulator">
+                <div class="interactive-header">
+                    <div class="interactive-title">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2"/><path d="M2 12h20M12 2v20"/></svg>
+                        Simulator Canny Edge Detection
+                    </div>
+                    <div class="interactive-controls">
+                        <label style="font-size: 0.8rem; color: var(--text-muted);">Low:
+                            <input type="range" id="cannyLow" min="10" max="200" value="50" style="width: 80px; vertical-align: middle;">
+                            <span id="cannyLowVal" style="font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: #22d3ee;">50</span>
+                        </label>
+                        <label style="font-size: 0.8rem; color: var(--text-muted);">High:
+                            <input type="range" id="cannyHigh" min="50" max="400" value="150" style="width: 80px; vertical-align: middle;">
+                            <span id="cannyHighVal" style="font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: #22d3ee;">150</span>
+                        </label>
+                        <button class="control-input" onclick="generateCannyDemo()" style="cursor:pointer; background: rgba(34,211,238,0.15); border-color: rgba(34,211,238,0.3); color: #22d3ee;">⟳ Generate</button>
+                    </div>
+                </div>
+                <div class="interactive-area" style="height: auto; display: flex; gap: 0; background: #0a0a12;">
+                    <div style="flex: 1; position: relative;">
+                        <canvas id="canvasOriginal" width="400" height="300" style="width: 100%; height: auto; display: block;"></canvas>
+                        <div style="position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.7); padding: 3px 10px; border-radius: 4px; font-size: 0.7rem; color: #888;">Original</div>
+                    </div>
+                    <div style="flex: 1; position: relative;">
+                        <canvas id="canvasEdge" width="400" height="300" style="width: 100%; height: auto; display: block;"></canvas>
+                        <div style="position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.7); padding: 3px 10px; border-radius: 4px; font-size: 0.7rem; color: #888;">Canny Edge</div>
+                    </div>
+                </div>
+                <div class="interactive-footer">
+                    Geser slider threshold untuk melihat perubahan deteksi tepi secara real-time. Low threshold menentukan batas minimum, High threshold menentukan batas tepi kuat.
+                </div>
+            </div>
+
+            <h2 class="content-heading">Praktikum: Edge Detection dengan OpenCV</h2>
+
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">edge_detection.py</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                    </button>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-keyword">import</span> cv2
+<span class="hl-keyword">import</span> numpy <span class="hl-keyword">as</span> np
+<span class="hl-keyword">import</span> matplotlib.pyplot <span class="hl-keyword">as</span> plt
+
+<span class="hl-comment"># Membaca citra dan konversi ke grayscale</span>
+img = cv2.<span class="hl-func">imread</span>(<span class="hl-string">'sample.jpg'</span>)
+gray = cv2.<span class="hl-func">cvtColor</span>(img, cv2.COLOR_BGR2GRAY)
+
+<span class="hl-comment"># 1. Sobel Edge Detection</span>
+sobel_x = cv2.<span class="hl-func">Sobel</span>(gray, cv2.CV_64F, <span class="hl-number">1</span>, <span class="hl-number">0</span>, ksize=<span class="hl-number">3</span>)
+sobel_y = cv2.<span class="hl-func">Sobel</span>(gray, cv2.CV_64F, <span class="hl-number">0</span>, <span class="hl-number">1</span>, ksize=<span class="hl-number">3</span>)
+sobel_mag = np.<span class="hl-func">sqrt</span>(sobel_x**<span class="hl-number">2</span> + sobel_y**<span class="hl-number">2</span>)
+sobel_mag = np.<span class="hl-func">uint8</span>(sobel_mag / sobel_mag.<span class="hl-func">max</span>() * <span class="hl-number">255</span>)
+
+<span class="hl-comment"># 2. Canny Edge Detection</span>
+edges_canny = cv2.<span class="hl-func">Canny</span>(gray, threshold1=<span class="hl-number">50</span>, threshold2=<span class="hl-number">150</span>)
+
+<span class="hl-comment"># 3. Laplacian Edge Detection</span>
+laplacian = cv2.<span class="hl-func">Laplacian</span>(gray, cv2.CV_64F)
+laplacian = np.<span class="hl-func">uint8</span>(np.<span class="hl-func">absolute</span>(laplacian))
+
+<span class="hl-comment"># Visualisasi Perbandingan</span>
+fig, axes = plt.<span class="hl-func">subplots</span>(<span class="hl-number">2</span>, <span class="hl-number">2</span>, figsize=(<span class="hl-number">12</span>, <span class="hl-number">10</span>))
+axes[<span class="hl-number">0</span>,<span class="hl-number">0</span>].<span class="hl-func">imshow</span>(gray, cmap=<span class="hl-string">'gray'</span>); axes[<span class="hl-number">0</span>,<span class="hl-number">0</span>].<span class="hl-func">set_title</span>(<span class="hl-string">'Original (Grayscale)'</span>)
+axes[<span class="hl-number">0</span>,<span class="hl-number">1</span>].<span class="hl-func">imshow</span>(sobel_mag, cmap=<span class="hl-string">'gray'</span>); axes[<span class="hl-number">0</span>,<span class="hl-number">1</span>].<span class="hl-func">set_title</span>(<span class="hl-string">'Sobel Magnitude'</span>)
+axes[<span class="hl-number">1</span>,<span class="hl-number">0</span>].<span class="hl-func">imshow</span>(edges_canny, cmap=<span class="hl-string">'gray'</span>); axes[<span class="hl-number">1</span>,<span class="hl-number">0</span>].<span class="hl-func">set_title</span>(<span class="hl-string">'Canny Edge'</span>)
+axes[<span class="hl-number">1</span>,<span class="hl-number">1</span>].<span class="hl-func">imshow</span>(laplacian, cmap=<span class="hl-string">'gray'</span>); axes[<span class="hl-number">1</span>,<span class="hl-number">1</span>].<span class="hl-func">set_title</span>(<span class="hl-string">'Laplacian'</span>)
+<span class="hl-keyword">for</span> ax <span class="hl-keyword">in</span> axes.flat: ax.<span class="hl-func">axis</span>(<span class="hl-string">'off'</span>)
+plt.<span class="hl-func">tight_layout</span>(); plt.<span class="hl-func">show</span>()</code></pre>
+            </div>
+
+            <!-- Navigation Prev/Next -->
+            <div class="content-nav">
+                <div class="content-nav-item">
+                    <a href="filtering.html" class="nav-btn nav-btn-prev">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                        <div>
+                            <span class="nav-label">Sebelumnya</span>
+                            <span class="nav-name">Filtering & Konvolusi</span>
+                        </div>
+                    </a>
+                </div>
+                <div class="content-nav-item">
+                    <a href="histogram.html" class="nav-btn nav-btn-next">
+                        <div>
+                            <span class="nav-label">Selanjutnya</span>
+                            <span class="nav-name">Histogram & Thresholding</span>
+                        </div>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </a>
+                </div>
+            </div>
+
+        </article>
+    </main>
+
+    <script src="/computer-vision/course-layout.js"></script>
+    <script>
+    // ---- Canny Edge Detection Simulator ----
+    const canvasOrig = document.getElementById('canvasOriginal');
+    const canvasEdge = document.getElementById('canvasEdge');
+    const ctxOrig = canvasOrig.getContext('2d');
+    const ctxEdge = canvasEdge.getContext('2d');
+    let imageData = null;
+
+    function generateCannyDemo() {
+        const W = canvasOrig.width, H = canvasOrig.height;
+        // Draw random geometric shapes as "scene"
+        ctxOrig.fillStyle = '#1a1a2e';
+        ctxOrig.fillRect(0, 0, W, H);
+        // Gradient background
+        const grad = ctxOrig.createLinearGradient(0, 0, W, H);
+        grad.addColorStop(0, '#1a1a3e'); grad.addColorStop(1, '#0a0a1e');
+        ctxOrig.fillStyle = grad; ctxOrig.fillRect(0, 0, W, H);
+        // Random shapes
+        const shapes = 6 + Math.floor(Math.random() * 6);
+        for (let i = 0; i < shapes; i++) {
+            const x = Math.random() * W, y = Math.random() * H;
+            const s = 30 + Math.random() * 80;
+            const c = `hsl(${Math.random()*360}, 60%, ${40+Math.random()*30}%)`;
+            ctxOrig.fillStyle = c;
+            if (Math.random() > 0.5) {
+                ctxOrig.fillRect(x - s/2, y - s/2, s, s * (0.5 + Math.random()));
+            } else {
+                ctxOrig.beginPath();
+                ctxOrig.arc(x, y, s/2, 0, Math.PI*2);
+                ctxOrig.fill();
+            }
+        }
+        // Add some lines
+        for (let i = 0; i < 3; i++) {
+            ctxOrig.strokeStyle = `hsl(${Math.random()*360}, 50%, 55%)`;
+            ctxOrig.lineWidth = 2 + Math.random() * 4;
+            ctxOrig.beginPath();
+            ctxOrig.moveTo(Math.random()*W, Math.random()*H);
+            ctxOrig.lineTo(Math.random()*W, Math.random()*H);
+            ctxOrig.stroke();
+        }
+        imageData = ctxOrig.getImageData(0, 0, W, H);
+        applyCanny();
+    }
+
+    function applyCanny() {
+        if (!imageData) return;
+        const W = canvasOrig.width, H = canvasOrig.height;
+        const low = parseInt(document.getElementById('cannyLow').value);
+        const high = parseInt(document.getElementById('cannyHigh').value);
+        // Convert to grayscale
+        const src = imageData.data;
+        const gray = new Float32Array(W * H);
+        for (let i = 0; i < W * H; i++) {
+            const idx = i * 4;
+            gray[i] = 0.299 * src[idx] + 0.587 * src[idx+1] + 0.114 * src[idx+2];
+        }
+        // Simple Gaussian blur 3x3
+        const blurred = new Float32Array(W * H);
+        const k = [1,2,1,2,4,2,1,2,1];
+        for (let y = 1; y < H-1; y++) {
+            for (let x = 1; x < W-1; x++) {
+                let sum = 0;
+                for (let ky = -1; ky <= 1; ky++)
+                    for (let kx = -1; kx <= 1; kx++)
+                        sum += gray[(y+ky)*W+(x+kx)] * k[(ky+1)*3+(kx+1)];
+                blurred[y*W+x] = sum / 16;
+            }
+        }
+        // Sobel gradients
+        const gx = new Float32Array(W * H);
+        const gy = new Float32Array(W * H);
+        const mag = new Float32Array(W * H);
+        const dir = new Float32Array(W * H);
+        for (let y = 1; y < H-1; y++) {
+            for (let x = 1; x < W-1; x++) {
+                const idx = y * W + x;
+                gx[idx] = -blurred[(y-1)*W+(x-1)] - 2*blurred[y*W+(x-1)] - blurred[(y+1)*W+(x-1)]
+                          +blurred[(y-1)*W+(x+1)] + 2*blurred[y*W+(x+1)] + blurred[(y+1)*W+(x+1)];
+                gy[idx] = -blurred[(y-1)*W+(x-1)] - 2*blurred[(y-1)*W+x] - blurred[(y-1)*W+(x+1)]
+                          +blurred[(y+1)*W+(x-1)] + 2*blurred[(y+1)*W+x] + blurred[(y+1)*W+(x+1)];
+                mag[idx] = Math.sqrt(gx[idx]*gx[idx] + gy[idx]*gy[idx]);
+                dir[idx] = Math.atan2(gy[idx], gx[idx]);
+            }
+        }
+        // Non-maximum suppression
+        const nms = new Float32Array(W * H);
+        for (let y = 1; y < H-1; y++) {
+            for (let x = 1; x < W-1; x++) {
+                const idx = y * W + x;
+                let angle = dir[idx] * 180 / Math.PI;
+                if (angle < 0) angle += 180;
+                let q = 0, r = 0;
+                if ((angle < 22.5) || (angle >= 157.5)) { q = mag[y*W+(x+1)]; r = mag[y*W+(x-1)]; }
+                else if (angle < 67.5) { q = mag[(y+1)*W+(x-1)]; r = mag[(y-1)*W+(x+1)]; }
+                else if (angle < 112.5) { q = mag[(y+1)*W+x]; r = mag[(y-1)*W+x]; }
+                else { q = mag[(y-1)*W+(x-1)]; r = mag[(y+1)*W+(x+1)]; }
+                nms[idx] = (mag[idx] >= q && mag[idx] >= r) ? mag[idx] : 0;
+            }
+        }
+        // Double threshold + hysteresis
+        const out = ctxEdge.createImageData(W, H);
+        for (let i = 0; i < W * H; i++) {
+            const val = nms[i] >= high ? 255 : (nms[i] >= low ? 128 : 0);
+            const idx = i * 4;
+            if (val === 255) {
+                out.data[idx] = 34; out.data[idx+1] = 211; out.data[idx+2] = 238; out.data[idx+3] = 255;
+            } else if (val === 128) {
+                out.data[idx] = 15; out.data[idx+1] = 90; out.data[idx+2] = 100; out.data[idx+3] = 255;
+            } else {
+                out.data[idx] = 8; out.data[idx+1] = 8; out.data[idx+2] = 16; out.data[idx+3] = 255;
+            }
+        }
+        ctxEdge.putImageData(out, 0, 0);
+    }
+
+    document.getElementById('cannyLow').addEventListener('input', function() {
+        document.getElementById('cannyLowVal').textContent = this.value;
+        applyCanny();
+    });
+    document.getElementById('cannyHigh').addEventListener('input', function() {
+        document.getElementById('cannyHighVal').textContent = this.value;
+        applyCanny();
+    });
+
+    // Generate on load
+    generateCannyDemo();
+
+    // ---- Copy Code ----
+    function copyCode(btn) {
+        const codeBlock = btn.closest('.code-block').querySelector('code');
+        navigator.clipboard.writeText(codeBlock.textContent).then(() => {
+            btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>';
+            setTimeout(() => {
+                btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+            }, 2000);
+        });
+    }
+    </script>
+</body>
+</html>

@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relationship — Laravel</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/laravel/course.css">
+</head>
+<body>
+    <div class="bg-grid" aria-hidden="true"></div>
+    <nav class="navbar scrolled" id="navbar"></nav>
+    <div class="mobile-menu" id="mobileMenu"></div>
+    <main class="course-layout">
+        <aside class="course-sidebar" id="courseSidebar"></aside>
+        <article class="course-content">
+            <div class="breadcrumb">
+                <a href="../index.html">Home</a><span>›</span>
+                <a href="index.html">Laravel</a><span>›</span>
+                <span style="color: var(--text-primary);">Relationship</span>
+            </div>
+            <header class="content-header">
+                <h1 class="content-title">Modul 10: Eloquent Relationship</h1>
+                <div class="content-meta">
+                    <div class="meta-pill"><span>Estimasi: 60 Menit</span></div>
+                    <div class="meta-pill"><span>Teori & Praktikum</span></div>
+                </div>
+            </header>
+
+            <p class="content-text">Tabel-tabel dalam database jarang berdiri sendiri — mereka saling terhubung. <em>Post</em> punya banyak <em>comment</em>, <em>user</em> punya banyak <em>order</em>, <em>book</em> ditulis oleh banyak <em>author</em>. Eloquent menyediakan API yang elegan untuk mendefinisikan dan menavigasi relasi ini tanpa harus menulis JOIN SQL manual.</p>
+
+            <div class="analogy-box">
+                <div class="analogy-icon">👨‍👩‍👧</div>
+                <div class="analogy-content">
+                    <strong>Analogi: Pohon Keluarga</strong>
+                    <p>Bayangkan database sebagai silsilah keluarga. Setiap orang (record) punya hubungan: <em>anak dari, suami dari, paman dari</em>. Tanpa relasi, Anda harus menjelaskan satu per satu siapa anak siapa. Dengan relasi, cukup tunjukkan pohon — semua hubungan terbaca otomatis.</p>
+                </div>
+            </div>
+
+            <h2 class="content-heading">Visualizer Tipe Relasi</h2>
+            <p class="content-text">Klik tab tipe relasi untuk melihat skema database, kode Model, dan contoh penggunaannya.</p>
+
+            <div class="interactive-card">
+                <div class="interactive-title">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="6" r="3"/><circle cx="18" cy="18" r="3"/><path d="M9 6h6a3 3 0 0 1 3 3v6"/></svg>
+                    Tipe-tipe Relasi Eloquent
+                </div>
+                <p class="interactive-subtitle">Pilih tipe untuk melihat detailnya.</p>
+                <div class="rel-viz">
+                    <div class="rel-type-selector">
+                        <button class="rel-type-btn active" data-rel="one-to-one" onclick="showRel('one-to-one', this)">One to One</button>
+                        <button class="rel-type-btn" data-rel="one-to-many" onclick="showRel('one-to-many', this)">One to Many</button>
+                        <button class="rel-type-btn" data-rel="many-to-one" onclick="showRel('many-to-one', this)">Many to One (Belongs To)</button>
+                        <button class="rel-type-btn" data-rel="many-to-many" onclick="showRel('many-to-many', this)">Many to Many</button>
+                        <button class="rel-type-btn" data-rel="has-many-through" onclick="showRel('has-many-through', this)">Has Many Through</button>
+                    </div>
+                    <div class="rel-diagram" id="relDiagram"></div>
+                    <div class="rel-description" id="relDesc"></div>
+                </div>
+            </div>
+
+            <h2 class="content-heading">1. One To One (Satu ke Satu)</h2>
+            <p class="content-text"><strong>Contoh:</strong> Satu User memiliki satu Profile. Satu Negara punya satu Ibu Kota.</p>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">User.php & Profile.php</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-comment">// Migration: profiles punya kolom user_id (foreign key)</span>
+$table-><span class="hl-func">foreignId</span>(<span class="hl-string">'user_id'</span>)-><span class="hl-func">constrained</span>()-><span class="hl-func">cascadeOnDelete</span>();
+
+<span class="hl-comment">// app/Models/User.php — sisi "punya" (hasOne)</span>
+<span class="hl-keyword">class</span> User <span class="hl-keyword">extends</span> Model
+{
+    <span class="hl-keyword">public function</span> <span class="hl-func">profile</span>()
+    {
+        <span class="hl-keyword">return</span> $<span class="hl-keyword">this</span>-><span class="hl-func">hasOne</span>(Profile::<span class="hl-keyword">class</span>);
+    }
+}
+
+<span class="hl-comment">// app/Models/Profile.php — sisi "dimiliki" (belongsTo)</span>
+<span class="hl-keyword">class</span> Profile <span class="hl-keyword">extends</span> Model
+{
+    <span class="hl-keyword">public function</span> <span class="hl-func">user</span>()
+    {
+        <span class="hl-keyword">return</span> $<span class="hl-keyword">this</span>-><span class="hl-func">belongsTo</span>(User::<span class="hl-keyword">class</span>);
+    }
+}
+
+<span class="hl-comment">// Pemakaian:</span>
+$user = User::<span class="hl-func">find</span>(<span class="hl-number">1</span>);
+<span class="hl-keyword">echo</span> $user->profile->bio; <span class="hl-comment">// auto join, ambil bio</span>
+
+$profile = Profile::<span class="hl-func">find</span>(<span class="hl-number">1</span>);
+<span class="hl-keyword">echo</span> $profile->user->name; <span class="hl-comment">// kebalikannya</span></code></pre>
+            </div>
+
+            <h2 class="content-heading">2. One To Many (Satu ke Banyak)</h2>
+            <p class="content-text"><strong>Contoh:</strong> Satu Post punya banyak Comment. Satu User punya banyak Order.</p>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">Post.php & Comment.php</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-comment">// Post.php — sisi "punya banyak"</span>
+<span class="hl-keyword">public function</span> <span class="hl-func">comments</span>()
+{
+    <span class="hl-keyword">return</span> $<span class="hl-keyword">this</span>-><span class="hl-func">hasMany</span>(Comment::<span class="hl-keyword">class</span>);
+}
+
+<span class="hl-comment">// Comment.php — sisi "milik"</span>
+<span class="hl-keyword">public function</span> <span class="hl-func">post</span>()
+{
+    <span class="hl-keyword">return</span> $<span class="hl-keyword">this</span>-><span class="hl-func">belongsTo</span>(Post::<span class="hl-keyword">class</span>);
+}
+
+<span class="hl-comment">// Pemakaian:</span>
+$post = Post::<span class="hl-func">find</span>(<span class="hl-number">1</span>);
+<span class="hl-keyword">foreach</span> ($post->comments <span class="hl-keyword">as</span> $comment) {  <span class="hl-comment">// Collection</span>
+    <span class="hl-keyword">echo</span> $comment->text;
+}
+
+<span class="hl-comment">// Filter pada relasi</span>
+$approved = $post->comments()-><span class="hl-func">where</span>(<span class="hl-string">'approved'</span>, <span class="hl-keyword">true</span>)-><span class="hl-func">get</span>();
+
+<span class="hl-comment">// Hitung tanpa load semua</span>
+$total = $post->comments()-><span class="hl-func">count</span>();
+$totalCached = $post->comments_count; <span class="hl-comment">// pakai withCount(), lebih cepat</span></code></pre>
+            </div>
+
+            <h2 class="content-heading">3. Many To Many (Banyak ke Banyak)</h2>
+            <p class="content-text"><strong>Contoh:</strong> Satu Post punya banyak Tag, satu Tag dipasang di banyak Post. Butuh <em>pivot table</em> (tabel perantara) <code>post_tag</code>.</p>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">migration pivot + model</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-comment">// Migration pivot table: post_tag (sorted alfabetis, singular)</span>
+Schema::<span class="hl-func">create</span>(<span class="hl-string">'post_tag'</span>, <span class="hl-keyword">function</span> (Blueprint $table) {
+    $table-><span class="hl-func">foreignId</span>(<span class="hl-string">'post_id'</span>)-><span class="hl-func">constrained</span>()-><span class="hl-func">cascadeOnDelete</span>();
+    $table-><span class="hl-func">foreignId</span>(<span class="hl-string">'tag_id'</span>)-><span class="hl-func">constrained</span>()-><span class="hl-func">cascadeOnDelete</span>();
+    $table-><span class="hl-func">primary</span>([<span class="hl-string">'post_id'</span>, <span class="hl-string">'tag_id'</span>]); <span class="hl-comment">// composite key</span>
+});
+
+<span class="hl-comment">// Post.php</span>
+<span class="hl-keyword">public function</span> <span class="hl-func">tags</span>()
+{
+    <span class="hl-keyword">return</span> $<span class="hl-keyword">this</span>-><span class="hl-func">belongsToMany</span>(Tag::<span class="hl-keyword">class</span>);
+}
+
+<span class="hl-comment">// Tag.php (mirror)</span>
+<span class="hl-keyword">public function</span> <span class="hl-func">posts</span>()
+{
+    <span class="hl-keyword">return</span> $<span class="hl-keyword">this</span>-><span class="hl-func">belongsToMany</span>(Post::<span class="hl-keyword">class</span>);
+}
+
+<span class="hl-comment">// Pemakaian: attach, detach, sync</span>
+$post-><span class="hl-func">tags</span>()-><span class="hl-func">attach</span>($tagId);              <span class="hl-comment">// tambah relasi</span>
+$post-><span class="hl-func">tags</span>()-><span class="hl-func">detach</span>($tagId);              <span class="hl-comment">// hapus relasi</span>
+$post-><span class="hl-func">tags</span>()-><span class="hl-func">sync</span>([<span class="hl-number">1</span>, <span class="hl-number">2</span>, <span class="hl-number">5</span>]);          <span class="hl-comment">// set ulang (semua yang lain dihapus)</span>
+$post-><span class="hl-func">tags</span>()-><span class="hl-func">toggle</span>([<span class="hl-number">1</span>, <span class="hl-number">3</span>]);            <span class="hl-comment">// toggle on/off</span>
+
+<span class="hl-comment">// Pivot dengan kolom tambahan (mis. created_at, priority)</span>
+$post-><span class="hl-func">tags</span>()-><span class="hl-func">attach</span>($tagId, [<span class="hl-string">'priority'</span> => <span class="hl-number">1</span>]);
+<span class="hl-keyword">foreach</span> ($post->tags <span class="hl-keyword">as</span> $tag) {
+    <span class="hl-keyword">echo</span> $tag->pivot->priority;
+}</code></pre>
+            </div>
+
+            <h2 class="content-heading">Mengakses & Filter Relasi</h2>
+            <table class="compare-table">
+                <thead><tr><th>Sintaks</th><th>Hasil</th></tr></thead>
+                <tbody>
+                    <tr><td><code>$post->comments</code></td><td>Property: load Collection (lazy)</td></tr>
+                    <tr><td><code>$post->comments()</code></td><td>Method: return query builder (bisa di-chain)</td></tr>
+                    <tr><td><code>$post->comments()->where('approved', 1)->get()</code></td><td>Filter sebelum execute</td></tr>
+                    <tr><td><code>$post->comments()->count()</code></td><td>COUNT(*) tanpa load semua</td></tr>
+                    <tr><td><code>$post->comments()->latest()->first()</code></td><td>Komentar terbaru</td></tr>
+                </tbody>
+            </table>
+
+            <h2 class="content-heading">Eager Loading — Solusi N+1 Query Problem</h2>
+            <div class="warning-box">
+                <div class="warning-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                    Masalah N+1
+                </div>
+                <p>Tanpa eager loading, kode ini bisa melakukan 101 query SQL untuk 100 post (1 ambil semua post + 100 ambil author setiap post). Akibatnya: aplikasi lambat dan database overload.</p>
+            </div>
+
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab(this, 'n1bad')">❌ Lazy Loading (N+1)</button>
+                <button class="tab-btn" onclick="switchTab(this, 'n1good')">✅ Eager Loading</button>
+            </div>
+            <div class="tab-content active" id="n1bad">
+                <div class="code-block">
+                    <div class="code-block-header">
+                        <div class="code-block-dots"><span></span><span></span><span></span></div>
+                        <span class="code-block-filename">N+1 problem</span>
+                    </div>
+                    <pre class="code-block-body"><code>$posts = Post::<span class="hl-func">all</span>(); <span class="hl-comment">// Query 1: SELECT * FROM posts</span>
+
+<span class="hl-keyword">foreach</span> ($posts <span class="hl-keyword">as</span> $post) {
+    <span class="hl-keyword">echo</span> $post->author->name;
+    <span class="hl-comment">// Query 2: SELECT * FROM users WHERE id = 1</span>
+    <span class="hl-comment">// Query 3: SELECT * FROM users WHERE id = 2</span>
+    <span class="hl-comment">// ... 100 query lagi! Total: 101 query SQL 😱</span>
+}</code></pre>
+                </div>
+            </div>
+            <div class="tab-content" id="n1good">
+                <div class="code-block">
+                    <div class="code-block-header">
+                        <div class="code-block-dots"><span></span><span></span><span></span></div>
+                        <span class="code-block-filename">eager loading</span>
+                    </div>
+                    <pre class="code-block-body"><code>$posts = Post::<span class="hl-func">with</span>(<span class="hl-string">'author'</span>)-><span class="hl-func">get</span>();
+<span class="hl-comment">// Query 1: SELECT * FROM posts</span>
+<span class="hl-comment">// Query 2: SELECT * FROM users WHERE id IN (1, 2, 3, ...)</span>
+
+<span class="hl-keyword">foreach</span> ($posts <span class="hl-keyword">as</span> $post) {
+    <span class="hl-keyword">echo</span> $post->author->name;
+    <span class="hl-comment">// Tidak query — data sudah di-load!</span>
+}
+
+<span class="hl-comment">// Total: 2 query saja, tidak peduli ada berapa post 🎉</span>
+
+<span class="hl-comment">// Multiple relasi sekaligus</span>
+$posts = Post::<span class="hl-func">with</span>([<span class="hl-string">'author'</span>, <span class="hl-string">'comments'</span>, <span class="hl-string">'tags'</span>])-><span class="hl-func">get</span>();
+
+<span class="hl-comment">// Nested (relasi dari relasi)</span>
+$posts = Post::<span class="hl-func">with</span>(<span class="hl-string">'comments.user'</span>)-><span class="hl-func">get</span>();
+
+<span class="hl-comment">// Eager loading dengan filter</span>
+$posts = Post::<span class="hl-func">with</span>([<span class="hl-string">'comments'</span> => <span class="hl-keyword">function</span> ($q) {
+    $q-><span class="hl-func">where</span>(<span class="hl-string">'approved'</span>, <span class="hl-keyword">true</span>);
+}])-><span class="hl-func">get</span>();</code></pre>
+                </div>
+            </div>
+
+            <h2 class="content-heading">withCount() — Hitung Tanpa Load</h2>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">withCount</span>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-comment">// Ambil post + jumlah komentar (tanpa load datanya)</span>
+$posts = Post::<span class="hl-func">withCount</span>(<span class="hl-string">'comments'</span>)-><span class="hl-func">get</span>();
+
+<span class="hl-keyword">foreach</span> ($posts <span class="hl-keyword">as</span> $post) {
+    <span class="hl-keyword">echo</span> $post->title;
+    <span class="hl-keyword">echo</span> $post->comments_count; <span class="hl-comment">// otomatis tersedia</span>
+}</code></pre>
+            </div>
+
+            <h2 class="content-heading">Membuat Data Bersamaan Relasi</h2>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">create dengan relasi</span>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-comment">// 1. Buat komentar baru DI BAWAH post tertentu (auto isi post_id)</span>
+$post = Post::<span class="hl-func">find</span>(<span class="hl-number">1</span>);
+$post-><span class="hl-func">comments</span>()-><span class="hl-func">create</span>([
+    <span class="hl-string">'text'</span> => <span class="hl-string">'Komentar baru!'</span>,
+    <span class="hl-string">'user_id'</span> => <span class="hl-func">auth</span>()-><span class="hl-func">id</span>(),
+]);
+
+<span class="hl-comment">// 2. Hubungkan record yang sudah ada (belongsTo)</span>
+$comment-><span class="hl-func">post</span>()-><span class="hl-func">associate</span>($post);
+$comment-><span class="hl-func">save</span>();
+
+<span class="hl-comment">// 3. Untuk many-to-many: attach</span>
+$post-><span class="hl-func">tags</span>()-><span class="hl-func">attach</span>([<span class="hl-number">1</span>, <span class="hl-number">2</span>, <span class="hl-number">5</span>]);</code></pre>
+            </div>
+
+            <div class="quiz">
+                <div class="quiz-title">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01"/></svg>
+                    Cek Pemahaman
+                </div>
+                <div class="quiz-question">
+                    <div class="quiz-q-text">1. Relasi "satu post punya banyak komentar" didefinisikan dengan?</div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'hasOne untuk relasi 1-to-1.')">$this->hasOne(Comment::class)</div>
+                        <div class="quiz-option" data-correct="true" onclick="quizAnswer(this, 'Tepat! hasMany di sisi "punya banyak".')">$this->hasMany(Comment::class)</div>
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'belongsTo di sisi sebaliknya (di Model Comment).')">$this->belongsTo(Comment::class)</div>
+                    </div>
+                    <div class="quiz-feedback hidden"></div>
+                </div>
+                <div class="quiz-question">
+                    <div class="quiz-q-text">2. Apa solusi untuk masalah N+1 query?</div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'Cache database tidak menyelesaikan jumlah query.')">Cache database</div>
+                        <div class="quiz-option" data-correct="true" onclick="quizAnswer(this, 'Tepat! with() mengeksekusi relasi dalam 1 query gabungan.')">Eager loading dengan ->with()</div>
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'Tidak otomatis; harus explicit pakai with().')">Aktifkan auto-loading</div>
+                    </div>
+                    <div class="quiz-feedback hidden"></div>
+                </div>
+                <div class="quiz-question">
+                    <div class="quiz-q-text">3. Untuk relasi many-to-many, apa nama default pivot table-nya jika Model: <code>Post</code> & <code>Tag</code>?</div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" data-correct="true" onclick="quizAnswer(this, 'Tepat! Alfabetis, singular, snake_case.')">post_tag</div>
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'Salah urut — alfabetis: p sebelum t.')">tag_post</div>
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'Pivot default tidak plural.')">posts_tags</div>
+                    </div>
+                    <div class="quiz-feedback hidden"></div>
+                </div>
+            </div>
+
+            <div class="content-nav">
+                <div class="content-nav-item">
+                    <a href="eloquent.html" class="nav-btn nav-btn-prev">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                        <div><span class="nav-label">Sebelumnya</span><span class="nav-name">Eloquent ORM</span></div>
+                    </a>
+                </div>
+                <div class="content-nav-item">
+                    <a href="form-validasi.html" class="nav-btn nav-btn-next">
+                        <div><span class="nav-label">Selanjutnya</span><span class="nav-name">Form & Validasi</span></div>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </a>
+                </div>
+            </div>
+        </article>
+    </main>
+    <script src="/laravel/course-layout.js"></script>
+    <script>
+    function copyCode(btn) {
+        const codeBlock = btn.closest('.code-block').querySelector('code');
+        navigator.clipboard.writeText(codeBlock.textContent).then(() => {
+            btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>';
+            setTimeout(() => { btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>'; }, 2000);
+        });
+    }
+
+    const relData = {
+        'one-to-one': {
+            entities: [
+                { name: 'User', fields: ['id', 'name', 'email'] },
+                { name: 'Profile', fields: ['id', 'user_id 🔗', 'bio', 'avatar'] }
+            ],
+            label: '1 : 1',
+            desc: '<strong>One to One:</strong> Satu User punya tepat satu Profile, dan Profile hanya milik satu User. Foreign key <code>user_id</code> ada di Profile. Method: <code>hasOne()</code> di User, <code>belongsTo()</code> di Profile.'
+        },
+        'one-to-many': {
+            entities: [
+                { name: 'Post', fields: ['id', 'title', 'body'] },
+                { name: 'Comment', fields: ['id', 'post_id 🔗', 'text', 'user_id'] }
+            ],
+            label: '1 : N',
+            desc: '<strong>One to Many:</strong> Satu Post bisa punya banyak Comment. Foreign key <code>post_id</code> ada di Comment. Method: <code>hasMany()</code> di Post, <code>belongsTo()</code> di Comment.'
+        },
+        'many-to-one': {
+            entities: [
+                { name: 'Comment', fields: ['id', 'post_id 🔗', 'text'] },
+                { name: 'Post', fields: ['id', 'title', 'body'] }
+            ],
+            label: 'N : 1',
+            desc: '<strong>Many to One (Belongs To):</strong> Banyak Comment milik satu Post — kebalikan dari hasMany. Ini adalah sisi yang punya foreign key. Method: <code>belongsTo()</code>.'
+        },
+        'many-to-many': {
+            entities: [
+                { name: 'Post', fields: ['id', 'title'] },
+                { name: 'post_tag', fields: ['post_id 🔗', 'tag_id 🔗'] },
+                { name: 'Tag', fields: ['id', 'name'] }
+            ],
+            label: 'N : M',
+            desc: '<strong>Many to Many:</strong> Satu Post bisa punya banyak Tag, dan satu Tag dipasang di banyak Post. Butuh <em>pivot table</em> <code>post_tag</code> di tengah. Method: <code>belongsToMany()</code> di kedua Model.'
+        },
+        'has-many-through': {
+            entities: [
+                { name: 'Country', fields: ['id', 'name'] },
+                { name: 'User', fields: ['id', 'country_id 🔗', 'name'] },
+                { name: 'Post', fields: ['id', 'user_id 🔗', 'title'] }
+            ],
+            label: 'via',
+            desc: '<strong>Has Many Through:</strong> Country tidak langsung berelasi dengan Post, tapi <em>melalui</em> User. Berguna untuk akses post-post dari satu Country tanpa loop manual. Method: <code>hasManyThrough(Post::class, User::class)</code>.'
+        }
+    };
+    function showRel(key, btn) {
+        document.querySelectorAll('.rel-type-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const d = relData[key];
+        const diag = document.getElementById('relDiagram');
+        let html = '';
+        d.entities.forEach((e, i) => {
+            html += '<div class="rel-entity"><div class="rel-entity-name">' + e.name + '</div><div class="rel-entity-fields">' + e.fields.map(f => '<div>' + f + '</div>').join('') + '</div></div>';
+            if (i < d.entities.length - 1) {
+                html += '<div class="rel-arrow"><div class="rel-arrow-label">' + d.label + '</div><div class="rel-arrow-line">↔</div></div>';
+            }
+        });
+        diag.innerHTML = html;
+        document.getElementById('relDesc').innerHTML = d.desc;
+    }
+    showRel('one-to-one', document.querySelector('.rel-type-btn'));
+
+    function switchTab(btn, id) {
+        btn.parentElement.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        btn.parentElement.parentElement.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+    }
+
+    function quizAnswer(el, feedback) {
+        const question = el.closest('.quiz-question');
+        const options = question.querySelectorAll('.quiz-option');
+        const fb = question.querySelector('.quiz-feedback');
+        options.forEach(o => {
+            o.style.pointerEvents = 'none';
+            if (o.dataset.correct === 'true') o.classList.add('correct');
+        });
+        if (el.dataset.correct !== 'true') el.classList.add('wrong');
+        fb.textContent = feedback;
+        fb.classList.remove('hidden');
+        fb.classList.add('visible');
+    }
+    </script>
+</body>
+</html>

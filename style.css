@@ -20,6 +20,8 @@
     --accent-laravel-glow: rgba(255, 107, 107, 0.15);
     --accent-datamining: #a78bfa;
     --accent-datamining-glow: rgba(167, 139, 250, 0.15);
+    --accent-cv: #22d3ee;
+    --accent-cv-glow: rgba(34, 211, 238, 0.15);
 
     --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
     --gradient-hero: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -768,6 +770,7 @@ img {
 .card-glow-flutter { background: var(--accent-flutter-glow); }
 .card-glow-laravel { background: var(--accent-laravel-glow); }
 .card-glow-datamining { background: var(--accent-datamining-glow); }
+.card-glow-cv { background: var(--accent-cv-glow); }
 
 .card-content {
     position: relative;
@@ -806,6 +809,12 @@ img {
     background: rgba(167, 139, 250, 0.1);
     color: var(--accent-datamining);
     border: 1px solid rgba(167, 139, 250, 0.15);
+}
+
+.card-icon-cv {
+    background: rgba(34, 211, 238, 0.1);
+    color: var(--accent-cv);
+    border: 1px solid rgba(34, 211, 238, 0.15);
 }
 
 .card-badge {
@@ -896,6 +905,7 @@ img {
 #card-flutter .card-link:hover { color: var(--accent-flutter); }
 #card-laravel .card-link:hover { color: var(--accent-laravel); }
 #card-datamining .card-link:hover { color: var(--accent-datamining); }
+#card-cv .card-link:hover { color: var(--accent-cv); }
 
 .card-pattern {
     position: absolute;

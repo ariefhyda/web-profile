@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Publish ke Play Store — Arif Hidayah</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/flutter/course.css">
+</head>
+<body>
+    <div class="bg-grid" aria-hidden="true"></div>
+    <nav class="navbar scrolled" id="navbar"></nav>
+    <div class="mobile-menu" id="mobileMenu"></div>
+
+    <main class="course-layout">
+        <aside class="course-sidebar" id="courseSidebar"></aside>
+
+        <article class="course-content">
+            <div class="breadcrumb">
+                <a href="../index.html">Home</a><span>›</span>
+                <a href="/flutter/index.html">Flutter</a><span>›</span>
+                <span style="color: var(--text-primary);">Publish ke Play Store</span>
+            </div>
+
+            <header class="content-header">
+                <h1 class="content-title">Modul 15: Publish Aplikasi ke Google Play Store</h1>
+                <div class="content-meta">
+                    <div class="meta-pill"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 5V8.5L10.5 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/></svg><span>Estimasi: 90 Menit</span></div>
+                    <div class="meta-pill"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="10" rx="1" stroke="currentColor" stroke-width="1.5"/><path d="M5 7h6M5 10h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><span>Praktikum & Administrasi</span></div>
+                </div>
+            </header>
+
+            <p class="content-text">
+                Setelah Anda punya file <code>.aab</code> yang sudah ditandatangani, langkah terakhir adalah <strong>publish ke Google Play Store</strong> agar bisa di-install oleh siapa saja melalui aplikasi Play Store. Modul ini menjelaskan langkah demi langkah dari mendaftar Play Console, menyiapkan asset, hingga rilis ke produksi.
+            </p>
+
+            <!-- Prasyarat -->
+            <div class="info-box">
+                <div class="info-box-header"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg><strong>Yang Anda Perlukan</strong></div>
+                <ol class="content-list" style="margin-top: 12px;">
+                    <li><strong>Akun Google</strong> (Gmail aktif).</li>
+                    <li><strong>Akun Google Play Developer</strong> — bayar sekali USD 25 (≈ Rp 400 ribu), berlaku selamanya.</li>
+                    <li><strong>Verifikasi identitas</strong> — siapkan KTP dan rekening/kartu kredit untuk pembayaran.</li>
+                    <li><strong>File AAB</strong> dari Modul 14 yang sudah ditandatangani.</li>
+                    <li><strong>Asset grafis</strong> (icon hi-res, screenshot, feature graphic) — dijelaskan di bawah.</li>
+                </ol>
+            </div>
+
+            <!-- Daftar Console -->
+            <h2 class="content-heading">1. Daftar Google Play Console</h2>
+            <p class="content-text">
+                Buka <a href="https://play.google.com/console" target="_blank" style="color: #54c5f8;">play.google.com/console</a> lalu login dengan akun Google Anda. Klik <em>"Get started"</em> dan pilih jenis akun:
+            </p>
+            <ol class="content-list">
+                <li><strong>Personal account</strong> — atas nama pribadi. Cocok untuk mahasiswa/developer indie. Wajib verifikasi identitas dengan dokumen resmi.</li>
+                <li><strong>Organization account</strong> — atas nama perusahaan/instansi. Wajib punya D-U-N-S Number.</li>
+            </ol>
+            <p class="content-text">Bayar biaya pendaftaran USD 25. Setelah pembayaran berhasil, Google akan memverifikasi identitas Anda (proses 1–3 hari). Selama menunggu, Anda sudah bisa mempersiapkan asset.</p>
+
+            <div class="info-box">
+                <div class="info-box-header"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg><strong>Kebijakan Baru Google (2023+)</strong></div>
+                <p>Sejak November 2023, akun personal baru wajib melakukan <strong>closed testing dengan minimal 12 tester selama 14 hari</strong> sebelum diizinkan publish ke produksi. Pastikan Anda menyiapkan tester (teman, keluarga) yang bersedia membantu di tahap ini.</p>
+            </div>
+
+            <!-- Buat App -->
+            <h2 class="content-heading">2. Buat App Baru di Console</h2>
+            <p class="content-text">Setelah login Play Console, klik tombol <strong>"Create app"</strong>. Anda akan diminta mengisi:</p>
+            <ol class="content-list">
+                <li><strong>App name</strong> — nama yang muncul di Play Store (max 30 karakter). Misal: <em>"Galeri Mahasiswa"</em>.</li>
+                <li><strong>Default language</strong> — pilih <em>Indonesian (Indonesia) – id-ID</em> untuk aplikasi berbahasa Indonesia.</li>
+                <li><strong>App or game</strong> — pilih <em>App</em>.</li>
+                <li><strong>Free or paid</strong> — pilih <em>Free</em>. (Paid bisa diatur belakangan.)</li>
+                <li><strong>Centangi 2 deklarasi</strong> — kepatuhan Developer Program Policies dan US export laws.</li>
+            </ol>
+
+            <!-- Siapkan Asset -->
+            <h2 class="content-heading">3. Siapkan Asset Grafis</h2>
+            <p class="content-text">Play Store butuh sederet asset visual. Siapkan semuanya sebelum mengisi listing — workflow akan jauh lebih lancar.</p>
+
+            <div class="info-box">
+                <div class="info-box-header"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg><strong>Checklist Asset Wajib</strong></div>
+                <p><strong>1. App icon (hi-res)</strong> — PNG 32-bit, <strong>512 × 512 px</strong>, tanpa alpha, ukuran max 1 MB.</p>
+                <p><strong>2. Feature graphic</strong> — JPG/PNG, <strong>1024 × 500 px</strong>, banner yang muncul di atas listing.</p>
+                <p><strong>3. Screenshot</strong> — minimal 2 (max 8) per kategori device: phone, 7-inch tablet, 10-inch tablet. Resolusi minimal 320px sisi pendek, max 3840px sisi panjang. Aspect ratio 16:9 atau 9:16.</p>
+                <p><strong>4. (Opsional) Promo video</strong> — link YouTube. Sangat dianjurkan, listing dengan video punya conversion rate lebih tinggi.</p>
+            </div>
+
+            <div class="info-box">
+                <div class="info-box-header"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg><strong>Tools Gratis untuk Bikin Asset</strong></div>
+                <p><strong>Figma</strong> (figma.com) — design icon dan feature graphic.</p>
+                <p><strong>Canva</strong> (canva.com) — template Play Store siap pakai.</p>
+                <p><strong>Screenshot Designer</strong> (appmockup.com) — masukkan screenshot mentah, dapatkan mockup HP keren.</p>
+                <p><strong>Screenshot dari emulator</strong> — di terminal saat aplikasi berjalan: <code>flutter screenshot</code>.</p>
+            </div>
+
+            <!-- Store Listing -->
+            <h2 class="content-heading">4. Isi Store Listing</h2>
+            <p class="content-text">Di sidebar Play Console, masuk ke <strong>Grow → Store presence → Main store listing</strong>. Anda perlu mengisi:</p>
+            <ol class="content-list">
+                <li><strong>App name</strong> — sudah diisi di langkah 2.</li>
+                <li><strong>Short description</strong> (max 80 karakter) — kalimat hook yang muncul di card pencarian.</li>
+                <li><strong>Full description</strong> (max 4000 karakter) — penjelasan lengkap fitur, target user, dan keunggulan.</li>
+                <li><strong>App icon</strong> — upload PNG 512×512.</li>
+                <li><strong>Feature graphic</strong> — upload 1024×500.</li>
+                <li><strong>Phone screenshots</strong> — upload minimal 2.</li>
+            </ol>
+
+            <p class="content-text"><strong>Contoh teks listing untuk aplikasi galeri mahasiswa:</strong></p>
+            <div class="code-block">
+                <div class="code-block-header"><div class="code-block-dots"><span></span><span></span><span></span></div><span class="code-block-filename">listing.txt</span><button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></div>
+                <pre class="code-block-body"><code>Short description:
+Galeri foto pribadi yang simpel, cepat, dan offline.
+
+Full description:
+📸 Galeri Mahasiswa adalah aplikasi galeri foto pribadi
+yang dirancang untuk menyimpan kenangan kuliah Anda
+secara aman dan offline.
+
+✨ FITUR UTAMA
+• Ambil foto langsung dari kamera
+• Pilih dari galeri perangkat
+• Simpan otomatis ke memori aplikasi (offline)
+• Tampilan grid 3 kolom yang cepat
+• Tap foto untuk lihat fullscreen
+
+🔒 PRIVASI
+Tidak ada data yang dikirim ke server. Semua foto
+tersimpan secara lokal di perangkat Anda.
+
+💡 COCOK UNTUK
+• Mahasiswa yang ingin mendokumentasikan kuliah
+• Pengguna yang menghargai privasi
+• Siapa saja yang butuh galeri ringan tanpa iklan
+
+Dibuat dengan ❤️ menggunakan Flutter.</code></pre>
+            </div>
+
+            <!-- Content Rating -->
+            <h2 class="content-heading">5. Content Rating & Target Audience</h2>
+            <p class="content-text">
+                Play Store mewajibkan setiap aplikasi memiliki <strong>rating konten</strong> resmi (mirip rating film). Masuk ke <strong>Policy → App content</strong> dan isi:
+            </p>
+            <ol class="content-list">
+                <li><strong>Privacy policy</strong> — URL halaman kebijakan privasi (wajib walau aplikasi sederhana). Bisa di-host gratis di GitHub Pages atau Notion publik.</li>
+                <li><strong>Ads</strong> — apakah aplikasi menampilkan iklan? (Pilih <em>No</em> jika tidak.)</li>
+                <li><strong>App access</strong> — apakah ada fitur yang butuh login? Jika ya, sediakan akun demo untuk reviewer Google.</li>
+                <li><strong>Content rating questionnaire</strong> — jawab serangkaian pertanyaan tentang konten (kekerasan, judi, dll). Hasilnya: rating ESRB (Everyone, Teen, dll).</li>
+                <li><strong>Target audience</strong> — pilih rentang umur target user.</li>
+                <li><strong>Data safety</strong> — deklarasi data apa saja yang dikumpulkan dan untuk apa. Karena aplikasi Anda offline, jawabannya biasanya <em>"No data collected"</em>.</li>
+            </ol>
+
+            <div class="info-box">
+                <div class="info-box-header"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg><strong>Cara Cepat Bikin Privacy Policy</strong></div>
+                <p>Pakai generator gratis seperti <a href="https://app-privacy-policy-generator.firebaseapp.com" target="_blank" style="color: #54c5f8;">app-privacy-policy-generator</a>. Hasilnya bisa di-host di GitHub Pages: buat repo baru, simpan sebagai <code>index.html</code>, aktifkan Pages di settings repo. URL <code>https://username.github.io/privacy-app</code> bisa langsung dipakai.</p>
+            </div>
+
+            <!-- Closed Testing -->
+            <h2 class="content-heading">6. Upload AAB ke Closed Testing</h2>
+            <p class="content-text">
+                Karena ada kebijakan baru wajib <strong>closed testing 14 hari dengan 12+ tester</strong> sebelum produksi, kita akan mulai dari sini.
+            </p>
+            <p class="content-text">Di sidebar Play Console: <strong>Release → Testing → Closed testing → Create new track</strong>. Beri nama track <em>"Internal Beta"</em> misalnya.</p>
+            <ol class="content-list">
+                <li>Klik <strong>"Create new release"</strong>.</li>
+                <li>Setujui pengelolaan signing key oleh Google Play (opsi <em>Play App Signing</em>).</li>
+                <li>Upload file <code>app-release.aab</code> dari folder <code>build/app/outputs/bundle/release/</code>.</li>
+                <li>Isi <strong>Release notes</strong>: tuliskan singkat fitur di versi ini. Format <code>&lt;id-ID&gt;Versi pertama. Fitur: ...&lt;/id-ID&gt;</code>.</li>
+                <li>Klik <strong>"Save"</strong> lalu <strong>"Review release"</strong>.</li>
+                <li>Tambahkan tester di tab <strong>Testers</strong> — bisa email list atau Google Group. Salin <strong>opt-in URL</strong> dan kirim ke tester Anda untuk join.</li>
+                <li>Klik <strong>"Start rollout to Closed Testing"</strong>.</li>
+            </ol>
+
+            <!-- Production -->
+            <h2 class="content-heading">7. Promote ke Production</h2>
+            <p class="content-text">
+                Setelah 14 hari berjalan dan minimal 12 tester sudah opt-in, Anda baru bisa promote release ke produksi.
+            </p>
+            <ol class="content-list">
+                <li>Masuk ke <strong>Release → Production → Create new release</strong>.</li>
+                <li>Klik <strong>"Promote release from"</strong> dan pilih versi closed testing yang sudah berjalan.</li>
+                <li>Pilih <strong>negara distribusi</strong> — biasanya pilih <em>"All countries"</em>.</li>
+                <li>Review semua isian (Store listing, App content, dll). Pastikan tidak ada warning merah.</li>
+                <li>Klik <strong>"Start rollout to Production"</strong>.</li>
+                <li>Aplikasi masuk antrian review Google (3 jam – 7 hari, biasanya 1–2 hari).</li>
+                <li>Setelah disetujui, aplikasi <strong>LIVE</strong> di Play Store dan bisa dicari semua orang!</li>
+            </ol>
+
+            <!-- Staged Rollout -->
+            <div class="info-box">
+                <div class="info-box-header"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg><strong>Staged Rollout — Rilis Bertahap</strong></div>
+                <p>Saat memulai rollout, Anda bisa pilih <strong>persentase user</strong> yang menerima update (mis. 10% dulu). Jika tidak ada crash report, naikkan ke 50%, lalu 100%. Strategi ini membatasi dampak bug yang lolos dari testing.</p>
+            </div>
+
+            <!-- Update -->
+            <h2 class="content-heading">8. Update Aplikasi</h2>
+            <p class="content-text">Untuk merilis versi baru:</p>
+            <ol class="content-list">
+                <li>Naikkan <code>versionCode</code> dan <code>versionName</code> di <code>pubspec.yaml</code> (misal <code>1.0.0+1</code> → <code>1.1.0+2</code>).</li>
+                <li>Build AAB baru: <code>flutter build appbundle --release</code>.</li>
+                <li>Di Play Console: <strong>Production → Create new release</strong>, upload AAB baru.</li>
+                <li>Isi <strong>release notes</strong> yang menjelaskan perubahan/fitur baru.</li>
+                <li>Submit untuk review.</li>
+            </ol>
+
+            <p class="content-text">User yang sudah meng-install akan otomatis dapat notifikasi update di Play Store mereka.</p>
+
+            <!-- Hal yang Sering Bikin Ditolak -->
+            <h2 class="content-heading">Hal yang Sering Bikin Aplikasi Ditolak</h2>
+            <ol class="content-list">
+                <li><strong>Privacy policy tidak ada / URL mati</strong> — pastikan link bisa diakses publik.</li>
+                <li><strong>Permission yang tidak dibutuhkan</strong> — jangan minta <code>CAMERA</code> jika aplikasi tidak pakai kamera.</li>
+                <li><strong>Screenshot menampilkan UI yang tidak ada di aplikasi</strong> — misleading.</li>
+                <li><strong>Aplikasi crash saat dibuka pertama kali</strong> — wajib test di device fisik bersih.</li>
+                <li><strong>Klaim "Resmi" tanpa lisensi</strong> — misal pakai logo perusahaan tanpa izin.</li>
+                <li><strong>Data safety form tidak akurat</strong> — Google verifikasi dengan auto-scan.</li>
+            </ol>
+
+            <!-- Pasca Publish -->
+            <h2 class="content-heading">9. Monitor Pasca Publish</h2>
+            <p class="content-text">Setelah aplikasi live, gunakan dashboard Play Console untuk memantau:</p>
+            <ol class="content-list">
+                <li><strong>Statistics</strong> — install, uninstall, rating, ulasan.</li>
+                <li><strong>Android vitals</strong> — crash rate, ANR (App Not Responding) rate, baterai.</li>
+                <li><strong>Reviews</strong> — balas review user, terutama yang negatif. Respon cepat & sopan meningkatkan rating overall.</li>
+                <li><strong>Acquisition reports</strong> — dari mana user menemukan aplikasi Anda (search, referral, dll).</li>
+            </ol>
+
+            <div class="info-box">
+                <div class="info-box-header"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg><strong>Strategi Pertumbuhan Sederhana</strong></div>
+                <p><strong>1.</strong> Bagikan link Play Store ke media sosial Anda saat launch.</p>
+                <p><strong>2.</strong> Pasang badge <em>"Get it on Google Play"</em> di portfolio / GitHub README Anda.</p>
+                <p><strong>3.</strong> Optimasi kata kunci di <em>full description</em> (ASO — App Store Optimization).</p>
+                <p><strong>4.</strong> Update rutin (minimal sebulan sekali) — algoritma Play Store memprioritaskan aplikasi aktif.</p>
+            </div>
+
+            <!-- Alternatif -->
+            <h2 class="content-heading">Alternatif Tanpa Play Store</h2>
+            <p class="content-text">
+                Jika Anda belum siap bayar USD 25, ada beberapa cara distribusi alternatif:
+            </p>
+            <ol class="content-list">
+                <li><strong>Direct APK</strong> — share file <code>.apk</code> via WhatsApp/Drive. User install manual.</li>
+                <li><strong>Firebase App Distribution</strong> — gratis, manajemen tester profesional, otomatis push update.</li>
+                <li><strong>F-Droid</strong> — store open-source. Aplikasi harus open-source (lisensi FOSS).</li>
+                <li><strong>Galaxy Store / Huawei AppGallery</strong> — gratis, target audiens lebih sempit.</li>
+            </ol>
+
+            <!-- Tantangan -->
+            <div class="info-box">
+                <div class="info-box-header"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg><strong>Tantangan Mahasiswa</strong></div>
+                <p>Pilih salah satu skenario sesuai kondisi Anda:</p>
+                <p><strong>Skenario A (Punya akun Play Console):</strong> Ikuti seluruh langkah di modul ini. Submit aplikasi Anda untuk closed testing. Kumpulkan 12 tester, jalankan selama 14 hari, lalu promote ke production.</p>
+                <p><strong>Skenario B (Belum punya akun):</strong> Siapkan <em>semua asset</em> seakan-akan Anda akan upload: ikon 512×512, feature graphic 1024×500, minimal 4 screenshot, full description, dan privacy policy yang sudah di-host. Buat dokumen "submission ready" di Notion/Google Docs.</p>
+                <p><strong>Skenario C (Tanpa Play Store):</strong> Upload aplikasi Anda ke Firebase App Distribution. Bagikan link install ke minimal 5 tester. Dokumentasikan feedback yang diterima.</p>
+                <p><strong>Wajib (semua skenario):</strong> Buat halaman GitHub README untuk project Anda yang berisi screenshot, deskripsi, dan link download.</p>
+            </div>
+
+            <!-- Nav -->
+            <div class="content-nav">
+                <div class="content-nav-item">
+                    <a href="/flutter/build-release.html" class="nav-btn nav-btn-prev">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                        <div><span class="nav-label">Sebelumnya</span><span class="nav-name">Build APK & AAB</span></div>
+                    </a>
+                </div>
+                <div class="content-nav-item">
+                    <a href="/flutter/final-project.html" class="nav-btn nav-btn-next">
+                        <div><span class="nav-label">Selanjutnya</span><span class="nav-name">Proyek Akhir</span></div>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </a>
+                </div>
+            </div>
+        </article>
+    </main>
+
+    <script src="/flutter/course-layout.js"></script>
+    <script>
+    function copyCode(btn){const c=btn.closest('.code-block').querySelector('code');navigator.clipboard.writeText(c.textContent).then(()=>{btn.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>';setTimeout(()=>{btn.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>'},2000)})}
+    </script>
+</body>
+</html>

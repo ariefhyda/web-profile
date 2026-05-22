@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Representasi citra digital: pixel, channel warna RGB, grayscale, HSV, resolusi, dan bit depth dalam Computer Vision.">
+    <title>Representasi Citra Digital — Computer Vision</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/computer-vision/course.css">
+</head>
+<body>
+    <div class="bg-grid" aria-hidden="true"></div>
+    <nav class="navbar scrolled" id="navbar"></nav>
+    <div class="mobile-menu" id="mobileMenu"></div>
+
+    <main class="course-layout">
+        <aside class="course-sidebar" id="courseSidebar"></aside>
+        <article class="course-content">
+
+            <div class="breadcrumb">
+                <a href="../index.html">Home</a><span>›</span>
+                <a href="index.html">Computer Vision</a><span>›</span>
+                <span style="color: var(--text-primary);">Representasi Citra Digital</span>
+            </div>
+
+            <header class="content-header">
+                <h1 class="content-title">Modul 2: Representasi Citra Digital</h1>
+                <div class="content-meta">
+                    <div class="meta-pill">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 5V8.5L10.5 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/></svg>
+                        <span>Estimasi: 60 Menit</span>
+                    </div>
+                    <div class="meta-pill">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="10" rx="1" stroke="currentColor" stroke-width="1.5"/><path d="M5 7h6M5 10h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                        <span>Teori & Praktikum</span>
+                    </div>
+                </div>
+            </header>
+
+            <p class="content-text">
+                Sebelum kita melakukan pengolahan atau analisis citra, kita harus memahami terlebih dahulu <strong>bagaimana sebuah citra direpresentasikan secara digital</strong> di dalam komputer. Pemahaman ini menjadi fondasi untuk seluruh materi Computer Vision selanjutnya.
+            </p>
+
+            <h2 class="content-heading">Apa itu Citra Digital?</h2>
+            <p class="content-text">
+                Citra digital adalah representasi dua dimensi dari sebuah scene visual yang disimpan dalam format numerik. Secara teknis, sebuah citra digital tersusun atas kumpulan elemen terkecil yang disebut <strong>pixel</strong> (<em>picture element</em>). Setiap pixel menyimpan nilai intensitas cahaya pada posisi (x, y) tertentu.
+            </p>
+            <p class="content-text">
+                Jika sebuah citra memiliki ukuran <strong>W × H</strong> pixel, maka citra tersebut dapat direpresentasikan sebagai sebuah <em>matrix</em> atau <em>array 2D</em> berukuran H baris dan W kolom. Pada citra berwarna (RGB), setiap pixel memiliki 3 nilai — sehingga representasinya menjadi array 3D berukuran <strong>H × W × 3</strong>.
+            </p>
+
+            <div class="info-box">
+                <div class="info-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                    <strong>Analogi Sederhana</strong>
+                </div>
+                <p>Bayangkan sebuah citra sebagai <strong>spreadsheet Excel raksasa</strong> — setiap sel menyimpan angka yang mewakili kecerahan (grayscale) atau tiga angka untuk warna merah, hijau, biru (RGB). Semakin banyak sel (pixel), semakin detail citra tersebut.</p>
+            </div>
+
+            <h2 class="content-heading">Model Warna (Color Space)</h2>
+            <p class="content-text">
+                Sebuah pixel dapat direpresentasikan dalam berbagai <em>color space</em> (ruang warna). Pemilihan color space yang tepat sangat penting karena memengaruhi efektivitas algoritma CV yang digunakan.
+            </p>
+
+            <ol class="content-list">
+                <li><strong>Grayscale (Skala Abu-abu)</strong><br>Setiap pixel memiliki satu nilai intensitas antara 0 (hitam) hingga 255 (putih). Cocok untuk analisis bentuk dan tepi karena menghilangkan informasi warna yang tidak relevan. Ukuran data = H × W.</li>
+                <li><strong>RGB (Red, Green, Blue)</strong><br>Model warna paling umum. Setiap pixel memiliki 3 channel: R, G, B masing-masing bernilai 0-255. Total kemungkinan warna: 256³ = 16.7 juta warna. Ukuran data = H × W × 3.</li>
+                <li><strong>HSV (Hue, Saturation, Value)</strong><br>Memisahkan informasi warna (Hue), kepekatan warna (Saturation), dan kecerahan (Value). Sangat berguna untuk deteksi objek berdasarkan warna karena lebih robust terhadap perubahan pencahayaan dibanding RGB.</li>
+                <li><strong>BGR</strong><br>Format default yang digunakan oleh OpenCV. Urutannya dibalik dari RGB: Blue → Green → Red. Penting untuk diperhatikan saat konversi antar library (OpenCV vs PIL vs Matplotlib).</li>
+            </ol>
+
+            <h2 class="content-heading">Praktikum: Membaca & Menampilkan Citra dengan OpenCV</h2>
+
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">01_read_image.py</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                    </button>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-keyword">import</span> cv2
+<span class="hl-keyword">import</span> numpy <span class="hl-keyword">as</span> np
+<span class="hl-keyword">import</span> matplotlib.pyplot <span class="hl-keyword">as</span> plt
+
+<span class="hl-comment"># 1. Membaca citra dari file</span>
+img_bgr = cv2.<span class="hl-func">imread</span>(<span class="hl-string">'sample.jpg'</span>)  <span class="hl-comment"># Format: BGR (default OpenCV)</span>
+
+<span class="hl-comment"># 2. Cek properti citra</span>
+<span class="hl-func">print</span>(f<span class="hl-string">"Shape   : {img_bgr.shape}"</span>)    <span class="hl-comment"># (H, W, C) misal (480, 640, 3)</span>
+<span class="hl-func">print</span>(f<span class="hl-string">"Dtype   : {img_bgr.dtype}"</span>)    <span class="hl-comment"># uint8 (0-255)</span>
+<span class="hl-func">print</span>(f<span class="hl-string">"Min/Max : {img_bgr.min()} / {img_bgr.max()}"</span>)
+
+<span class="hl-comment"># 3. Konversi BGR → RGB (untuk Matplotlib)</span>
+img_rgb = cv2.<span class="hl-func">cvtColor</span>(img_bgr, cv2.COLOR_BGR2RGB)
+
+<span class="hl-comment"># 4. Konversi ke Grayscale</span>
+img_gray = cv2.<span class="hl-func">cvtColor</span>(img_bgr, cv2.COLOR_BGR2GRAY)
+
+<span class="hl-comment"># 5. Konversi ke HSV</span>
+img_hsv = cv2.<span class="hl-func">cvtColor</span>(img_bgr, cv2.COLOR_BGR2HSV)
+
+<span class="hl-comment"># 6. Visualisasi</span>
+fig, axes = plt.<span class="hl-func">subplots</span>(<span class="hl-number">1</span>, <span class="hl-number">3</span>, figsize=(<span class="hl-number">15</span>, <span class="hl-number">5</span>))
+axes[<span class="hl-number">0</span>].<span class="hl-func">imshow</span>(img_rgb)
+axes[<span class="hl-number">0</span>].<span class="hl-func">set_title</span>(<span class="hl-string">'RGB'</span>)
+axes[<span class="hl-number">1</span>].<span class="hl-func">imshow</span>(img_gray, cmap=<span class="hl-string">'gray'</span>)
+axes[<span class="hl-number">1</span>].<span class="hl-func">set_title</span>(<span class="hl-string">'Grayscale'</span>)
+axes[<span class="hl-number">2</span>].<span class="hl-func">imshow</span>(img_hsv)
+axes[<span class="hl-number">2</span>].<span class="hl-func">set_title</span>(<span class="hl-string">'HSV'</span>)
+<span class="hl-keyword">for</span> ax <span class="hl-keyword">in</span> axes: ax.<span class="hl-func">axis</span>(<span class="hl-string">'off'</span>)
+plt.<span class="hl-func">tight_layout</span>()
+plt.<span class="hl-func">show</span>()</code></pre>
+            </div>
+
+            <h2 class="content-heading">Resolusi dan Bit Depth</h2>
+            <p class="content-text">
+                Dua parameter penting yang menentukan kualitas dan ukuran citra digital:
+            </p>
+            <ol class="content-list">
+                <li><strong>Resolusi (Spatial Resolution)</strong><br>Jumlah pixel per dimensi. Resolusi 1920×1080 berarti citra memiliki ~2 juta pixel. Semakin tinggi resolusi, semakin detail citra namun semakin besar ukuran file dan memori yang dibutuhkan.</li>
+                <li><strong>Bit Depth (Kedalaman Bit)</strong><br>Jumlah bit yang digunakan untuk merepresentasikan nilai setiap pixel. 8-bit = 256 level (0–255), 16-bit = 65536 level. Citra medis dan astronomi sering menggunakan 16-bit atau 32-bit float untuk presisi yang lebih tinggi.</li>
+            </ol>
+
+            <h2 class="content-heading">Praktikum: Memanipulasi Pixel Secara Langsung</h2>
+
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">02_pixel_manipulation.py</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                    </button>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-keyword">import</span> cv2
+<span class="hl-keyword">import</span> numpy <span class="hl-keyword">as</span> np
+
+<span class="hl-comment"># Membuat citra kosong (hitam) berukuran 300×400, 3 channel</span>
+canvas = np.<span class="hl-func">zeros</span>((<span class="hl-number">300</span>, <span class="hl-number">400</span>, <span class="hl-number">3</span>), dtype=np.uint8)
+
+<span class="hl-comment"># Mengakses dan mengubah pixel individual</span>
+canvas[<span class="hl-number">100</span>, <span class="hl-number">200</span>] = [<span class="hl-number">0</span>, <span class="hl-number">255</span>, <span class="hl-number">0</span>]  <span class="hl-comment"># Pixel hijau di (y=100, x=200)</span>
+
+<span class="hl-comment"># Menggambar region/ROI (Region of Interest)</span>
+canvas[<span class="hl-number">50</span>:<span class="hl-number">150</span>, <span class="hl-number">100</span>:<span class="hl-number">300</span>] = [<span class="hl-number">255</span>, <span class="hl-number">0</span>, <span class="hl-number">0</span>]   <span class="hl-comment"># Kotak biru (BGR)</span>
+canvas[<span class="hl-number">160</span>:<span class="hl-number">260</span>, <span class="hl-number">50</span>:<span class="hl-number">200</span>] = [<span class="hl-number">0</span>, <span class="hl-number">0</span>, <span class="hl-number">255</span>]   <span class="hl-comment"># Kotak merah (BGR)</span>
+
+<span class="hl-comment"># Split channel RGB</span>
+b, g, r = cv2.<span class="hl-func">split</span>(canvas)
+<span class="hl-func">print</span>(f<span class="hl-string">"Blue channel shape: {b.shape}"</span>)  <span class="hl-comment"># (300, 400)</span>
+
+<span class="hl-comment"># Menampilkan hasil</span>
+cv2.<span class="hl-func">imshow</span>(<span class="hl-string">'Canvas'</span>, canvas)
+cv2.<span class="hl-func">waitKey</span>(<span class="hl-number">0</span>)
+cv2.<span class="hl-func">destroyAllWindows</span>()</code></pre>
+            </div>
+
+            <div class="info-box">
+                <div class="info-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                    <strong>Penting: Konvensi Axis</strong>
+                </div>
+                <p>Dalam OpenCV dan NumPy, akses pixel menggunakan format <strong>[y, x]</strong> atau <strong>[row, col]</strong> — bukan [x, y]! Ini adalah salah satu sumber bug paling umum bagi pemula. Baris (y) dihitung dari atas ke bawah, kolom (x) dari kiri ke kanan.</p>
+            </div>
+
+            <!-- Navigation Prev/Next -->
+            <div class="content-nav">
+                <div class="content-nav-item">
+                    <a href="index.html" class="nav-btn nav-btn-prev">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                        <div>
+                            <span class="nav-label">Sebelumnya</span>
+                            <span class="nav-name">Apa itu Computer Vision?</span>
+                        </div>
+                    </a>
+                </div>
+                <div class="content-nav-item">
+                    <a href="operasi-dasar.html" class="nav-btn nav-btn-next">
+                        <div>
+                            <span class="nav-label">Selanjutnya</span>
+                            <span class="nav-name">Operasi Dasar Citra</span>
+                        </div>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </a>
+                </div>
+            </div>
+
+        </article>
+    </main>
+
+    <script src="/computer-vision/course-layout.js"></script>
+    <script>
+    function copyCode(btn) {
+        const codeBlock = btn.closest('.code-block').querySelector('code');
+        navigator.clipboard.writeText(codeBlock.textContent).then(() => {
+            btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>';
+            setTimeout(() => {
+                btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+            }, 2000);
+        });
+    }
+    function playVideo() {
+        alert('Video belum tersedia.');
+    }
+    </script>
+</body>
+</html>

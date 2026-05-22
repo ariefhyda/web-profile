@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Authentication — Laravel</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/laravel/course.css">
+</head>
+<body>
+    <div class="bg-grid" aria-hidden="true"></div>
+    <nav class="navbar scrolled" id="navbar"></nav>
+    <div class="mobile-menu" id="mobileMenu"></div>
+    <main class="course-layout">
+        <aside class="course-sidebar" id="courseSidebar"></aside>
+        <article class="course-content">
+            <div class="breadcrumb">
+                <a href="../index.html">Home</a><span>›</span>
+                <a href="index.html">Laravel</a><span>›</span>
+                <span style="color: var(--text-primary);">Authentication</span>
+            </div>
+            <header class="content-header">
+                <h1 class="content-title">Modul 12: Authentication</h1>
+                <div class="content-meta">
+                    <div class="meta-pill"><span>Estimasi: 40 Menit</span></div>
+                    <div class="meta-pill"><span>Teori & Praktikum</span></div>
+                </div>
+            </header>
+
+            <p class="content-text">Sistem Authentication (autentikasi / login) bisa memakan waktu berhari-hari untuk dibangun dari awal karena banyaknya detail keamanan (hashing password, token session, proteksi brute force). Untungnya, Laravel menyediakan semua ini secara <em>out-of-the-box</em>.</p>
+
+            <h2 class="content-heading">Starter Kits (Breeze / Jetstream)</h2>
+            <p class="content-text">Untuk aplikasi baru, sangat disarankan menggunakan Starter Kits resmi Laravel daripada menulis sistem login sendiri. Starter kit yang paling sederhana dan direkomendasikan untuk pemula adalah <strong>Laravel Breeze</strong>.</p>
+
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">Terminal</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-comment"># Instalasi package Breeze via Composer</span>
+composer require laravel/breeze --dev
+
+<span class="hl-comment"># Generate file view, route, dan controller untuk login/register</span>
+php artisan breeze:install
+
+<span class="hl-comment"># Jalankan migrasi tabel users</span>
+php artisan migrate
+
+<span class="hl-comment"># Install dan compile asset frontend (Tailwind/Vite)</span>
+npm install
+npm run dev</code></pre>
+            </div>
+            <p class="content-text">Setelah perintah di atas selesai, Anda otomatis memiliki halaman <code>/login</code>, <code>/register</code>, <code>/forgot-password</code>, dan sistem proteksi route.</p>
+
+            <h2 class="content-heading">Facade Auth</h2>
+            <p class="content-text">Facade <code>Auth</code> digunakan untuk berinteraksi dengan user yang sedang login di Controller atau route Anda.</p>
+
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">PHP</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-keyword">use</span> Illuminate\Support\Facades\Auth;
+
+<span class="hl-comment">// Mengecek apakah user sudah login</span>
+<span class="hl-keyword">if</span> (Auth::<span class="hl-func">check</span>()) {
+    <span class="hl-comment">// User sedang login...</span>
+}
+
+<span class="hl-comment">// Mengambil objek user yang sedang login</span>
+$user = Auth::<span class="hl-func">user</span>();
+<span class="hl-keyword">echo</span> $user-&gt;name;
+
+<span class="hl-comment">// Mengambil ID user yang sedang login</span>
+$id = Auth::<span class="hl-func">id</span>();</code></pre>
+            </div>
+
+            <h2 class="content-heading">Auth Helpers di Blade</h2>
+            <p class="content-text">Di dalam file view Blade, Anda tidak perlu menggunakan Facade. Cukup gunakan directive <code>@auth</code> dan metode <code>auth()</code>.</p>
+
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">resources/views/navbar.blade.php</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code>@auth
+    <span class="hl-comment">&lt;!-- Tampil jika sudah login --&gt;</span>
+    &lt;p&gt;Selamat datang kembali, {{ auth()-&gt;user()-&gt;name }}!&lt;/p&gt;
+    &lt;form method="POST" action="{{ route('logout') }}"&gt;
+        @csrf
+        &lt;button type="submit"&gt;Logout&lt;/button&gt;
+    &lt;/form&gt;
+@else
+    <span class="hl-comment">&lt;!-- Tampil jika belum login --&gt;</span>
+    &lt;a href="{{ route('login') }}"&gt;Log in&lt;/a&gt;
+    &lt;a href="{{ route('register') }}"&gt;Register&lt;/a&gt;
+@endauth</code></pre>
+            </div>
+
+            <h2 class="content-heading">Melindungi Route (Proteksi)</h2>
+            <p class="content-text">Untuk membatasi akses ke suatu halaman hanya untuk user yang sudah login, cukup pasangkan middleware <code>auth</code> pada route tersebut.</p>
+
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">routes/web.php</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code>Route::<span class="hl-func">get</span>(<span class="hl-string">'/dashboard'</span>, <span class="hl-keyword">function</span> () {
+    <span class="hl-keyword">return</span> <span class="hl-func">view</span>(<span class="hl-string">'dashboard'</span>);
+})-&gt;<span class="hl-func">middleware</span>(<span class="hl-string">'auth'</span>);</code></pre>
+            </div>
+
+            <div class="content-nav">
+                <div class="content-nav-item">
+                    <a href="form-validasi.html" class="nav-btn nav-btn-prev">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                        <div><span class="nav-label">Sebelumnya</span><span class="nav-name">Form & Validasi</span></div>
+                    </a>
+                </div>
+                <div class="content-nav-item">
+                    <a href="rest-api.html" class="nav-btn nav-btn-next">
+                        <div><span class="nav-label">Selanjutnya</span><span class="nav-name">REST API</span></div>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </a>
+                </div>
+            </div>
+        </article>
+    </main>
+    <script src="/laravel/course-layout.js"></script>
+    <script>
+    function copyCode(btn) {
+        const codeBlock = btn.closest('.code-block').querySelector('code');
+        navigator.clipboard.writeText(codeBlock.textContent).then(() => {
+            btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>';
+            setTimeout(() => { btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>'; }, 2000);
+        });
+    }
+    </script>
+</body>
+</html>

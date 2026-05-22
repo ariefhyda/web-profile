@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Local Storage (SQLite) Flutter — Arif Hidayah</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/flutter/course.css">
+</head>
+<body>
+    <div class="bg-grid" aria-hidden="true"></div>
+    <nav class="navbar scrolled" id="navbar"></nav>
+    <div class="mobile-menu" id="mobileMenu"></div>
+
+    <main class="course-layout">
+        <aside class="course-sidebar" id="courseSidebar"></aside>
+
+        <article class="course-content">
+            <div class="breadcrumb">
+                <a href="../index.html">Home</a><span>›</span>
+                <a href="/flutter/index.html">Flutter</a><span>›</span>
+                <span style="color: var(--text-primary);">Local Storage (SQLite)</span>
+            </div>
+
+            <header class="content-header">
+                <h1 class="content-title">Modul 11: Local Storage — SharedPreferences & SQLite</h1>
+                <div class="content-meta">
+                    <div class="meta-pill"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 5V8.5L10.5 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/></svg><span>Estimasi: 90 Menit</span></div>
+                    <div class="meta-pill"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="10" rx="1" stroke="currentColor" stroke-width="1.5"/><path d="M5 7h6M5 10h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><span>Teori & Praktikum</span></div>
+                </div>
+            </header>
+
+            <p class="content-text">
+                Aplikasi profesional harus bisa <strong>menyimpan data secara lokal</strong> agar tetap tersedia saat offline atau setelah aplikasi ditutup. Modul ini membahas dua teknik penyimpanan lokal yang paling sering dipakai: <strong>SharedPreferences</strong> untuk data kecil (key-value), dan <strong>SQLite</strong> untuk data terstruktur.
+            </p>
+
+            <!-- Project Setup -->
+            <div class="info-box">
+                <div class="info-box-header"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg><strong>Buat Project Baru</strong></div>
+                <div class="code-block" style="margin-top: 12px;">
+                    <div class="code-block-header"><div class="code-block-dots"><span></span><span></span><span></span></div><span class="code-block-filename">Terminal</span><button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></div>
+                    <pre class="code-block-body"><code>$ flutter create flutter_local_storage
+$ cd flutter_local_storage
+
+<span class="hl-comment"># Untuk SharedPreferences</span>
+$ flutter pub add shared_preferences
+
+<span class="hl-comment"># Untuk SQLite</span>
+$ flutter pub add sqflite path</code></pre>
+                </div>
+            </div>
+
+            <!-- Pilihan -->
+            <h2 class="content-heading">Memilih Storage yang Tepat</h2>
+            <p class="content-text">
+                Sebelum coding, pahami kapan harus pakai apa:
+            </p>
+            <ol class="content-list">
+                <li><strong>SharedPreferences</strong> — Untuk data kecil berbentuk key-value: pengaturan tema, token login, flag <em>"sudah lihat onboarding"</em>, last opened page. Cepat & mudah, tapi tidak cocok untuk data kompleks.</li>
+                <li><strong>SQLite (sqflite)</strong> — Database relasional. Cocok untuk data terstruktur dengan banyak field dan relasi: catatan, daftar transaksi, kontak, todo dengan kategori, dll. CRUD penuh dengan query SQL.</li>
+                <li><strong>Hive / Isar / ObjectBox</strong> — Database NoSQL berbasis object. Lebih cepat dari SQLite untuk skenario tertentu. (Tidak dibahas di modul ini.)</li>
+            </ol>
+
+            <!-- SharedPreferences -->
+            <h2 class="content-heading">SharedPreferences — Key-Value Sederhana</h2>
+            <p class="content-text">
+                Bayangkan SharedPreferences sebagai <code>Map</code> persisten yang otomatis disimpan ke disk. Mendukung tipe primitif: <code>int</code>, <code>double</code>, <code>bool</code>, <code>String</code>, dan <code>List&lt;String&gt;</code>.
+            </p>
+            <div class="code-block">
+                <div class="code-block-header"><div class="code-block-dots"><span></span><span></span><span></span></div><span class="code-block-filename">shared_prefs_demo.dart</span><button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></div>
+                <pre class="code-block-body"><code><span class="hl-keyword">import</span> <span class="hl-string">'package:shared_preferences/shared_preferences.dart'</span>;
+
+<span class="hl-comment">// SIMPAN</span>
+Future&lt;<span class="hl-keyword">void</span>&gt; simpanNama(<span class="hl-keyword">String</span> nama) <span class="hl-keyword">async</span> {
+  <span class="hl-keyword">final</span> prefs = <span class="hl-keyword">await</span> SharedPreferences.getInstance();
+  <span class="hl-keyword">await</span> prefs.setString(<span class="hl-string">'user_nama'</span>, nama);
+  <span class="hl-keyword">await</span> prefs.setBool(<span class="hl-string">'sudah_login'</span>, <span class="hl-keyword">true</span>);
+  <span class="hl-keyword">await</span> prefs.setInt(<span class="hl-string">'umur'</span>, <span class="hl-number">21</span>);
+}
+
+<span class="hl-comment">// BACA (kembalian bisa null jika belum pernah disimpan)</span>
+Future&lt;<span class="hl-keyword">void</span>&gt; muatNama() <span class="hl-keyword">async</span> {
+  <span class="hl-keyword">final</span> prefs = <span class="hl-keyword">await</span> SharedPreferences.getInstance();
+  <span class="hl-keyword">final</span> nama = prefs.getString(<span class="hl-string">'user_nama'</span>) ?? <span class="hl-string">'Belum diisi'</span>;
+  <span class="hl-keyword">final</span> sudahLogin = prefs.getBool(<span class="hl-string">'sudah_login'</span>) ?? <span class="hl-keyword">false</span>;
+  <span class="hl-func">print</span>(<span class="hl-string">'Nama: $nama, Login: $sudahLogin'</span>);
+}
+
+<span class="hl-comment">// HAPUS</span>
+Future&lt;<span class="hl-keyword">void</span>&gt; logout() <span class="hl-keyword">async</span> {
+  <span class="hl-keyword">final</span> prefs = <span class="hl-keyword">await</span> SharedPreferences.getInstance();
+  <span class="hl-keyword">await</span> prefs.remove(<span class="hl-string">'user_nama'</span>);
+  <span class="hl-comment">// atau hapus semua:</span>
+  <span class="hl-keyword">await</span> prefs.clear();
+}</code></pre>
+            </div>
+
+            <div class="info-box">
+                <div class="info-box-header"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg><strong>Use-case Klasik SharedPreferences</strong></div>
+                <p><strong>Theme switcher:</strong> simpan <code>bool isDarkMode</code> agar pilihan user tidak hilang setelah aplikasi ditutup.</p>
+                <p><strong>Token login:</strong> simpan JWT token, baca saat aplikasi dibuka, otomatis arahkan ke Home jika ada.</p>
+                <p><strong>Onboarding flag:</strong> simpan <code>bool sudahLihatTutorial</code> agar tutorial hanya muncul sekali di first launch.</p>
+            </div>
+
+            <!-- SQLite Intro -->
+            <h2 class="content-heading">SQLite dengan sqflite</h2>
+            <p class="content-text">
+                <strong>SQLite</strong> adalah database relasional ringan yang sudah ada di setiap perangkat Android & iOS. Kita mengaksesnya melalui package <code>sqflite</code>. Konsep dasarnya sama dengan database biasa: ada tabel, kolom, dan kita menjalankan query SQL.
+            </p>
+
+            <!-- Model -->
+            <h2 class="content-heading">Membuat Model — Catatan</h2>
+            <p class="content-text">
+                Sebagai contoh, kita akan membangun aplikasi <em>"Buku Catatan"</em>. Setiap catatan punya <code>id</code>, <code>judul</code>, <code>isi</code>, dan <code>createdAt</code>.
+            </p>
+            <div class="code-block">
+                <div class="code-block-header"><div class="code-block-dots"><span></span><span></span><span></span></div><span class="code-block-filename">note_model.dart</span><button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></div>
+                <pre class="code-block-body"><code><span class="hl-keyword">class</span> Note {
+  <span class="hl-keyword">final int</span>? id;        <span class="hl-comment">// null saat catatan baru, auto-fill setelah insert</span>
+  <span class="hl-keyword">final String</span> judul;
+  <span class="hl-keyword">final String</span> isi;
+  <span class="hl-keyword">final String</span> createdAt;
+
+  Note({<span class="hl-keyword">this</span>.id, <span class="hl-keyword">required this</span>.judul, <span class="hl-keyword">required this</span>.isi, <span class="hl-keyword">required this</span>.createdAt});
+
+  <span class="hl-comment">// Konversi ke Map untuk insert/update</span>
+  Map&lt;<span class="hl-keyword">String</span>, <span class="hl-keyword">dynamic</span>&gt; toMap() => {
+    <span class="hl-string">'id'</span>: id,
+    <span class="hl-string">'judul'</span>: judul,
+    <span class="hl-string">'isi'</span>: isi,
+    <span class="hl-string">'createdAt'</span>: createdAt,
+  };
+
+  <span class="hl-comment">// Konversi dari Map (hasil query)</span>
+  factory Note.fromMap(Map&lt;<span class="hl-keyword">String</span>, <span class="hl-keyword">dynamic</span>&gt; m) => Note(
+    id: m[<span class="hl-string">'id'</span>] <span class="hl-keyword">as int</span>?,
+    judul: m[<span class="hl-string">'judul'</span>] <span class="hl-keyword">as String</span>,
+    isi: m[<span class="hl-string">'isi'</span>] <span class="hl-keyword">as String</span>,
+    createdAt: m[<span class="hl-string">'createdAt'</span>] <span class="hl-keyword">as String</span>,
+  );
+}</code></pre>
+            </div>
+
+            <!-- DatabaseHelper -->
+            <h2 class="content-heading">DatabaseHelper — Singleton untuk Akses DB</h2>
+            <p class="content-text">
+                Daripada membuka koneksi database di setiap halaman, kita buat satu class <code>DatabaseHelper</code> yang bertanggung jawab untuk inisialisasi dan operasi CRUD.
+            </p>
+            <div class="code-block">
+                <div class="code-block-header"><div class="code-block-dots"><span></span><span></span><span></span></div><span class="code-block-filename">database_helper.dart</span><button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></div>
+                <pre class="code-block-body"><code><span class="hl-keyword">import</span> <span class="hl-string">'package:sqflite/sqflite.dart'</span>;
+<span class="hl-keyword">import</span> <span class="hl-string">'package:path/path.dart'</span>;
+
+<span class="hl-keyword">class</span> DatabaseHelper {
+  <span class="hl-keyword">static final</span> DatabaseHelper instance = DatabaseHelper._();
+  DatabaseHelper._();
+
+  <span class="hl-keyword">static</span> Database? _db;
+
+  Future&lt;Database&gt; <span class="hl-keyword">get</span> database <span class="hl-keyword">async</span> {
+    <span class="hl-keyword">if</span> (_db != <span class="hl-keyword">null</span>) <span class="hl-keyword">return</span> _db!;
+    _db = <span class="hl-keyword">await</span> _initDb();
+    <span class="hl-keyword">return</span> _db!;
+  }
+
+  Future&lt;Database&gt; _initDb() <span class="hl-keyword">async</span> {
+    <span class="hl-keyword">final</span> path = join(<span class="hl-keyword">await</span> getDatabasesPath(), <span class="hl-string">'notes.db'</span>);
+    <span class="hl-keyword">return</span> openDatabase(
+      path,
+      version: <span class="hl-number">1</span>,
+      onCreate: (db, version) {
+        <span class="hl-keyword">return</span> db.execute('''
+          CREATE TABLE notes (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            judul TEXT NOT NULL,
+            isi TEXT NOT NULL,
+            createdAt TEXT NOT NULL
+          )
+        ''');
+      },
+    );
+  }
+
+  <span class="hl-comment">// CREATE</span>
+  Future&lt;<span class="hl-keyword">int</span>&gt; insert(Note note) <span class="hl-keyword">async</span> {
+    <span class="hl-keyword">final</span> db = <span class="hl-keyword">await</span> database;
+    <span class="hl-keyword">return</span> db.insert(<span class="hl-string">'notes'</span>, note.toMap());
+  }
+
+  <span class="hl-comment">// READ semua</span>
+  Future&lt;List&lt;Note&gt;&gt; getAll() <span class="hl-keyword">async</span> {
+    <span class="hl-keyword">final</span> db = <span class="hl-keyword">await</span> database;
+    <span class="hl-keyword">final</span> maps = <span class="hl-keyword">await</span> db.query(<span class="hl-string">'notes'</span>, orderBy: <span class="hl-string">'id DESC'</span>);
+    <span class="hl-keyword">return</span> maps.map(Note.fromMap).toList();
+  }
+
+  <span class="hl-comment">// UPDATE</span>
+  Future&lt;<span class="hl-keyword">int</span>&gt; update(Note note) <span class="hl-keyword">async</span> {
+    <span class="hl-keyword">final</span> db = <span class="hl-keyword">await</span> database;
+    <span class="hl-keyword">return</span> db.update(
+      <span class="hl-string">'notes'</span>,
+      note.toMap(),
+      where: <span class="hl-string">'id = ?'</span>,
+      whereArgs: [note.id],
+    );
+  }
+
+  <span class="hl-comment">// DELETE</span>
+  Future&lt;<span class="hl-keyword">int</span>&gt; delete(<span class="hl-keyword">int</span> id) <span class="hl-keyword">async</span> {
+    <span class="hl-keyword">final</span> db = <span class="hl-keyword">await</span> database;
+    <span class="hl-keyword">return</span> db.delete(<span class="hl-string">'notes'</span>, where: <span class="hl-string">'id = ?'</span>, whereArgs: [id]);
+  }
+}</code></pre>
+            </div>
+
+            <div class="info-box">
+                <div class="info-box-header"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg><strong>Kenapa Singleton?</strong></div>
+                <p>Membuka koneksi database itu mahal. Pola <em>singleton</em> memastikan hanya ada satu instance <code>Database</code> selama aplikasi berjalan. Trik <code>DatabaseHelper._()</code> (constructor private) + <code>static final instance</code> adalah idiom Dart standar untuk singleton.</p>
+            </div>
+
+            <!-- Aplikasi Lengkap -->
+            <h2 class="content-heading">Aplikasi Lengkap: Buku Catatan</h2>
+            <p class="content-text">
+                Sekarang gabungkan semuanya. Untuk kemudahan, kita akan menulis semua kode dalam satu file <code>lib/main.dart</code>. Di aplikasi nyata, sebaiknya dipecah menjadi beberapa file: <code>note_model.dart</code>, <code>database_helper.dart</code>, dan halaman-halaman terpisah.
+            </p>
+            <div class="code-block">
+                <div class="code-block-header"><div class="code-block-dots"><span></span><span></span><span></span></div><span class="code-block-filename">lib/main.dart</span><button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></div>
+                <pre class="code-block-body"><code><span class="hl-keyword">import</span> <span class="hl-string">'package:flutter/material.dart'</span>;
+<span class="hl-keyword">import</span> <span class="hl-string">'package:sqflite/sqflite.dart'</span>;
+<span class="hl-keyword">import</span> <span class="hl-string">'package:path/path.dart'</span>;
+
+<span class="hl-keyword">void</span> main() => runApp(<span class="hl-keyword">const</span> MyApp());
+
+<span class="hl-comment">// === MODEL ===</span>
+<span class="hl-keyword">class</span> Note {
+  <span class="hl-keyword">final int</span>? id;
+  <span class="hl-keyword">final String</span> judul, isi, createdAt;
+  Note({<span class="hl-keyword">this</span>.id, <span class="hl-keyword">required this</span>.judul, <span class="hl-keyword">required this</span>.isi, <span class="hl-keyword">required this</span>.createdAt});
+  Map&lt;<span class="hl-keyword">String</span>, <span class="hl-keyword">dynamic</span>&gt; toMap() => {<span class="hl-string">'id'</span>: id, <span class="hl-string">'judul'</span>: judul, <span class="hl-string">'isi'</span>: isi, <span class="hl-string">'createdAt'</span>: createdAt};
+  factory Note.fromMap(Map&lt;<span class="hl-keyword">String</span>, <span class="hl-keyword">dynamic</span>&gt; m) =>
+    Note(id: m[<span class="hl-string">'id'</span>], judul: m[<span class="hl-string">'judul'</span>], isi: m[<span class="hl-string">'isi'</span>], createdAt: m[<span class="hl-string">'createdAt'</span>]);
+}
+
+<span class="hl-comment">// === DATABASE HELPER ===</span>
+<span class="hl-keyword">class</span> DB {
+  <span class="hl-keyword">static final</span> DB instance = DB._();
+  DB._();
+  <span class="hl-keyword">static</span> Database? _db;
+
+  Future&lt;Database&gt; <span class="hl-keyword">get</span> db <span class="hl-keyword">async</span> {
+    <span class="hl-keyword">if</span> (_db != <span class="hl-keyword">null</span>) <span class="hl-keyword">return</span> _db!;
+    <span class="hl-keyword">final</span> path = join(<span class="hl-keyword">await</span> getDatabasesPath(), <span class="hl-string">'notes.db'</span>);
+    _db = <span class="hl-keyword">await</span> openDatabase(path, version: <span class="hl-number">1</span>, onCreate: (d, _) {
+      <span class="hl-keyword">return</span> d.execute(<span class="hl-string">'CREATE TABLE notes(id INTEGER PRIMARY KEY AUTOINCREMENT, judul TEXT, isi TEXT, createdAt TEXT)'</span>);
+    });
+    <span class="hl-keyword">return</span> _db!;
+  }
+
+  Future&lt;<span class="hl-keyword">int</span>&gt; insert(Note n) <span class="hl-keyword">async</span> => (<span class="hl-keyword">await</span> db).insert(<span class="hl-string">'notes'</span>, n.toMap());
+  Future&lt;List&lt;Note&gt;&gt; all() <span class="hl-keyword">async</span> =>
+    (<span class="hl-keyword">await</span> (<span class="hl-keyword">await</span> db).query(<span class="hl-string">'notes'</span>, orderBy: <span class="hl-string">'id DESC'</span>)).map(Note.fromMap).toList();
+  Future&lt;<span class="hl-keyword">int</span>&gt; delete(<span class="hl-keyword">int</span> id) <span class="hl-keyword">async</span> =>
+    (<span class="hl-keyword">await</span> db).delete(<span class="hl-string">'notes'</span>, where: <span class="hl-string">'id=?'</span>, whereArgs: [id]);
+}
+
+<span class="hl-comment">// === UI ===</span>
+<span class="hl-keyword">class</span> MyApp <span class="hl-keyword">extends</span> StatelessWidget {
+  <span class="hl-keyword">const</span> MyApp({<span class="hl-keyword">super</span>.key});
+  <span class="hl-keyword">@override</span>
+  Widget build(BuildContext context) => MaterialApp(
+    theme: ThemeData(colorSchemeSeed: Colors.amber, useMaterial3: <span class="hl-keyword">true</span>),
+    home: <span class="hl-keyword">const</span> NotePage(),
+  );
+}
+
+<span class="hl-keyword">class</span> NotePage <span class="hl-keyword">extends</span> StatefulWidget {
+  <span class="hl-keyword">const</span> NotePage({<span class="hl-keyword">super</span>.key});
+  <span class="hl-keyword">@override</span>
+  State&lt;NotePage&gt; createState() => _NotePageState();
+}
+
+<span class="hl-keyword">class</span> _NotePageState <span class="hl-keyword">extends</span> State&lt;NotePage&gt; {
+  List&lt;Note&gt; _notes = [];
+
+  <span class="hl-keyword">@override</span>
+  <span class="hl-keyword">void</span> initState() { <span class="hl-keyword">super</span>.initState(); _load(); }
+
+  Future&lt;<span class="hl-keyword">void</span>&gt; _load() <span class="hl-keyword">async</span> {
+    <span class="hl-keyword">final</span> data = <span class="hl-keyword">await</span> DB.instance.all();
+    setState(() => _notes = data);
+  }
+
+  Future&lt;<span class="hl-keyword">void</span>&gt; _showForm() <span class="hl-keyword">async</span> {
+    <span class="hl-keyword">final</span> judulCtrl = TextEditingController();
+    <span class="hl-keyword">final</span> isiCtrl = TextEditingController();
+
+    <span class="hl-keyword">final</span> simpan = <span class="hl-keyword">await</span> showDialog&lt;<span class="hl-keyword">bool</span>&gt;(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: <span class="hl-keyword">const</span> Text(<span class="hl-string">'Catatan Baru'</span>),
+        content: Column(mainAxisSize: MainAxisSize.min, children: [
+          TextField(controller: judulCtrl, decoration: <span class="hl-keyword">const</span> InputDecoration(labelText: <span class="hl-string">'Judul'</span>)),
+          TextField(controller: isiCtrl, decoration: <span class="hl-keyword">const</span> InputDecoration(labelText: <span class="hl-string">'Isi'</span>), maxLines: <span class="hl-number">3</span>),
+        ]),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, <span class="hl-keyword">false</span>), child: <span class="hl-keyword">const</span> Text(<span class="hl-string">'Batal'</span>)),
+          FilledButton(onPressed: () => Navigator.pop(context, <span class="hl-keyword">true</span>), child: <span class="hl-keyword">const</span> Text(<span class="hl-string">'Simpan'</span>)),
+        ],
+      ),
+    );
+
+    <span class="hl-keyword">if</span> (simpan == <span class="hl-keyword">true</span> && judulCtrl.text.isNotEmpty) {
+      <span class="hl-keyword">await</span> DB.instance.insert(Note(
+        judul: judulCtrl.text,
+        isi: isiCtrl.text,
+        createdAt: DateTime.now().toIso8601String().substring(<span class="hl-number">0</span>, <span class="hl-number">16</span>),
+      ));
+      _load();
+    }
+  }
+
+  <span class="hl-keyword">@override</span>
+  Widget build(BuildContext context) {
+    <span class="hl-keyword">return</span> Scaffold(
+      appBar: AppBar(title: <span class="hl-keyword">const</span> Text(<span class="hl-string">'Buku Catatan'</span>)),
+      body: _notes.isEmpty
+        ? <span class="hl-keyword">const</span> Center(child: Text(<span class="hl-string">'Belum ada catatan. Tekan + untuk menambah'</span>))
+        : ListView.builder(
+            itemCount: _notes.length,
+            itemBuilder: (_, i) {
+              <span class="hl-keyword">final</span> n = _notes[i];
+              <span class="hl-keyword">return</span> Dismissible(
+                key: ValueKey(n.id),
+                background: Container(color: Colors.red, alignment: Alignment.centerRight,
+                  padding: <span class="hl-keyword">const</span> EdgeInsets.only(right: <span class="hl-number">16</span>),
+                  child: <span class="hl-keyword">const</span> Icon(Icons.delete, color: Colors.white)),
+                onDismissed: (_) <span class="hl-keyword">async</span> {
+                  <span class="hl-keyword">await</span> DB.instance.delete(n.id!);
+                  _load();
+                },
+                child: ListTile(
+                  title: Text(n.judul, style: <span class="hl-keyword">const</span> TextStyle(fontWeight: FontWeight.bold)),
+                  subtitle: Text(<span class="hl-string">'${n.isi}\n📅 ${n.createdAt}'</span>),
+                  isThreeLine: <span class="hl-keyword">true</span>,
+                ),
+              );
+            },
+          ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _showForm,
+        child: <span class="hl-keyword">const</span> Icon(Icons.add),
+      ),
+    );
+  }
+}</code></pre>
+            </div>
+
+            <div class="info-box">
+                <div class="info-box-header"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg><strong>Dismissible — Swipe to Delete</strong></div>
+                <p>Widget <code>Dismissible</code> menambahkan gesture <em>swipe-to-delete</em> ala Gmail. Setiap item memerlukan <code>key</code> unik (gunakan id dari database). Saat user swipe, callback <code>onDismissed</code> akan dipanggil.</p>
+            </div>
+
+            <!-- Tip Reset -->
+            <div class="info-box">
+                <div class="info-box-header"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg><strong>Saat Skema Tabel Berubah</strong></div>
+                <p>Jika Anda mengubah <em>CREATE TABLE</em> (mis. menambah kolom <code>kategori</code>), aplikasi yang sudah pernah di-run <strong>tidak akan otomatis</strong> mengupdate skema. Cara cepat saat development: uninstall aplikasi dari emulator/device, lalu <code>flutter run</code> lagi. Cara profesional: gunakan <code>onUpgrade</code> di <code>openDatabase</code> dan naikkan parameter <code>version</code>.</p>
+            </div>
+
+            <!-- Tantangan -->
+            <div class="info-box">
+                <div class="info-box-header"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg><strong>Tantangan Mahasiswa</strong></div>
+                <p>Tingkatkan aplikasi <em>Buku Catatan</em>:</p>
+                <p>1. Tambahkan fitur <strong>edit catatan</strong>. Saat user tap item → muncul dialog yang sudah terisi data lama. Gunakan method <code>db.update()</code>.</p>
+                <p>2. Tambahkan kolom <strong>kategori</strong> (Personal / Kuliah / Pekerjaan). Tampilkan badge berwarna di setiap item.</p>
+                <p>3. Tambahkan <strong>filter</strong> di AppBar untuk menampilkan catatan berdasarkan kategori tertentu.</p>
+                <p>4. <strong>Bonus:</strong> Buat project baru bernama <code>flutter_login_persist</code>. Implementasikan halaman login sederhana yang menyimpan status <em>"sudah login"</em> dengan SharedPreferences, sehingga user tidak perlu login ulang setiap aplikasi dibuka.</p>
+            </div>
+
+            <!-- Penutup -->
+            <h2 class="content-heading">Selamat! Anda Telah Menyelesaikan Course</h2>
+            <p class="content-text">
+                Dengan menyelesaikan 11 modul ini, Anda telah memiliki <strong>fondasi yang kuat</strong> untuk membangun aplikasi Flutter nyata: dari Dart fundamental, UI dasar, layout responsif, navigasi, state management, integrasi REST API, hingga penyimpanan lokal. Langkah selanjutnya: rangkai semua skill ini menjadi <em>capstone project</em> Anda sendiri!
+            </p>
+
+            <div class="info-box">
+                <div class="info-box-header"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/></svg><strong>Ide Capstone Project</strong></div>
+                <p><strong>Aplikasi Resep:</strong> tampilkan daftar resep dari REST API, simpan resep favorit ke SQLite, foto bisa dari kamera/gallery.</p>
+                <p><strong>Catatan Keuangan Pribadi:</strong> CRUD transaksi pemasukan & pengeluaran, grafik bulanan, ekspor ke CSV.</p>
+                <p><strong>Aplikasi Cuaca:</strong> integrasi API OpenWeather, simpan kota favorit lokal, widget cuaca harian responsive.</p>
+                <p><strong>Mini E-Commerce:</strong> daftar produk dari API, keranjang dengan Provider, riwayat transaksi di SQLite.</p>
+            </div>
+
+            <!-- Nav -->
+            <div class="content-nav">
+                <div class="content-nav-item">
+                    <a href="/flutter/rest-api.html" class="nav-btn nav-btn-prev">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                        <div><span class="nav-label">Sebelumnya</span><span class="nav-name">REST API & HTTP</span></div>
+                    </a>
+                </div>
+                <div class="content-nav-item">
+                    <a href="/flutter/media.html" class="nav-btn nav-btn-next">
+                        <div><span class="nav-label">Selanjutnya</span><span class="nav-name">Pengelolaan Media</span></div>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </a>
+                </div>
+            </div>
+        </article>
+    </main>
+
+    <script src="/flutter/course-layout.js"></script>
+    <script>
+    function copyCode(btn){const c=btn.closest('.code-block').querySelector('code');navigator.clipboard.writeText(c.textContent).then(()=>{btn.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>';setTimeout(()=>{btn.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>'},2000)})}
+    </script>
+</body>
+</html>

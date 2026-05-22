@@ -1,64 +1,51 @@
 /**
- * Flutter Fundamentals Layout Component
+ * Computer Vision Course Layout Component
  */
 
 const courseConfig = {
-    courseName: "Flutter Fundamentals",
+    courseName: "Computer Vision",
     profileUrl: "../index.html",
     courseIcon: `<svg width="24" height="24" viewBox="0 0 40 40" fill="none">
-        <path d="M22 6L8 20L13 25L32 6H22Z" fill="currentColor"/>
-        <path d="M22 18L13 27L18 32L32 18H22Z" fill="currentColor" opacity="0.7"/>
+        <rect x="6" y="10" width="28" height="20" rx="3" stroke="currentColor" stroke-width="2"/>
+        <circle cx="20" cy="20" r="5" stroke="currentColor" stroke-width="2"/>
+        <circle cx="20" cy="20" r="2" fill="currentColor"/>
+        <path d="M12 10V7M28 10V7M12 7H28" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
     </svg>`,
     modules: [
         {
             group: "Pengantar",
             items: [
-                { title: "Pengenalan Flutter & Dart", url: "/flutter/index.html", icon: "1" },
-                { title: "Instalasi & Konfigurasi", url: "/flutter/instalasi.html", icon: "2" }
+                { title: "Apa itu Computer Vision?", url: "/computer-vision/index.html", icon: "1" },
+                { title: "Representasi Citra Digital", url: "/computer-vision/citra-digital.html", icon: "2" }
             ]
         },
         {
-            group: "Dart Fundamental",
+            group: "Image Processing",
             items: [
-                { title: "Variabel & Tipe Data", url: "/flutter/variabel.html", icon: "3" },
-                { title: "Function & OOP", url: "/flutter/fungsi-oop.html", icon: "4" },
-                { title: "Collection & Async", url: "/flutter/collection-async.html", icon: "5" }
+                { title: "Operasi Dasar Citra", url: "/computer-vision/operasi-dasar.html", icon: "3" },
+                { title: "Filtering & Konvolusi", url: "/computer-vision/filtering.html", icon: "4" },
+                { title: "Deteksi Tepi (Edge Detection)", url: "/computer-vision/edge-detection.html", icon: "5" }
             ]
         },
         {
-            group: "Flutter UI",
+            group: "Feature Extraction",
             items: [
-                { title: "Widget Dasar", url: "/flutter/widget-dasar.html", icon: "6" },
-                { title: "Layout & Responsive", url: "/flutter/layout-responsive.html", icon: "7" },
-                { title: "Navigation & Routing", url: "/flutter/navigation-routing.html", icon: "8" }
+                { title: "Histogram & Thresholding", url: "/computer-vision/histogram.html", icon: "6" },
+                { title: "Feature Descriptor (HOG, SIFT)", url: "/computer-vision/feature-descriptor.html", icon: "7" }
             ]
         },
         {
-            group: "State & Data",
+            group: "Deep Learning for CV",
             items: [
-                { title: "State Management", url: "/flutter/state-management.html", icon: "9" },
-                { title: "REST API & HTTP", url: "/flutter/rest-api.html", icon: "10" },
-                { title: "Local Storage (SQLite)", url: "/flutter/local-storage.html", icon: "11" }
+                { title: "Convolutional Neural Network", url: "/computer-vision/cnn.html", icon: "8" },
+                { title: "Object Detection (YOLO)", url: "/computer-vision/object-detection.html", icon: "9" },
+                { title: "Image Segmentation", url: "/computer-vision/segmentation.html", icon: "10" }
             ]
         },
         {
-            group: "Fitur Lanjutan",
+            group: "Proyek",
             items: [
-                { title: "Pengelolaan Media", url: "/flutter/media.html", icon: "12" }
-            ]
-        },
-        {
-            group: "Testing & Deployment",
-            items: [
-                { title: "Testing Aplikasi", url: "/flutter/testing.html", icon: "13" },
-                { title: "Build APK & AAB", url: "/flutter/build-release.html", icon: "14" },
-                { title: "Publish ke Play Store", url: "/flutter/publish-playstore.html", icon: "15" }
-            ]
-        },
-        {
-            group: "Capstone",
-            items: [
-                { title: "Proyek Akhir", url: "/flutter/final-project.html", icon: "16" }
+                { title: "Final Project CV", url: "/computer-vision/final-project.html", icon: "11" }
             ]
         }
     ]
@@ -67,7 +54,6 @@ const courseConfig = {
 function renderNavbar() {
     const navbar = document.getElementById('navbar');
     if (!navbar) return;
-
     navbar.innerHTML = `
         <div class="nav-container" style="max-width: 1300px; padding: 0 32px;">
             <a href="${courseConfig.profileUrl}" class="nav-logo">
@@ -87,7 +73,6 @@ function renderNavbar() {
             </button>
         </div>
     `;
-
     const mobileMenu = document.getElementById('mobileMenu');
     if (mobileMenu) {
         mobileMenu.innerHTML = `
@@ -99,55 +84,39 @@ function renderNavbar() {
 function renderSidebar() {
     const sidebar = document.getElementById('courseSidebar');
     if (!sidebar) return;
-
     const currentPath = window.location.pathname;
-
     let html = `
         <div class="sidebar-header">
-            <div class="sidebar-icon">
-                ${courseConfig.courseIcon}
-            </div>
+            <div class="sidebar-icon">${courseConfig.courseIcon}</div>
             <span class="sidebar-course-name">${courseConfig.courseName}</span>
         </div>
     `;
-
     courseConfig.modules.forEach(module => {
-        html += `
-            <div class="module-group">
-                <div class="module-group-title">${module.group}</div>
-        `;
-
+        html += `<div class="module-group"><div class="module-group-title">${module.group}</div>`;
         module.items.forEach(item => {
             const isActive = currentPath === item.url ? 'active' : '';
             html += `
                 <a href="${item.url}" class="module-link ${isActive}">
                     <div class="module-link-icon">${item.icon}</div>
                     <span>${item.title}</span>
-                </a>
-            `;
+                </a>`;
         });
-
         html += `</div>`;
     });
-
     sidebar.innerHTML = html;
 }
 
-// Inisialisasi
 document.addEventListener('DOMContentLoaded', () => {
     renderNavbar();
     renderSidebar();
-
     const navbar = document.getElementById('navbar');
     const navToggle = document.getElementById('navToggle');
     const mobileMenu = document.getElementById('mobileMenu');
-
     if (navbar) {
         window.addEventListener('scroll', () => {
             navbar.classList.toggle('scrolled', window.scrollY > 20);
         });
     }
-
     if (navToggle && mobileMenu) {
         navToggle.addEventListener('click', () => {
             navToggle.classList.toggle('active');

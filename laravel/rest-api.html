@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>REST API — Laravel</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/laravel/course.css">
+</head>
+<body>
+    <div class="bg-grid" aria-hidden="true"></div>
+    <nav class="navbar scrolled" id="navbar"></nav>
+    <div class="mobile-menu" id="mobileMenu"></div>
+    <main class="course-layout">
+        <aside class="course-sidebar" id="courseSidebar"></aside>
+        <article class="course-content">
+            <div class="breadcrumb">
+                <a href="../index.html">Home</a><span>›</span>
+                <a href="index.html">Laravel</a><span>›</span>
+                <span style="color: var(--text-primary);">REST API</span>
+            </div>
+            <header class="content-header">
+                <h1 class="content-title">Modul 13: Membangun REST API</h1>
+                <div class="content-meta">
+                    <div class="meta-pill"><span>Estimasi: 45 Menit</span></div>
+                    <div class="meta-pill"><span>Teori & Praktikum</span></div>
+                </div>
+            </header>
+
+            <p class="content-text">Selain digunakan sebagai aplikasi web full-stack, Laravel juga merupakan framework yang sangat luar biasa untuk membangun backend RESTful API. API backend ini nantinya akan dikonsumsi oleh aplikasi Mobile (Android/iOS) atau framework Frontend SPA (seperti React, Vue, atau Angular).</p>
+
+            <h2 class="content-heading">Routing API</h2>
+            <p class="content-text">Semua route untuk API dideklarasikan di dalam file <code>routes/api.php</code> (bukan di <code>web.php</code>). Laravel secara otomatis akan menambahkan prefix <code>/api</code> pada URL tersebut.</p>
+
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">routes/api.php</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-keyword">use</span> App\Http\Controllers\Api\ProductController;
+
+<span class="hl-comment">// URL yang diakses nantinya: http://localhost:8000/api/products</span>
+Route::<span class="hl-func">get</span>(<span class="hl-string">'/products'</span>, [ProductController::<span class="hl-keyword">class</span>, <span class="hl-string">'index'</span>]);
+Route::<span class="hl-func">post</span>(<span class="hl-string">'/products'</span>, [ProductController::<span class="hl-keyword">class</span>, <span class="hl-string">'store'</span>]);
+Route::<span class="hl-func">get</span>(<span class="hl-string">'/products/{id}'</span>, [ProductController::<span class="hl-keyword">class</span>, <span class="hl-string">'show'</span>]);
+
+<span class="hl-comment">// Atau gunakan apiResource (sama seperti resource, tapi menghilangkan route 'create' dan 'edit' yang menghasilkan view HTML)</span>
+Route::<span class="hl-func">apiResource</span>(<span class="hl-string">'products'</span>, ProductController::<span class="hl-keyword">class</span>);</code></pre>
+            </div>
+
+            <div class="info-box">
+                <div class="info-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                    <strong>Mengaktifkan API Routes di Laravel 11+</strong>
+                </div>
+                <p>Mulai Laravel 11, file <code>api.php</code> tidak terinstal secara otomatis. Untuk mempublikasikannya, Anda perlu menjalankan perintah: <br><code>php artisan install:api</code></p>
+            </div>
+
+            <h2 class="content-heading">Mengembalikan JSON Response</h2>
+            <p class="content-text">Di Controller web, biasanya Anda me-return view <code>return view('page');</code>. Di API, Anda me-return collection Eloquent atau array, dan Laravel secara otomatis akan mengubahnya menjadi JSON.</p>
+
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">app/Http/Controllers/Api/ProductController.php</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-keyword">class</span> ProductController <span class="hl-keyword">extends</span> Controller
+{
+    <span class="hl-keyword">public function</span> <span class="hl-func">index</span>()
+    {
+        <span class="hl-comment">// Mengembalikan koleksi model. Otomatis jadi JSON!</span>
+        <span class="hl-keyword">return</span> Product::<span class="hl-func">all</span>();
+    }
+
+    <span class="hl-keyword">public function</span> <span class="hl-func">store</span>(Request $request)
+    {
+        <span class="hl-comment">// Validasi</span>
+        $validated = $request-&gt;<span class="hl-func">validate</span>([
+            <span class="hl-string">'name'</span> =&gt; <span class="hl-string">'required|string'</span>,
+            <span class="hl-string">'price'</span> =&gt; <span class="hl-string">'required|integer'</span>
+        ]);
+
+        $product = Product::<span class="hl-func">create</span>($validated);
+
+        <span class="hl-comment">// Response custom menggunakan helper response()-&gt;json() dengan HTTP Status Code 201 (Created)</span>
+        <span class="hl-keyword">return</span> <span class="hl-func">response</span>()-&gt;<span class="hl-func">json</span>([
+            <span class="hl-string">'message'</span> =&gt; <span class="hl-string">'Produk berhasil ditambahkan'</span>,
+            <span class="hl-string">'data'</span> =&gt; $product
+        ], <span class="hl-number">201</span>);
+    }
+}</code></pre>
+            </div>
+
+            <h2 class="content-heading">API Resources (Format Output yang Rapi)</h2>
+            <p class="content-text">Ketika membangun API berskala besar, mengembalikan Model Eloquent secara langsung bukanlah praktik terbaik karena akan mengekspos semua atribut (termasuk yang sensitif). Anda sebaiknya menggunakan <strong>Eloquent API Resources</strong> untuk menjadi "jembatan transformasi" dari database ke JSON.</p>
+
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">Terminal</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code>php artisan make:resource ProductResource</code></pre>
+            </div>
+
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">app/Http/Resources/ProductResource.php</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-keyword">public function</span> <span class="hl-func">toArray</span>(Request $request): <span class="hl-keyword">array</span>
+{
+    <span class="hl-comment">// Mendefinisikan kolom apa saja yang boleh dilihat oleh API Consumer</span>
+    <span class="hl-keyword">return</span> [
+        <span class="hl-string">'id'</span> =&gt; $<span class="hl-keyword">this</span>-&gt;id,
+        <span class="hl-string">'product_name'</span> =&gt; $<span class="hl-keyword">this</span>-&gt;name, <span class="hl-comment">// Mengubah nama key output json</span>
+        <span class="hl-string">'price_formatted'</span> =&gt; <span class="hl-string">'Rp '</span> . <span class="hl-func">number_format</span>($<span class="hl-keyword">this</span>-&gt;price, <span class="hl-number">0</span>, <span class="hl-string">','</span>, <span class="hl-string">'.'</span>),
+        <span class="hl-string">'created_at'</span> =&gt; $<span class="hl-keyword">this</span>-&gt;created_at-&gt;<span class="hl-func">format</span>(<span class="hl-string">'d-M-Y'</span>),
+    ];
+}</code></pre>
+            </div>
+
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">app/Http/Controllers/Api/ProductController.php</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-keyword">public function</span> <span class="hl-func">index</span>()
+{
+    <span class="hl-comment">// Me-return data yang sudah di-wrap dan difilter oleh Resource</span>
+    <span class="hl-keyword">return</span> ProductResource::<span class="hl-func">collection</span>(Product::<span class="hl-func">all</span>());
+}</code></pre>
+            </div>
+
+            <div class="content-nav">
+                <div class="content-nav-item">
+                    <a href="authentication.html" class="nav-btn nav-btn-prev">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                        <div><span class="nav-label">Sebelumnya</span><span class="nav-name">Authentication</span></div>
+                    </a>
+                </div>
+                <div class="content-nav-item">
+                    <a href="final-project.html" class="nav-btn nav-btn-next">
+                        <div><span class="nav-label">Selanjutnya</span><span class="nav-name">Final Project</span></div>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </a>
+                </div>
+            </div>
+        </article>
+    </main>
+    <script src="/laravel/course-layout.js"></script>
+    <script>
+    function copyCode(btn) {
+        const codeBlock = btn.closest('.code-block').querySelector('code');
+        navigator.clipboard.writeText(codeBlock.textContent).then(() => {
+            btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>';
+            setTimeout(() => { btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>'; }, 2000);
+        });
+    }
+    </script>
+</body>
+</html>

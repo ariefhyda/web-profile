@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pengelolaan Media Flutter — Arif Hidayah</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/flutter/course.css">
+</head>
+<body>
+    <div class="bg-grid" aria-hidden="true"></div>
+    <nav class="navbar scrolled" id="navbar"></nav>
+    <div class="mobile-menu" id="mobileMenu"></div>
+
+    <main class="course-layout">
+        <aside class="course-sidebar" id="courseSidebar"></aside>
+
+        <article class="course-content">
+            <div class="breadcrumb">
+                <a href="../index.html">Home</a><span>›</span>
+                <a href="/flutter/index.html">Flutter</a><span>›</span>
+                <span style="color: var(--text-primary);">Pengelolaan Media</span>
+            </div>
+
+            <header class="content-header">
+                <h1 class="content-title">Modul 12: Pengelolaan Media (Image, Audio, File)</h1>
+                <div class="content-meta">
+                    <div class="meta-pill"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 5V8.5L10.5 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/></svg><span>Estimasi: 100 Menit</span></div>
+                    <div class="meta-pill"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="10" rx="1" stroke="currentColor" stroke-width="1.5"/><path d="M5 7h6M5 10h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><span>Teori & Praktikum</span></div>
+                </div>
+            </header>
+
+            <p class="content-text">
+                Aplikasi nyata sering perlu bekerja dengan <strong>media</strong>: mengambil foto dari kamera, memilih gambar dari galeri, memutar audio, atau membaca/menulis file. Modul ini mengajarkan cara menggunakan tiga package penting: <code>image_picker</code>, <code>file_picker</code>, dan <code>audioplayers</code>, serta cara menyimpan file ke direktori aplikasi.
+            </p>
+
+            <!-- Project Setup -->
+            <div class="info-box">
+                <div class="info-box-header"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg><strong>Buat Project Baru</strong></div>
+                <div class="code-block" style="margin-top: 12px;">
+                    <div class="code-block-header"><div class="code-block-dots"><span></span><span></span><span></span></div><span class="code-block-filename">Terminal</span><button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></div>
+                    <pre class="code-block-body"><code>$ flutter create flutter_media
+$ cd flutter_media
+
+<span class="hl-comment"># Tambahkan tiga package</span>
+$ flutter pub add image_picker
+$ flutter pub add file_picker
+$ flutter pub add audioplayers
+$ flutter pub add path_provider</code></pre>
+                </div>
+            </div>
+
+            <!-- Permission -->
+            <h2 class="content-heading">Mengatur Permission</h2>
+            <p class="content-text">
+                Mengakses kamera, galeri, dan file di perangkat memerlukan <strong>izin</strong> dari user. Setiap platform punya cara konfigurasinya sendiri.
+            </p>
+
+            <p class="content-text"><strong>Android</strong> — buka <code>android/app/src/main/AndroidManifest.xml</code>, tambahkan permission di dalam tag <code>&lt;manifest&gt;</code>:</p>
+            <div class="code-block">
+                <div class="code-block-header"><div class="code-block-dots"><span></span><span></span><span></span></div><span class="code-block-filename">AndroidManifest.xml</span><button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></div>
+                <pre class="code-block-body"><code>&lt;uses-permission android:name=<span class="hl-string">"android.permission.CAMERA"</span> /&gt;
+&lt;uses-permission android:name=<span class="hl-string">"android.permission.READ_EXTERNAL_STORAGE"</span> /&gt;
+&lt;uses-permission android:name=<span class="hl-string">"android.permission.READ_MEDIA_IMAGES"</span> /&gt;
+&lt;uses-permission android:name=<span class="hl-string">"android.permission.READ_MEDIA_AUDIO"</span> /&gt;
+&lt;uses-permission android:name=<span class="hl-string">"android.permission.INTERNET"</span> /&gt;</code></pre>
+            </div>
+
+            <p class="content-text"><strong>iOS</strong> — buka <code>ios/Runner/Info.plist</code>, tambahkan deskripsi permission yang akan ditampilkan ke user:</p>
+            <div class="code-block">
+                <div class="code-block-header"><div class="code-block-dots"><span></span><span></span><span></span></div><span class="code-block-filename">Info.plist</span><button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></div>
+                <pre class="code-block-body"><code>&lt;key&gt;NSCameraUsageDescription&lt;/key&gt;
+&lt;string&gt;Aplikasi memerlukan kamera untuk mengambil foto.&lt;/string&gt;
+&lt;key&gt;NSPhotoLibraryUsageDescription&lt;/key&gt;
+&lt;string&gt;Aplikasi memerlukan akses galeri untuk memilih foto.&lt;/string&gt;
+&lt;key&gt;NSMicrophoneUsageDescription&lt;/key&gt;
+&lt;string&gt;Aplikasi memerlukan mikrofon untuk merekam audio.&lt;/string&gt;</code></pre>
+            </div>
+
+            <div class="info-box">
+                <div class="info-box-header"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg><strong>Permission Runtime di Android 13+</strong></div>
+                <p>Sejak Android 13, <code>READ_EXTERNAL_STORAGE</code> diganti menjadi <code>READ_MEDIA_IMAGES</code>, <code>READ_MEDIA_VIDEO</code>, dan <code>READ_MEDIA_AUDIO</code> yang lebih granular. Daftarkan semuanya jika aplikasi Anda perlu mengakses media tertentu.</p>
+            </div>
+
+            <!-- Image Picker -->
+            <h2 class="content-heading">image_picker — Ambil Foto dari Kamera/Galeri</h2>
+            <p class="content-text">
+                Package <code>image_picker</code> menyediakan dialog standar OS untuk memilih gambar dari galeri atau langsung memotret dari kamera. Hasil kembaliannya adalah <code>XFile</code> yang berisi path file.
+            </p>
+            <div class="code-block">
+                <div class="code-block-header"><div class="code-block-dots"><span></span><span></span><span></span></div><span class="code-block-filename">image_picker_demo.dart</span><button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></div>
+                <pre class="code-block-body"><code><span class="hl-keyword">import</span> <span class="hl-string">'dart:io'</span>;
+<span class="hl-keyword">import</span> <span class="hl-string">'package:flutter/material.dart'</span>;
+<span class="hl-keyword">import</span> <span class="hl-string">'package:image_picker/image_picker.dart'</span>;
+
+<span class="hl-keyword">class</span> ImagePage <span class="hl-keyword">extends</span> StatefulWidget {
+  <span class="hl-keyword">const</span> ImagePage({<span class="hl-keyword">super</span>.key});
+  <span class="hl-keyword">@override</span>
+  State&lt;ImagePage&gt; createState() => _ImagePageState();
+}
+
+<span class="hl-keyword">class</span> _ImagePageState <span class="hl-keyword">extends</span> State&lt;ImagePage&gt; {
+  XFile? _foto;
+  <span class="hl-keyword">final</span> _picker = ImagePicker();
+
+  Future&lt;<span class="hl-keyword">void</span>&gt; _ambilDariKamera() <span class="hl-keyword">async</span> {
+    <span class="hl-keyword">final</span> file = <span class="hl-keyword">await</span> _picker.pickImage(
+      source: ImageSource.camera,
+      imageQuality: <span class="hl-number">80</span>,        <span class="hl-comment">// kompres ke 80% — hemat storage</span>
+      maxWidth: <span class="hl-number">1280</span>,
+    );
+    <span class="hl-keyword">if</span> (file != <span class="hl-keyword">null</span>) setState(() => _foto = file);
+  }
+
+  Future&lt;<span class="hl-keyword">void</span>&gt; _ambilDariGaleri() <span class="hl-keyword">async</span> {
+    <span class="hl-keyword">final</span> file = <span class="hl-keyword">await</span> _picker.pickImage(source: ImageSource.gallery);
+    <span class="hl-keyword">if</span> (file != <span class="hl-keyword">null</span>) setState(() => _foto = file);
+  }
+
+  <span class="hl-keyword">@override</span>
+  Widget build(BuildContext context) {
+    <span class="hl-keyword">return</span> Scaffold(
+      appBar: AppBar(title: <span class="hl-keyword">const</span> Text(<span class="hl-string">'Pilih Foto'</span>)),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            _foto == <span class="hl-keyword">null</span>
+              ? <span class="hl-keyword">const</span> Icon(Icons.image, size: <span class="hl-number">120</span>, color: Colors.grey)
+              : Image.file(File(_foto!.path), height: <span class="hl-number">240</span>),
+            <span class="hl-keyword">const</span> SizedBox(height: <span class="hl-number">24</span>),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ElevatedButton.icon(
+                  onPressed: _ambilDariKamera,
+                  icon: <span class="hl-keyword">const</span> Icon(Icons.camera_alt),
+                  label: <span class="hl-keyword">const</span> Text(<span class="hl-string">'Kamera'</span>),
+                ),
+                <span class="hl-keyword">const</span> SizedBox(width: <span class="hl-number">12</span>),
+                OutlinedButton.icon(
+                  onPressed: _ambilDariGaleri,
+                  icon: <span class="hl-keyword">const</span> Icon(Icons.photo_library),
+                  label: <span class="hl-keyword">const</span> Text(<span class="hl-string">'Galeri'</span>),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}</code></pre>
+            </div>
+
+            <div class="info-box">
+                <div class="info-box-header"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg><strong>XFile vs File</strong></div>
+                <p><code>XFile</code> adalah abstraksi cross-platform dari package <code>image_picker</code> — ia hanya menyimpan path. Untuk menampilkan di <code>Image.file()</code>, konversi dulu menjadi <code>File</code> dari <code>dart:io</code> seperti contoh di atas. Di Flutter Web, gunakan <code>file.readAsBytes()</code> + <code>Image.memory()</code> karena <code>dart:io</code> tidak tersedia.</p>
+            </div>
+
+            <!-- Multi Image -->
+            <h2 class="content-heading">Memilih Banyak Gambar Sekaligus</h2>
+            <p class="content-text">
+                Untuk fitur seperti <em>upload galeri</em>, gunakan <code>pickMultiImage</code> yang langsung mengembalikan <code>List&lt;XFile&gt;</code>.
+            </p>
+            <div class="code-block">
+                <div class="code-block-header"><div class="code-block-dots"><span></span><span></span><span></span></div><span class="code-block-filename">multi_image.dart</span><button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></div>
+                <pre class="code-block-body"><code>List&lt;XFile&gt; _fotos = [];
+
+Future&lt;<span class="hl-keyword">void</span>&gt; _ambilBanyak() <span class="hl-keyword">async</span> {
+  <span class="hl-keyword">final</span> list = <span class="hl-keyword">await</span> ImagePicker().pickMultiImage(imageQuality: <span class="hl-number">80</span>);
+  setState(() => _fotos = list);
+}
+
+<span class="hl-comment">// Tampilkan dengan GridView</span>
+GridView.builder(
+  gridDelegate: <span class="hl-keyword">const</span> SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: <span class="hl-number">3</span>),
+  itemCount: _fotos.length,
+  itemBuilder: (_, i) => Image.file(File(_fotos[i].path), fit: BoxFit.cover),
+)</code></pre>
+            </div>
+
+            <!-- Simpan ke Direktori App -->
+            <h2 class="content-heading">Menyimpan File ke Direktori Aplikasi</h2>
+            <p class="content-text">
+                File yang dipilih lewat <code>image_picker</code> biasanya disimpan di direktori sementara dan bisa hilang sewaktu-waktu. Untuk menyimpan secara permanen, copy ke direktori aplikasi menggunakan <code>path_provider</code>.
+            </p>
+            <div class="code-block">
+                <div class="code-block-header"><div class="code-block-dots"><span></span><span></span><span></span></div><span class="code-block-filename">simpan_file.dart</span><button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></div>
+                <pre class="code-block-body"><code><span class="hl-keyword">import</span> <span class="hl-string">'dart:io'</span>;
+<span class="hl-keyword">import</span> <span class="hl-string">'package:path_provider/path_provider.dart'</span>;
+<span class="hl-keyword">import</span> <span class="hl-string">'package:path/path.dart'</span> <span class="hl-keyword">as</span> p;
+
+Future&lt;File&gt; simpanPermanen(XFile sumber) <span class="hl-keyword">async</span> {
+  <span class="hl-keyword">final</span> dir = <span class="hl-keyword">await</span> getApplicationDocumentsDirectory();
+  <span class="hl-keyword">final</span> namaFile = <span class="hl-string">'foto_${DateTime.now().millisecondsSinceEpoch}.jpg'</span>;
+  <span class="hl-keyword">final</span> tujuan = File(p.join(dir.path, namaFile));
+  <span class="hl-keyword">return</span> File(sumber.path).copy(tujuan.path);
+}
+
+<span class="hl-comment">// Pemakaian:</span>
+<span class="hl-keyword">final</span> xfile = <span class="hl-keyword">await</span> ImagePicker().pickImage(source: ImageSource.camera);
+<span class="hl-keyword">if</span> (xfile != <span class="hl-keyword">null</span>) {
+  <span class="hl-keyword">final</span> permanen = <span class="hl-keyword">await</span> simpanPermanen(xfile);
+  <span class="hl-func">print</span>(<span class="hl-string">'Disimpan di: ${permanen.path}'</span>);
+}</code></pre>
+            </div>
+
+            <div class="info-box">
+                <div class="info-box-header"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg><strong>getApplicationDocumentsDirectory vs getTemporaryDirectory</strong></div>
+                <p><strong>Documents</strong> — persisten, bertahan sampai aplikasi di-uninstall. Untuk file yang harus disimpan (foto profil, dokumen user).</p>
+                <p><strong>Temporary</strong> — bisa dibersihkan OS kapan saja. Untuk cache (thumbnail, download sementara).</p>
+            </div>
+
+            <!-- File Picker -->
+            <h2 class="content-heading">file_picker — Pilih File Apa Saja</h2>
+            <p class="content-text">
+                Untuk fitur seperti <em>upload PDF</em>, <em>impor CSV</em>, atau <em>lampiran dokumen</em>, gunakan <code>file_picker</code>. Package ini bisa memfilter berdasarkan tipe file.
+            </p>
+            <div class="code-block">
+                <div class="code-block-header"><div class="code-block-dots"><span></span><span></span><span></span></div><span class="code-block-filename">file_picker_demo.dart</span><button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></div>
+                <pre class="code-block-body"><code><span class="hl-keyword">import</span> <span class="hl-string">'package:file_picker/file_picker.dart'</span>;
+
+<span class="hl-comment">// Pilih satu file PDF</span>
+Future&lt;<span class="hl-keyword">void</span>&gt; pilihPdf() <span class="hl-keyword">async</span> {
+  <span class="hl-keyword">final</span> result = <span class="hl-keyword">await</span> FilePicker.platform.pickFiles(
+    type: FileType.custom,
+    allowedExtensions: [<span class="hl-string">'pdf'</span>],
+  );
+  <span class="hl-keyword">if</span> (result != <span class="hl-keyword">null</span>) {
+    <span class="hl-keyword">final</span> file = result.files.single;
+    <span class="hl-func">print</span>(<span class="hl-string">'Nama: ${file.name}'</span>);
+    <span class="hl-func">print</span>(<span class="hl-string">'Ukuran: ${file.size} bytes'</span>);
+    <span class="hl-func">print</span>(<span class="hl-string">'Path: ${file.path}'</span>);
+  }
+}
+
+<span class="hl-comment">// Pilih banyak file gambar</span>
+Future&lt;<span class="hl-keyword">void</span>&gt; pilihGambar() <span class="hl-keyword">async</span> {
+  <span class="hl-keyword">final</span> result = <span class="hl-keyword">await</span> FilePicker.platform.pickFiles(
+    type: FileType.image,
+    allowMultiple: <span class="hl-keyword">true</span>,
+  );
+  result?.files.forEach((f) => <span class="hl-func">print</span>(f.name));
+}
+
+<span class="hl-comment">// Pilih file apapun</span>
+<span class="hl-keyword">final</span> any = <span class="hl-keyword">await</span> FilePicker.platform.pickFiles(type: FileType.any);</code></pre>
+            </div>
+
+            <!-- Audio Player -->
+            <h2 class="content-heading">audioplayers — Memutar Audio</h2>
+            <p class="content-text">
+                Package <code>audioplayers</code> bisa memutar audio dari berbagai sumber: file asset (built-in), file lokal, atau URL streaming.
+            </p>
+            <div class="code-block">
+                <div class="code-block-header"><div class="code-block-dots"><span></span><span></span><span></span></div><span class="code-block-filename">audio_demo.dart</span><button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></div>
+                <pre class="code-block-body"><code><span class="hl-keyword">import</span> <span class="hl-string">'package:audioplayers/audioplayers.dart'</span>;
+
+<span class="hl-keyword">class</span> AudioPage <span class="hl-keyword">extends</span> StatefulWidget {
+  <span class="hl-keyword">const</span> AudioPage({<span class="hl-keyword">super</span>.key});
+  <span class="hl-keyword">@override</span>
+  State&lt;AudioPage&gt; createState() => _AudioPageState();
+}
+
+<span class="hl-keyword">class</span> _AudioPageState <span class="hl-keyword">extends</span> State&lt;AudioPage&gt; {
+  <span class="hl-keyword">final</span> _player = AudioPlayer();
+  <span class="hl-keyword">bool</span> _sedangMain = <span class="hl-keyword">false</span>;
+
+  Future&lt;<span class="hl-keyword">void</span>&gt; _playUrl() <span class="hl-keyword">async</span> {
+    <span class="hl-keyword">await</span> _player.play(UrlSource(
+      <span class="hl-string">'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'</span>,
+    ));
+    setState(() => _sedangMain = <span class="hl-keyword">true</span>);
+  }
+
+  Future&lt;<span class="hl-keyword">void</span>&gt; _playAsset() <span class="hl-keyword">async</span> {
+    <span class="hl-comment">// Daftarkan dulu di pubspec.yaml: assets: - assets/sound.mp3</span>
+    <span class="hl-keyword">await</span> _player.play(AssetSource(<span class="hl-string">'sound.mp3'</span>));
+    setState(() => _sedangMain = <span class="hl-keyword">true</span>);
+  }
+
+  Future&lt;<span class="hl-keyword">void</span>&gt; _pause() <span class="hl-keyword">async</span> {
+    <span class="hl-keyword">await</span> _player.pause();
+    setState(() => _sedangMain = <span class="hl-keyword">false</span>);
+  }
+
+  <span class="hl-keyword">@override</span>
+  <span class="hl-keyword">void</span> dispose() {
+    _player.dispose(); <span class="hl-comment">// JANGAN lupa — supaya tidak memory leak</span>
+    <span class="hl-keyword">super</span>.dispose();
+  }
+
+  <span class="hl-keyword">@override</span>
+  Widget build(BuildContext context) {
+    <span class="hl-keyword">return</span> Scaffold(
+      appBar: AppBar(title: <span class="hl-keyword">const</span> Text(<span class="hl-string">'Audio Player'</span>)),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            IconButton(
+              iconSize: <span class="hl-number">96</span>,
+              icon: Icon(_sedangMain ? Icons.pause_circle : Icons.play_circle),
+              onPressed: _sedangMain ? _pause : _playUrl,
+            ),
+            <span class="hl-keyword">const</span> SizedBox(height: <span class="hl-number">12</span>),
+            Text(_sedangMain ? <span class="hl-string">'Memutar...'</span> : <span class="hl-string">'Tap untuk play'</span>),
+          ],
+        ),
+      ),
+    );
+  }
+}</code></pre>
+            </div>
+
+            <div class="info-box">
+                <div class="info-box-header"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg><strong>Listen Progress Audio</strong></div>
+                <p>Anda bisa subscribe ke stream untuk membuat <em>seek bar</em>: <code>_player.onPositionChanged.listen((d) => ...)</code> memberi posisi pemutaran, dan <code>_player.onDurationChanged.listen((d) => ...)</code> memberi total durasi. Gabungkan dengan widget <code>Slider</code> untuk UI player profesional.</p>
+            </div>
+
+            <!-- Mini Project -->
+            <h2 class="content-heading">Mini Project: Galeri Foto Pribadi</h2>
+            <p class="content-text">
+                Aplikasi yang memungkinkan user menambah foto dari kamera/galeri, lalu menyimpannya ke direktori aplikasi sehingga tidak hilang setelah restart. Ganti <code>lib/main.dart</code> dengan kode berikut:
+            </p>
+            <div class="code-block">
+                <div class="code-block-header"><div class="code-block-dots"><span></span><span></span><span></span></div><span class="code-block-filename">lib/main.dart</span><button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></div>
+                <pre class="code-block-body"><code><span class="hl-keyword">import</span> <span class="hl-string">'dart:io'</span>;
+<span class="hl-keyword">import</span> <span class="hl-string">'package:flutter/material.dart'</span>;
+<span class="hl-keyword">import</span> <span class="hl-string">'package:image_picker/image_picker.dart'</span>;
+<span class="hl-keyword">import</span> <span class="hl-string">'package:path_provider/path_provider.dart'</span>;
+<span class="hl-keyword">import</span> <span class="hl-string">'package:path/path.dart'</span> <span class="hl-keyword">as</span> p;
+
+<span class="hl-keyword">void</span> main() => runApp(<span class="hl-keyword">const</span> MyApp());
+
+<span class="hl-keyword">class</span> MyApp <span class="hl-keyword">extends</span> StatelessWidget {
+  <span class="hl-keyword">const</span> MyApp({<span class="hl-keyword">super</span>.key});
+  <span class="hl-keyword">@override</span>
+  Widget build(BuildContext context) => MaterialApp(
+    theme: ThemeData(colorSchemeSeed: Colors.pink, useMaterial3: <span class="hl-keyword">true</span>),
+    home: <span class="hl-keyword">const</span> GalleryPage(),
+  );
+}
+
+<span class="hl-keyword">class</span> GalleryPage <span class="hl-keyword">extends</span> StatefulWidget {
+  <span class="hl-keyword">const</span> GalleryPage({<span class="hl-keyword">super</span>.key});
+  <span class="hl-keyword">@override</span>
+  State&lt;GalleryPage&gt; createState() => _GalleryPageState();
+}
+
+<span class="hl-keyword">class</span> _GalleryPageState <span class="hl-keyword">extends</span> State&lt;GalleryPage&gt; {
+  List&lt;File&gt; _photos = [];
+
+  <span class="hl-keyword">@override</span>
+  <span class="hl-keyword">void</span> initState() { <span class="hl-keyword">super</span>.initState(); _loadPhotos(); }
+
+  Future&lt;<span class="hl-keyword">void</span>&gt; _loadPhotos() <span class="hl-keyword">async</span> {
+    <span class="hl-keyword">final</span> dir = <span class="hl-keyword">await</span> getApplicationDocumentsDirectory();
+    <span class="hl-keyword">final</span> files = dir.listSync()
+      .whereType&lt;File&gt;()
+      .where((f) => f.path.endsWith(<span class="hl-string">'.jpg'</span>))
+      .toList();
+    files.sort((a, b) => b.path.compareTo(a.path));
+    setState(() => _photos = files);
+  }
+
+  Future&lt;<span class="hl-keyword">void</span>&gt; _tambahFoto(ImageSource src) <span class="hl-keyword">async</span> {
+    <span class="hl-keyword">final</span> picked = <span class="hl-keyword">await</span> ImagePicker().pickImage(source: src, imageQuality: <span class="hl-number">80</span>);
+    <span class="hl-keyword">if</span> (picked == <span class="hl-keyword">null</span>) <span class="hl-keyword">return</span>;
+    <span class="hl-keyword">final</span> dir = <span class="hl-keyword">await</span> getApplicationDocumentsDirectory();
+    <span class="hl-keyword">final</span> nama = <span class="hl-string">'foto_${DateTime.now().millisecondsSinceEpoch}.jpg'</span>;
+    <span class="hl-keyword">await</span> File(picked.path).copy(p.join(dir.path, nama));
+    _loadPhotos();
+  }
+
+  <span class="hl-keyword">@override</span>
+  Widget build(BuildContext context) {
+    <span class="hl-keyword">return</span> Scaffold(
+      appBar: AppBar(title: Text(<span class="hl-string">'Galeri (${_photos.length})'</span>)),
+      body: _photos.isEmpty
+        ? <span class="hl-keyword">const</span> Center(child: Text(<span class="hl-string">'Belum ada foto'</span>))
+        : GridView.builder(
+            padding: <span class="hl-keyword">const</span> EdgeInsets.all(<span class="hl-number">8</span>),
+            gridDelegate: <span class="hl-keyword">const</span> SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: <span class="hl-number">3</span>, crossAxisSpacing: <span class="hl-number">8</span>, mainAxisSpacing: <span class="hl-number">8</span>),
+            itemCount: _photos.length,
+            itemBuilder: (_, i) => GestureDetector(
+              onTap: () => showDialog(
+                context: context,
+                builder: (_) => Dialog(child: Image.file(_photos[i])),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(<span class="hl-number">8</span>),
+                child: Image.file(_photos[i], fit: BoxFit.cover),
+              ),
+            ),
+          ),
+      floatingActionButton: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          FloatingActionButton(
+            heroTag: <span class="hl-string">'cam'</span>,
+            onPressed: () => _tambahFoto(ImageSource.camera),
+            child: <span class="hl-keyword">const</span> Icon(Icons.camera_alt),
+          ),
+          <span class="hl-keyword">const</span> SizedBox(width: <span class="hl-number">12</span>),
+          FloatingActionButton(
+            heroTag: <span class="hl-string">'gal'</span>,
+            onPressed: () => _tambahFoto(ImageSource.gallery),
+            child: <span class="hl-keyword">const</span> Icon(Icons.photo_library),
+          ),
+        ],
+      ),
+    );
+  }
+}</code></pre>
+            </div>
+
+            <!-- Tantangan -->
+            <div class="info-box">
+                <div class="info-box-header"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg><strong>Tantangan Mahasiswa</strong></div>
+                <p>1. Tambahkan tombol <strong>hapus</strong> foto saat user long-press di item. Konfirmasi dengan <code>AlertDialog</code> sebelum menghapus.</p>
+                <p>2. Tampilkan <strong>tanggal & waktu</strong> foto diambil di overlay pojok bawah setiap thumbnail (ambil dari nama file timestamp).</p>
+                <p>3. Tambahkan halaman kedua: <strong>Audio Recorder</strong> sederhana. Petunjuk: gunakan package <code>record</code> untuk merekam, lalu putar dengan <code>audioplayers</code>.</p>
+                <p>4. <strong>Bonus:</strong> Tambahkan fitur <em>share foto</em> menggunakan package <code>share_plus</code>.</p>
+            </div>
+
+            <!-- Nav -->
+            <div class="content-nav">
+                <div class="content-nav-item">
+                    <a href="/flutter/local-storage.html" class="nav-btn nav-btn-prev">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                        <div><span class="nav-label">Sebelumnya</span><span class="nav-name">Local Storage (SQLite)</span></div>
+                    </a>
+                </div>
+                <div class="content-nav-item">
+                    <a href="/flutter/testing.html" class="nav-btn nav-btn-next">
+                        <div><span class="nav-label">Selanjutnya</span><span class="nav-name">Testing Aplikasi</span></div>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </a>
+                </div>
+            </div>
+        </article>
+    </main>
+
+    <script src="/flutter/course-layout.js"></script>
+    <script>
+    function copyCode(btn){const c=btn.closest('.code-block').querySelector('code');navigator.clipboard.writeText(c.textContent).then(()=>{btn.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>';setTimeout(()=>{btn.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>'},2000)})}
+    </script>
+</body>
+</html>

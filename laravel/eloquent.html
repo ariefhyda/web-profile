@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eloquent ORM — Laravel</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/laravel/course.css">
+</head>
+<body>
+    <div class="bg-grid" aria-hidden="true"></div>
+    <nav class="navbar scrolled" id="navbar"></nav>
+    <div class="mobile-menu" id="mobileMenu"></div>
+    <main class="course-layout">
+        <aside class="course-sidebar" id="courseSidebar"></aside>
+        <article class="course-content">
+            <div class="breadcrumb">
+                <a href="../index.html">Home</a><span>›</span>
+                <a href="index.html">Laravel</a><span>›</span>
+                <span style="color: var(--text-primary);">Eloquent ORM</span>
+            </div>
+            <header class="content-header">
+                <h1 class="content-title">Modul 9: Eloquent ORM</h1>
+                <div class="content-meta">
+                    <div class="meta-pill"><span>Estimasi: 70 Menit</span></div>
+                    <div class="meta-pill"><span>Teori & Praktikum</span></div>
+                </div>
+            </header>
+
+            <p class="content-text"><strong>Eloquent ORM</strong> (Object-Relational Mapper) adalah jembatan antara dunia objek PHP dan tabel database relasional. Dengan Eloquent, Anda tidak menulis SQL — cukup pakai sintaks PHP yang ekspresif. Setiap tabel diwakili oleh sebuah <em>Model</em>, dan setiap baris menjadi <em>instance</em> Model.</p>
+
+            <div class="analogy-box">
+                <div class="analogy-icon">🌐</div>
+                <div class="analogy-content">
+                    <strong>Analogi: Penerjemah Bahasa</strong>
+                    <p>Anda bicara bahasa PHP ("ambilkan user yang aktif"). Eloquent menerjemahkan ke bahasa SQL ("SELECT * FROM users WHERE active=1"). Database jawab dengan baris-baris data, Eloquent bungkus jadi objek PHP yang bisa Anda akses dengan <code>$user-&gt;name</code>. Anda tidak perlu fasih bahasa SQL — Eloquent yang tangani.</p>
+                </div>
+            </div>
+
+            <h2 class="content-heading">Membuat Model</h2>
+            <p class="content-text">Pakai Artisan dengan flag <code>-m</code> agar sekaligus dibuat file migration-nya:</p>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">Terminal</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-comment"># Model + Migration</span>
+php artisan make:model Post -m
+
+<span class="hl-comment"># Model + Migration + Controller + Resource + Factory + Seeder (paling lengkap)</span>
+php artisan make:model Post -a</code></pre>
+            </div>
+
+            <div class="info-box">
+                <div class="info-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                    <strong>Konvensi Penamaan</strong>
+                </div>
+                <p>Model bernama <strong>singular</strong> dengan PascalCase (<code>Post</code>, <code>User</code>, <code>BlogCategory</code>). Eloquent otomatis mencari tabel dengan nama <strong>plural snake_case</strong> (<code>posts</code>, <code>users</code>, <code>blog_categories</code>). Override dengan <code>protected $table = 'nama_custom';</code> jika perlu.</p>
+            </div>
+
+            <h2 class="content-heading">Anatomi Model</h2>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">app/Models/Post.php</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code>&lt;?php
+
+<span class="hl-keyword">namespace</span> App\Models;
+
+<span class="hl-keyword">use</span> Illuminate\Database\Eloquent\Model;
+<span class="hl-keyword">use</span> Illuminate\Database\Eloquent\Factories\HasFactory;
+
+<span class="hl-keyword">class</span> Post <span class="hl-keyword">extends</span> Model
+{
+    <span class="hl-keyword">use</span> HasFactory;
+
+    <span class="hl-comment">// Kolom yang BOLEH diisi via Mass Assignment</span>
+    <span class="hl-keyword">protected</span> $fillable = [<span class="hl-string">'title'</span>, <span class="hl-string">'body'</span>, <span class="hl-string">'user_id'</span>];
+
+    <span class="hl-comment">// Atau sebaliknya, kolom yang DILINDUNGI (sisanya boleh)</span>
+    <span class="hl-comment">// protected $guarded = ['id'];</span>
+
+    <span class="hl-comment">// Konversi tipe otomatis</span>
+    <span class="hl-keyword">protected</span> $casts = [
+        <span class="hl-string">'is_published'</span> => <span class="hl-string">'boolean'</span>,
+        <span class="hl-string">'published_at'</span> => <span class="hl-string">'datetime'</span>,
+        <span class="hl-string">'meta'</span>         => <span class="hl-string">'array'</span>, <span class="hl-comment">// JSON → array PHP</span>
+    ];
+
+    <span class="hl-comment">// Sembunyikan dari output JSON (mis. password)</span>
+    <span class="hl-keyword">protected</span> $hidden = [<span class="hl-string">'password'</span>, <span class="hl-string">'remember_token'</span>];
+}</code></pre>
+            </div>
+
+            <h2 class="content-heading">Query Builder Interaktif</h2>
+            <p class="content-text">Susun query Eloquent dengan klik dropdown — lihat kode PHP dan SQL yang dihasilkan secara real-time.</p>
+
+            <div class="interactive-card">
+                <div class="interactive-title">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+                    Eloquent → SQL Translator
+                </div>
+                <p class="interactive-subtitle">Bayangkan tabel <code>posts</code> dengan kolom: id, title, status, user_id, views, created_at.</p>
+                <div class="qb">
+                    <div class="qb-row">
+                        <label>Model:</label>
+                        <select id="qbModel">
+                            <option value="Post">Post</option>
+                            <option value="User">User</option>
+                            <option value="Comment">Comment</option>
+                        </select>
+                    </div>
+                    <div class="qb-row">
+                        <label>Where:</label>
+                        <select id="qbWhereCol">
+                            <option value="">— tidak ada —</option>
+                            <option value="status">status</option>
+                            <option value="user_id">user_id</option>
+                            <option value="views">views</option>
+                            <option value="title">title</option>
+                        </select>
+                        <select id="qbWhereOp">
+                            <option value="=">=</option>
+                            <option value="!=">!=</option>
+                            <option value=">">&gt;</option>
+                            <option value="<">&lt;</option>
+                            <option value="like">like</option>
+                        </select>
+                        <input type="text" id="qbWhereVal" placeholder="published" style="width: 120px;">
+                    </div>
+                    <div class="qb-row">
+                        <label>Order by:</label>
+                        <select id="qbOrderCol">
+                            <option value="">— tidak ada —</option>
+                            <option value="created_at">created_at</option>
+                            <option value="title">title</option>
+                            <option value="views">views</option>
+                            <option value="id">id</option>
+                        </select>
+                        <select id="qbOrderDir">
+                            <option value="desc">desc</option>
+                            <option value="asc">asc</option>
+                        </select>
+                    </div>
+                    <div class="qb-row">
+                        <label>Limit:</label>
+                        <input type="number" id="qbLimit" placeholder="10" style="width: 80px;" min="0">
+                    </div>
+                    <div class="qb-row">
+                        <label>Eksekusi:</label>
+                        <select id="qbExec">
+                            <option value="get">get() — koleksi</option>
+                            <option value="first">first() — 1 baris</option>
+                            <option value="count">count() — total</option>
+                            <option value="paginate">paginate(10) — pagination</option>
+                            <option value="pluck">pluck('title') — 1 kolom</option>
+                        </select>
+                    </div>
+                    <div class="qb-result">
+                        <div class="qb-result-label">Kode Eloquent (PHP)</div>
+                        <pre class="qb-code-php" id="qbPhp"></pre>
+                        <div class="qb-result-label">SQL yang Dijalankan</div>
+                        <pre class="qb-code-sql" id="qbSql"></pre>
+                    </div>
+                </div>
+                <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 10px;">
+                    💡 Coba ubah dropdown di atas — kode PHP dan SQL akan ter-update otomatis.
+                </p>
+            </div>
+
+            <h2 class="content-heading">Operasi CRUD dengan Eloquent</h2>
+
+            <h3 class="content-subheading">📖 Read — Membaca Data</h3>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">contoh query</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-comment">// Ambil semua</span>
+$posts = Post::<span class="hl-func">all</span>();
+
+<span class="hl-comment">// Find berdasarkan primary key</span>
+$post = Post::<span class="hl-func">find</span>(<span class="hl-number">1</span>);             <span class="hl-comment">// null jika tidak ada</span>
+$post = Post::<span class="hl-func">findOrFail</span>(<span class="hl-number">1</span>);       <span class="hl-comment">// 404 jika tidak ada</span>
+
+<span class="hl-comment">// Where clause (chainable)</span>
+$active = Post::<span class="hl-func">where</span>(<span class="hl-string">'status'</span>, <span class="hl-string">'published'</span>)
+              -><span class="hl-func">where</span>(<span class="hl-string">'views'</span>, <span class="hl-string">'>'</span>, <span class="hl-number">100</span>)
+              -><span class="hl-func">orderBy</span>(<span class="hl-string">'created_at'</span>, <span class="hl-string">'desc'</span>)
+              -><span class="hl-func">take</span>(<span class="hl-number">10</span>)
+              -><span class="hl-func">get</span>();
+
+<span class="hl-comment">// Get first / latest / oldest</span>
+$latest = Post::<span class="hl-func">latest</span>()-><span class="hl-func">first</span>();   <span class="hl-comment">// = orderBy created_at desc + first</span>
+$oldest = Post::<span class="hl-func">oldest</span>()-><span class="hl-func">first</span>();
+
+<span class="hl-comment">// Aggregate</span>
+$count = Post::<span class="hl-func">count</span>();
+$max   = Post::<span class="hl-func">max</span>(<span class="hl-string">'views'</span>);
+$avg   = Post::<span class="hl-func">avg</span>(<span class="hl-string">'views'</span>);
+$sum   = Post::<span class="hl-func">sum</span>(<span class="hl-string">'views'</span>);
+
+<span class="hl-comment">// Pagination otomatis</span>
+$posts = Post::<span class="hl-func">paginate</span>(<span class="hl-number">15</span>); <span class="hl-comment">// 15 per halaman</span>
+
+<span class="hl-comment">// Ambil hanya 1 kolom</span>
+$titles = Post::<span class="hl-func">pluck</span>(<span class="hl-string">'title'</span>); <span class="hl-comment">// Collection of strings</span>
+
+<span class="hl-comment">// Where ekstra</span>
+Post::<span class="hl-func">whereIn</span>(<span class="hl-string">'id'</span>, [<span class="hl-number">1</span>, <span class="hl-number">2</span>, <span class="hl-number">3</span>])-><span class="hl-func">get</span>();
+Post::<span class="hl-func">whereBetween</span>(<span class="hl-string">'views'</span>, [<span class="hl-number">100</span>, <span class="hl-number">500</span>])-><span class="hl-func">get</span>();
+Post::<span class="hl-func">whereNull</span>(<span class="hl-string">'deleted_at'</span>)-><span class="hl-func">get</span>();
+Post::<span class="hl-func">whereDate</span>(<span class="hl-string">'created_at'</span>, <span class="hl-func">today</span>())-><span class="hl-func">get</span>();</code></pre>
+            </div>
+
+            <h3 class="content-subheading">✏️ Create — Membuat Data</h3>
+            <p class="content-text">Sebelum pakai mass assignment, definisikan <code>$fillable</code> di Model untuk keamanan:</p>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">contoh create</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-comment">// Cara 1: Instansiasi + save</span>
+$post = <span class="hl-keyword">new</span> Post;
+$post->title = <span class="hl-string">'Belajar Eloquent'</span>;
+$post->body  = <span class="hl-string">'Eloquent itu menyenangkan.'</span>;
+$post-><span class="hl-func">save</span>();
+
+<span class="hl-comment">// Cara 2: Mass assignment dengan create() — paling singkat</span>
+$post = Post::<span class="hl-func">create</span>([
+    <span class="hl-string">'title'</span> => <span class="hl-string">'Belajar Eloquent'</span>,
+    <span class="hl-string">'body'</span>  => <span class="hl-string">'Eloquent itu menyenangkan.'</span>,
+]);
+
+<span class="hl-comment">// Cara 3: firstOrCreate — buat jika belum ada</span>
+$cat = Category::<span class="hl-func">firstOrCreate</span>(
+    [<span class="hl-string">'name'</span> => <span class="hl-string">'Tech'</span>],         <span class="hl-comment">// cari berdasarkan ini</span>
+    [<span class="hl-string">'description'</span> => <span class="hl-string">'...'</span>]    <span class="hl-comment">// kolom tambahan saat create</span>
+);
+
+<span class="hl-comment">// Cara 4: updateOrCreate — update jika ada, create jika tidak</span>
+Setting::<span class="hl-func">updateOrCreate</span>(
+    [<span class="hl-string">'key'</span> => <span class="hl-string">'theme'</span>],
+    [<span class="hl-string">'value'</span> => <span class="hl-string">'dark'</span>]
+);</code></pre>
+            </div>
+
+            <h3 class="content-subheading">🔄 Update — Mengubah Data</h3>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">contoh update</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-comment">// Update satu record</span>
+$post = Post::<span class="hl-func">find</span>(<span class="hl-number">1</span>);
+$post->title = <span class="hl-string">'Judul Baru'</span>;
+$post-><span class="hl-func">save</span>();
+
+<span class="hl-comment">// Atau singkat:</span>
+Post::<span class="hl-func">find</span>(<span class="hl-number">1</span>)-><span class="hl-func">update</span>([<span class="hl-string">'title'</span> => <span class="hl-string">'Judul Baru'</span>]);
+
+<span class="hl-comment">// Update massal (banyak record sekaligus)</span>
+Post::<span class="hl-func">where</span>(<span class="hl-string">'status'</span>, <span class="hl-string">'draft'</span>)
+    -><span class="hl-func">update</span>([<span class="hl-string">'status'</span> => <span class="hl-string">'archived'</span>]);
+
+<span class="hl-comment">// Increment/decrement (counter, view, like)</span>
+Post::<span class="hl-func">find</span>(<span class="hl-number">1</span>)-><span class="hl-func">increment</span>(<span class="hl-string">'views'</span>);          <span class="hl-comment">// +1</span>
+Post::<span class="hl-func">find</span>(<span class="hl-number">1</span>)-><span class="hl-func">increment</span>(<span class="hl-string">'views'</span>, <span class="hl-number">10</span>);      <span class="hl-comment">// +10</span>
+Product::<span class="hl-func">find</span>(<span class="hl-number">1</span>)-><span class="hl-func">decrement</span>(<span class="hl-string">'stock'</span>);     <span class="hl-comment">// -1</span></code></pre>
+            </div>
+
+            <h3 class="content-subheading">🗑 Delete — Menghapus Data</h3>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">contoh delete</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-comment">// Delete satu instance</span>
+$post = Post::<span class="hl-func">find</span>(<span class="hl-number">1</span>);
+$post-><span class="hl-func">delete</span>();
+
+<span class="hl-comment">// Delete langsung by ID</span>
+Post::<span class="hl-func">destroy</span>(<span class="hl-number">1</span>);
+Post::<span class="hl-func">destroy</span>([<span class="hl-number">1</span>, <span class="hl-number">2</span>, <span class="hl-number">3</span>]);
+
+<span class="hl-comment">// Delete massal dengan kondisi</span>
+Post::<span class="hl-func">where</span>(<span class="hl-string">'status'</span>, <span class="hl-string">'draft'</span>)-><span class="hl-func">delete</span>();
+
+<span class="hl-comment">// Soft delete (pakai trait SoftDeletes di model)</span>
+$post-><span class="hl-func">delete</span>();                <span class="hl-comment">// set deleted_at, tidak benar2 hapus</span>
+$post-><span class="hl-func">restore</span>();               <span class="hl-comment">// kembalikan</span>
+$post-><span class="hl-func">forceDelete</span>();           <span class="hl-comment">// hapus permanen</span>
+Post::<span class="hl-func">withTrashed</span>()-><span class="hl-func">get</span>();    <span class="hl-comment">// termasuk yang soft-deleted</span></code></pre>
+            </div>
+
+            <h2 class="content-heading">Accessor & Mutator (Property Cerdas)</h2>
+            <p class="content-text"><strong>Accessor</strong> = modifikasi data saat dibaca. <strong>Mutator</strong> = modifikasi saat ditulis. Berguna untuk formatting, hashing, dll.</p>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">app/Models/User.php</span>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-keyword">use</span> Illuminate\Database\Eloquent\Casts\Attribute;
+
+<span class="hl-keyword">class</span> User <span class="hl-keyword">extends</span> Model
+{
+    <span class="hl-comment">// Accessor: $user->full_name → "Arif Hidayah"</span>
+    <span class="hl-keyword">protected function</span> <span class="hl-func">fullName</span>(): Attribute
+    {
+        <span class="hl-keyword">return</span> Attribute::<span class="hl-func">make</span>(
+            get: <span class="hl-keyword">fn</span> () => $<span class="hl-keyword">this</span>->first_name . <span class="hl-string">' '</span> . $<span class="hl-keyword">this</span>->last_name
+        );
+    }
+
+    <span class="hl-comment">// Mutator: hash password otomatis saat di-set</span>
+    <span class="hl-keyword">protected function</span> <span class="hl-func">password</span>(): Attribute
+    {
+        <span class="hl-keyword">return</span> Attribute::<span class="hl-func">make</span>(
+            set: <span class="hl-keyword">fn</span> ($value) => bcrypt($value)
+        );
+    }
+}
+
+<span class="hl-comment">// Pemakaian:</span>
+<span class="hl-keyword">echo</span> $user->full_name;        <span class="hl-comment">// → "Arif Hidayah"</span>
+$user->password = <span class="hl-string">'rahasia'</span>;   <span class="hl-comment">// → otomatis di-hash sebelum simpan</span></code></pre>
+            </div>
+
+            <h2 class="content-heading">Scope (Query yang Reusable)</h2>
+            <p class="content-text">Daripada menulis <code>where('status', 'published')</code> berulang, buat scope di Model:</p>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">app/Models/Post.php</span>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-keyword">class</span> Post <span class="hl-keyword">extends</span> Model
+{
+    <span class="hl-comment">// Scope: published</span>
+    <span class="hl-keyword">public function</span> <span class="hl-func">scopePublished</span>($query)
+    {
+        <span class="hl-keyword">return</span> $query-><span class="hl-func">where</span>(<span class="hl-string">'status'</span>, <span class="hl-string">'published'</span>);
+    }
+
+    <span class="hl-comment">// Scope dengan parameter</span>
+    <span class="hl-keyword">public function</span> <span class="hl-func">scopePopular</span>($query, $min = <span class="hl-number">100</span>)
+    {
+        <span class="hl-keyword">return</span> $query-><span class="hl-func">where</span>(<span class="hl-string">'views'</span>, <span class="hl-string">'>='</span>, $min);
+    }
+}
+
+<span class="hl-comment">// Pemakaian — drop "scope" dan camelCase jadi lowercase:</span>
+$posts = Post::<span class="hl-func">published</span>()-><span class="hl-func">popular</span>(<span class="hl-number">500</span>)-><span class="hl-func">get</span>();
+<span class="hl-comment">// Setara dengan: where('status', 'published')->where('views', '>=', 500)</span></code></pre>
+            </div>
+
+            <div class="quiz">
+                <div class="quiz-title">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01"/></svg>
+                    Cek Pemahaman
+                </div>
+                <div class="quiz-question">
+                    <div class="quiz-q-text">1. Jika Model bernama <code>BlogPost</code>, tabel yang dicari Eloquent adalah?</div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'Eloquent menambah s di akhir + snake_case.')">BlogPost</div>
+                        <div class="quiz-option" data-correct="true" onclick="quizAnswer(this, 'Tepat! PascalCase → snake_case + plural.')">blog_posts</div>
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'snake_case-nya benar tapi tidak plural.')">blog_post</div>
+                    </div>
+                    <div class="quiz-feedback hidden"></div>
+                </div>
+                <div class="quiz-question">
+                    <div class="quiz-q-text">2. Apa beda <code>find(1)</code> dan <code>findOrFail(1)</code>?</div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'Performa sama.')">findOrFail lebih cepat</div>
+                        <div class="quiz-option" data-correct="true" onclick="quizAnswer(this, 'Tepat! find = null, findOrFail = throw 404.')">find return null jika tidak ada, findOrFail throw 404</div>
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'Salah, keduanya bisa.')">findOrFail tidak bisa pakai ID</div>
+                    </div>
+                    <div class="quiz-feedback hidden"></div>
+                </div>
+                <div class="quiz-question">
+                    <div class="quiz-q-text">3. Mengapa <code>$fillable</code> penting di Model?</div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'Tidak ada hubungan dengan performa.')">Mempercepat query</div>
+                        <div class="quiz-option" data-correct="true" onclick="quizAnswer(this, 'Tepat! Melindungi dari Mass Assignment vulnerability.')">Mencegah Mass Assignment vulnerability</div>
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'Sama saja — fillable bukan untuk validasi format.')">Validasi format input</div>
+                    </div>
+                    <div class="quiz-feedback hidden"></div>
+                </div>
+            </div>
+
+            <div class="content-nav">
+                <div class="content-nav-item">
+                    <a href="migration.html" class="nav-btn nav-btn-prev">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                        <div><span class="nav-label">Sebelumnya</span><span class="nav-name">Migration & Seeder</span></div>
+                    </a>
+                </div>
+                <div class="content-nav-item">
+                    <a href="relationship.html" class="nav-btn nav-btn-next">
+                        <div><span class="nav-label">Selanjutnya</span><span class="nav-name">Relationship</span></div>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </a>
+                </div>
+            </div>
+        </article>
+    </main>
+    <script src="/laravel/course-layout.js"></script>
+    <script>
+    function copyCode(btn) {
+        const codeBlock = btn.closest('.code-block').querySelector('code');
+        navigator.clipboard.writeText(codeBlock.textContent).then(() => {
+            btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>';
+            setTimeout(() => { btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>'; }, 2000);
+        });
+    }
+
+    function buildQuery() {
+        const model = document.getElementById('qbModel').value;
+        const table = model.toLowerCase() + 's';
+        const wc = document.getElementById('qbWhereCol').value;
+        const wo = document.getElementById('qbWhereOp').value;
+        const wv = document.getElementById('qbWhereVal').value;
+        const oc = document.getElementById('qbOrderCol').value;
+        const od = document.getElementById('qbOrderDir').value;
+        const lim = document.getElementById('qbLimit').value;
+        const exec = document.getElementById('qbExec').value;
+
+        let php = `<span style="color:#82aaff">${model}</span>::`;
+        let sql = '<span style="color:#c792ea">SELECT</span> ';
+        if (exec === 'count') sql += '<span style="color:#82aaff">COUNT</span>(*) ';
+        else if (exec === 'pluck') sql += '<span style="color:#82aaff">title</span> ';
+        else sql += '* ';
+        sql += `<span style="color:#c792ea">FROM</span> <span style="color:#82aaff">${table}</span>`;
+
+        if (wc) {
+            php += `<span style="color:#82aaff">where</span>(<span style="color:#c3e88d">'${wc}'</span>${wo !== '=' ? `, <span style="color:#c3e88d">'${wo}'</span>` : ''}, <span style="color:#c3e88d">'${wv || '...'}'</span>)`;
+            const wvSql = isNaN(wv) || wv === '' ? `'${wv || '...'}'` : wv;
+            sql += `<br><span style="color:#c792ea">WHERE</span> <span style="color:#82aaff">${wc}</span> ${wo.toUpperCase()} <span style="color:#c3e88d">${wvSql}</span>`;
+        }
+        if (oc) {
+            if (wc) php += '<br>    ->';
+            else php += '';
+            php += `<span style="color:#82aaff">orderBy</span>(<span style="color:#c3e88d">'${oc}'</span>${od !== 'asc' ? `, <span style="color:#c3e88d">'${od}'</span>` : ''})`;
+            sql += `<br><span style="color:#c792ea">ORDER BY</span> <span style="color:#82aaff">${oc}</span> ${od.toUpperCase()}`;
+        }
+        if (lim && exec !== 'paginate' && exec !== 'count') {
+            php += (wc || oc) ? '<br>    ->' : '';
+            php += `<span style="color:#82aaff">limit</span>(<span style="color:#f78c6c">${lim}</span>)`;
+            sql += `<br><span style="color:#c792ea">LIMIT</span> <span style="color:#f78c6c">${lim}</span>`;
+        }
+
+        const finalCalls = {
+            get: '<span style="color:#82aaff">get</span>()',
+            first: '<span style="color:#82aaff">first</span>()',
+            count: '<span style="color:#82aaff">count</span>()',
+            paginate: '<span style="color:#82aaff">paginate</span>(<span style="color:#f78c6c">10</span>)',
+            pluck: '<span style="color:#82aaff">pluck</span>(<span style="color:#c3e88d">\'title\'</span>)'
+        };
+        php += (wc || oc || lim) ? '<br>    ->' : '';
+        php += finalCalls[exec] + ';';
+
+        if (exec === 'first') sql += '<br><span style="color:#c792ea">LIMIT</span> <span style="color:#f78c6c">1</span>';
+        if (exec === 'paginate') sql += '<br><span style="color:#c792ea">LIMIT</span> <span style="color:#f78c6c">10 OFFSET 0</span>';
+
+        document.getElementById('qbPhp').innerHTML = php;
+        document.getElementById('qbSql').innerHTML = sql;
+    }
+    ['qbModel','qbWhereCol','qbWhereOp','qbWhereVal','qbOrderCol','qbOrderDir','qbLimit','qbExec'].forEach(id => {
+        document.getElementById(id).addEventListener('input', buildQuery);
+        document.getElementById(id).addEventListener('change', buildQuery);
+    });
+    buildQuery();
+
+    function quizAnswer(el, feedback) {
+        const question = el.closest('.quiz-question');
+        const options = question.querySelectorAll('.quiz-option');
+        const fb = question.querySelector('.quiz-feedback');
+        options.forEach(o => {
+            o.style.pointerEvents = 'none';
+            if (o.dataset.correct === 'true') o.classList.add('correct');
+        });
+        if (el.dataset.correct !== 'true') el.classList.add('wrong');
+        fb.textContent = feedback;
+        fb.classList.remove('hidden');
+        fb.classList.add('visible');
+    }
+    </script>
+</body>
+</html>

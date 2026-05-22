@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Migration dan Seeder — Laravel</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/laravel/course.css">
+</head>
+<body>
+    <div class="bg-grid" aria-hidden="true"></div>
+    <nav class="navbar scrolled" id="navbar"></nav>
+    <div class="mobile-menu" id="mobileMenu"></div>
+    <main class="course-layout">
+        <aside class="course-sidebar" id="courseSidebar"></aside>
+        <article class="course-content">
+            <div class="breadcrumb">
+                <a href="../index.html">Home</a><span>›</span>
+                <a href="index.html">Laravel</a><span>›</span>
+                <span style="color: var(--text-primary);">Migration & Seeder</span>
+            </div>
+            <header class="content-header">
+                <h1 class="content-title">Modul 8: Migration dan Seeder</h1>
+                <div class="content-meta">
+                    <div class="meta-pill"><span>Estimasi: 55 Menit</span></div>
+                    <div class="meta-pill"><span>Teori & Praktikum</span></div>
+                </div>
+            </header>
+
+            <p class="content-text"><strong>Migration</strong> adalah <em>version control untuk database</em>. Daripada membagikan file <code>.sql</code> ke rekan tim, Anda mendefinisikan struktur tabel pakai kode PHP. Rekan tim cukup jalankan satu perintah untuk menyamakan skema database.</p>
+
+            <div class="analogy-box">
+                <div class="analogy-icon">📜</div>
+                <div class="analogy-content">
+                    <strong>Analogi: Resep Masak Tertulis</strong>
+                    <p>Daripada teman Anda harus melihat masakan jadi dan menebak bumbunya, lebih mudah memberinya <em>resep tertulis</em> step-by-step. Tinggal ikuti, hasilnya pasti sama. Migration = resep database Anda. Cukup <code>git pull</code> + <code>php artisan migrate</code>, teman Anda punya struktur DB yang sama persis.</p>
+                </div>
+            </div>
+
+            <h2 class="content-heading">Mengapa Tidak Pakai .sql Saja?</h2>
+            <table class="compare-table">
+                <thead>
+                    <tr><th>Aspek</th><th>File .sql</th><th>Migration Laravel</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Versioning</td><td>Manual: backup tiap perubahan</td><td>Otomatis tersimpan di Git</td></tr>
+                    <tr><td>Rollback</td><td>Sulit, harus tulis ulang DROP</td><td><code>php artisan migrate:rollback</code></td></tr>
+                    <tr><td>Lintas DB</td><td>Berbeda MySQL vs PostgreSQL</td><td>Sintaks sama, Laravel translate</td></tr>
+                    <tr><td>Sharing tim</td><td>Kirim file via WhatsApp 😅</td><td>Push ke Git → sync otomatis</td></tr>
+                </tbody>
+            </table>
+
+            <h2 class="content-heading">Membuat Migration</h2>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">Terminal</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-comment"># Migration baru untuk tabel baru</span>
+php artisan make:migration create_flights_table
+
+<span class="hl-comment"># Migration untuk menambah kolom ke tabel yang sudah ada</span>
+php artisan make:migration add_status_to_flights_table --table=flights
+
+<span class="hl-comment"># Otomatis dibuat di database/migrations/&lt;timestamp&gt;_*.php</span></code></pre>
+            </div>
+
+            <p class="content-text">Timestamp di nama file menentukan urutan eksekusi. Migration lama jalan duluan — penting karena tabel yang punya foreign key harus dibuat <em>setelah</em> tabel yang dirujuk.</p>
+
+            <h2 class="content-heading">Schema Builder Interaktif</h2>
+            <p class="content-text">Coba bangun skema tabel sendiri! Tambahkan kolom, pilih tipe data, lalu lihat kode migration yang dihasilkan.</p>
+
+            <div class="interactive-card">
+                <div class="interactive-title">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5M3 12c0 1.66 4 3 9 3s9-1.34 9-3"/></svg>
+                    Schema Builder
+                </div>
+                <p class="interactive-subtitle">Bangun tabel dari nol. Kode migration & SQL otomatis di-generate di bawah.</p>
+                <div class="schema-builder">
+                    <div class="schema-builder-header">
+                        <input type="text" class="schema-table-name" id="tableName" value="posts" oninput="renderSchema()" style="background: rgba(0,0,0,0.4); border: 1px solid var(--border-color); color: var(--accent-laravel); padding: 4px 8px; border-radius: 4px; font-family: 'JetBrains Mono', monospace;">
+                        <button class="btn-action" onclick="addColumn()">+ Tambah Kolom</button>
+                    </div>
+                    <div class="schema-columns" id="schemaColumns"></div>
+                    <div class="schema-actions">
+                        <button class="btn-action btn-secondary" onclick="toggleOutput('php')">Lihat Migration PHP</button>
+                        <button class="btn-action btn-secondary" onclick="toggleOutput('sql')">Lihat SQL Hasilnya</button>
+                        <button class="btn-action btn-secondary" onclick="resetSchema()">↺ Reset</button>
+                    </div>
+                    <pre class="schema-output" id="schemaOutput"></pre>
+                </div>
+            </div>
+
+            <h2 class="content-heading">Mendefinisikan Struktur Tabel</h2>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">database/migrations/..._create_flights_table.php</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-keyword">use</span> Illuminate\Database\Migrations\Migration;
+<span class="hl-keyword">use</span> Illuminate\Database\Schema\Blueprint;
+<span class="hl-keyword">use</span> Illuminate\Support\Facades\Schema;
+
+<span class="hl-keyword">return new class extends</span> Migration
+{
+    <span class="hl-comment">// Dijalankan saat php artisan migrate</span>
+    <span class="hl-keyword">public function</span> <span class="hl-func">up</span>(): <span class="hl-keyword">void</span>
+    {
+        Schema::<span class="hl-func">create</span>(<span class="hl-string">'flights'</span>, <span class="hl-keyword">function</span> (Blueprint $table) {
+            $table-><span class="hl-func">id</span>();                          <span class="hl-comment">// Primary key auto-increment</span>
+            $table-><span class="hl-func">string</span>(<span class="hl-string">'name'</span>);                <span class="hl-comment">// VARCHAR(255)</span>
+            $table-><span class="hl-func">string</span>(<span class="hl-string">'airline'</span>)-><span class="hl-func">nullable</span>(); <span class="hl-comment">// Boleh NULL</span>
+            $table-><span class="hl-func">integer</span>(<span class="hl-string">'price'</span>)-><span class="hl-func">default</span>(<span class="hl-number">0</span>);  <span class="hl-comment">// Default 0</span>
+            $table-><span class="hl-func">boolean</span>(<span class="hl-string">'is_active'</span>)-><span class="hl-func">default</span>(<span class="hl-keyword">true</span>);
+            $table-><span class="hl-func">text</span>(<span class="hl-string">'description'</span>)-><span class="hl-func">nullable</span>();
+            $table-><span class="hl-func">timestamp</span>(<span class="hl-string">'departure_at'</span>)-><span class="hl-func">useCurrent</span>();
+            $table-><span class="hl-func">timestamps</span>();                  <span class="hl-comment">// created_at + updated_at</span>
+        });
+    }
+
+    <span class="hl-comment">// Dijalankan saat php artisan migrate:rollback</span>
+    <span class="hl-keyword">public function</span> <span class="hl-func">down</span>(): <span class="hl-keyword">void</span>
+    {
+        Schema::<span class="hl-func">dropIfExists</span>(<span class="hl-string">'flights'</span>);
+    }
+};</code></pre>
+            </div>
+
+            <h2 class="content-heading">Tipe Kolom yang Sering Dipakai</h2>
+            <table class="compare-table">
+                <thead><tr><th>Method</th><th>Tipe SQL</th><th>Kapan Dipakai</th></tr></thead>
+                <tbody>
+                    <tr><td><code>id()</code></td><td>BIGINT UNSIGNED AUTO_INCREMENT</td><td>Primary key (default)</td></tr>
+                    <tr><td><code>string('name')</code></td><td>VARCHAR(255)</td><td>Teks pendek (nama, judul, email)</td></tr>
+                    <tr><td><code>text('body')</code></td><td>TEXT</td><td>Teks panjang (artikel, komentar)</td></tr>
+                    <tr><td><code>integer('age')</code></td><td>INT</td><td>Bilangan bulat</td></tr>
+                    <tr><td><code>decimal('price', 8, 2)</code></td><td>DECIMAL(8,2)</td><td>Harga, nilai mata uang</td></tr>
+                    <tr><td><code>boolean('is_active')</code></td><td>TINYINT(1)</td><td>True/false</td></tr>
+                    <tr><td><code>date('birth')</code></td><td>DATE</td><td>Tanggal saja</td></tr>
+                    <tr><td><code>dateTime('start')</code></td><td>DATETIME</td><td>Tanggal + jam</td></tr>
+                    <tr><td><code>timestamp('publish_at')</code></td><td>TIMESTAMP</td><td>Lebih ringkas, range 1970–2038</td></tr>
+                    <tr><td><code>json('settings')</code></td><td>JSON</td><td>Data terstruktur fleksibel</td></tr>
+                    <tr><td><code>foreignId('user_id')</code></td><td>BIGINT UNSIGNED + FK</td><td>Foreign key ke users.id</td></tr>
+                    <tr><td><code>enum('role', ['admin','user'])</code></td><td>ENUM</td><td>Hanya nilai tertentu</td></tr>
+                    <tr><td><code>timestamps()</code></td><td>created_at + updated_at</td><td>Selalu pakai di setiap tabel</td></tr>
+                    <tr><td><code>softDeletes()</code></td><td>deleted_at TIMESTAMP NULL</td><td>Soft delete (data tidak benar2 dihapus)</td></tr>
+                </tbody>
+            </table>
+
+            <h2 class="content-heading">Modifier (Pelengkap Kolom)</h2>
+            <table class="compare-table">
+                <thead><tr><th>Modifier</th><th>Fungsi</th></tr></thead>
+                <tbody>
+                    <tr><td><code>->nullable()</code></td><td>Boleh diisi NULL</td></tr>
+                    <tr><td><code>->default('val')</code></td><td>Nilai default jika kosong</td></tr>
+                    <tr><td><code>->unique()</code></td><td>Tidak boleh duplikat (mis. email)</td></tr>
+                    <tr><td><code>->unsigned()</code></td><td>Hanya bilangan non-negatif</td></tr>
+                    <tr><td><code>->index()</code></td><td>Buat index untuk speedup query</td></tr>
+                    <tr><td><code>->after('column')</code></td><td>Posisi kolom (saat alter table)</td></tr>
+                    <tr><td><code>->comment('keterangan')</code></td><td>Komentar dokumentasi</td></tr>
+                </tbody>
+            </table>
+
+            <h2 class="content-heading">Foreign Key (Relasi Antar Tabel)</h2>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">contoh foreign key</span>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-comment">// Cara lama (verbose)</span>
+$table-><span class="hl-func">unsignedBigInteger</span>(<span class="hl-string">'user_id'</span>);
+$table-><span class="hl-func">foreign</span>(<span class="hl-string">'user_id'</span>)
+      -><span class="hl-func">references</span>(<span class="hl-string">'id'</span>)
+      -><span class="hl-func">on</span>(<span class="hl-string">'users'</span>)
+      -><span class="hl-func">onDelete</span>(<span class="hl-string">'cascade'</span>);
+
+<span class="hl-comment">// Cara modern (singkat — Laravel 7+)</span>
+$table-><span class="hl-func">foreignId</span>(<span class="hl-string">'user_id'</span>)
+      -><span class="hl-func">constrained</span>()           <span class="hl-comment">// otomatis cari tabel "users"</span>
+      -><span class="hl-func">cascadeOnDelete</span>();    <span class="hl-comment">// hapus post jika user dihapus</span>
+
+<span class="hl-comment">// Jika nama tabel tidak sesuai konvensi:</span>
+$table-><span class="hl-func">foreignId</span>(<span class="hl-string">'author_id'</span>)-><span class="hl-func">constrained</span>(<span class="hl-string">'users'</span>);</code></pre>
+            </div>
+
+            <h2 class="content-heading">Menjalankan Migration</h2>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">Terminal</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-comment"># Jalankan semua migration yang belum dieksekusi</span>
+php artisan migrate
+
+<span class="hl-comment"># Batalkan migration terakhir (1 batch)</span>
+php artisan migrate:rollback
+
+<span class="hl-comment"># Reset SEMUA migration (rollback semua, lalu migrate lagi)</span>
+php artisan migrate:refresh
+
+<span class="hl-comment"># DROP semua tabel, jalankan ulang dari awal</span>
+php artisan migrate:fresh
+
+<span class="hl-comment"># Sekaligus jalankan seeder setelah fresh</span>
+php artisan migrate:fresh --seed
+
+<span class="hl-comment"># Cek status migration (mana yang sudah, mana yang belum)</span>
+php artisan migrate:status</code></pre>
+            </div>
+
+            <div class="warning-box">
+                <div class="warning-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                    JANGAN migrate:fresh di Production!
+                </div>
+                <p><code>migrate:fresh</code> dan <code>migrate:refresh</code> akan menghapus SEMUA DATA. Hanya gunakan di environment lokal/dev. Di production, selalu pakai <code>migrate</code> biasa atau buat migration baru untuk perubahan tabel.</p>
+            </div>
+
+            <h2 class="content-heading">Seeder — Mengisi Data Awal</h2>
+            <p class="content-text">Seeder mengisi database dengan data awal atau dummy. Berguna untuk testing dan demo. Biasanya dipadukan dengan <strong>Factory</strong> yang men-generate data acak.</p>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">database/seeders/DatabaseSeeder.php</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-keyword">use</span> Illuminate\Database\Seeder;
+<span class="hl-keyword">use</span> Illuminate\Support\Facades\Hash;
+<span class="hl-keyword">use</span> App\Models\{User, Post};
+
+<span class="hl-keyword">class</span> DatabaseSeeder <span class="hl-keyword">extends</span> Seeder
+{
+    <span class="hl-keyword">public function</span> <span class="hl-func">run</span>(): <span class="hl-keyword">void</span>
+    {
+        <span class="hl-comment">// 1. Data spesifik (admin user)</span>
+        User::<span class="hl-func">create</span>([
+            <span class="hl-string">'name'</span> => <span class="hl-string">'Admin'</span>,
+            <span class="hl-string">'email'</span> => <span class="hl-string">'admin@example.com'</span>,
+            <span class="hl-string">'password'</span> => Hash::<span class="hl-func">make</span>(<span class="hl-string">'password'</span>),
+        ]);
+
+        <span class="hl-comment">// 2. Data dummy via Factory (10 user random)</span>
+        User::<span class="hl-func">factory</span>(<span class="hl-number">10</span>)-><span class="hl-func">create</span>();
+
+        <span class="hl-comment">// 3. Setiap user buat 3 post</span>
+        User::<span class="hl-func">all</span>()-><span class="hl-func">each</span>(<span class="hl-keyword">function</span> ($user) {
+            Post::<span class="hl-func">factory</span>(<span class="hl-number">3</span>)-><span class="hl-func">create</span>([<span class="hl-string">'user_id'</span> => $user->id]);
+        });
+    }
+}</code></pre>
+            </div>
+
+            <div class="info-box">
+                <div class="info-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                    <strong>Workflow Pengembangan Database</strong>
+                </div>
+                <p>Workflow tipikal: <strong>1)</strong> Buat migration → tulis schema → <strong>2)</strong> Buat factory → definisikan data dummy → <strong>3)</strong> Daftarkan di DatabaseSeeder → <strong>4)</strong> Jalankan <code>php artisan migrate:fresh --seed</code> → DB siap untuk testing.</p>
+            </div>
+
+            <div class="quiz">
+                <div class="quiz-title">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01"/></svg>
+                    Cek Pemahaman
+                </div>
+                <div class="quiz-question">
+                    <div class="quiz-q-text">1. Apa method yang dijalankan saat <code>php artisan migrate:rollback</code>?</div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'up() dipanggil saat migrate, bukan rollback.')">up()</div>
+                        <div class="quiz-option" data-correct="true" onclick="quizAnswer(this, 'Tepat! down() = membatalkan apa yang up() lakukan.')">down()</div>
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'Bukan — itu untuk seeder.')">run()</div>
+                    </div>
+                    <div class="quiz-feedback hidden"></div>
+                </div>
+                <div class="quiz-question">
+                    <div class="quiz-q-text">2. Method paling singkat untuk membuat foreign key ke tabel <code>users</code>?</div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'Itu cara verbose — masih harus tambah foreign().')">$table->unsignedBigInteger('user_id')</div>
+                        <div class="quiz-option" data-correct="true" onclick="quizAnswer(this, 'Tepat! constrained() otomatis buat foreign key ke users.id.')">$table->foreignId('user_id')->constrained()</div>
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'integer() saja tidak membuat foreign key.')">$table->integer('user_id')</div>
+                    </div>
+                    <div class="quiz-feedback hidden"></div>
+                </div>
+                <div class="quiz-question">
+                    <div class="quiz-q-text">3. Mengapa <code>php artisan migrate:fresh</code> berbahaya di production?</div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'Sebenarnya cepat — tapi BAHAYA-nya karena hapus data.')">Karena terlalu lambat</div>
+                        <div class="quiz-option" data-correct="true" onclick="quizAnswer(this, 'Tepat! migrate:fresh DROP semua tabel → kehilangan data.')">Karena menghapus semua data di tabel</div>
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'Salah — tidak ada hubungan dengan disk space.')">Karena memakan banyak disk space</div>
+                    </div>
+                    <div class="quiz-feedback hidden"></div>
+                </div>
+            </div>
+
+            <div class="content-nav">
+                <div class="content-nav-item">
+                    <a href="layout-component.html" class="nav-btn nav-btn-prev">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                        <div><span class="nav-label">Sebelumnya</span><span class="nav-name">Layout & Component</span></div>
+                    </a>
+                </div>
+                <div class="content-nav-item">
+                    <a href="eloquent.html" class="nav-btn nav-btn-next">
+                        <div><span class="nav-label">Selanjutnya</span><span class="nav-name">Eloquent ORM</span></div>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </a>
+                </div>
+            </div>
+        </article>
+    </main>
+    <script src="/laravel/course-layout.js"></script>
+    <script>
+    function copyCode(btn) {
+        const codeBlock = btn.closest('.code-block').querySelector('code');
+        navigator.clipboard.writeText(codeBlock.textContent).then(() => {
+            btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>';
+            setTimeout(() => { btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>'; }, 2000);
+        });
+    }
+
+    let columns = [
+        { name: 'id', type: 'id', nullable: false, def: '' },
+        { name: 'title', type: 'string', nullable: false, def: '' },
+        { name: 'body', type: 'text', nullable: false, def: '' },
+        { name: 'user_id', type: 'foreignId', nullable: false, def: '' },
+        { name: 'is_published', type: 'boolean', nullable: false, def: 'false' },
+        { name: 'timestamps', type: 'timestamps', nullable: false, def: '' }
+    ];
+    let outputMode = 'php';
+
+    const types = ['id', 'string', 'text', 'integer', 'bigInteger', 'decimal', 'boolean', 'date', 'dateTime', 'timestamp', 'json', 'foreignId', 'timestamps', 'softDeletes'];
+
+    function renderSchema() {
+        const wrap = document.getElementById('schemaColumns');
+        wrap.innerHTML = columns.map((c, i) => `
+            <div class="schema-column">
+                <input type="text" class="schema-col-name" value="${c.name}" oninput="updCol(${i}, 'name', this.value)" ${c.type === 'timestamps' || c.type === 'softDeletes' ? 'disabled' : ''} placeholder="nama_kolom">
+                <select onchange="updCol(${i}, 'type', this.value)">
+                    ${types.map(t => `<option value="${t}" ${t === c.type ? 'selected' : ''}>${t}</option>`).join('')}
+                </select>
+                <input type="text" value="${c.def}" oninput="updCol(${i}, 'def', this.value)" placeholder="default (opsional)" ${c.type === 'timestamps' || c.type === 'softDeletes' || c.type === 'id' ? 'disabled' : ''}>
+                <button class="schema-remove" onclick="removeCol(${i})" title="Hapus kolom">×</button>
+            </div>
+            ${c.type !== 'timestamps' && c.type !== 'softDeletes' && c.type !== 'id' ? `
+            <div class="schema-column" style="grid-template-columns: 1fr; padding: 6px 16px;">
+                <label class="schema-checkbox">
+                    <input type="checkbox" ${c.nullable ? 'checked' : ''} onchange="updCol(${i}, 'nullable', this.checked)">
+                    nullable (boleh NULL)
+                </label>
+            </div>` : ''}
+        `).join('');
+        renderOutput();
+    }
+    function updCol(i, key, val) { columns[i][key] = val; renderSchema(); }
+    function removeCol(i) { columns.splice(i, 1); renderSchema(); }
+    function addColumn() {
+        columns.splice(columns.length - 1, 0, { name: 'new_column', type: 'string', nullable: false, def: '' });
+        renderSchema();
+    }
+    function resetSchema() {
+        columns = [
+            { name: 'id', type: 'id', nullable: false, def: '' },
+            { name: 'title', type: 'string', nullable: false, def: '' },
+            { name: 'timestamps', type: 'timestamps', nullable: false, def: '' }
+        ];
+        document.getElementById('tableName').value = 'posts';
+        renderSchema();
+    }
+    function toggleOutput(mode) { outputMode = mode; renderOutput(); }
+
+    function renderOutput() {
+        const table = document.getElementById('tableName').value || 'table_name';
+        const out = document.getElementById('schemaOutput');
+        if (outputMode === 'php') {
+            let php = `<span style="color:#c792ea">Schema</span>::<span style="color:#82aaff">create</span>(<span style="color:#c3e88d">'${table}'</span>, <span style="color:#c792ea">function</span> (Blueprint $table) {\n`;
+            columns.forEach(c => {
+                let line = `    $table-><span style="color:#82aaff">${c.type}</span>(`;
+                if (c.type !== 'timestamps' && c.type !== 'softDeletes' && c.type !== 'id') {
+                    line += `<span style="color:#c3e88d">'${c.name}'</span>`;
+                }
+                line += `)`;
+                if (c.nullable) line += `-><span style="color:#82aaff">nullable</span>()`;
+                if (c.def) line += `-><span style="color:#82aaff">default</span>(<span style="color:#f78c6c">${c.def}</span>)`;
+                if (c.type === 'foreignId') line += `-><span style="color:#82aaff">constrained</span>()`;
+                line += ';';
+                php += line + '\n';
+            });
+            php += `});`;
+            out.innerHTML = php;
+        } else {
+            let sql = `<span style="color:#c792ea">CREATE TABLE</span> <span style="color:#82aaff">\`${table}\`</span> (\n`;
+            const lines = [];
+            columns.forEach(c => {
+                if (c.type === 'timestamps') {
+                    lines.push(`  <span style="color:#82aaff">\`created_at\`</span> TIMESTAMP NULL`);
+                    lines.push(`  <span style="color:#82aaff">\`updated_at\`</span> TIMESTAMP NULL`);
+                    return;
+                }
+                if (c.type === 'softDeletes') {
+                    lines.push(`  <span style="color:#82aaff">\`deleted_at\`</span> TIMESTAMP NULL`);
+                    return;
+                }
+                if (c.type === 'id') {
+                    lines.push(`  <span style="color:#82aaff">\`id\`</span> BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY`);
+                    return;
+                }
+                const sqlTypes = {
+                    string: 'VARCHAR(255)', text: 'TEXT', integer: 'INT', bigInteger: 'BIGINT',
+                    decimal: 'DECIMAL(8,2)', boolean: 'TINYINT(1)', date: 'DATE',
+                    dateTime: 'DATETIME', timestamp: 'TIMESTAMP', json: 'JSON',
+                    foreignId: 'BIGINT UNSIGNED'
+                };
+                let line = `  <span style="color:#82aaff">\`${c.name}\`</span> <span style="color:#c792ea">${sqlTypes[c.type] || 'VARCHAR(255)'}</span>`;
+                if (!c.nullable) line += ' NOT NULL';
+                if (c.def) line += ` DEFAULT ${c.def}`;
+                lines.push(line);
+            });
+            sql += lines.join(',\n');
+            sql += `\n);`;
+            out.innerHTML = sql;
+        }
+    }
+    renderSchema();
+
+    function quizAnswer(el, feedback) {
+        const question = el.closest('.quiz-question');
+        const options = question.querySelectorAll('.quiz-option');
+        const fb = question.querySelector('.quiz-feedback');
+        options.forEach(o => {
+            o.style.pointerEvents = 'none';
+            if (o.dataset.correct === 'true') o.classList.add('correct');
+        });
+        if (el.dataset.correct !== 'true') el.classList.add('wrong');
+        fb.textContent = feedback;
+        fb.classList.remove('hidden');
+        fb.classList.add('visible');
+    }
+    </script>
+</body>
+</html>

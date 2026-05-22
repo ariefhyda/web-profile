@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Navigation & Routing Flutter — Arif Hidayah</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/flutter/course.css">
+</head>
+<body>
+    <div class="bg-grid" aria-hidden="true"></div>
+    <nav class="navbar scrolled" id="navbar"></nav>
+    <div class="mobile-menu" id="mobileMenu"></div>
+
+    <main class="course-layout">
+        <aside class="course-sidebar" id="courseSidebar"></aside>
+
+        <article class="course-content">
+            <div class="breadcrumb">
+                <a href="../index.html">Home</a><span>›</span>
+                <a href="/flutter/index.html">Flutter</a><span>›</span>
+                <span style="color: var(--text-primary);">Navigation & Routing</span>
+            </div>
+
+            <header class="content-header">
+                <h1 class="content-title">Modul 8: Navigation & Routing</h1>
+                <div class="content-meta">
+                    <div class="meta-pill"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 5V8.5L10.5 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/></svg><span>Estimasi: 75 Menit</span></div>
+                    <div class="meta-pill"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="10" rx="1" stroke="currentColor" stroke-width="1.5"/><path d="M5 7h6M5 10h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><span>Teori & Praktikum</span></div>
+                </div>
+            </header>
+
+            <p class="content-text">
+                Aplikasi nyata selalu terdiri dari banyak halaman: <em>login</em>, <em>beranda</em>, <em>detail produk</em>, <em>profil</em>, dan seterusnya. Modul ini mengajarkan cara <strong>berpindah halaman</strong> di Flutter — dari yang paling sederhana hingga teknik <em>named routes</em> yang scalable.
+            </p>
+
+            <!-- Project Setup -->
+            <div class="info-box">
+                <div class="info-box-header"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg><strong>Buat Project Baru</strong></div>
+                <div class="code-block" style="margin-top: 12px;">
+                    <div class="code-block-header"><div class="code-block-dots"><span></span><span></span><span></span></div><span class="code-block-filename">Terminal</span><button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></div>
+                    <pre class="code-block-body"><code>$ flutter create flutter_navigation
+$ cd flutter_navigation
+$ flutter run</code></pre>
+                </div>
+            </div>
+
+            <!-- Konsep -->
+            <h2 class="content-heading">Konsep Stack Navigation</h2>
+            <p class="content-text">
+                Flutter mengelola halaman menggunakan struktur <strong>stack</strong> (tumpukan). Saat Anda membuka halaman baru, halaman tersebut <strong>didorong</strong> (<em>push</em>) ke atas tumpukan. Saat Anda menekan tombol back, halaman teratas <strong>dilepas</strong> (<em>pop</em>) dari tumpukan.
+            </p>
+            <div class="code-block">
+                <div class="code-block-header"><div class="code-block-dots"><span></span><span></span><span></span></div><span class="code-block-filename">stack_concept.txt</span><button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></div>
+                <pre class="code-block-body"><code>[ DetailPage ]  ← Halaman teratas (terlihat)
+[ ListPage   ]
+[ HomePage   ]  ← Halaman pertama (di paling bawah)</code></pre>
+            </div>
+
+            <!-- Push & Pop -->
+            <h2 class="content-heading">Navigator.push & Navigator.pop</h2>
+            <p class="content-text">
+                Cara paling sederhana untuk berpindah halaman adalah dengan <code>Navigator.push</code>. Untuk kembali, gunakan <code>Navigator.pop</code> — atau biarkan tombol back perangkat melakukannya secara otomatis.
+            </p>
+            <div class="code-block">
+                <div class="code-block-header"><div class="code-block-dots"><span></span><span></span><span></span></div><span class="code-block-filename">push_pop.dart</span><button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></div>
+                <pre class="code-block-body"><code><span class="hl-comment">// Pindah ke halaman baru</span>
+ElevatedButton(
+  onPressed: () {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => <span class="hl-keyword">const</span> HalamanKedua()),
+    );
+  },
+  child: <span class="hl-keyword">const</span> Text(<span class="hl-string">'Buka Halaman Kedua'</span>),
+)
+
+<span class="hl-comment">// Kembali ke halaman sebelumnya</span>
+ElevatedButton(
+  onPressed: () => Navigator.pop(context),
+  child: <span class="hl-keyword">const</span> Text(<span class="hl-string">'Kembali'</span>),
+)</code></pre>
+            </div>
+
+            <!-- Aplikasi 2 Halaman -->
+            <h2 class="content-heading">Contoh Lengkap: Aplikasi 2 Halaman</h2>
+            <p class="content-text">
+                Mari kita buat aplikasi sederhana dengan dua halaman: <em>HomePage</em> dan <em>AboutPage</em>. Ganti seluruh isi <code>lib/main.dart</code> dengan kode berikut:
+            </p>
+            <div class="code-block">
+                <div class="code-block-header"><div class="code-block-dots"><span></span><span></span><span></span></div><span class="code-block-filename">lib/main.dart</span><button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></div>
+                <pre class="code-block-body"><code><span class="hl-keyword">import</span> <span class="hl-string">'package:flutter/material.dart'</span>;
+
+<span class="hl-keyword">void</span> main() => runApp(<span class="hl-keyword">const</span> MyApp());
+
+<span class="hl-keyword">class</span> MyApp <span class="hl-keyword">extends</span> StatelessWidget {
+  <span class="hl-keyword">const</span> MyApp({<span class="hl-keyword">super</span>.key});
+
+  <span class="hl-keyword">@override</span>
+  Widget build(BuildContext context) {
+    <span class="hl-keyword">return</span> MaterialApp(
+      theme: ThemeData(colorSchemeSeed: Colors.deepPurple, useMaterial3: <span class="hl-keyword">true</span>),
+      home: <span class="hl-keyword">const</span> HomePage(),
+    );
+  }
+}
+
+<span class="hl-keyword">class</span> HomePage <span class="hl-keyword">extends</span> StatelessWidget {
+  <span class="hl-keyword">const</span> HomePage({<span class="hl-keyword">super</span>.key});
+
+  <span class="hl-keyword">@override</span>
+  Widget build(BuildContext context) {
+    <span class="hl-keyword">return</span> Scaffold(
+      appBar: AppBar(title: <span class="hl-keyword">const</span> Text(<span class="hl-string">'Beranda'</span>)),
+      body: Center(
+        child: ElevatedButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => <span class="hl-keyword">const</span> AboutPage()),
+            );
+          },
+          child: <span class="hl-keyword">const</span> Text(<span class="hl-string">'Tentang Aplikasi →'</span>),
+        ),
+      ),
+    );
+  }
+}
+
+<span class="hl-keyword">class</span> AboutPage <span class="hl-keyword">extends</span> StatelessWidget {
+  <span class="hl-keyword">const</span> AboutPage({<span class="hl-keyword">super</span>.key});
+
+  <span class="hl-keyword">@override</span>
+  Widget build(BuildContext context) {
+    <span class="hl-keyword">return</span> Scaffold(
+      appBar: AppBar(title: <span class="hl-keyword">const</span> Text(<span class="hl-string">'Tentang'</span>)),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            <span class="hl-keyword">const</span> Text(<span class="hl-string">'Aplikasi ini dibuat untuk belajar Flutter 🚀'</span>),
+            <span class="hl-keyword">const</span> SizedBox(height: <span class="hl-number">16</span>),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context),
+              child: <span class="hl-keyword">const</span> Text(<span class="hl-string">'← Kembali'</span>),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}</code></pre>
+            </div>
+
+            <!-- Mengirim Data -->
+            <h2 class="content-heading">Mengirim Data ke Halaman Baru</h2>
+            <p class="content-text">
+                Sangat umum kita ingin mengirim data dari satu halaman ke halaman lain (misalnya ID produk, nama user). Caranya: kirim sebagai <em>parameter constructor</em> halaman tujuan.
+            </p>
+            <div class="code-block">
+                <div class="code-block-header"><div class="code-block-dots"><span></span><span></span><span></span></div><span class="code-block-filename">passing_data.dart</span><button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></div>
+                <pre class="code-block-body"><code><span class="hl-comment">// Halaman tujuan menerima parameter</span>
+<span class="hl-keyword">class</span> DetailPage <span class="hl-keyword">extends</span> StatelessWidget {
+  <span class="hl-keyword">final String</span> namaProduk;
+  <span class="hl-keyword">final int</span> harga;
+
+  <span class="hl-keyword">const</span> DetailPage({<span class="hl-keyword">super</span>.key, <span class="hl-keyword">required this</span>.namaProduk, <span class="hl-keyword">required this</span>.harga});
+
+  <span class="hl-keyword">@override</span>
+  Widget build(BuildContext context) {
+    <span class="hl-keyword">return</span> Scaffold(
+      appBar: AppBar(title: Text(namaProduk)),
+      body: Center(child: Text(<span class="hl-string">'Harga: Rp $harga'</span>)),
+    );
+  }
+}
+
+<span class="hl-comment">// Halaman pemanggil mengirim data</span>
+Navigator.push(
+  context,
+  MaterialPageRoute(
+    builder: (_) => <span class="hl-keyword">const</span> DetailPage(namaProduk: <span class="hl-string">'Sepatu Lari'</span>, harga: <span class="hl-number">450000</span>),
+  ),
+);</code></pre>
+            </div>
+
+            <!-- Mengembalikan Data -->
+            <h2 class="content-heading">Mengembalikan Data ke Halaman Sebelumnya</h2>
+            <p class="content-text">
+                Pola sebaliknya juga sering dipakai. Misalnya halaman <em>"Pilih Kota"</em> mengembalikan kota yang dipilih user. <code>Navigator.push</code> mengembalikan <code>Future</code> yang resolve saat halaman tujuan di-<code>pop</code> dengan data.
+            </p>
+            <div class="code-block">
+                <div class="code-block-header"><div class="code-block-dots"><span></span><span></span><span></span></div><span class="code-block-filename">return_data.dart</span><button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></div>
+                <pre class="code-block-body"><code><span class="hl-comment">// Halaman pemanggil — tunggu hasilnya</span>
+<span class="hl-keyword">final</span> hasil = <span class="hl-keyword">await</span> Navigator.push&lt;<span class="hl-keyword">String</span>&gt;(
+  context,
+  MaterialPageRoute(builder: (_) => <span class="hl-keyword">const</span> PilihKotaPage()),
+);
+
+<span class="hl-keyword">if</span> (hasil != <span class="hl-keyword">null</span>) {
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(content: Text(<span class="hl-string">'Kamu memilih: $hasil'</span>)),
+  );
+}
+
+<span class="hl-comment">// Halaman PilihKotaPage — kembalikan data lewat pop</span>
+ListTile(
+  title: <span class="hl-keyword">const</span> Text(<span class="hl-string">'Bandung'</span>),
+  onTap: () => Navigator.pop(context, <span class="hl-string">'Bandung'</span>),
+)</code></pre>
+            </div>
+
+            <div class="info-box">
+                <div class="info-box-header"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg><strong>async / await pada Navigator.push</strong></div>
+                <p>Karena <code>Navigator.push</code> mengembalikan <code>Future</code>, function yang memanggilnya harus ditandai <code>async</code> dan menggunakan <code>await</code>. Konsep ini sudah Anda pelajari di modul <strong>Collection & Async</strong>.</p>
+            </div>
+
+            <!-- Named Routes -->
+            <h2 class="content-heading">Named Routes — Navigasi yang Lebih Rapi</h2>
+            <p class="content-text">
+                Jika aplikasi Anda punya banyak halaman, <em>named routes</em> jauh lebih rapi. Daftarkan seluruh rute di <code>MaterialApp.routes</code>, lalu panggil dengan <code>Navigator.pushNamed</code>.
+            </p>
+            <div class="code-block">
+                <div class="code-block-header"><div class="code-block-dots"><span></span><span></span><span></span></div><span class="code-block-filename">named_routes.dart</span><button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></div>
+                <pre class="code-block-body"><code>MaterialApp(
+  initialRoute: <span class="hl-string">'/'</span>,
+  routes: {
+    <span class="hl-string">'/'</span>: (_) => <span class="hl-keyword">const</span> HomePage(),
+    <span class="hl-string">'/about'</span>: (_) => <span class="hl-keyword">const</span> AboutPage(),
+    <span class="hl-string">'/settings'</span>: (_) => <span class="hl-keyword">const</span> SettingsPage(),
+  },
+)
+
+<span class="hl-comment">// Cara memanggilnya</span>
+Navigator.pushNamed(context, <span class="hl-string">'/about'</span>);
+
+<span class="hl-comment">// Replace (tidak bisa di-back, cocok untuk login → home)</span>
+Navigator.pushReplacementNamed(context, <span class="hl-string">'/home'</span>);
+
+<span class="hl-comment">// Pop sampai ke route tertentu</span>
+Navigator.popUntil(context, ModalRoute.withName(<span class="hl-string">'/'</span>));</code></pre>
+            </div>
+
+            <!-- BottomNav -->
+            <h2 class="content-heading">BottomNavigationBar — Navigasi Tab</h2>
+            <p class="content-text">
+                Banyak aplikasi (Instagram, WhatsApp, Tokopedia) menggunakan <em>bottom navigation</em> untuk berpindah antar halaman utama. Implementasinya cukup sederhana — gunakan <code>StatefulWidget</code> untuk menyimpan index tab aktif.
+            </p>
+            <div class="code-block">
+                <div class="code-block-header"><div class="code-block-dots"><span></span><span></span><span></span></div><span class="code-block-filename">bottom_nav.dart</span><button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></div>
+                <pre class="code-block-body"><code><span class="hl-keyword">class</span> MainScaffold <span class="hl-keyword">extends</span> StatefulWidget {
+  <span class="hl-keyword">const</span> MainScaffold({<span class="hl-keyword">super</span>.key});
+  <span class="hl-keyword">@override</span>
+  State&lt;MainScaffold&gt; createState() => _MainScaffoldState();
+}
+
+<span class="hl-keyword">class</span> _MainScaffoldState <span class="hl-keyword">extends</span> State&lt;MainScaffold&gt; {
+  <span class="hl-keyword">int</span> _index = <span class="hl-number">0</span>;
+
+  <span class="hl-keyword">final</span> _pages = <span class="hl-keyword">const</span> [
+    Center(child: Text(<span class="hl-string">'🏠 Beranda'</span>, style: TextStyle(fontSize: <span class="hl-number">24</span>))),
+    Center(child: Text(<span class="hl-string">'🔍 Cari'</span>, style: TextStyle(fontSize: <span class="hl-number">24</span>))),
+    Center(child: Text(<span class="hl-string">'👤 Profil'</span>, style: TextStyle(fontSize: <span class="hl-number">24</span>))),
+  ];
+
+  <span class="hl-keyword">@override</span>
+  Widget build(BuildContext context) {
+    <span class="hl-keyword">return</span> Scaffold(
+      body: _pages[_index],
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: _index,
+        onDestinationSelected: (i) => setState(() => _index = i),
+        destinations: <span class="hl-keyword">const</span> [
+          NavigationDestination(icon: Icon(Icons.home), label: <span class="hl-string">'Beranda'</span>),
+          NavigationDestination(icon: Icon(Icons.search), label: <span class="hl-string">'Cari'</span>),
+          NavigationDestination(icon: Icon(Icons.person), label: <span class="hl-string">'Profil'</span>),
+        ],
+      ),
+    );
+  }
+}</code></pre>
+            </div>
+
+            <!-- Drawer -->
+            <h2 class="content-heading">Drawer — Menu Samping</h2>
+            <p class="content-text">
+                <code>Drawer</code> adalah menu samping yang muncul dengan swipe atau klik tombol menu di AppBar. Cocok untuk pengaturan, profil, daftar shortcut, dll.
+            </p>
+            <div class="code-block">
+                <div class="code-block-header"><div class="code-block-dots"><span></span><span></span><span></span></div><span class="code-block-filename">drawer.dart</span><button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></div>
+                <pre class="code-block-body"><code>Scaffold(
+  appBar: AppBar(title: <span class="hl-keyword">const</span> Text(<span class="hl-string">'Beranda'</span>)),
+  drawer: Drawer(
+    child: ListView(
+      children: [
+        <span class="hl-keyword">const</span> DrawerHeader(
+          decoration: BoxDecoration(color: Colors.deepPurple),
+          child: Text(<span class="hl-string">'Halo, Arif!'</span>, style: TextStyle(color: Colors.white, fontSize: <span class="hl-number">20</span>)),
+        ),
+        ListTile(
+          leading: <span class="hl-keyword">const</span> Icon(Icons.settings),
+          title: <span class="hl-keyword">const</span> Text(<span class="hl-string">'Pengaturan'</span>),
+          onTap: () => Navigator.pushNamed(context, <span class="hl-string">'/settings'</span>),
+        ),
+        ListTile(
+          leading: <span class="hl-keyword">const</span> Icon(Icons.logout),
+          title: <span class="hl-keyword">const</span> Text(<span class="hl-string">'Keluar'</span>),
+          onTap: () {},
+        ),
+      ],
+    ),
+  ),
+  body: <span class="hl-keyword">const</span> Center(child: Text(<span class="hl-string">'Konten halaman'</span>)),
+)</code></pre>
+            </div>
+
+            <!-- Tantangan -->
+            <div class="info-box">
+                <div class="info-box-header"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg><strong>Tantangan Mahasiswa</strong></div>
+                <p>Buat aplikasi <strong>Katalog Produk</strong> di project ini:</p>
+                <p>1. <code>HomePage</code> menampilkan <code>ListView</code> berisi 5 produk (nama + harga).</p>
+                <p>2. Klik salah satu produk → buka <code>DetailPage</code> dengan <em>passing data</em> nama dan harga.</p>
+                <p>3. Di <code>DetailPage</code>, ada tombol <em>"Pilih Produk Ini"</em> yang melakukan <code>Navigator.pop</code> mengembalikan nama produk.</p>
+                <p>4. <code>HomePage</code> menampilkan <code>SnackBar</code> berisi nama produk yang dipilih.</p>
+            </div>
+
+            <!-- Nav -->
+            <div class="content-nav">
+                <div class="content-nav-item">
+                    <a href="/flutter/layout-responsive.html" class="nav-btn nav-btn-prev">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                        <div><span class="nav-label">Sebelumnya</span><span class="nav-name">Layout & Responsive</span></div>
+                    </a>
+                </div>
+                <div class="content-nav-item">
+                    <a href="/flutter/state-management.html" class="nav-btn nav-btn-next">
+                        <div><span class="nav-label">Selanjutnya</span><span class="nav-name">State Management</span></div>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </a>
+                </div>
+            </div>
+        </article>
+    </main>
+
+    <script src="/flutter/course-layout.js"></script>
+    <script>
+    function copyCode(btn){const c=btn.closest('.code-block').querySelector('code');navigator.clipboard.writeText(c.textContent).then(()=>{btn.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>';setTimeout(()=>{btn.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>'},2000)})}
+    </script>
+</body>
+</html>

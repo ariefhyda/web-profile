@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>State Management Flutter — Arif Hidayah</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/flutter/course.css">
+</head>
+<body>
+    <div class="bg-grid" aria-hidden="true"></div>
+    <nav class="navbar scrolled" id="navbar"></nav>
+    <div class="mobile-menu" id="mobileMenu"></div>
+
+    <main class="course-layout">
+        <aside class="course-sidebar" id="courseSidebar"></aside>
+
+        <article class="course-content">
+            <div class="breadcrumb">
+                <a href="../index.html">Home</a><span>›</span>
+                <a href="/flutter/index.html">Flutter</a><span>›</span>
+                <span style="color: var(--text-primary);">State Management</span>
+            </div>
+
+            <header class="content-header">
+                <h1 class="content-title">Modul 9: State Management</h1>
+                <div class="content-meta">
+                    <div class="meta-pill"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 5V8.5L10.5 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/></svg><span>Estimasi: 90 Menit</span></div>
+                    <div class="meta-pill"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="10" rx="1" stroke="currentColor" stroke-width="1.5"/><path d="M5 7h6M5 10h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><span>Teori & Praktikum</span></div>
+                </div>
+            </header>
+
+            <p class="content-text">
+                <strong>State</strong> adalah segala data yang bisa <em>berubah</em> seiring waktu di aplikasi Anda: angka counter, daftar todo, data user yang login, isi keranjang, dll. Modul ini membahas tiga teknik state management yang wajib dikuasai: <code>setState</code>, <code>ValueNotifier</code>, dan <code>Provider</code>.
+            </p>
+
+            <!-- Project Setup -->
+            <div class="info-box">
+                <div class="info-box-header"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg><strong>Buat Project Baru</strong></div>
+                <div class="code-block" style="margin-top: 12px;">
+                    <div class="code-block-header"><div class="code-block-dots"><span></span><span></span><span></span></div><span class="code-block-filename">Terminal</span><button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></div>
+                    <pre class="code-block-body"><code>$ flutter create flutter_state_management
+$ cd flutter_state_management
+
+<span class="hl-comment"># Untuk bagian Provider di akhir modul:</span>
+$ flutter pub add provider</code></pre>
+                </div>
+            </div>
+
+            <!-- Stateless vs Stateful -->
+            <h2 class="content-heading">Stateless vs Stateful Widget</h2>
+            <p class="content-text">
+                Sebelum bicara teknik canggih, pahami dulu perbedaan dua jenis widget yang sudah Anda kenal sejak modul pertama:
+            </p>
+            <ol class="content-list">
+                <li><strong>StatelessWidget</strong> — tampilannya <em>tetap</em> sepanjang umur widget. Cocok untuk tampilan statis (Text, Icon, kartu profil).</li>
+                <li><strong>StatefulWidget</strong> — punya <em>data internal</em> yang bisa berubah. Setiap kali datanya diperbarui melalui <code>setState</code>, Flutter akan me-<em>build ulang</em> tampilan secara otomatis.</li>
+            </ol>
+
+            <!-- setState -->
+            <h2 class="content-heading">setState — State Management Termudah</h2>
+            <p class="content-text">
+                <code>setState</code> adalah cara paling fundamental untuk mengubah state. Konsepnya sederhana: ubah variabel di dalam <code>setState(() { ... })</code>, lalu Flutter otomatis me-render ulang widget.
+            </p>
+            <div class="code-block">
+                <div class="code-block-header"><div class="code-block-dots"><span></span><span></span><span></span></div><span class="code-block-filename">lib/main.dart</span><button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></div>
+                <pre class="code-block-body"><code><span class="hl-keyword">import</span> <span class="hl-string">'package:flutter/material.dart'</span>;
+
+<span class="hl-keyword">void</span> main() => runApp(<span class="hl-keyword">const</span> MaterialApp(home: CounterPage()));
+
+<span class="hl-keyword">class</span> CounterPage <span class="hl-keyword">extends</span> StatefulWidget {
+  <span class="hl-keyword">const</span> CounterPage({<span class="hl-keyword">super</span>.key});
+  <span class="hl-keyword">@override</span>
+  State&lt;CounterPage&gt; createState() => _CounterPageState();
+}
+
+<span class="hl-keyword">class</span> _CounterPageState <span class="hl-keyword">extends</span> State&lt;CounterPage&gt; {
+  <span class="hl-keyword">int</span> _angka = <span class="hl-number">0</span>;
+
+  <span class="hl-keyword">void</span> _tambah() {
+    setState(() {       <span class="hl-comment">// ← memicu rebuild</span>
+      _angka++;
+    });
+  }
+
+  <span class="hl-keyword">@override</span>
+  Widget build(BuildContext context) {
+    <span class="hl-keyword">return</span> Scaffold(
+      appBar: AppBar(title: <span class="hl-keyword">const</span> Text(<span class="hl-string">'Counter Sederhana'</span>)),
+      body: Center(
+        child: Text(<span class="hl-string">'$_angka'</span>, style: <span class="hl-keyword">const</span> TextStyle(fontSize: <span class="hl-number">72</span>)),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _tambah,
+        child: <span class="hl-keyword">const</span> Icon(Icons.add),
+      ),
+    );
+  }
+}</code></pre>
+            </div>
+
+            <div class="info-box">
+                <div class="info-box-header"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg><strong>Kenapa Harus Dibungkus setState?</strong></div>
+                <p>Jika Anda hanya menulis <code>_angka++</code> tanpa <code>setState</code>, nilainya memang berubah di memori — tapi Flutter tidak tahu bahwa harus me-render ulang. Hasilnya tampilan tetap menampilkan angka lama. <code>setState</code> adalah sinyal eksplisit: <em>"data berubah, tolong build ulang!"</em></p>
+            </div>
+
+            <!-- Lifting State Up -->
+            <h2 class="content-heading">Lifting State Up — Berbagi State Antar Widget</h2>
+            <p class="content-text">
+                Ketika dua widget bersaudara perlu berbagi state, pindahkan state-nya ke <em>parent</em> yang sama, lalu turunkan via constructor. Konsep ini disebut <strong>"lifting state up"</strong>.
+            </p>
+            <div class="code-block">
+                <div class="code-block-header"><div class="code-block-dots"><span></span><span></span><span></span></div><span class="code-block-filename">lifting_state.dart</span><button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></div>
+                <pre class="code-block-body"><code><span class="hl-comment">// State disimpan di parent</span>
+<span class="hl-keyword">class</span> _ParentState <span class="hl-keyword">extends</span> State&lt;Parent&gt; {
+  <span class="hl-keyword">int</span> _counter = <span class="hl-number">0</span>;
+
+  <span class="hl-keyword">@override</span>
+  Widget build(BuildContext context) {
+    <span class="hl-keyword">return</span> Column(
+      children: [
+        Tampilan(angka: _counter),                                 <span class="hl-comment">// terima state</span>
+        Tombol(onTambah: () => setState(() => _counter++)),         <span class="hl-comment">// ubah state</span>
+      ],
+    );
+  }
+}
+
+<span class="hl-keyword">class</span> Tampilan <span class="hl-keyword">extends</span> StatelessWidget {
+  <span class="hl-keyword">final int</span> angka;
+  <span class="hl-keyword">const</span> Tampilan({<span class="hl-keyword">super</span>.key, <span class="hl-keyword">required this</span>.angka});
+  <span class="hl-keyword">@override</span>
+  Widget build(BuildContext context) => Text(<span class="hl-string">'$angka'</span>);
+}
+
+<span class="hl-keyword">class</span> Tombol <span class="hl-keyword">extends</span> StatelessWidget {
+  <span class="hl-keyword">final</span> VoidCallback onTambah;
+  <span class="hl-keyword">const</span> Tombol({<span class="hl-keyword">super</span>.key, <span class="hl-keyword">required this</span>.onTambah});
+  <span class="hl-keyword">@override</span>
+  Widget build(BuildContext context) => ElevatedButton(onPressed: onTambah, child: <span class="hl-keyword">const</span> Text(<span class="hl-string">'+'</span>));
+}</code></pre>
+            </div>
+
+            <div class="info-box">
+                <div class="info-box-header"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg><strong>Masalah Saat Aplikasi Membesar</strong></div>
+                <p>Lifting state up bagus untuk aplikasi kecil. Tapi saat state perlu diakses dari widget yang <em>jauh</em> dalam tree (mis. dari halaman keempat ke halaman pertama), passing constructor terus-menerus menjadi merepotkan. Inilah masalah <strong>"prop drilling"</strong> — solusinya adalah <strong>Provider</strong>.</p>
+            </div>
+
+            <!-- ValueNotifier -->
+            <h2 class="content-heading">ValueNotifier — Reactive State Bawaan</h2>
+            <p class="content-text">
+                <code>ValueNotifier</code> adalah teknik <em>reactive</em> bawaan Flutter — tidak perlu package tambahan. Cocok untuk state sederhana yang ingin di-listen tanpa harus <code>StatefulWidget</code>.
+            </p>
+            <div class="code-block">
+                <div class="code-block-header"><div class="code-block-dots"><span></span><span></span><span></span></div><span class="code-block-filename">value_notifier.dart</span><button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></div>
+                <pre class="code-block-body"><code><span class="hl-keyword">final</span> counter = ValueNotifier&lt;<span class="hl-keyword">int</span>&gt;(<span class="hl-number">0</span>);
+
+<span class="hl-comment">// Listen perubahan secara reactive</span>
+ValueListenableBuilder&lt;<span class="hl-keyword">int</span>&gt;(
+  valueListenable: counter,
+  builder: (context, value, _) => Text(<span class="hl-string">'$value'</span>),
+)
+
+<span class="hl-comment">// Ubah nilainya</span>
+ElevatedButton(
+  onPressed: () => counter.value++,
+  child: <span class="hl-keyword">const</span> Text(<span class="hl-string">'+'</span>),
+)</code></pre>
+            </div>
+
+            <!-- Provider -->
+            <h2 class="content-heading">Provider — State Global yang Scalable</h2>
+            <p class="content-text">
+                Untuk aplikasi nyata, <strong>Provider</strong> adalah pilihan paling banyak dipakai. Provider memungkinkan state diakses dari widget mana pun di bawah Provider, tanpa passing constructor.
+            </p>
+            <p class="content-text">
+                Tiga komponen utama Provider:
+            </p>
+            <ol class="content-list">
+                <li><strong>ChangeNotifier</strong> — class yang menyimpan state dan memberitahu listener saat berubah, dengan memanggil <code>notifyListeners()</code>.</li>
+                <li><strong>ChangeNotifierProvider</strong> — widget yang men-<em>inject</em> ChangeNotifier ke widget tree.</li>
+                <li><strong>Consumer / context.watch</strong> — cara membaca state dan otomatis rebuild saat state berubah.</li>
+            </ol>
+
+            <div class="code-block">
+                <div class="code-block-header"><div class="code-block-dots"><span></span><span></span><span></span></div><span class="code-block-filename">lib/main.dart (Provider)</span><button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></div>
+                <pre class="code-block-body"><code><span class="hl-keyword">import</span> <span class="hl-string">'package:flutter/material.dart'</span>;
+<span class="hl-keyword">import</span> <span class="hl-string">'package:provider/provider.dart'</span>;
+
+<span class="hl-comment">// 1. Definisikan model state</span>
+<span class="hl-keyword">class</span> CounterModel <span class="hl-keyword">extends</span> ChangeNotifier {
+  <span class="hl-keyword">int</span> _angka = <span class="hl-number">0</span>;
+  <span class="hl-keyword">int get</span> angka => _angka;
+
+  <span class="hl-keyword">void</span> tambah() {
+    _angka++;
+    notifyListeners(); <span class="hl-comment">// beritahu semua listener: state berubah!</span>
+  }
+
+  <span class="hl-keyword">void</span> reset() {
+    _angka = <span class="hl-number">0</span>;
+    notifyListeners();
+  }
+}
+
+<span class="hl-keyword">void</span> main() {
+  runApp(
+    <span class="hl-comment">// 2. Inject model ke tree</span>
+    ChangeNotifierProvider(
+      create: (_) => CounterModel(),
+      child: <span class="hl-keyword">const</span> MyApp(),
+    ),
+  );
+}
+
+<span class="hl-keyword">class</span> MyApp <span class="hl-keyword">extends</span> StatelessWidget {
+  <span class="hl-keyword">const</span> MyApp({<span class="hl-keyword">super</span>.key});
+  <span class="hl-keyword">@override</span>
+  Widget build(BuildContext context) {
+    <span class="hl-keyword">return</span> MaterialApp(
+      theme: ThemeData(colorSchemeSeed: Colors.orange, useMaterial3: <span class="hl-keyword">true</span>),
+      home: <span class="hl-keyword">const</span> CounterPage(),
+    );
+  }
+}
+
+<span class="hl-keyword">class</span> CounterPage <span class="hl-keyword">extends</span> StatelessWidget {
+  <span class="hl-keyword">const</span> CounterPage({<span class="hl-keyword">super</span>.key});
+  <span class="hl-keyword">@override</span>
+  Widget build(BuildContext context) {
+    <span class="hl-comment">// 3. Baca state (akan rebuild saat berubah)</span>
+    <span class="hl-keyword">final</span> counter = context.watch&lt;CounterModel&gt;();
+
+    <span class="hl-keyword">return</span> Scaffold(
+      appBar: AppBar(title: <span class="hl-keyword">const</span> Text(<span class="hl-string">'Counter + Provider'</span>)),
+      body: Center(
+        child: Text(<span class="hl-string">'${counter.angka}'</span>, style: <span class="hl-keyword">const</span> TextStyle(fontSize: <span class="hl-number">72</span>)),
+      ),
+      floatingActionButton: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          FloatingActionButton(
+            heroTag: <span class="hl-string">'reset'</span>,
+            onPressed: () => context.read&lt;CounterModel&gt;().reset(),
+            child: <span class="hl-keyword">const</span> Icon(Icons.refresh),
+          ),
+          <span class="hl-keyword">const</span> SizedBox(width: <span class="hl-number">12</span>),
+          FloatingActionButton(
+            heroTag: <span class="hl-string">'add'</span>,
+            onPressed: () => context.read&lt;CounterModel&gt;().tambah(),
+            child: <span class="hl-keyword">const</span> Icon(Icons.add),
+          ),
+        ],
+      ),
+    );
+  }
+}</code></pre>
+            </div>
+
+            <div class="info-box">
+                <div class="info-box-header"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg><strong>context.watch vs context.read</strong></div>
+                <p><strong><code>context.watch&lt;T&gt;()</code></strong> — membaca data <em>dan</em> rebuild widget saat data berubah. Pakai di <code>build()</code>.</p>
+                <p><strong><code>context.read&lt;T&gt;()</code></strong> — hanya membaca tanpa subscribe. Pakai di event handler (<code>onPressed</code>, dll) — tidak akan trigger rebuild.</p>
+            </div>
+
+            <!-- Mini Project -->
+            <h2 class="content-heading">Mini Project: TodoList dengan Provider</h2>
+            <p class="content-text">
+                Aplikasi todo sederhana yang menyimpan daftar pekerjaan menggunakan Provider. Tampilan dan logic dipisah dengan rapi.
+            </p>
+            <div class="code-block">
+                <div class="code-block-header"><div class="code-block-dots"><span></span><span></span><span></span></div><span class="code-block-filename">lib/main.dart</span><button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></div>
+                <pre class="code-block-body"><code><span class="hl-keyword">import</span> <span class="hl-string">'package:flutter/material.dart'</span>;
+<span class="hl-keyword">import</span> <span class="hl-string">'package:provider/provider.dart'</span>;
+
+<span class="hl-keyword">class</span> Todo {
+  <span class="hl-keyword">final String</span> judul;
+  <span class="hl-keyword">bool</span> selesai;
+  Todo(<span class="hl-keyword">this</span>.judul, {<span class="hl-keyword">this</span>.selesai = <span class="hl-keyword">false</span>});
+}
+
+<span class="hl-keyword">class</span> TodoModel <span class="hl-keyword">extends</span> ChangeNotifier {
+  <span class="hl-keyword">final</span> List&lt;Todo&gt; _items = [];
+  List&lt;Todo&gt; <span class="hl-keyword">get</span> items => List.unmodifiable(_items);
+
+  <span class="hl-keyword">void</span> tambah(<span class="hl-keyword">String</span> judul) {
+    <span class="hl-keyword">if</span> (judul.trim().isEmpty) <span class="hl-keyword">return</span>;
+    _items.add(Todo(judul));
+    notifyListeners();
+  }
+
+  <span class="hl-keyword">void</span> toggle(<span class="hl-keyword">int</span> index) {
+    _items[index].selesai = !_items[index].selesai;
+    notifyListeners();
+  }
+
+  <span class="hl-keyword">void</span> hapus(<span class="hl-keyword">int</span> index) {
+    _items.removeAt(index);
+    notifyListeners();
+  }
+}
+
+<span class="hl-keyword">void</span> main() {
+  runApp(ChangeNotifierProvider(
+    create: (_) => TodoModel(),
+    child: <span class="hl-keyword">const</span> MyApp(),
+  ));
+}
+
+<span class="hl-keyword">class</span> MyApp <span class="hl-keyword">extends</span> StatelessWidget {
+  <span class="hl-keyword">const</span> MyApp({<span class="hl-keyword">super</span>.key});
+  <span class="hl-keyword">@override</span>
+  Widget build(BuildContext context) => MaterialApp(
+    theme: ThemeData(colorSchemeSeed: Colors.green, useMaterial3: <span class="hl-keyword">true</span>),
+    home: <span class="hl-keyword">const</span> TodoPage(),
+  );
+}
+
+<span class="hl-keyword">class</span> TodoPage <span class="hl-keyword">extends</span> StatelessWidget {
+  <span class="hl-keyword">const</span> TodoPage({<span class="hl-keyword">super</span>.key});
+  <span class="hl-keyword">@override</span>
+  Widget build(BuildContext context) {
+    <span class="hl-keyword">final</span> model = context.watch&lt;TodoModel&gt;();
+    <span class="hl-keyword">final</span> ctrl = TextEditingController();
+
+    <span class="hl-keyword">return</span> Scaffold(
+      appBar: AppBar(title: <span class="hl-keyword">const</span> Text(<span class="hl-string">'Todo List'</span>)),
+      body: Column(
+        children: [
+          Padding(
+            padding: <span class="hl-keyword">const</span> EdgeInsets.all(<span class="hl-number">12</span>),
+            child: Row(children: [
+              Expanded(child: TextField(controller: ctrl, decoration: <span class="hl-keyword">const</span> InputDecoration(hintText: <span class="hl-string">'Pekerjaan baru...'</span>))),
+              <span class="hl-keyword">const</span> SizedBox(width: <span class="hl-number">8</span>),
+              ElevatedButton(
+                onPressed: () { context.read&lt;TodoModel&gt;().tambah(ctrl.text); ctrl.clear(); },
+                child: <span class="hl-keyword">const</span> Text(<span class="hl-string">'+'</span>),
+              ),
+            ]),
+          ),
+          Expanded(
+            child: ListView.builder(
+              itemCount: model.items.length,
+              itemBuilder: (_, i) {
+                <span class="hl-keyword">final</span> todo = model.items[i];
+                <span class="hl-keyword">return</span> CheckboxListTile(
+                  value: todo.selesai,
+                  onChanged: (_) => context.read&lt;TodoModel&gt;().toggle(i),
+                  title: Text(todo.judul, style: TextStyle(decoration: todo.selesai ? TextDecoration.lineThrough : <span class="hl-keyword">null</span>)),
+                  secondary: IconButton(
+                    icon: <span class="hl-keyword">const</span> Icon(Icons.delete),
+                    onPressed: () => context.read&lt;TodoModel&gt;().hapus(i),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}</code></pre>
+            </div>
+
+            <!-- Rangkuman -->
+            <div class="info-box">
+                <div class="info-box-header"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg><strong>Kapan Pakai Apa?</strong></div>
+                <p><strong>setState</strong> — state lokal di satu widget. Contoh: toggle password show/hide.</p>
+                <p><strong>ValueNotifier</strong> — state sederhana yang ingin di-listen reactive tanpa setup library.</p>
+                <p><strong>Provider</strong> — state global atau yang dipakai di banyak halaman. Standar industri.</p>
+                <p><strong>Riverpod / Bloc</strong> — alternatif populer untuk skala enterprise. Akan dibahas di kuliah lanjutan.</p>
+            </div>
+
+            <!-- Tantangan -->
+            <div class="info-box">
+                <div class="info-box-header"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg><strong>Tantangan Mahasiswa</strong></div>
+                <p>Modifikasi <em>TodoList</em> di atas:</p>
+                <p>1. Tambahkan <em>counter</em> di AppBar yang menampilkan <strong>jumlah todo yang belum selesai</strong>. Gunakan <em>getter</em> di <code>TodoModel</code> untuk menghitungnya.</p>
+                <p>2. Tambahkan tombol <em>"Hapus Semua Selesai"</em> di bottom bar.</p>
+                <p>3. Buat halaman kedua <code>StatistikPage</code> yang menampilkan total todo, jumlah selesai, dan persentase. State <strong>tetap diakses dari Provider yang sama</strong>.</p>
+            </div>
+
+            <!-- Nav -->
+            <div class="content-nav">
+                <div class="content-nav-item">
+                    <a href="/flutter/navigation-routing.html" class="nav-btn nav-btn-prev">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                        <div><span class="nav-label">Sebelumnya</span><span class="nav-name">Navigation & Routing</span></div>
+                    </a>
+                </div>
+                <div class="content-nav-item">
+                    <a href="/flutter/rest-api.html" class="nav-btn nav-btn-next">
+                        <div><span class="nav-label">Selanjutnya</span><span class="nav-name">REST API & HTTP</span></div>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </a>
+                </div>
+            </div>
+        </article>
+    </main>
+
+    <script src="/flutter/course-layout.js"></script>
+    <script>
+    function copyCode(btn){const c=btn.closest('.code-block').querySelector('code');navigator.clipboard.writeText(c.textContent).then(()=>{btn.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>';setTimeout(()=>{btn.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>'},2000)})}
+    </script>
+</body>
+</html>

@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form dan Validasi — Laravel</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/laravel/course.css">
+</head>
+<body>
+    <div class="bg-grid" aria-hidden="true"></div>
+    <nav class="navbar scrolled" id="navbar"></nav>
+    <div class="mobile-menu" id="mobileMenu"></div>
+    <main class="course-layout">
+        <aside class="course-sidebar" id="courseSidebar"></aside>
+        <article class="course-content">
+            <div class="breadcrumb">
+                <a href="../index.html">Home</a><span>›</span>
+                <a href="index.html">Laravel</a><span>›</span>
+                <span style="color: var(--text-primary);">Form & Validasi</span>
+            </div>
+            <header class="content-header">
+                <h1 class="content-title">Modul 11: Form dan Validasi</h1>
+                <div class="content-meta">
+                    <div class="meta-pill"><span>Estimasi: 50 Menit</span></div>
+                    <div class="meta-pill"><span>Teori & Praktikum</span></div>
+                </div>
+            </header>
+
+            <p class="content-text">Setiap data yang dikirim user (form login, registrasi, post baru, dll) <strong>tidak boleh dipercaya</strong> sampai divalidasi. Laravel menyediakan API validasi yang sangat ringkas — cukup tulis aturan, Laravel handle semuanya: cek, redirect kalau gagal, dan tampilkan pesan error.</p>
+
+            <div class="analogy-box">
+                <div class="analogy-icon">🔍</div>
+                <div class="analogy-content">
+                    <strong>Analogi: Petugas Imigrasi</strong>
+                    <p>Sebelum masuk negara, paspor Anda diperiksa: masih berlaku? foto sesuai? bukan paspor palsu? Jika salah satu gagal — Anda dipulangkan. Validasi Laravel berperan sama: setiap input form diperiksa berdasarkan "checklist" sebelum boleh disimpan ke database.</p>
+                </div>
+            </div>
+
+            <h2 class="content-heading">CSRF Protection — Wajib di Setiap Form</h2>
+            <p class="content-text">Setiap form dengan method POST/PUT/PATCH/DELETE <strong>wajib</strong> menyertakan token CSRF. Tanpa ini, request ditolak dengan error <code>419 Page Expired</code> — Laravel mencegah serangan <em>Cross-Site Request Forgery</em>.</p>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">form.blade.php</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code>&lt;form method=<span class="hl-string">"POST"</span> action=<span class="hl-string">"/posts"</span>&gt;
+    @csrf  <span class="hl-comment">&lt;!-- WAJIB! Otomatis inject &lt;input type="hidden" name="_token"...&gt; --&gt;</span>
+
+    &lt;input type=<span class="hl-string">"text"</span> name=<span class="hl-string">"title"</span>&gt;
+    &lt;button type=<span class="hl-string">"submit"</span>&gt;Simpan&lt;/button&gt;
+&lt;/form&gt;
+
+<span class="hl-comment">&lt;!-- Untuk method PUT/PATCH/DELETE (HTML tidak support langsung) --&gt;</span>
+&lt;form method=<span class="hl-string">"POST"</span> action=<span class="hl-string">"/posts/1"</span>&gt;
+    @csrf
+    @method(<span class="hl-string">'PUT'</span>) <span class="hl-comment">&lt;!-- Override method ke PUT --&gt;</span>
+    ...
+&lt;/form&gt;</code></pre>
+            </div>
+
+            <h2 class="content-heading">Validasi di Controller</h2>
+            <p class="content-text">Method <code>$request-&gt;validate()</code> menerima array berisi aturan validasi. Jika gagal, Laravel otomatis redirect kembali ke form dengan pesan error.</p>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">PostController.php</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-keyword">public function</span> <span class="hl-func">store</span>(Request $request)
+{
+    <span class="hl-comment">// Jika gagal: auto-redirect back + flash $errors</span>
+    $validated = $request-><span class="hl-func">validate</span>([
+        <span class="hl-string">'title'</span>        => <span class="hl-string">'required|unique:posts|max:255'</span>,
+        <span class="hl-string">'body'</span>         => <span class="hl-string">'required|min:50'</span>,
+        <span class="hl-string">'email'</span>        => <span class="hl-string">'required|email'</span>,
+        <span class="hl-string">'age'</span>          => <span class="hl-string">'required|integer|between:18,99'</span>,
+        <span class="hl-string">'category_id'</span>  => <span class="hl-string">'required|exists:categories,id'</span>,
+        <span class="hl-string">'thumbnail'</span>    => <span class="hl-string">'nullable|image|max:2048'</span>, <span class="hl-comment">// 2MB max</span>
+    ]);
+
+    <span class="hl-comment">// Hanya berjalan jika validasi sukses</span>
+    Post::<span class="hl-func">create</span>($validated);
+
+    <span class="hl-keyword">return</span> <span class="hl-func">redirect</span>(<span class="hl-string">'/posts'</span>)-><span class="hl-func">with</span>(<span class="hl-string">'success'</span>, <span class="hl-string">'Post berhasil dibuat!'</span>);
+}</code></pre>
+            </div>
+
+            <h2 class="content-heading">Live Validation Tester</h2>
+            <p class="content-text">Coba sendiri! Tulis aturan validasi, ketik input — lihat hasilnya real-time.</p>
+
+            <div class="interactive-card">
+                <div class="interactive-title">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                    Validation Rule Tester
+                </div>
+                <p class="interactive-subtitle">Pilih preset atau tulis sendiri aturan validasi. Ketik input untuk uji.</p>
+                <div class="validator">
+                    <div class="validator-rules">
+                        <label>Rules:</label>
+                        <input type="text" id="vRules" value="required|email|min:5">
+                        <button class="btn-action btn-secondary" onclick="vPreset('required|email')">required|email</button>
+                        <button class="btn-action btn-secondary" onclick="vPreset('required|min:8|max:20')">password</button>
+                        <button class="btn-action btn-secondary" onclick="vPreset('required|integer|between:18,99')">age</button>
+                        <button class="btn-action btn-secondary" onclick="vPreset('required|url')">url</button>
+                    </div>
+                    <div class="validator-body">
+                        <div class="validator-field">
+                            <label for="vInput">Coba ketik di sini:</label>
+                            <input type="text" id="vInput" placeholder="masukkan nilai..." oninput="validateNow()">
+                            <div class="validator-error" id="vError">Mulai ketik untuk melihat validasi…</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h2 class="content-heading">Aturan Validasi yang Sering Dipakai</h2>
+            <table class="compare-table">
+                <thead><tr><th>Rule</th><th>Arti</th><th>Contoh</th></tr></thead>
+                <tbody>
+                    <tr><td><code>required</code></td><td>Tidak boleh kosong</td><td>Wajib diisi</td></tr>
+                    <tr><td><code>nullable</code></td><td>Boleh kosong (skip aturan lain jika null)</td><td>Field opsional</td></tr>
+                    <tr><td><code>email</code></td><td>Format email valid</td><td><code>user@mail.com</code></td></tr>
+                    <tr><td><code>url</code></td><td>URL valid</td><td><code>https://...</code></td></tr>
+                    <tr><td><code>numeric</code></td><td>Angka (boleh desimal)</td><td>1, 2.5, -3</td></tr>
+                    <tr><td><code>integer</code></td><td>Bilangan bulat</td><td>1, 100, -5</td></tr>
+                    <tr><td><code>min:N</code></td><td>Minimal N (karakter atau angka)</td><td><code>min:8</code></td></tr>
+                    <tr><td><code>max:N</code></td><td>Maksimal N</td><td><code>max:255</code></td></tr>
+                    <tr><td><code>between:A,B</code></td><td>Nilai antara A dan B</td><td><code>between:18,99</code></td></tr>
+                    <tr><td><code>in:a,b,c</code></td><td>Harus salah satu</td><td><code>in:admin,user,guest</code></td></tr>
+                    <tr><td><code>unique:table,col</code></td><td>Belum ada di database</td><td><code>unique:users,email</code></td></tr>
+                    <tr><td><code>exists:table,col</code></td><td>Harus sudah ada di database</td><td><code>exists:categories,id</code></td></tr>
+                    <tr><td><code>confirmed</code></td><td>Field <code>X_confirmation</code> harus sama</td><td><code>password.confirmed</code></td></tr>
+                    <tr><td><code>same:field</code></td><td>Sama dengan field lain</td><td><code>same:password</code></td></tr>
+                    <tr><td><code>different:field</code></td><td>Berbeda dengan field lain</td><td>—</td></tr>
+                    <tr><td><code>regex:/pattern/</code></td><td>Cocok regex</td><td><code>regex:/^[a-z]+$/</code></td></tr>
+                    <tr><td><code>image</code></td><td>File gambar (jpg, png, dll)</td><td>Untuk upload foto</td></tr>
+                    <tr><td><code>mimes:jpg,png,pdf</code></td><td>Tipe file tertentu</td><td>—</td></tr>
+                </tbody>
+            </table>
+
+            <h2 class="content-heading">Menampilkan Error di Blade</h2>
+            <p class="content-text">Saat validasi gagal, Laravel otomatis menyediakan variabel <code>$errors</code> di semua view. Juga ada helper <code>old()</code> untuk mengisi ulang input agar user tidak kehilangan apa yang sudah diketik.</p>
+
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">create.blade.php</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code>&lt;form method=<span class="hl-string">"POST"</span> action=<span class="hl-string">"/posts"</span>&gt;
+    @csrf
+
+    <span class="hl-comment">&lt;!-- Tampilkan SEMUA error di atas form --&gt;</span>
+    @if ($errors-&gt;<span class="hl-func">any</span>())
+        &lt;div class=<span class="hl-string">"alert alert-danger"</span>&gt;
+            &lt;ul&gt;
+                @foreach ($errors-&gt;<span class="hl-func">all</span>() <span class="hl-keyword">as</span> $error)
+                    &lt;li&gt;{{ $error }}&lt;/li&gt;
+                @endforeach
+            &lt;/ul&gt;
+        &lt;/div&gt;
+    @endif
+
+    <span class="hl-comment">&lt;!-- Field Title --&gt;</span>
+    &lt;div&gt;
+        &lt;label&gt;Judul&lt;/label&gt;
+        <span class="hl-comment">&lt;!-- old() mengisi ulang dengan nilai sebelumnya saat validasi gagal --&gt;</span>
+        &lt;input type=<span class="hl-string">"text"</span> name=<span class="hl-string">"title"</span> value=<span class="hl-string">"{{ old('title') }}"</span>
+               class=<span class="hl-string">"@error('title') is-invalid @enderror"</span>&gt;
+
+        <span class="hl-comment">&lt;!-- @error: cek apakah field ini punya error --&gt;</span>
+        @error(<span class="hl-string">'title'</span>)
+            &lt;p class=<span class="hl-string">"error"</span>&gt;{{ $message }}&lt;/p&gt;
+        @enderror
+    &lt;/div&gt;
+
+    &lt;button type=<span class="hl-string">"submit"</span>&gt;Simpan&lt;/button&gt;
+&lt;/form&gt;</code></pre>
+            </div>
+
+            <h2 class="content-heading">Form Request — Validasi Terpisah</h2>
+            <p class="content-text">Untuk validasi kompleks, pisahkan dari Controller ke <em>Form Request class</em>. Hasilnya: Controller lebih bersih, aturan lebih mudah dipakai ulang.</p>
+
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">Terminal</span>
+                </div>
+                <pre class="code-block-body"><code>php artisan make:request StorePostRequest</code></pre>
+            </div>
+
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">app/Http/Requests/StorePostRequest.php</span>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-keyword">class</span> StorePostRequest <span class="hl-keyword">extends</span> FormRequest
+{
+    <span class="hl-comment">// Authorization: siapa yang boleh kirim form ini?</span>
+    <span class="hl-keyword">public function</span> <span class="hl-func">authorize</span>(): <span class="hl-keyword">bool</span>
+    {
+        <span class="hl-keyword">return</span> <span class="hl-func">auth</span>()-><span class="hl-func">check</span>(); <span class="hl-comment">// Hanya user login</span>
+    }
+
+    <span class="hl-comment">// Aturan validasi</span>
+    <span class="hl-keyword">public function</span> <span class="hl-func">rules</span>(): <span class="hl-keyword">array</span>
+    {
+        <span class="hl-keyword">return</span> [
+            <span class="hl-string">'title'</span> => <span class="hl-string">'required|unique:posts|max:255'</span>,
+            <span class="hl-string">'body'</span>  => <span class="hl-string">'required|min:50'</span>,
+        ];
+    }
+
+    <span class="hl-comment">// Custom error message</span>
+    <span class="hl-keyword">public function</span> <span class="hl-func">messages</span>(): <span class="hl-keyword">array</span>
+    {
+        <span class="hl-keyword">return</span> [
+            <span class="hl-string">'title.required'</span> => <span class="hl-string">'Judul wajib diisi.'</span>,
+            <span class="hl-string">'title.unique'</span>   => <span class="hl-string">'Judul sudah dipakai.'</span>,
+            <span class="hl-string">'body.min'</span>       => <span class="hl-string">'Konten minimal 50 karakter.'</span>,
+        ];
+    }
+}</code></pre>
+            </div>
+
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">PostController.php — bersih sekarang</span>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-keyword">public function</span> <span class="hl-func">store</span>(StorePostRequest $request) <span class="hl-comment">// type-hint FormRequest</span>
+{
+    <span class="hl-comment">// Validasi sudah dijalankan otomatis sebelum masuk sini</span>
+    Post::<span class="hl-func">create</span>($request-><span class="hl-func">validated</span>());
+    <span class="hl-keyword">return</span> <span class="hl-func">redirect</span>(<span class="hl-string">'/posts'</span>);
+}</code></pre>
+            </div>
+
+            <h2 class="content-heading">Flash Message — Notifikasi Sekali Pakai</h2>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">controller + view</span>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-comment">// Di Controller:</span>
+<span class="hl-keyword">return</span> <span class="hl-func">redirect</span>(<span class="hl-string">'/posts'</span>)-><span class="hl-func">with</span>(<span class="hl-string">'success'</span>, <span class="hl-string">'Post berhasil dibuat!'</span>);
+
+<span class="hl-comment">// Di Blade (mis. di layout master):</span>
+@if (<span class="hl-func">session</span>(<span class="hl-string">'success'</span>))
+    &lt;div class=<span class="hl-string">"alert alert-success"</span>&gt;
+        {{ <span class="hl-func">session</span>(<span class="hl-string">'success'</span>) }}
+    &lt;/div&gt;
+@endif</code></pre>
+            </div>
+
+            <div class="info-box">
+                <div class="info-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                    <strong>"Sekali Pakai" Artinya...</strong>
+                </div>
+                <p>Flash message tersimpan di session <em>hanya untuk request berikutnya</em>. Setelah halaman ditampilkan, otomatis hilang. Refresh? Tidak muncul lagi. Inilah cara membuat notifikasi pop-up "Berhasil disimpan" yang tidak persisten.</p>
+            </div>
+
+            <div class="quiz">
+                <div class="quiz-title">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01"/></svg>
+                    Cek Pemahaman
+                </div>
+                <div class="quiz-question">
+                    <div class="quiz-q-text">1. Apa yang terjadi jika form POST tidak ada <code>@csrf</code>?</div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'Tetap diproses tidak benar — Laravel akan menolak.')">Tetap diproses normal</div>
+                        <div class="quiz-option" data-correct="true" onclick="quizAnswer(this, 'Tepat! 419 = CSRF token mismatch.')">Error 419 Page Expired</div>
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, '404 untuk route tidak ditemukan, bukan CSRF.')">Error 404</div>
+                    </div>
+                    <div class="quiz-feedback hidden"></div>
+                </div>
+                <div class="quiz-question">
+                    <div class="quiz-q-text">2. Rule mana yang memastikan email belum terdaftar di tabel users?</div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'exists = HARUS sudah ada — kebalikan.')">exists:users,email</div>
+                        <div class="quiz-option" data-correct="true" onclick="quizAnswer(this, 'Tepat! unique = belum ada.')">unique:users,email</div>
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'distinct untuk validasi array, bukan tabel.')">distinct:users</div>
+                    </div>
+                    <div class="quiz-feedback hidden"></div>
+                </div>
+                <div class="quiz-question">
+                    <div class="quiz-q-text">3. Untuk mengisi ulang input setelah validasi gagal, pakai helper apa?</div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'session() bisa, tapi old() lebih spesifik untuk ini.')">session('input')</div>
+                        <div class="quiz-option" data-correct="true" onclick="quizAnswer(this, 'Tepat! old("field") mengambil nilai input sebelumnya.')">old('field')</div>
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, '$request hanya tersedia di Controller, bukan view.')">$request->input()</div>
+                    </div>
+                    <div class="quiz-feedback hidden"></div>
+                </div>
+            </div>
+
+            <div class="content-nav">
+                <div class="content-nav-item">
+                    <a href="relationship.html" class="nav-btn nav-btn-prev">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                        <div><span class="nav-label">Sebelumnya</span><span class="nav-name">Relationship</span></div>
+                    </a>
+                </div>
+                <div class="content-nav-item">
+                    <a href="authentication.html" class="nav-btn nav-btn-next">
+                        <div><span class="nav-label">Selanjutnya</span><span class="nav-name">Authentication</span></div>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </a>
+                </div>
+            </div>
+        </article>
+    </main>
+    <script src="/laravel/course-layout.js"></script>
+    <script>
+    function copyCode(btn) {
+        const codeBlock = btn.closest('.code-block').querySelector('code');
+        navigator.clipboard.writeText(codeBlock.textContent).then(() => {
+            btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>';
+            setTimeout(() => { btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>'; }, 2000);
+        });
+    }
+
+    const validators = {
+        required: (v) => v !== undefined && v !== null && v.toString().trim().length > 0,
+        email: (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v),
+        url: (v) => { try { new URL(v); return true; } catch { return false; } },
+        numeric: (v) => !isNaN(Number(v)) && v !== '',
+        integer: (v) => Number.isInteger(Number(v)) && v !== '',
+        'min': (v, n) => v.toString().length >= Number(n),
+        'max': (v, n) => v.toString().length <= Number(n),
+        'between': (v, a, b) => { const n = Number(v); return n >= Number(a) && n <= Number(b); },
+        'in': (v, ...args) => args.includes(v)
+    };
+    const ruleMessages = {
+        required: 'Field ini wajib diisi.',
+        email: 'Format email tidak valid (contoh: user@mail.com).',
+        url: 'URL tidak valid.',
+        numeric: 'Harus berupa angka.',
+        integer: 'Harus bilangan bulat.',
+        min: (n) => `Minimal ${n} karakter.`,
+        max: (n) => `Maksimal ${n} karakter.`,
+        between: (a, b) => `Nilai harus antara ${a} dan ${b}.`,
+        in: (...args) => `Harus salah satu dari: ${args.join(', ')}.`
+    };
+    function vPreset(rules) {
+        document.getElementById('vRules').value = rules;
+        validateNow();
+    }
+    function validateNow() {
+        const rules = document.getElementById('vRules').value.split('|').map(s => s.trim()).filter(Boolean);
+        const value = document.getElementById('vInput').value;
+        const input = document.getElementById('vInput');
+        const err = document.getElementById('vError');
+        if (value === '' && !rules.includes('required')) {
+            input.className = '';
+            err.textContent = 'Field opsional (kosong).';
+            err.className = 'validator-error';
+            return;
+        }
+        for (const r of rules) {
+            const [name, ...params] = r.split(':');
+            const args = params.join(':').split(',');
+            if (!validators[name]) continue;
+            const ok = validators[name](value, ...args);
+            if (!ok) {
+                input.className = 'invalid';
+                const msg = typeof ruleMessages[name] === 'function' ? ruleMessages[name](...args) : ruleMessages[name];
+                err.textContent = '✗ ' + msg;
+                err.className = 'validator-error';
+                return;
+            }
+        }
+        input.className = 'valid';
+        err.textContent = '✓ Semua aturan terpenuhi!';
+        err.className = 'validator-error success';
+    }
+    validateNow();
+
+    function quizAnswer(el, feedback) {
+        const question = el.closest('.quiz-question');
+        const options = question.querySelectorAll('.quiz-option');
+        const fb = question.querySelector('.quiz-feedback');
+        options.forEach(o => {
+            o.style.pointerEvents = 'none';
+            if (o.dataset.correct === 'true') o.classList.add('correct');
+        });
+        if (el.dataset.correct !== 'true') el.classList.add('wrong');
+        fb.textContent = feedback;
+        fb.classList.remove('hidden');
+        fb.classList.add('visible');
+    }
+    </script>
+</body>
+</html>

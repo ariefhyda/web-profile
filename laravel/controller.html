@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controller dan Request — Laravel</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/laravel/course.css">
+</head>
+<body>
+    <div class="bg-grid" aria-hidden="true"></div>
+    <nav class="navbar scrolled" id="navbar"></nav>
+    <div class="mobile-menu" id="mobileMenu"></div>
+    <main class="course-layout">
+        <aside class="course-sidebar" id="courseSidebar"></aside>
+        <article class="course-content">
+            <div class="breadcrumb">
+                <a href="../index.html">Home</a><span>›</span>
+                <a href="index.html">Laravel</a><span>›</span>
+                <span style="color: var(--text-primary);">Controller & Request</span>
+            </div>
+            <header class="content-header">
+                <h1 class="content-title">Modul 4: Controller dan Request</h1>
+                <div class="content-meta">
+                    <div class="meta-pill"><span>Estimasi: 45 Menit</span></div>
+                    <div class="meta-pill"><span>Teori & Praktikum</span></div>
+                </div>
+            </header>
+
+            <p class="content-text"><strong>Controller</strong> adalah jantung dari arsitektur MVC. Alih-alih menulis semua logika aplikasi di dalam file route (<code>web.php</code>), kita mengelompokkan logika tersebut ke dalam class Controller. Hasilnya: kode lebih terstruktur, mudah dipelihara, dan dapat diuji.</p>
+
+            <div class="analogy-box">
+                <div class="analogy-icon">👨‍🍳</div>
+                <div class="analogy-content">
+                    <strong>Analogi: Koki di Dapur</strong>
+                    <p>Bayangkan Anda di restoran. Pelayan (Route) menerima pesanan Anda. Koki (Controller) yang sebenarnya memasak — ambil bahan dari kulkas (Model), olah, plating, lalu kasih ke pelayan untuk diantar (View). Tanpa koki, pelayan harus sambil masak — chaos!</p>
+                </div>
+            </div>
+
+            <h2 class="content-heading">Membuat Controller</h2>
+            <p class="content-text">Cara terbaik membuat controller di Laravel adalah lewat <strong>Artisan CLI</strong>. Laravel akan generate file dengan struktur class yang benar.</p>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">Terminal</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-comment"># Controller biasa (kosong)</span>
+php artisan make:controller UserController
+
+<span class="hl-comment"># Resource Controller (7 method CRUD lengkap otomatis dibuat)</span>
+php artisan make:controller ProductController --resource
+
+<span class="hl-comment"># Resource Controller + Model binding (paling sering dipakai)</span>
+php artisan make:controller ProductController --resource --model=Product
+
+<span class="hl-comment"># API Resource Controller (tanpa create dan edit form view)</span>
+php artisan make:controller ProductController --api</code></pre>
+            </div>
+
+            <p class="content-text">File controller akan dibuat di <code>app/Http/Controllers/</code>. Berikut contoh isi <code>UserController.php</code>:</p>
+
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">app/Http/Controllers/UserController.php</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code>&lt;?php
+
+<span class="hl-keyword">namespace</span> App\Http\Controllers;
+
+<span class="hl-keyword">use</span> Illuminate\Http\Request;
+<span class="hl-keyword">use</span> App\Models\User;
+
+<span class="hl-keyword">class</span> UserController <span class="hl-keyword">extends</span> Controller
+{
+    <span class="hl-comment">// GET /users — Daftar semua user</span>
+    <span class="hl-keyword">public function</span> <span class="hl-func">index</span>()
+    {
+        $users = User::<span class="hl-func">all</span>();
+        <span class="hl-keyword">return</span> <span class="hl-func">view</span>(<span class="hl-string">'users.index'</span>, <span class="hl-func">compact</span>(<span class="hl-string">'users'</span>));
+    }
+
+    <span class="hl-comment">// GET /users/{id} — Detail satu user</span>
+    <span class="hl-keyword">public function</span> <span class="hl-func">show</span>($id)
+    {
+        $user = User::<span class="hl-func">findOrFail</span>($id); <span class="hl-comment">// 404 jika tidak ketemu</span>
+        <span class="hl-keyword">return</span> <span class="hl-func">view</span>(<span class="hl-string">'users.show'</span>, <span class="hl-func">compact</span>(<span class="hl-string">'user'</span>));
+    }
+}</code></pre>
+            </div>
+
+            <h2 class="content-heading">Simulasi CRUD Resource Controller</h2>
+            <p class="content-text">Klik tombol di bawah untuk melihat method controller mana yang dipanggil saat user melakukan aksi tertentu pada halaman blog post.</p>
+
+            <div class="interactive-card">
+                <div class="interactive-title">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c.6.243 1 .83 1 1.51H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                    CRUD Method Visualizer
+                </div>
+                <p class="interactive-subtitle">Skenario: aplikasi blog dengan <code>Route::resource('posts', PostController::class)</code>. Pilih aksi user untuk lihat method mana yang dipanggil.</p>
+                <div class="req-controls" style="margin-bottom: 14px;">
+                    <button class="btn-action btn-secondary" onclick="showCrud('list')">📋 Lihat daftar post</button>
+                    <button class="btn-action btn-secondary" onclick="showCrud('new')">➕ Klik "Buat Post Baru"</button>
+                    <button class="btn-action btn-secondary" onclick="showCrud('save')">💾 Submit form post baru</button>
+                    <button class="btn-action btn-secondary" onclick="showCrud('detail')">📄 Klik judul post</button>
+                    <button class="btn-action btn-secondary" onclick="showCrud('edit')">✏️ Klik tombol Edit</button>
+                    <button class="btn-action btn-secondary" onclick="showCrud('update')">🔄 Submit form edit</button>
+                    <button class="btn-action btn-secondary" onclick="showCrud('delete')">🗑 Klik tombol Hapus</button>
+                </div>
+                <div class="route-output" id="crudOutput">
+                    <span style="color: var(--text-muted);">Klik aksi di atas untuk melihat method controller yang dipanggil...</span>
+                </div>
+            </div>
+
+            <h2 class="content-heading">Request Object — Membaca Input User</h2>
+            <p class="content-text">Class <code>Illuminate\Http\Request</code> menyediakan metode berorientasi objek untuk berinteraksi dengan HTTP request: membaca input form, query string, header, cookie, dan file upload.</p>
+
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">PostController.php</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-keyword">public function</span> <span class="hl-func">store</span>(Request $request)
+{
+    <span class="hl-comment">// Mengambil SEMUA input form (sebagai array)</span>
+    $input = $request-><span class="hl-func">all</span>();
+
+    <span class="hl-comment">// Mengambil input spesifik berdasarkan name</span>
+    $title = $request-><span class="hl-func">input</span>(<span class="hl-string">'title'</span>);
+
+    <span class="hl-comment">// Dengan nilai default jika kosong</span>
+    $author = $request-><span class="hl-func">input</span>(<span class="hl-string">'author'</span>, <span class="hl-string">'Anonim'</span>);
+
+    <span class="hl-comment">// Cara singkat via dynamic property</span>
+    $email = $request->email;
+
+    <span class="hl-comment">// Cek apakah field ada</span>
+    <span class="hl-keyword">if</span> ($request-><span class="hl-func">has</span>(<span class="hl-string">'newsletter'</span>)) { <span class="hl-comment">/* checkbox dicentang */</span> }
+
+    <span class="hl-comment">// Cek apakah ada file upload</span>
+    <span class="hl-keyword">if</span> ($request-><span class="hl-func">hasFile</span>(<span class="hl-string">'photo'</span>)) {
+        $path = $request-><span class="hl-func">file</span>(<span class="hl-string">'photo'</span>)-><span class="hl-func">store</span>(<span class="hl-string">'uploads'</span>);
+    }
+
+    <span class="hl-comment">// Query string: /posts?page=2 → $request->query('page') === 2</span>
+    $page = $request-><span class="hl-func">query</span>(<span class="hl-string">'page'</span>, <span class="hl-number">1</span>);
+
+    <span class="hl-comment">// Hanya ambil field tertentu (filter)</span>
+    $clean = $request-><span class="hl-func">only</span>([<span class="hl-string">'title'</span>, <span class="hl-string">'body'</span>]);
+
+    <span class="hl-comment">// Ambil semua kecuali field tertentu</span>
+    $safe = $request-><span class="hl-func">except</span>([<span class="hl-string">'_token'</span>, <span class="hl-string">'password'</span>]);
+}</code></pre>
+            </div>
+
+            <h2 class="content-heading">Route Model Binding — Sihir Otomatis</h2>
+            <p class="content-text">Daripada menulis <code>User::findOrFail($id)</code> di setiap method, Laravel bisa <em>otomatis</em> mengubah parameter URL menjadi instance Model. Ini disebut <strong>Route Model Binding</strong>.</p>
+
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab(this, 'bind1')">❌ Tanpa Binding</button>
+                <button class="tab-btn" onclick="switchTab(this, 'bind2')">✅ Dengan Binding</button>
+            </div>
+            <div class="tab-content active" id="bind1">
+                <div class="code-block">
+                    <div class="code-block-header">
+                        <div class="code-block-dots"><span></span><span></span><span></span></div>
+                        <span class="code-block-filename">tanpa binding</span>
+                    </div>
+                    <pre class="code-block-body"><code><span class="hl-comment">// routes/web.php</span>
+Route::<span class="hl-func">get</span>(<span class="hl-string">'/posts/{id}'</span>, [PostController::<span class="hl-keyword">class</span>, <span class="hl-string">'show'</span>]);
+
+<span class="hl-comment">// PostController.php</span>
+<span class="hl-keyword">public function</span> <span class="hl-func">show</span>($id)
+{
+    $post = Post::<span class="hl-func">findOrFail</span>($id); <span class="hl-comment">// Manual query</span>
+    <span class="hl-keyword">return</span> <span class="hl-func">view</span>(<span class="hl-string">'posts.show'</span>, <span class="hl-func">compact</span>(<span class="hl-string">'post'</span>));
+}</code></pre>
+                </div>
+            </div>
+            <div class="tab-content" id="bind2">
+                <div class="code-block">
+                    <div class="code-block-header">
+                        <div class="code-block-dots"><span></span><span></span><span></span></div>
+                        <span class="code-block-filename">dengan binding</span>
+                    </div>
+                    <pre class="code-block-body"><code><span class="hl-comment">// routes/web.php — parameter pakai nama model (lowercase)</span>
+Route::<span class="hl-func">get</span>(<span class="hl-string">'/posts/{post}'</span>, [PostController::<span class="hl-keyword">class</span>, <span class="hl-string">'show'</span>]);
+
+<span class="hl-comment">// PostController.php — type-hint Post, Laravel ambilkan otomatis</span>
+<span class="hl-keyword">public function</span> <span class="hl-func">show</span>(Post $post)
+{
+    <span class="hl-keyword">return</span> <span class="hl-func">view</span>(<span class="hl-string">'posts.show'</span>, <span class="hl-func">compact</span>(<span class="hl-string">'post'</span>));
+    <span class="hl-comment">// Tidak ditemukan? Auto 404. Selesai.</span>
+}</code></pre>
+                </div>
+            </div>
+
+            <div class="success-box">
+                <div class="success-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                    Kapan Pakai Route Model Binding?
+                </div>
+                <p>Selalu — kecuali Anda butuh logic khusus saat fetch (misal: filter tambahan, query relasi). Binding menghemat 1 baris di setiap method dan otomatis handle 404. Untuk binding pakai kolom non-id (misal slug): <code>Route::get('/posts/{post:slug}', ...)</code>.</p>
+            </div>
+
+            <h2 class="content-heading">Response: Mengirim Balik ke Browser</h2>
+            <p class="content-text">Controller bisa mengembalikan berbagai macam response:</p>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">contoh response</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-comment">// 1. Return view HTML</span>
+<span class="hl-keyword">return</span> <span class="hl-func">view</span>(<span class="hl-string">'posts.index'</span>, $data);
+
+<span class="hl-comment">// 2. Return JSON (auto-serialize, cocok untuk API)</span>
+<span class="hl-keyword">return</span> <span class="hl-func">response</span>()-><span class="hl-func">json</span>([<span class="hl-string">'status'</span> => <span class="hl-string">'ok'</span>, <span class="hl-string">'data'</span> => $post]);
+
+<span class="hl-comment">// 3. Redirect ke halaman lain</span>
+<span class="hl-keyword">return</span> <span class="hl-func">redirect</span>(<span class="hl-string">'/dashboard'</span>);
+<span class="hl-keyword">return</span> <span class="hl-func">redirect</span>()-><span class="hl-func">route</span>(<span class="hl-string">'posts.show'</span>, $post);
+<span class="hl-keyword">return</span> <span class="hl-func">back</span>(); <span class="hl-comment">// Balik ke halaman sebelumnya</span>
+
+<span class="hl-comment">// 4. Redirect dengan flash message (tampil sekali, lalu hilang)</span>
+<span class="hl-keyword">return</span> <span class="hl-func">redirect</span>(<span class="hl-string">'/posts'</span>)-><span class="hl-func">with</span>(<span class="hl-string">'success'</span>, <span class="hl-string">'Post berhasil dibuat!'</span>);
+
+<span class="hl-comment">// 5. Download file</span>
+<span class="hl-keyword">return</span> <span class="hl-func">response</span>()-><span class="hl-func">download</span>(<span class="hl-string">'path/to/file.pdf'</span>);
+
+<span class="hl-comment">// 6. Custom status code</span>
+<span class="hl-keyword">return</span> <span class="hl-func">response</span>()-><span class="hl-func">json</span>([<span class="hl-string">'error'</span> => <span class="hl-string">'Not Found'</span>], <span class="hl-number">404</span>);</code></pre>
+            </div>
+
+            <div class="info-box">
+                <div class="info-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                    <strong>Routing Super Singkat</strong>
+                </div>
+                <p>Daripada menulis 7 baris route manual di <code>web.php</code>, cukup satu baris:<br><code>Route::resource('photos', PhotoController::class);</code><br>Laravel otomatis pasangkan ke-7 method CRUD ke route yang sesuai.</p>
+            </div>
+
+            <div class="quiz">
+                <div class="quiz-title">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01"/></svg>
+                    Cek Pemahaman
+                </div>
+                <div class="quiz-question">
+                    <div class="quiz-q-text">1. Method controller mana yang dipanggil saat user mengklik tombol "Edit Post"?</div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'show menampilkan detail, bukan form edit.')">show()</div>
+                        <div class="quiz-option" data-correct="true" onclick="quizAnswer(this, 'Tepat! edit() menampilkan form edit dengan data terisi.')">edit()</div>
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'update() dipanggil saat form-nya disubmit, bukan saat tombol Edit diklik.')">update()</div>
+                    </div>
+                    <div class="quiz-feedback hidden"></div>
+                </div>
+                <div class="quiz-question">
+                    <div class="quiz-q-text">2. Manakah cara yang benar mengambil input form bernama "email"?</div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'Ini sintaks PHP murni, tidak idiomatic di Laravel.')">$_POST['email']</div>
+                        <div class="quiz-option" data-correct="true" onclick="quizAnswer(this, 'Tepat! Atau bisa juga $request->email atau $request->all().')">$request->input('email')</div>
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'Itu untuk session, bukan request input.')">$request->session('email')</div>
+                    </div>
+                    <div class="quiz-feedback hidden"></div>
+                </div>
+                <div class="quiz-question">
+                    <div class="quiz-q-text">3. Apa keuntungan menggunakan Route Model Binding?</div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'Tidak ada hubungan dengan performa secara signifikan.')">Lebih cepat dari findOrFail</div>
+                        <div class="quiz-option" data-correct="true" onclick="quizAnswer(this, 'Tepat! Hemat kode dan auto-404 sudah include.')">Hemat kode dan otomatis return 404 jika tidak ditemukan</div>
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'Sama saja — binding hanya gula sintaks.')">Mengurangi keamanan</div>
+                    </div>
+                    <div class="quiz-feedback hidden"></div>
+                </div>
+            </div>
+
+            <div class="content-nav">
+                <div class="content-nav-item">
+                    <a href="routing.html" class="nav-btn nav-btn-prev">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                        <div><span class="nav-label">Sebelumnya</span><span class="nav-name">Routing Dasar</span></div>
+                    </a>
+                </div>
+                <div class="content-nav-item">
+                    <a href="middleware.html" class="nav-btn nav-btn-next">
+                        <div><span class="nav-label">Selanjutnya</span><span class="nav-name">Middleware</span></div>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </a>
+                </div>
+            </div>
+        </article>
+    </main>
+    <script src="/laravel/course-layout.js"></script>
+    <script>
+    function copyCode(btn) {
+        const codeBlock = btn.closest('.code-block').querySelector('code');
+        navigator.clipboard.writeText(codeBlock.textContent).then(() => {
+            btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>';
+            setTimeout(() => { btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>'; }, 2000);
+        });
+    }
+
+    const crud = {
+        list: { method: 'GET', url: '/posts', handler: 'PostController@index', desc: 'Menampilkan daftar semua post. Method mengambil data Post::all() dan return view posts.index.' },
+        new: { method: 'GET', url: '/posts/create', handler: 'PostController@create', desc: 'Menampilkan form kosong untuk membuat post baru. Tidak query database.' },
+        save: { method: 'POST', url: '/posts', handler: 'PostController@store', desc: 'Memproses form. Validasi → insert ke DB → redirect ke /posts dengan flash message.' },
+        detail: { method: 'GET', url: '/posts/{id}', handler: 'PostController@show', desc: 'Menampilkan detail satu post. Post::findOrFail($id) → return view posts.show.' },
+        edit: { method: 'GET', url: '/posts/{id}/edit', handler: 'PostController@edit', desc: 'Menampilkan form edit dengan data lama terisi. Mirip show, tapi ke view berbeda.' },
+        update: { method: 'PUT', url: '/posts/{id}', handler: 'PostController@update', desc: 'Memproses form edit. Validasi → update DB → redirect kembali ke detail post.' },
+        delete: { method: 'DELETE', url: '/posts/{id}', handler: 'PostController@destroy', desc: 'Menghapus post dari DB. $post->delete() → redirect ke /posts.' }
+    };
+    function showCrud(key) {
+        const c = crud[key];
+        const methodCls = 'http-' + c.method.toLowerCase();
+        const out = document.getElementById('crudOutput');
+        out.classList.add('match'); out.classList.remove('no-match');
+        out.innerHTML = '<span class="http-method ' + methodCls + '">' + c.method + '</span> <span class="val">' + c.url + '</span>\n\n<span class="key">Handler</span>: <span class="val">' + c.handler + '</span>\n\n<span style="color:var(--text-muted); font-family: Inter, sans-serif; font-size: 0.85rem; line-height: 1.6;">' + c.desc + '</span>';
+    }
+
+    function switchTab(btn, id) {
+        btn.parentElement.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        btn.parentElement.parentElement.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+    }
+
+    function quizAnswer(el, feedback) {
+        const question = el.closest('.quiz-question');
+        const options = question.querySelectorAll('.quiz-option');
+        const fb = question.querySelector('.quiz-feedback');
+        options.forEach(o => {
+            o.style.pointerEvents = 'none';
+            if (o.dataset.correct === 'true') o.classList.add('correct');
+        });
+        if (el.dataset.correct !== 'true') el.classList.add('wrong');
+        fb.textContent = feedback;
+        fb.classList.remove('hidden');
+        fb.classList.add('visible');
+    }
+    </script>
+</body>
+</html>

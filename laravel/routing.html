@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Routing Dasar — Laravel</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/laravel/course.css">
+</head>
+<body>
+    <div class="bg-grid" aria-hidden="true"></div>
+    <nav class="navbar scrolled" id="navbar"></nav>
+    <div class="mobile-menu" id="mobileMenu"></div>
+    <main class="course-layout">
+        <aside class="course-sidebar" id="courseSidebar"></aside>
+        <article class="course-content">
+            <div class="breadcrumb">
+                <a href="../index.html">Home</a><span>›</span>
+                <a href="index.html">Laravel</a><span>›</span>
+                <span style="color: var(--text-primary);">Routing Dasar</span>
+            </div>
+            <header class="content-header">
+                <h1 class="content-title">Modul 3: Routing Dasar Laravel</h1>
+                <div class="content-meta">
+                    <div class="meta-pill"><span>Estimasi: 60 Menit</span></div>
+                    <div class="meta-pill"><span>Teori & Praktikum</span></div>
+                </div>
+            </header>
+
+            <p class="content-text"><strong>Routing</strong> adalah mekanisme untuk menentukan bagaimana aplikasi merespons request dari client ke URL tertentu. Sederhananya, routing menjawab pertanyaan: "Ketika user buka URL <em>X</em>, kode mana yang harus dijalankan?"</p>
+
+            <div class="analogy-box">
+                <div class="analogy-icon">📞</div>
+                <div class="analogy-content">
+                    <strong>Analogi: Resepsionis Hotel</strong>
+                    <p>Bayangkan router sebagai resepsionis. Setiap tamu (request) datang menyebutkan kamar tujuan (URL). Resepsionis mencocokkan dengan daftar (route table) lalu mengarahkan ke petugas yang tepat (controller). Tanpa resepsionis, tamu akan tersesat — semua request akan menumpuk di pintu masuk.</p>
+                </div>
+            </div>
+
+            <p class="content-text">Di Laravel, semua route didefinisikan dalam file <code>routes/web.php</code> (untuk web) dan <code>routes/api.php</code> (untuk API). Mulai Laravel 11, file <code>api.php</code> tidak ada secara default — aktifkan dengan <code>php artisan install:api</code>.</p>
+
+            <h2 class="content-heading">HTTP Methods — Mengapa Penting?</h2>
+            <p class="content-text">Setiap interaksi web memakai salah satu HTTP method. Pilihan method bukan sembarangan — ada konvensi yang harus diikuti agar API Anda <em>RESTful</em> dan masuk akal:</p>
+
+            <table class="compare-table">
+                <thead>
+                    <tr><th>Method</th><th>Tujuan (CRUD)</th><th>Contoh URL</th><th>Idempotent?</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="http-method http-get">GET</span></td>
+                        <td>Mengambil data (Read)</td>
+                        <td><code>/posts</code>, <code>/users/1</code></td>
+                        <td>Ya — boleh diulang</td>
+                    </tr>
+                    <tr>
+                        <td><span class="http-method http-post">POST</span></td>
+                        <td>Membuat data baru (Create)</td>
+                        <td><code>/posts</code> (kirim body)</td>
+                        <td>Tidak — buat duplikat</td>
+                    </tr>
+                    <tr>
+                        <td><span class="http-method http-put">PUT</span></td>
+                        <td>Update seluruh data (Update)</td>
+                        <td><code>/posts/5</code></td>
+                        <td>Ya — hasilnya sama</td>
+                    </tr>
+                    <tr>
+                        <td><span class="http-method http-patch">PATCH</span></td>
+                        <td>Update sebagian field</td>
+                        <td><code>/posts/5</code></td>
+                        <td>Ya</td>
+                    </tr>
+                    <tr>
+                        <td><span class="http-method http-delete">DELETE</span></td>
+                        <td>Hapus data (Delete)</td>
+                        <td><code>/posts/5</code></td>
+                        <td>Ya</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="info-box">
+                <div class="info-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                    <strong>Idempotent?</strong>
+                </div>
+                <p>Operasi <em>idempotent</em> = mengulanginya menghasilkan efek yang sama. Refresh halaman GET = aman. Refresh halaman setelah POST checkout = berbahaya (bisa double-charge). Karena itu browser sering menampilkan peringatan "Confirm form resubmission".</p>
+            </div>
+
+            <h2 class="content-heading">Route Dasar</h2>
+            <p class="content-text">Route paling sederhana menerima URI dan sebuah closure (fungsi anonim):</p>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">routes/web.php</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-keyword">use</span> Illuminate\Support\Facades\Route;
+
+<span class="hl-comment">// Route GET — menampilkan halaman</span>
+Route::<span class="hl-func">get</span>(<span class="hl-string">'/'</span>, <span class="hl-keyword">function</span> () {
+    <span class="hl-keyword">return</span> <span class="hl-func">view</span>(<span class="hl-string">'welcome'</span>);
+});
+
+<span class="hl-comment">// Route dengan parameter wajib (id WAJIB ada di URL)</span>
+Route::<span class="hl-func">get</span>(<span class="hl-string">'/user/{id}'</span>, <span class="hl-keyword">function</span> ($id) {
+    <span class="hl-keyword">return</span> <span class="hl-string">"User ID: "</span> . $id;
+});
+
+<span class="hl-comment">// Route dengan parameter opsional (tanda ? di belakang)</span>
+Route::<span class="hl-func">get</span>(<span class="hl-string">'/hello/{name?}'</span>, <span class="hl-keyword">function</span> ($name = <span class="hl-string">'Guest'</span>) {
+    <span class="hl-keyword">return</span> <span class="hl-string">"Hello, "</span> . $name;
+});
+
+<span class="hl-comment">// Named route — bisa dipanggil via route('dashboard')</span>
+Route::<span class="hl-func">get</span>(<span class="hl-string">'/dashboard'</span>, <span class="hl-keyword">function</span> () {
+    <span class="hl-keyword">return</span> <span class="hl-func">view</span>(<span class="hl-string">'dashboard'</span>);
+})-><span class="hl-func">name</span>(<span class="hl-string">'dashboard'</span>);
+
+<span class="hl-comment">// Route dengan constraint (id harus angka)</span>
+Route::<span class="hl-func">get</span>(<span class="hl-string">'/post/{id}'</span>, <span class="hl-keyword">function</span> ($id) {
+    <span class="hl-keyword">return</span> <span class="hl-string">"Post #"</span> . $id;
+})-><span class="hl-func">where</span>(<span class="hl-string">'id'</span>, <span class="hl-string">'[0-9]+'</span>);</code></pre>
+            </div>
+
+            <h2 class="content-heading">Simulator Route Tester</h2>
+            <p class="content-text">Coba sendiri bagaimana router Laravel mencocokkan URL. Pilih method dan ketik URL — lihat route mana yang cocok dan parameter apa yang ditangkap.</p>
+
+            <div class="interactive-card">
+                <div class="interactive-title">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    Route Matcher Interaktif
+                </div>
+                <p class="interactive-subtitle">Daftar route yang terdaftar di simulasi: <code>GET /</code>, <code>GET /posts</code>, <code>POST /posts</code>, <code>GET /posts/{id}</code>, <code>PUT /posts/{id}</code>, <code>DELETE /posts/{id}</code>, <code>GET /users/{id}/edit</code>, <code>GET /hello/{name?}</code></p>
+                <div class="route-tester">
+                    <div class="route-input-row">
+                        <select id="testerMethod">
+                            <option value="GET">GET</option>
+                            <option value="POST">POST</option>
+                            <option value="PUT">PUT</option>
+                            <option value="PATCH">PATCH</option>
+                            <option value="DELETE">DELETE</option>
+                        </select>
+                        <input type="text" id="testerUrl" placeholder="/posts/5" value="/posts/5">
+                        <button class="btn-action" onclick="testRoute()">Cek</button>
+                    </div>
+                    <div class="route-output" id="testerOutput">
+                        <span style="color: var(--text-muted);">Klik "Cek" untuk melihat hasilnya...</span>
+                    </div>
+                </div>
+                <div style="margin-top: 10px; font-size: 0.78rem; color: var(--text-muted);">
+                    Coba: <code style="cursor:pointer; text-decoration: underline;" onclick="quickFill('GET','/posts/12')">/posts/12</code>,
+                    <code style="cursor:pointer; text-decoration: underline;" onclick="quickFill('POST','/posts')">POST /posts</code>,
+                    <code style="cursor:pointer; text-decoration: underline;" onclick="quickFill('GET','/users/3/edit')">/users/3/edit</code>,
+                    <code style="cursor:pointer; text-decoration: underline;" onclick="quickFill('GET','/hello')">/hello (tanpa nama)</code>,
+                    <code style="cursor:pointer; text-decoration: underline;" onclick="quickFill('GET','/random')">/random (tidak ada)</code>
+                </div>
+            </div>
+
+            <h2 class="content-heading">Route ke Controller</h2>
+            <p class="content-text">Untuk aplikasi yang lebih besar, logika sebaiknya dipindahkan dari closure di file route ke <em>Controller</em> — sehingga route hanya bertugas "menunjukkan jalan".</p>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">routes/web.php</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-keyword">use</span> App\Http\Controllers\PostController;
+
+<span class="hl-comment">// Route ke method tertentu di controller</span>
+Route::<span class="hl-func">get</span>(<span class="hl-string">'/posts'</span>, [PostController::<span class="hl-keyword">class</span>, <span class="hl-string">'index'</span>]);
+Route::<span class="hl-func">get</span>(<span class="hl-string">'/posts/{id}'</span>, [PostController::<span class="hl-keyword">class</span>, <span class="hl-string">'show'</span>]);
+Route::<span class="hl-func">post</span>(<span class="hl-string">'/posts'</span>, [PostController::<span class="hl-keyword">class</span>, <span class="hl-string">'store'</span>]);
+
+<span class="hl-comment">// Resource Route — 7 route CRUD sekaligus!</span>
+Route::<span class="hl-func">resource</span>(<span class="hl-string">'posts'</span>, PostController::<span class="hl-keyword">class</span>);
+<span class="hl-comment">// Menghasilkan: index, create, store, show, edit, update, destroy</span></code></pre>
+            </div>
+
+            <h2 class="content-heading">Resource Route — 7 Route dalam 1 Baris</h2>
+            <p class="content-text">Saat membangun CRUD, Anda akan butuh route yang persis sama berulang. <code>Route::resource()</code> membuatkan ke-7 route standar sekaligus:</p>
+
+            <table class="compare-table">
+                <thead>
+                    <tr><th>Method</th><th>URI</th><th>Controller@method</th><th>Tujuan</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><span class="http-method http-get">GET</span></td><td><code>/posts</code></td><td>index</td><td>Daftar semua post</td></tr>
+                    <tr><td><span class="http-method http-get">GET</span></td><td><code>/posts/create</code></td><td>create</td><td>Form tambah</td></tr>
+                    <tr><td><span class="http-method http-post">POST</span></td><td><code>/posts</code></td><td>store</td><td>Simpan post baru</td></tr>
+                    <tr><td><span class="http-method http-get">GET</span></td><td><code>/posts/{id}</code></td><td>show</td><td>Detail satu post</td></tr>
+                    <tr><td><span class="http-method http-get">GET</span></td><td><code>/posts/{id}/edit</code></td><td>edit</td><td>Form edit</td></tr>
+                    <tr><td><span class="http-method http-put">PUT</span>/<span class="http-method http-patch">PATCH</span></td><td><code>/posts/{id}</code></td><td>update</td><td>Update post</td></tr>
+                    <tr><td><span class="http-method http-delete">DELETE</span></td><td><code>/posts/{id}</code></td><td>destroy</td><td>Hapus post</td></tr>
+                </tbody>
+            </table>
+
+            <h2 class="content-heading">Route Group — Hemat Pengetikan</h2>
+            <p class="content-text">Sering kali sekelompok route punya prefix atau middleware sama. Daripada menulis berulang, gunakan <code>group()</code>:</p>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">routes/web.php</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-comment">// Semua route admin pakai prefix /admin DAN middleware auth</span>
+Route::<span class="hl-func">prefix</span>(<span class="hl-string">'admin'</span>)
+    -><span class="hl-func">middleware</span>(<span class="hl-string">'auth'</span>)
+    -><span class="hl-func">name</span>(<span class="hl-string">'admin.'</span>) <span class="hl-comment">// prefix nama</span>
+    -><span class="hl-func">group</span>(<span class="hl-keyword">function</span> () {
+        Route::<span class="hl-func">get</span>(<span class="hl-string">'/dashboard'</span>, [AdminController::<span class="hl-keyword">class</span>, <span class="hl-string">'index'</span>])-><span class="hl-func">name</span>(<span class="hl-string">'dashboard'</span>);
+        Route::<span class="hl-func">get</span>(<span class="hl-string">'/users'</span>, [AdminController::<span class="hl-keyword">class</span>, <span class="hl-string">'users'</span>])-><span class="hl-func">name</span>(<span class="hl-string">'users'</span>);
+        Route::<span class="hl-func">get</span>(<span class="hl-string">'/settings'</span>, [AdminController::<span class="hl-keyword">class</span>, <span class="hl-string">'settings'</span>])-><span class="hl-func">name</span>(<span class="hl-string">'settings'</span>);
+    });
+
+<span class="hl-comment">// URL hasilnya: /admin/dashboard, /admin/users, /admin/settings</span>
+<span class="hl-comment">// Nama route: admin.dashboard, admin.users, admin.settings</span>
+<span class="hl-comment">// Semua diproteksi middleware 'auth'</span></code></pre>
+            </div>
+
+            <h2 class="content-heading">Named Route — Jangan Hardcode URL!</h2>
+            <p class="content-text">Daripada menulis <code>&lt;a href="/posts/5"&gt;</code> di banyak tempat, beri nama route lalu rujuk by name. Jika URL berubah, cukup ubah di satu tempat.</p>
+
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab(this, 'name1')">❌ Hardcode</button>
+                <button class="tab-btn" onclick="switchTab(this, 'name2')">✅ Named Route</button>
+            </div>
+            <div class="tab-content active" id="name1">
+                <div class="code-block">
+                    <div class="code-block-header">
+                        <div class="code-block-dots"><span></span><span></span><span></span></div>
+                        <span class="code-block-filename">blade.php — buruk</span>
+                    </div>
+                    <pre class="code-block-body"><code>&lt;a href=<span class="hl-string">"/posts/5"</span>&gt;Detail&lt;/a&gt;
+&lt;a href=<span class="hl-string">"/posts/5/edit"</span>&gt;Edit&lt;/a&gt;
+&lt;form action=<span class="hl-string">"/posts/5"</span> method=<span class="hl-string">"POST"</span>&gt;
+<span class="hl-comment">// Kalau URL berubah jadi /articles/5, semua harus diubah manual</span></code></pre>
+                </div>
+            </div>
+            <div class="tab-content" id="name2">
+                <div class="code-block">
+                    <div class="code-block-header">
+                        <div class="code-block-dots"><span></span><span></span><span></span></div>
+                        <span class="code-block-filename">blade.php — bagus</span>
+                    </div>
+                    <pre class="code-block-body"><code>&lt;a href=<span class="hl-string">"{{ route('posts.show', 5) }}"</span>&gt;Detail&lt;/a&gt;
+&lt;a href=<span class="hl-string">"{{ route('posts.edit', 5) }}"</span>&gt;Edit&lt;/a&gt;
+&lt;form action=<span class="hl-string">"{{ route('posts.update', 5) }}"</span> method=<span class="hl-string">"POST"</span>&gt;
+<span class="hl-comment">// URL berubah? Tinggal ubah definisi route — semua link otomatis update</span></code></pre>
+                </div>
+            </div>
+
+            <div class="info-box">
+                <div class="info-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                    <strong>Tips Debugging: php artisan route:list</strong>
+                </div>
+                <p>Lupa route apa saja yang ada? Jalankan <code>php artisan route:list</code> untuk lihat semua route terdaftar (method, URI, name, controller, middleware). Filter dengan <code>--name=posts</code> untuk lihat hanya yang mengandung "posts".</p>
+            </div>
+
+            <div class="quiz">
+                <div class="quiz-title">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01"/></svg>
+                    Cek Pemahaman
+                </div>
+                <div class="quiz-question">
+                    <div class="quiz-q-text">1. HTTP method apa yang biasanya digunakan untuk membuat data baru (CREATE)?</div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'GET untuk ambil data, bukan membuat.')">GET</div>
+                        <div class="quiz-option" data-correct="true" onclick="quizAnswer(this, 'Tepat! POST = membuat resource baru.')">POST</div>
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'PUT untuk update keseluruhan, bukan create.')">PUT</div>
+                    </div>
+                    <div class="quiz-feedback hidden"></div>
+                </div>
+                <div class="quiz-question">
+                    <div class="quiz-q-text">2. Berapa banyak route CRUD yang dihasilkan oleh <code>Route::resource('posts', PostController::class)</code>?</div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'Lebih banyak dari itu.')">4 route</div>
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'Hampir, tapi salah satu kurang.')">6 route</div>
+                        <div class="quiz-option" data-correct="true" onclick="quizAnswer(this, 'Benar! index, create, store, show, edit, update, destroy.')">7 route</div>
+                    </div>
+                    <div class="quiz-feedback hidden"></div>
+                </div>
+                <div class="quiz-question">
+                    <div class="quiz-q-text">3. Mana cara terbaik untuk link ke halaman detail post?</div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'Hardcode URL akan menyulitkan refactor di masa depan.')">&lt;a href="/posts/{{ $post->id }}"&gt;</div>
+                        <div class="quiz-option" data-correct="true" onclick="quizAnswer(this, 'Tepat! Named route fleksibel — URL berubah, link otomatis ikut.')">&lt;a href="{{ route('posts.show', $post) }}"&gt;</div>
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'Itu URL absolut yang tidak diperlukan di app sendiri.')">&lt;a href="http://localhost/posts/1"&gt;</div>
+                    </div>
+                    <div class="quiz-feedback hidden"></div>
+                </div>
+            </div>
+
+            <div class="content-nav">
+                <div class="content-nav-item">
+                    <a href="instalasi.html" class="nav-btn nav-btn-prev">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                        <div><span class="nav-label">Sebelumnya</span><span class="nav-name">Instalasi & Konfigurasi</span></div>
+                    </a>
+                </div>
+                <div class="content-nav-item">
+                    <a href="controller.html" class="nav-btn nav-btn-next">
+                        <div><span class="nav-label">Selanjutnya</span><span class="nav-name">Controller & Request</span></div>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </a>
+                </div>
+            </div>
+        </article>
+    </main>
+    <script src="/laravel/course-layout.js"></script>
+    <script>
+    function copyCode(btn) {
+        const codeBlock = btn.closest('.code-block').querySelector('code');
+        navigator.clipboard.writeText(codeBlock.textContent).then(() => {
+            btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>';
+            setTimeout(() => { btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>'; }, 2000);
+        });
+    }
+
+    const routes = [
+        { method: 'GET', pattern: '^/$', handler: 'WelcomeController@index', params: [] },
+        { method: 'GET', pattern: '^/posts$', handler: 'PostController@index', params: [] },
+        { method: 'POST', pattern: '^/posts$', handler: 'PostController@store', params: [] },
+        { method: 'GET', pattern: '^/posts/([^/]+)$', handler: 'PostController@show', params: ['id'] },
+        { method: 'PUT', pattern: '^/posts/([^/]+)$', handler: 'PostController@update', params: ['id'] },
+        { method: 'DELETE', pattern: '^/posts/([^/]+)$', handler: 'PostController@destroy', params: ['id'] },
+        { method: 'GET', pattern: '^/users/([^/]+)/edit$', handler: 'UserController@edit', params: ['id'] },
+        { method: 'GET', pattern: '^/hello(?:/([^/]+))?$', handler: 'GreetController@hello', params: ['name?'] }
+    ];
+
+    function testRoute() {
+        const method = document.getElementById('testerMethod').value;
+        const url = document.getElementById('testerUrl').value.trim() || '/';
+        const out = document.getElementById('testerOutput');
+        let match = null;
+        for (const r of routes) {
+            if (r.method !== method) continue;
+            const m = url.match(new RegExp(r.pattern));
+            if (m) { match = { route: r, captured: m.slice(1) }; break; }
+        }
+        if (match) {
+            out.classList.add('match'); out.classList.remove('no-match');
+            let params = '';
+            match.route.params.forEach((p, i) => {
+                const v = match.captured[i];
+                params += '\n  <span class="key">' + p.replace('?','') + '</span>: <span class="val">' + (v === undefined ? '(opsional, tidak diisi)' : '"' + v + '"') + '</span>';
+            });
+            if (!params) params = '\n  <span style="color:var(--text-muted)">(tidak ada parameter)</span>';
+            out.innerHTML = '<span style="color:#c3e88d">✓ Match!</span>\n\n<span class="key">Method</span>: <span class="val">' + method + '</span>\n<span class="key">URL</span>: <span class="val">' + url + '</span>\n<span class="key">Handler</span>: <span class="val">' + match.route.handler + '</span>\n<span class="key">Parameters</span>:' + params;
+        } else {
+            out.classList.add('no-match'); out.classList.remove('match');
+            out.innerHTML = '<span style="color:#ff5555">✗ 404 Not Found</span>\n\nLaravel tidak menemukan route yang cocok dengan <span class="val">' + method + ' ' + url + '</span>\n\n<span style="color:var(--text-muted)">Tips: cek apakah method dan URL sudah benar, atau cek route:list.</span>';
+        }
+    }
+    function quickFill(method, url) {
+        document.getElementById('testerMethod').value = method;
+        document.getElementById('testerUrl').value = url;
+        testRoute();
+    }
+
+    function switchTab(btn, id) {
+        btn.parentElement.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        btn.parentElement.parentElement.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+    }
+
+    function quizAnswer(el, feedback) {
+        const question = el.closest('.quiz-question');
+        const options = question.querySelectorAll('.quiz-option');
+        const fb = question.querySelector('.quiz-feedback');
+        options.forEach(o => {
+            o.style.pointerEvents = 'none';
+            if (o.dataset.correct === 'true') o.classList.add('correct');
+        });
+        if (el.dataset.correct !== 'true') el.classList.add('wrong');
+        fb.textContent = feedback;
+        fb.classList.remove('hidden');
+        fb.classList.add('visible');
+    }
+    </script>
+</body>
+</html>

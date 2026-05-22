@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blade Templating — Laravel</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/laravel/course.css">
+</head>
+<body>
+    <div class="bg-grid" aria-hidden="true"></div>
+    <nav class="navbar scrolled" id="navbar"></nav>
+    <div class="mobile-menu" id="mobileMenu"></div>
+    <main class="course-layout">
+        <aside class="course-sidebar" id="courseSidebar"></aside>
+        <article class="course-content">
+            <div class="breadcrumb">
+                <a href="../index.html">Home</a><span>›</span>
+                <a href="index.html">Laravel</a><span>›</span>
+                <span style="color: var(--text-primary);">Blade Templating</span>
+            </div>
+            <header class="content-header">
+                <h1 class="content-title">Modul 6: Blade Templating</h1>
+                <div class="content-meta">
+                    <div class="meta-pill"><span>Estimasi: 50 Menit</span></div>
+                    <div class="meta-pill"><span>Teori & Praktikum</span></div>
+                </div>
+            </header>
+
+            <p class="content-text"><strong>Blade</strong> adalah template engine bawaan Laravel — ringan namun kuat. Tidak seperti template engine lain, Blade tidak melarang Anda memakai PHP murni. Setiap file Blade dikompilasi ke PHP biasa dan di-cache sampai berubah, jadi tidak ada overhead performa.</p>
+
+            <div class="analogy-box">
+                <div class="analogy-icon">📝</div>
+                <div class="analogy-content">
+                    <strong>Analogi: Surat Massal dengan Variabel</strong>
+                    <p>Blade ibarat <em>mail merge</em> di Word: Anda buat template "Halo {nama}, saldo Anda Rp {saldo}". Lalu Word mengisi <code>{nama}</code> dan <code>{saldo}</code> dengan data dari Excel untuk setiap penerima. Begitu juga Blade: template HTML dengan slot <code>{{ $var }}</code> yang diisi data dari controller.</p>
+                </div>
+            </div>
+
+            <h2 class="content-heading">Menampilkan Data dengan <code>{{ }}</code></h2>
+            <p class="content-text">Variabel ditampilkan dengan kurung kurawal ganda. Laravel otomatis menjalankan <code>htmlspecialchars()</code> — mencegah serangan XSS (Cross-Site Scripting).</p>
+
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">welcome.blade.php</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-comment">&lt;!-- Menampilkan variabel (aman dari XSS) --&gt;</span>
+&lt;h1&gt;Hello, {{ $name }}&lt;/h1&gt;
+
+<span class="hl-comment">&lt;!-- Memanggil fungsi PHP --&gt;</span>
+&lt;p&gt;Waktu sekarang: {{ <span class="hl-func">date</span>(<span class="hl-string">'H:i'</span>) }}&lt;/p&gt;
+
+<span class="hl-comment">&lt;!-- Nilai default jika variabel kosong --&gt;</span>
+&lt;p&gt;{{ $title ?? <span class="hl-string">'Judul Default'</span> }}&lt;/p&gt;
+
+<span class="hl-comment">&lt;!-- Output mentah TANPA escape (HATI-HATI XSS!) --&gt;</span>
+&lt;div&gt;{!! $htmlContent !!}&lt;/div&gt;</code></pre>
+            </div>
+
+            <h2 class="content-heading">Blade Playground Interaktif</h2>
+            <p class="content-text">Coba sendiri! Ubah nilai variabel di kiri, lihat hasil HTML-nya di kanan secara real-time.</p>
+
+            <div class="interactive-card">
+                <div class="interactive-title">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                    Blade Live Preview
+                </div>
+                <p class="interactive-subtitle">Pilih contoh template di bawah, ubah variabel, dan lihat hasilnya.</p>
+                <div class="req-controls" style="margin-bottom: 12px;">
+                    <button class="btn-action btn-secondary" onclick="loadPg('hello')">Hello World</button>
+                    <button class="btn-action btn-secondary" onclick="loadPg('if')">If/Else</button>
+                    <button class="btn-action btn-secondary" onclick="loadPg('foreach')">Foreach</button>
+                    <button class="btn-action btn-secondary" onclick="loadPg('xss')">XSS Demo</button>
+                </div>
+                <div class="playground">
+                    <div class="playground-pane">
+                        <div class="playground-pane-header">📝 Template Blade</div>
+                        <div class="playground-input">
+                            <label>$name:</label>
+                            <input type="text" id="pgName" value="Arif" oninput="renderPg()">
+                        </div>
+                        <div class="playground-input">
+                            <label>$role:</label>
+                            <input type="text" id="pgRole" value="admin" oninput="renderPg()">
+                        </div>
+                        <pre class="playground-source" id="pgSource"></pre>
+                    </div>
+                    <div class="playground-pane">
+                        <div class="playground-pane-header">🖥 Output HTML (yang dilihat user)</div>
+                        <div class="playground-preview" id="pgPreview"></div>
+                    </div>
+                </div>
+            </div>
+
+            <h2 class="content-heading">Struktur Kontrol: @if / @else</h2>
+            <p class="content-text">Blade punya direktif yang lebih bersih daripada <code>&lt;?php if ?&gt;</code> PHP murni:</p>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">Blade</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-comment">&lt;!-- IF / ELSEIF / ELSE --&gt;</span>
+@if (<span class="hl-func">count</span>($records) === <span class="hl-number">1</span>)
+    Saya punya 1 data.
+@elseif (<span class="hl-func">count</span>($records) &gt; <span class="hl-number">1</span>)
+    Saya punya banyak data.
+@else
+    Saya tidak punya data.
+@endif
+
+<span class="hl-comment">&lt;!-- UNLESS = kebalikan IF --&gt;</span>
+@unless (Auth::<span class="hl-func">check</span>())
+    Anda belum login.
+@endunless
+
+<span class="hl-comment">&lt;!-- SWITCH --&gt;</span>
+@switch($role)
+    @case(<span class="hl-string">'admin'</span>)
+        Dashboard Admin
+        @break
+    @case(<span class="hl-string">'user'</span>)
+        Dashboard User
+        @break
+    @default
+        Halaman Tamu
+@endswitch</code></pre>
+            </div>
+
+            <h2 class="content-heading">Direktif Auth Cepat</h2>
+            <p class="content-text">Beberapa shortcut yang sangat sering dipakai untuk autentikasi:</p>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">Blade</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-comment">&lt;!-- Tampil jika sudah login --&gt;</span>
+@auth
+    &lt;a href=<span class="hl-string">"/dashboard"</span>&gt;Dashboard&lt;/a&gt;
+@endauth
+
+<span class="hl-comment">&lt;!-- Tampil jika BELUM login --&gt;</span>
+@guest
+    &lt;a href=<span class="hl-string">"/login"</span>&gt;Login&lt;/a&gt;
+@endguest
+
+<span class="hl-comment">&lt;!-- Cek apakah variabel kosong --&gt;</span>
+@empty($posts)
+    &lt;p&gt;Belum ada post.&lt;/p&gt;
+@endempty
+
+<span class="hl-comment">&lt;!-- Cek role / izin (Gate) --&gt;</span>
+@can(<span class="hl-string">'edit'</span>, $post)
+    &lt;button&gt;Edit&lt;/button&gt;
+@endcan</code></pre>
+            </div>
+
+            <h2 class="content-heading">Looping: @foreach & @forelse</h2>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">Blade</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-comment">&lt;!-- foreach biasa --&gt;</span>
+&lt;ul&gt;
+@foreach ($users <span class="hl-keyword">as</span> $user)
+    &lt;li&gt;{{ $user-&gt;name }}&lt;/li&gt;
+@endforeach
+&lt;/ul&gt;
+
+<span class="hl-comment">&lt;!-- forelse: gabungan foreach + handler kosong --&gt;</span>
+@forelse ($users <span class="hl-keyword">as</span> $user)
+    &lt;li&gt;{{ $user-&gt;name }}&lt;/li&gt;
+@empty
+    &lt;p&gt;Belum ada user terdaftar.&lt;/p&gt;
+@endforelse
+
+<span class="hl-comment">&lt;!-- for, while, break, continue --&gt;</span>
+@for ($i = <span class="hl-number">0</span>; $i &lt; <span class="hl-number">10</span>; $i++)
+    Iterasi: {{ $i }}
+@endfor</code></pre>
+            </div>
+
+            <h2 class="content-heading">Variabel $loop (Super Power Foreach)</h2>
+            <p class="content-text">Di dalam <code>@foreach</code>, Blade otomatis menyediakan variabel <code>$loop</code> dengan metadata berguna:</p>
+
+            <table class="compare-table">
+                <thead><tr><th>Property</th><th>Arti</th></tr></thead>
+                <tbody>
+                    <tr><td><code>$loop->index</code></td><td>Iterasi ke-berapa (mulai dari 0)</td></tr>
+                    <tr><td><code>$loop->iteration</code></td><td>Iterasi ke-berapa (mulai dari 1)</td></tr>
+                    <tr><td><code>$loop->first</code></td><td>true jika iterasi pertama</td></tr>
+                    <tr><td><code>$loop->last</code></td><td>true jika iterasi terakhir</td></tr>
+                    <tr><td><code>$loop->count</code></td><td>Total jumlah item</td></tr>
+                    <tr><td><code>$loop->remaining</code></td><td>Berapa item tersisa</td></tr>
+                    <tr><td><code>$loop->parent</code></td><td>Akses $loop dari foreach di luar (kalau nested)</td></tr>
+                </tbody>
+            </table>
+
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">contoh $loop</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code>@foreach ($users <span class="hl-keyword">as</span> $user)
+    &lt;div class=<span class="hl-string">"{{ $loop->first ? 'highlight' : '' }}"</span>&gt;
+        {{ $loop->iteration }}. {{ $user->name }}
+        @if ($loop->last) &lt;em&gt;(terakhir)&lt;/em&gt; @endif
+    &lt;/div&gt;
+@endforeach</code></pre>
+            </div>
+
+            <h2 class="content-heading">Include — Memasukkan Partial</h2>
+            <p class="content-text">Untuk komponen yang berulang (navbar, footer, sidebar), gunakan <code>@include</code>:</p>
+
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">layout</span>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-comment">&lt;!-- File: resources/views/layouts/master.blade.php --&gt;</span>
+@include(<span class="hl-string">'partials.navbar'</span>) <span class="hl-comment">&lt;!-- → resources/views/partials/navbar.blade.php --&gt;</span>
+
+&lt;main&gt;
+    @include(<span class="hl-string">'partials.alert'</span>, [<span class="hl-string">'type'</span> => <span class="hl-string">'success'</span>, <span class="hl-string">'msg'</span> => <span class="hl-string">'OK'</span>])
+@yield(<span class="hl-string">'content'</span>)
+&lt;/main&gt;
+
+@include(<span class="hl-string">'partials.footer'</span>)</code></pre>
+            </div>
+
+            <div class="warning-box">
+                <div class="warning-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                    Bahaya {!! !!} dan XSS
+                </div>
+                <p>Gunakan <code>{{ }}</code> untuk semua output user. <code>{!! !!}</code> hanya untuk konten yang Anda <em>benar-benar</em> kontrol (misal HTML hasil sanitize dengan library seperti HTMLPurifier). Klik tombol <strong>XSS Demo</strong> di Playground di atas untuk lihat efeknya!</p>
+            </div>
+
+            <div class="quiz">
+                <div class="quiz-title">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01"/></svg>
+                    Cek Pemahaman
+                </div>
+                <div class="quiz-question">
+                    <div class="quiz-q-text">1. Apa perbedaan <code>{{ $x }}</code> dan <code>{!! $x !!}</code>?</div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'Salah — keduanya kompilasi ke PHP biasa, kecepatan sama.')">Yang pertama lebih cepat</div>
+                        <div class="quiz-option" data-correct="true" onclick="quizAnswer(this, 'Tepat! {{ }} = aman dari XSS, {!! !!} = output mentah.')">{{ }} otomatis escape HTML, {!! !!} tidak</div>
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'Salah — keduanya menampilkan variabel.')">Hanya yang kedua bisa menampilkan variabel</div>
+                    </div>
+                    <div class="quiz-feedback hidden"></div>
+                </div>
+                <div class="quiz-question">
+                    <div class="quiz-q-text">2. Kapan menggunakan <code>@forelse</code> bukan <code>@foreach</code>?</div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" data-correct="true" onclick="quizAnswer(this, 'Tepat! @forelse = @foreach + @empty fallback otomatis.')">Saat ingin menampilkan pesan jika koleksi kosong</div>
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'Salah — keduanya iterasi koleksi.')">Saat iterasi array string</div>
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'Tidak benar — performanya sama.')">Saat ingin lebih cepat</div>
+                    </div>
+                    <div class="quiz-feedback hidden"></div>
+                </div>
+                <div class="quiz-question">
+                    <div class="quiz-q-text">3. Bagaimana cara mengakses iterasi ke-berapa di dalam <code>@foreach</code>?</div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, '$i tidak otomatis tersedia di foreach Blade.')">$i</div>
+                        <div class="quiz-option" data-correct="true" onclick="quizAnswer(this, 'Benar! $loop->iteration (mulai dari 1) atau $loop->index (mulai dari 0).')">$loop->iteration</div>
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'count() hanya mengembalikan total jumlah, bukan iterasi saat ini.')">count($users)</div>
+                    </div>
+                    <div class="quiz-feedback hidden"></div>
+                </div>
+            </div>
+
+            <div class="content-nav">
+                <div class="content-nav-item">
+                    <a href="middleware.html" class="nav-btn nav-btn-prev">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                        <div><span class="nav-label">Sebelumnya</span><span class="nav-name">Middleware</span></div>
+                    </a>
+                </div>
+                <div class="content-nav-item">
+                    <a href="layout-component.html" class="nav-btn nav-btn-next">
+                        <div><span class="nav-label">Selanjutnya</span><span class="nav-name">Layout & Component</span></div>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </a>
+                </div>
+            </div>
+        </article>
+    </main>
+    <script src="/laravel/course-layout.js"></script>
+    <script>
+    function copyCode(btn) {
+        const codeBlock = btn.closest('.code-block').querySelector('code');
+        navigator.clipboard.writeText(codeBlock.textContent).then(() => {
+            btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>';
+            setTimeout(() => { btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>'; }, 2000);
+        });
+    }
+
+    const pgTemplates = {
+        hello: '<h1>Selamat datang, {{ $name }}!</h1>\n<p>Anda login sebagai <strong>{{ $role }}</strong>.</p>',
+        if: '@if ($role === \'admin\')\n    <h1>Halo Admin {{ $name }} 👑</h1>\n    <p>Anda punya akses penuh.</p>\n@elseif ($role === \'user\')\n    <h1>Halo {{ $name }} 👋</h1>\n    <p>Selamat membaca!</p>\n@else\n    <h1>Halo, Tamu</h1>\n    <p>Silakan login dulu.</p>\n@endif',
+        foreach: '<h2>Daftar Tugas {{ $name }}</h2>\n<ul>\n@foreach ([\'Belajar Laravel\', \'Push ke GitHub\', \'Kerjakan UAS\'] as $task)\n    <li>{{ $loop->iteration }}. {{ $task }}</li>\n@endforeach\n</ul>',
+        xss: '<h1>Nama: {{ $name }}</h1>\n<p>Dengan {{ }}, HTML dianggap teks biasa.</p>\n\n<h1>Nama: {!! $name !!}</h1>\n<p>⚠ Dengan {!! !!}, HTML/JS dieksekusi!</p>'
+    };
+    let pgCurrent = 'hello';
+    function loadPg(key) {
+        pgCurrent = key;
+        if (key === 'xss') {
+            document.getElementById('pgName').value = '<em>Arif</em> &lt;script&gt;alert(\'XSS\')&lt;/script&gt;';
+        }
+        renderPg();
+    }
+    function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+    function highlightBlade(s) {
+        return escHtml(s)
+            .replace(/(@\w+)/g, '<span style="color:#c792ea">$1</span>')
+            .replace(/(\{\{[^}]+\}\})/g, '<span style="color:#82aaff">$1</span>')
+            .replace(/(\{!![^!]+!!\})/g, '<span style="color:#f78c6c">$1</span>')
+            .replace(/(&lt;!--[\s\S]*?--&gt;)/g, '<span style="color:#546e7a; font-style: italic">$1</span>');
+    }
+    function renderBlade(src, vars) {
+        let out = src;
+        // {{ var }} - escaped
+        out = out.replace(/\{\{\s*\$(\w+)\s*\}\}/g, (m, k) => escHtml(String(vars[k] ?? '')));
+        // {!! var !!} - raw
+        out = out.replace(/\{!!\s*\$(\w+)\s*!!\}/g, (m, k) => String(vars[k] ?? ''));
+        // @if / @elseif / @else / @endif simple
+        out = out.replace(/@if\s*\(([^)]+)\)([\s\S]*?)(?:@elseif\s*\(([^)]+)\)([\s\S]*?))?(?:@else([\s\S]*?))?@endif/g, (m, c1, b1, c2, b2, b3) => {
+            const ev = expr => {
+                try {
+                    let e = expr;
+                    Object.keys(vars).forEach(k => { e = e.split('$'+k).join(JSON.stringify(vars[k])); });
+                    return Function('"use strict";return ('+e+')')();
+                } catch (_) { return false; }
+            };
+            if (ev(c1)) return b1;
+            if (c2 !== undefined && ev(c2)) return b2;
+            return b3 || '';
+        });
+        // @foreach ([...] as $x) ... @endforeach
+        out = out.replace(/@foreach\s*\(\[([^\]]+)\]\s+as\s+\$(\w+)\)([\s\S]*?)@endforeach/g, (m, items, key, body) => {
+            const arr = items.split(',').map(s => s.trim().replace(/^['"]|['"]$/g, ''));
+            let r = '';
+            arr.forEach((v, i) => {
+                let b = body;
+                b = b.replace(new RegExp('\\{\\{\\s*\\$'+key+'\\s*\\}\\}','g'), escHtml(v));
+                b = b.replace(/\{\{\s*\$loop->iteration\s*\}\}/g, String(i+1));
+                b = b.replace(/\{\{\s*\$loop->index\s*\}\}/g, String(i));
+                r += b;
+            });
+            return r;
+        });
+        return out;
+    }
+    function renderPg() {
+        const name = document.getElementById('pgName').value;
+        const role = document.getElementById('pgRole').value;
+        const src = pgTemplates[pgCurrent];
+        document.getElementById('pgSource').innerHTML = highlightBlade(src);
+        document.getElementById('pgPreview').innerHTML = renderBlade(src, { name, role });
+    }
+
+    function switchTab(btn, id) {
+        btn.parentElement.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        btn.parentElement.parentElement.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+    }
+
+    function quizAnswer(el, feedback) {
+        const question = el.closest('.quiz-question');
+        const options = question.querySelectorAll('.quiz-option');
+        const fb = question.querySelector('.quiz-feedback');
+        options.forEach(o => {
+            o.style.pointerEvents = 'none';
+            if (o.dataset.correct === 'true') o.classList.add('correct');
+        });
+        if (el.dataset.correct !== 'true') el.classList.add('wrong');
+        fb.textContent = feedback;
+        fb.classList.remove('hidden');
+        fb.classList.add('visible');
+    }
+
+    renderPg();
+    </script>
+</body>
+</html>

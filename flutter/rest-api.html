@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>REST API & HTTP Flutter — Arif Hidayah</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/flutter/course.css">
+</head>
+<body>
+    <div class="bg-grid" aria-hidden="true"></div>
+    <nav class="navbar scrolled" id="navbar"></nav>
+    <div class="mobile-menu" id="mobileMenu"></div>
+
+    <main class="course-layout">
+        <aside class="course-sidebar" id="courseSidebar"></aside>
+
+        <article class="course-content">
+            <div class="breadcrumb">
+                <a href="../index.html">Home</a><span>›</span>
+                <a href="/flutter/index.html">Flutter</a><span>›</span>
+                <span style="color: var(--text-primary);">REST API & HTTP</span>
+            </div>
+
+            <header class="content-header">
+                <h1 class="content-title">Modul 10: REST API & HTTP</h1>
+                <div class="content-meta">
+                    <div class="meta-pill"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 5V8.5L10.5 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/></svg><span>Estimasi: 90 Menit</span></div>
+                    <div class="meta-pill"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="10" rx="1" stroke="currentColor" stroke-width="1.5"/><path d="M5 7h6M5 10h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><span>Teori & Praktikum</span></div>
+                </div>
+            </header>
+
+            <p class="content-text">
+                Hampir setiap aplikasi mobile mengambil data dari server. Modul ini mengajarkan Anda cara <strong>melakukan request HTTP</strong> ke REST API, <strong>parsing JSON</strong> menjadi object Dart, dan menampilkannya di UI menggunakan <code>FutureBuilder</code>.
+            </p>
+
+            <!-- Project Setup -->
+            <div class="info-box">
+                <div class="info-box-header"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg><strong>Buat Project Baru</strong></div>
+                <div class="code-block" style="margin-top: 12px;">
+                    <div class="code-block-header"><div class="code-block-dots"><span></span><span></span><span></span></div><span class="code-block-filename">Terminal</span><button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></div>
+                    <pre class="code-block-body"><code>$ flutter create flutter_rest_api
+$ cd flutter_rest_api
+
+<span class="hl-comment"># Tambahkan package http</span>
+$ flutter pub add http</code></pre>
+                </div>
+                <p>Untuk Android, tambahkan permission internet di <code>android/app/src/main/AndroidManifest.xml</code> (biasanya sudah ada):</p>
+                <div class="code-block" style="margin-top: 12px;">
+                    <div class="code-block-header"><div class="code-block-dots"><span></span><span></span><span></span></div><span class="code-block-filename">AndroidManifest.xml</span><button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></div>
+                    <pre class="code-block-body"><code>&lt;uses-permission android:name=<span class="hl-string">"android.permission.INTERNET"</span> /&gt;</code></pre>
+                </div>
+            </div>
+
+            <!-- REST -->
+            <h2 class="content-heading">Mengenal REST API</h2>
+            <p class="content-text">
+                <strong>REST API</strong> adalah cara komunikasi antara aplikasi (client) dengan server menggunakan protokol HTTP. Setiap operasi punya <em>HTTP method</em> tersendiri:
+            </p>
+            <ol class="content-list">
+                <li><strong>GET</strong> — Mengambil data (mis. daftar produk, detail user).</li>
+                <li><strong>POST</strong> — Menambahkan data baru (mis. menambahkan komentar).</li>
+                <li><strong>PUT / PATCH</strong> — Mengubah data yang sudah ada.</li>
+                <li><strong>DELETE</strong> — Menghapus data.</li>
+            </ol>
+
+            <div class="info-box">
+                <div class="info-box-header"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg><strong>API untuk Latihan</strong></div>
+                <p>Di modul ini kita akan menggunakan <a href="https://jsonplaceholder.typicode.com" target="_blank" style="color: #54c5f8;">JSONPlaceholder</a> — REST API publik gratis untuk latihan. API ini menyediakan endpoint dummy seperti <code>/posts</code>, <code>/users</code>, <code>/comments</code>, dll.</p>
+            </div>
+
+            <!-- GET Request -->
+            <h2 class="content-heading">GET Request — Mengambil Data</h2>
+            <p class="content-text">
+                Mari mulai dengan request paling sederhana: GET. Kita akan ambil daftar posts dari JSONPlaceholder.
+            </p>
+            <div class="code-block">
+                <div class="code-block-header"><div class="code-block-dots"><span></span><span></span><span></span></div><span class="code-block-filename">contoh_get.dart</span><button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></div>
+                <pre class="code-block-body"><code><span class="hl-keyword">import</span> <span class="hl-string">'package:http/http.dart'</span> <span class="hl-keyword">as</span> http;
+<span class="hl-keyword">import</span> <span class="hl-string">'dart:convert'</span>;
+
+Future&lt;<span class="hl-keyword">void</span>&gt; ambilData() <span class="hl-keyword">async</span> {
+  <span class="hl-keyword">final</span> url = Uri.parse(<span class="hl-string">'https://jsonplaceholder.typicode.com/posts/1'</span>);
+  <span class="hl-keyword">final</span> response = <span class="hl-keyword">await</span> http.get(url);
+
+  <span class="hl-keyword">if</span> (response.statusCode == <span class="hl-number">200</span>) {
+    <span class="hl-keyword">final</span> data = jsonDecode(response.body);
+    <span class="hl-func">print</span>(<span class="hl-string">'Judul: ${data['title']}'</span>);
+    <span class="hl-func">print</span>(<span class="hl-string">'Isi: ${data['body']}'</span>);
+  } <span class="hl-keyword">else</span> {
+    <span class="hl-func">print</span>(<span class="hl-string">'Error: ${response.statusCode}'</span>);
+  }
+}</code></pre>
+            </div>
+
+            <!-- Model & fromJson -->
+            <h2 class="content-heading">Parsing JSON ke Object Dart</h2>
+            <p class="content-text">
+                Bekerja dengan <code>Map&lt;String, dynamic&gt;</code> langsung itu rawan typo dan tidak type-safe. Praktik terbaik: buat <strong>model class</strong> dengan factory constructor <code>fromJson</code> yang mengubah JSON menjadi object Dart yang nyaman.
+            </p>
+            <div class="code-block">
+                <div class="code-block-header"><div class="code-block-dots"><span></span><span></span><span></span></div><span class="code-block-filename">post_model.dart</span><button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></div>
+                <pre class="code-block-body"><code><span class="hl-keyword">class</span> Post {
+  <span class="hl-keyword">final int</span> id;
+  <span class="hl-keyword">final String</span> title;
+  <span class="hl-keyword">final String</span> body;
+
+  Post({<span class="hl-keyword">required this</span>.id, <span class="hl-keyword">required this</span>.title, <span class="hl-keyword">required this</span>.body});
+
+  <span class="hl-comment">// Factory untuk parse dari JSON</span>
+  factory Post.fromJson(Map&lt;<span class="hl-keyword">String</span>, <span class="hl-keyword">dynamic</span>&gt; json) {
+    <span class="hl-keyword">return</span> Post(
+      id: json[<span class="hl-string">'id'</span>] <span class="hl-keyword">as int</span>,
+      title: json[<span class="hl-string">'title'</span>] <span class="hl-keyword">as String</span>,
+      body: json[<span class="hl-string">'body'</span>] <span class="hl-keyword">as String</span>,
+    );
+  }
+}</code></pre>
+            </div>
+
+            <!-- Service Class -->
+            <h2 class="content-heading">Service Class — Memisahkan Logic API</h2>
+            <p class="content-text">
+                Daripada menulis kode HTTP langsung di widget, lebih rapi memisahkannya ke <em>service class</em>. Pola ini membuat kode mudah dimaintain dan di-test.
+            </p>
+            <div class="code-block">
+                <div class="code-block-header"><div class="code-block-dots"><span></span><span></span><span></span></div><span class="code-block-filename">post_service.dart</span><button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></div>
+                <pre class="code-block-body"><code><span class="hl-keyword">import</span> <span class="hl-string">'dart:convert'</span>;
+<span class="hl-keyword">import</span> <span class="hl-string">'package:http/http.dart'</span> <span class="hl-keyword">as</span> http;
+
+<span class="hl-keyword">class</span> PostService {
+  <span class="hl-keyword">static const</span> _baseUrl = <span class="hl-string">'https://jsonplaceholder.typicode.com'</span>;
+
+  <span class="hl-comment">// GET daftar posts</span>
+  Future&lt;List&lt;Post&gt;&gt; getPosts() <span class="hl-keyword">async</span> {
+    <span class="hl-keyword">final</span> response = <span class="hl-keyword">await</span> http.get(Uri.parse(<span class="hl-string">'$_baseUrl/posts'</span>));
+
+    <span class="hl-keyword">if</span> (response.statusCode == <span class="hl-number">200</span>) {
+      <span class="hl-keyword">final</span> List&lt;<span class="hl-keyword">dynamic</span>&gt; list = jsonDecode(response.body);
+      <span class="hl-keyword">return</span> list.map((j) => Post.fromJson(j)).toList();
+    } <span class="hl-keyword">else</span> {
+      <span class="hl-keyword">throw</span> Exception(<span class="hl-string">'Gagal memuat posts'</span>);
+    }
+  }
+
+  <span class="hl-comment">// POST data baru</span>
+  Future&lt;Post&gt; createPost(<span class="hl-keyword">String</span> title, <span class="hl-keyword">String</span> body) <span class="hl-keyword">async</span> {
+    <span class="hl-keyword">final</span> response = <span class="hl-keyword">await</span> http.post(
+      Uri.parse(<span class="hl-string">'$_baseUrl/posts'</span>),
+      headers: {<span class="hl-string">'Content-Type'</span>: <span class="hl-string">'application/json'</span>},
+      body: jsonEncode({<span class="hl-string">'title'</span>: title, <span class="hl-string">'body'</span>: body, <span class="hl-string">'userId'</span>: <span class="hl-number">1</span>}),
+    );
+
+    <span class="hl-keyword">if</span> (response.statusCode == <span class="hl-number">201</span>) {
+      <span class="hl-keyword">return</span> Post.fromJson(jsonDecode(response.body));
+    } <span class="hl-keyword">else</span> {
+      <span class="hl-keyword">throw</span> Exception(<span class="hl-string">'Gagal membuat post'</span>);
+    }
+  }
+}</code></pre>
+            </div>
+
+            <!-- FutureBuilder -->
+            <h2 class="content-heading">FutureBuilder — Menampilkan Hasil API</h2>
+            <p class="content-text">
+                <code>FutureBuilder</code> adalah widget magis yang otomatis menangani 3 keadaan: <em>loading</em>, <em>sukses</em>, dan <em>error</em>. Anda tinggal memberi tahu builder bagaimana setiap keadaan ditampilkan.
+            </p>
+            <div class="code-block">
+                <div class="code-block-header"><div class="code-block-dots"><span></span><span></span><span></span></div><span class="code-block-filename">future_builder.dart</span><button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></div>
+                <pre class="code-block-body"><code>FutureBuilder&lt;List&lt;Post&gt;&gt;(
+  future: PostService().getPosts(),
+  builder: (context, snapshot) {
+    <span class="hl-comment">// 1. Loading</span>
+    <span class="hl-keyword">if</span> (snapshot.connectionState == ConnectionState.waiting) {
+      <span class="hl-keyword">return</span> <span class="hl-keyword">const</span> Center(child: CircularProgressIndicator());
+    }
+    <span class="hl-comment">// 2. Error</span>
+    <span class="hl-keyword">if</span> (snapshot.hasError) {
+      <span class="hl-keyword">return</span> Center(child: Text(<span class="hl-string">'Error: ${snapshot.error}'</span>));
+    }
+    <span class="hl-comment">// 3. Sukses</span>
+    <span class="hl-keyword">final</span> posts = snapshot.data!;
+    <span class="hl-keyword">return</span> ListView.builder(
+      itemCount: posts.length,
+      itemBuilder: (_, i) => ListTile(
+        leading: CircleAvatar(child: Text(<span class="hl-string">'${posts[i].id}'</span>)),
+        title: Text(posts[i].title),
+        subtitle: Text(posts[i].body, maxLines: <span class="hl-number">2</span>, overflow: TextOverflow.ellipsis),
+      ),
+    );
+  },
+)</code></pre>
+            </div>
+
+            <!-- Aplikasi Lengkap -->
+            <h2 class="content-heading">Aplikasi Lengkap: Pembaca Postingan</h2>
+            <p class="content-text">
+                Gabungkan semuanya menjadi satu aplikasi nyata. Ganti seluruh isi <code>lib/main.dart</code> di project <code>flutter_rest_api</code> dengan kode berikut:
+            </p>
+            <div class="code-block">
+                <div class="code-block-header"><div class="code-block-dots"><span></span><span></span><span></span></div><span class="code-block-filename">lib/main.dart</span><button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></div>
+                <pre class="code-block-body"><code><span class="hl-keyword">import</span> <span class="hl-string">'dart:convert'</span>;
+<span class="hl-keyword">import</span> <span class="hl-string">'package:flutter/material.dart'</span>;
+<span class="hl-keyword">import</span> <span class="hl-string">'package:http/http.dart'</span> <span class="hl-keyword">as</span> http;
+
+<span class="hl-keyword">void</span> main() => runApp(<span class="hl-keyword">const</span> MyApp());
+
+<span class="hl-keyword">class</span> Post {
+  <span class="hl-keyword">final int</span> id;
+  <span class="hl-keyword">final String</span> title, body;
+  Post({<span class="hl-keyword">required this</span>.id, <span class="hl-keyword">required this</span>.title, <span class="hl-keyword">required this</span>.body});
+  factory Post.fromJson(Map&lt;<span class="hl-keyword">String</span>, <span class="hl-keyword">dynamic</span>&gt; j) =>
+    Post(id: j[<span class="hl-string">'id'</span>], title: j[<span class="hl-string">'title'</span>], body: j[<span class="hl-string">'body'</span>]);
+}
+
+Future&lt;List&lt;Post&gt;&gt; fetchPosts() <span class="hl-keyword">async</span> {
+  <span class="hl-keyword">final</span> r = <span class="hl-keyword">await</span> http.get(Uri.parse(<span class="hl-string">'https://jsonplaceholder.typicode.com/posts'</span>));
+  <span class="hl-keyword">if</span> (r.statusCode != <span class="hl-number">200</span>) <span class="hl-keyword">throw</span> Exception(<span class="hl-string">'Gagal: ${r.statusCode}'</span>);
+  <span class="hl-keyword">final</span> list = jsonDecode(r.body) <span class="hl-keyword">as</span> List;
+  <span class="hl-keyword">return</span> list.map((j) => Post.fromJson(j)).toList();
+}
+
+<span class="hl-keyword">class</span> MyApp <span class="hl-keyword">extends</span> StatelessWidget {
+  <span class="hl-keyword">const</span> MyApp({<span class="hl-keyword">super</span>.key});
+  <span class="hl-keyword">@override</span>
+  Widget build(BuildContext context) => MaterialApp(
+    theme: ThemeData(colorSchemeSeed: Colors.blue, useMaterial3: <span class="hl-keyword">true</span>),
+    home: <span class="hl-keyword">const</span> PostListPage(),
+  );
+}
+
+<span class="hl-keyword">class</span> PostListPage <span class="hl-keyword">extends</span> StatefulWidget {
+  <span class="hl-keyword">const</span> PostListPage({<span class="hl-keyword">super</span>.key});
+  <span class="hl-keyword">@override</span>
+  State&lt;PostListPage&gt; createState() => _PostListPageState();
+}
+
+<span class="hl-keyword">class</span> _PostListPageState <span class="hl-keyword">extends</span> State&lt;PostListPage&gt; {
+  late Future&lt;List&lt;Post&gt;&gt; _future;
+
+  <span class="hl-keyword">@override</span>
+  <span class="hl-keyword">void</span> initState() {
+    <span class="hl-keyword">super</span>.initState();
+    _future = fetchPosts();
+  }
+
+  Future&lt;<span class="hl-keyword">void</span>&gt; _refresh() <span class="hl-keyword">async</span> {
+    setState(() => _future = fetchPosts());
+  }
+
+  <span class="hl-keyword">@override</span>
+  Widget build(BuildContext context) {
+    <span class="hl-keyword">return</span> Scaffold(
+      appBar: AppBar(
+        title: <span class="hl-keyword">const</span> Text(<span class="hl-string">'Pembaca Postingan'</span>),
+        actions: [IconButton(icon: <span class="hl-keyword">const</span> Icon(Icons.refresh), onPressed: _refresh)],
+      ),
+      body: RefreshIndicator(
+        onRefresh: _refresh,
+        child: FutureBuilder&lt;List&lt;Post&gt;&gt;(
+          future: _future,
+          builder: (context, snap) {
+            <span class="hl-keyword">if</span> (snap.connectionState == ConnectionState.waiting) {
+              <span class="hl-keyword">return</span> <span class="hl-keyword">const</span> Center(child: CircularProgressIndicator());
+            }
+            <span class="hl-keyword">if</span> (snap.hasError) {
+              <span class="hl-keyword">return</span> Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    <span class="hl-keyword">const</span> Icon(Icons.error_outline, size: <span class="hl-number">64</span>, color: Colors.red),
+                    <span class="hl-keyword">const</span> SizedBox(height: <span class="hl-number">8</span>),
+                    Text(<span class="hl-string">'${snap.error}'</span>),
+                    <span class="hl-keyword">const</span> SizedBox(height: <span class="hl-number">12</span>),
+                    ElevatedButton(onPressed: _refresh, child: <span class="hl-keyword">const</span> Text(<span class="hl-string">'Coba lagi'</span>)),
+                  ],
+                ),
+              );
+            }
+            <span class="hl-keyword">final</span> posts = snap.data!;
+            <span class="hl-keyword">return</span> ListView.separated(
+              itemCount: posts.length,
+              separatorBuilder: (_, __) => <span class="hl-keyword">const</span> Divider(height: <span class="hl-number">1</span>),
+              itemBuilder: (_, i) {
+                <span class="hl-keyword">final</span> p = posts[i];
+                <span class="hl-keyword">return</span> ListTile(
+                  leading: CircleAvatar(child: Text(<span class="hl-string">'${p.id}'</span>)),
+                  title: Text(p.title, maxLines: <span class="hl-number">1</span>, overflow: TextOverflow.ellipsis),
+                  subtitle: Text(p.body, maxLines: <span class="hl-number">2</span>, overflow: TextOverflow.ellipsis),
+                  onTap: () => showDialog(
+                    context: context,
+                    builder: (_) => AlertDialog(
+                      title: Text(p.title),
+                      content: Text(p.body),
+                      actions: [TextButton(onPressed: () => Navigator.pop(context), child: <span class="hl-keyword">const</span> Text(<span class="hl-string">'OK'</span>))],
+                    ),
+                  ),
+                );
+              },
+            );
+          },
+        ),
+      ),
+    );
+  }
+}</code></pre>
+            </div>
+
+            <div class="info-box">
+                <div class="info-box-header"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg><strong>RefreshIndicator</strong></div>
+                <p>Widget <code>RefreshIndicator</code> menambahkan gesture <em>pull-to-refresh</em> ala Instagram/Twitter. User tinggal tarik konten ke bawah dan API akan dipanggil ulang. Sangat dianjurkan untuk semua list yang berasal dari API.</p>
+            </div>
+
+            <!-- Best Practice -->
+            <div class="info-box">
+                <div class="info-box-header"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg><strong>Hindari Memanggil API di build()</strong></div>
+                <p>JANGAN tulis <code>future: fetchPosts()</code> langsung di <code>build()</code>. Setiap rebuild, request HTTP akan diulang. Pola yang benar adalah simpan Future di state (<code>initState</code>) seperti di contoh di atas, atau panggil melalui <em>Provider</em>.</p>
+            </div>
+
+            <!-- Tantangan -->
+            <div class="info-box">
+                <div class="info-box-header"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg><strong>Tantangan Mahasiswa</strong></div>
+                <p>1. Tambahkan halaman <code>DetailPostPage</code>. Saat user mengklik item di list, navigasi ke halaman tersebut dan tampilkan judul + body lengkap (bukan dialog).</p>
+                <p>2. Buat halaman <em>"Tambah Post Baru"</em> dengan dua <code>TextField</code> (judul & body) dan tombol <em>Submit</em> yang memanggil POST ke <code>https://jsonplaceholder.typicode.com/posts</code>.</p>
+                <p>3. Tampilkan <code>SnackBar</code> hijau jika berhasil dan merah jika gagal.</p>
+                <p>4. <strong>Bonus:</strong> Gunakan endpoint <code>/users</code> dari JSONPlaceholder untuk membuat aplikasi <em>"Direktori User"</em> di project lain. Tampilkan nama, email, kota, dan website tiap user.</p>
+            </div>
+
+            <!-- Nav -->
+            <div class="content-nav">
+                <div class="content-nav-item">
+                    <a href="/flutter/state-management.html" class="nav-btn nav-btn-prev">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                        <div><span class="nav-label">Sebelumnya</span><span class="nav-name">State Management</span></div>
+                    </a>
+                </div>
+                <div class="content-nav-item">
+                    <a href="/flutter/local-storage.html" class="nav-btn nav-btn-next">
+                        <div><span class="nav-label">Selanjutnya</span><span class="nav-name">Local Storage (SQLite)</span></div>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </a>
+                </div>
+            </div>
+        </article>
+    </main>
+
+    <script src="/flutter/course-layout.js"></script>
+    <script>
+    function copyCode(btn){const c=btn.closest('.code-block').querySelector('code');navigator.clipboard.writeText(c.textContent).then(()=>{btn.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>';setTimeout(()=>{btn.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>'},2000)})}
+    </script>
+</body>
+</html>
