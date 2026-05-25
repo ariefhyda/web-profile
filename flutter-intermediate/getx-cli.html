@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GetX CLI & Scaffolding — Flutter Intermediate</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/flutter/course.css">
+    <link rel="stylesheet" href="/flutter-intermediate/course.css">
+</head>
+<body>
+    <div class="bg-grid" aria-hidden="true"></div>
+    <nav class="navbar scrolled" id="navbar"></nav>
+    <div class="mobile-menu" id="mobileMenu"></div>
+    <main class="course-layout">
+        <aside class="course-sidebar" id="courseSidebar"></aside>
+        <article class="course-content">
+            <div class="breadcrumb">
+                <a href="../index.html">Home</a><span>›</span>
+                <a href="index.html">Flutter Intermediate</a><span>›</span>
+                <span style="color: var(--text-primary);">GetX CLI</span>
+            </div>
+            <header class="content-header">
+                <h1 class="content-title">Modul 4: GetX CLI & Scaffolding</h1>
+                <div class="content-meta">
+                    <div class="meta-pill"><span>Estimasi: 40 Menit</span></div>
+                    <div class="meta-pill"><span>Praktikum</span></div>
+                </div>
+            </header>
+
+            <p class="content-text">Bayangkan tiap kali bikin fitur baru harus: bikin folder, bikin 3 file (view, controller, binding), import package, daftar di routes... capek! <strong>GetX CLI</strong> mengotomatisasi semua itu — ketik 1 perintah, dapat folder lengkap. Hemat 5-10 menit per fitur.</p>
+
+            <div class="analogy-box">
+                <div class="analogy-icon">🍔</div>
+                <div class="analogy-content">
+                    <strong>Analogi: McDonald's vs Masak Sendiri</strong>
+                    <p>Mau makan burger? Bisa beli bahan, racik, panggang, plating sendiri (manual scaffolding). Atau langsung ke McD — pesan, 3 menit jadi (GetX CLI). Hasilnya: burger yang konsisten setiap kali. GetX CLI = scaffolding instan dengan struktur konsisten.</p>
+                </div>
+            </div>
+
+            <h2 class="content-heading">Instalasi GetX CLI</h2>
+            <p class="content-text">GetX CLI adalah <em>global package</em> Dart — perlu install satu kali per komputer.</p>
+
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">Terminal</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-comment"># Install global</span>
+dart pub global activate get_cli
+
+<span class="hl-comment"># Verifikasi instalasi</span>
+get --version
+<span class="hl-comment"># Output: get_cli vX.X.X</span>
+
+<span class="hl-comment"># Jika error "command not found", tambahkan ke PATH:</span>
+<span class="hl-comment"># macOS/Linux: export PATH="$PATH:$HOME/.pub-cache/bin"</span>
+<span class="hl-comment"># Windows: tambahkan %LOCALAPPDATA%\Pub\Cache\bin ke PATH</span></code></pre>
+            </div>
+
+            <h2 class="content-heading">CLI Command Simulator</h2>
+            <p class="content-text">Coba simulasikan perintah CLI dan lihat output yang dihasilkan tanpa harus install dulu.</p>
+
+            <div class="interactive-card">
+                <div class="interactive-title">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+                    GetX CLI Simulator
+                </div>
+                <p class="interactive-subtitle">Pilih command untuk melihat output dan struktur file yang dihasilkan.</p>
+                <div class="cli-terminal">
+                    <div class="cli-terminal-header">
+                        <div class="cli-terminal-dots"><span></span><span></span><span></span></div>
+                        <div class="cli-terminal-title">project_kelas/</div>
+                    </div>
+                    <div class="cli-terminal-body" id="cliBody">
+<span class="cli-info">$ Pilih command di bawah untuk menjalankan...</span>
+                    </div>
+                    <div class="cli-controls">
+                        <button class="btn-action btn-secondary" onclick="runCli('init')">get init</button>
+                        <button class="btn-action btn-secondary" onclick="runCli('page')">get create page:login</button>
+                        <button class="btn-action btn-secondary" onclick="runCli('controller')">get create controller:auth</button>
+                        <button class="btn-action btn-secondary" onclick="runCli('model')">get create model:user</button>
+                        <button class="btn-action btn-secondary" onclick="runCli('provider')">get create provider:user</button>
+                        <button class="btn-action btn-secondary" onclick="runCli('clear')">clear</button>
+                    </div>
+                </div>
+            </div>
+
+            <h2 class="content-heading">Perintah-perintah Penting</h2>
+
+            <h3 class="content-subheading">1. <code>get init</code> — Inisialisasi Proyek</h3>
+            <p class="content-text">Setup struktur folder GetX di proyek Flutter yang sudah ada. <strong>Wajib jalankan sekali</strong> sebelum perintah lain.</p>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">terminal</span>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-comment"># Di dalam folder proyek Flutter</span>
+get init
+
+<span class="hl-comment"># CLI akan tanya:</span>
+<span class="hl-comment"># - Mau pakai GetMaterialApp? (y/n)</span>
+<span class="hl-comment"># - Setup struktur folder? (y/n)</span>
+
+<span class="hl-comment"># Hasilnya: folder app/, routes/, modules/ otomatis terbuat</span></code></pre>
+            </div>
+
+            <h3 class="content-subheading">2. <code>get create page:nama</code> — Buat Halaman Lengkap</h3>
+            <p class="content-text">Generate 1 module lengkap (folder + 3 file: view, controller, binding) sekaligus daftarkan ke <code>app_pages.dart</code>.</p>
+
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">terminal</span>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-comment"># Buat halaman Login</span>
+get create page:login
+
+<span class="hl-comment"># Output: file-file berikut otomatis dibuat</span>
+<span class="hl-comment"># ├── lib/app/modules/login/</span>
+<span class="hl-comment"># │   ├── bindings/login_binding.dart</span>
+<span class="hl-comment"># │   ├── controllers/login_controller.dart</span>
+<span class="hl-comment"># │   └── views/login_view.dart</span>
+<span class="hl-comment"># └── lib/app/routes/app_pages.dart (auto-update)</span>
+
+<span class="hl-comment"># Buat halaman dengan sub-folder</span>
+get create page:profile/edit-profile</code></pre>
+            </div>
+
+            <h3 class="content-subheading">3. <code>get create controller:nama</code></h3>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">terminal</span>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-comment"># Tambah controller ke module yang sudah ada</span>
+get create controller:auth on home
+
+<span class="hl-comment"># Output: lib/app/modules/home/controllers/auth_controller.dart</span></code></pre>
+            </div>
+
+            <h3 class="content-subheading">4. <code>get create model:nama</code></h3>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">terminal</span>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-comment"># Generate Model dari JSON (otomatis fromJson + toJson)</span>
+get create model:user on home with assets/user.json
+
+<span class="hl-comment"># Atau model kosong</span>
+get create model:user</code></pre>
+            </div>
+
+            <h3 class="content-subheading">5. <code>get create provider:nama</code></h3>
+            <p class="content-text">Generate kelas Provider (HTTP client / API service):</p>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">terminal</span>
+                </div>
+                <pre class="code-block-body"><code>get create provider:product
+
+<span class="hl-comment"># Output: lib/app/data/providers/product_provider.dart</span>
+<span class="hl-comment"># Berisi ConnectService class dengan method GET/POST/PUT/DELETE</span></code></pre>
+            </div>
+
+            <h2 class="content-heading">Cheatsheet Lengkap</h2>
+            <table class="compare-table">
+                <thead>
+                    <tr><th>Perintah</th><th>Fungsi</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>get init</code></td><td>Setup awal struktur folder GetX</td></tr>
+                    <tr><td><code>get create page:nama</code></td><td>Buat 1 module lengkap (view + controller + binding)</td></tr>
+                    <tr><td><code>get create page:nama --no-folder</code></td><td>Buat module tanpa folder per file</td></tr>
+                    <tr><td><code>get create controller:nama on module</code></td><td>Tambah controller ke module yang ada</td></tr>
+                    <tr><td><code>get create view:nama on module</code></td><td>Tambah view ke module</td></tr>
+                    <tr><td><code>get create model:nama with file.json</code></td><td>Generate model dari JSON sample</td></tr>
+                    <tr><td><code>get create provider:nama</code></td><td>Generate API provider</td></tr>
+                    <tr><td><code>get create screen:nama</code></td><td>Bikin screen responsif (mobile/tablet/desktop layout)</td></tr>
+                    <tr><td><code>get install package_name</code></td><td>Tambah dependency ke pubspec.yaml</td></tr>
+                    <tr><td><code>get sort lib/</code></td><td>Auto-sort import di seluruh file</td></tr>
+                    <tr><td><code>get generate locales lang/</code></td><td>Generate file translation dari JSON</td></tr>
+                </tbody>
+            </table>
+
+            <h2 class="content-heading">Workflow Pengembangan Tipikal</h2>
+            <p class="content-text">Berikut alur kerja sehari-hari pakai GetX CLI:</p>
+
+            <div class="timeline-list">
+                <div class="timeline-entry">
+                    <div class="timeline-week">Step 1</div>
+                    <div class="timeline-title">Buat project Flutter & install GetX</div>
+                    <div class="timeline-desc"><code>flutter create my_app && cd my_app && flutter pub add get</code></div>
+                </div>
+                <div class="timeline-entry">
+                    <div class="timeline-week">Step 2</div>
+                    <div class="timeline-title">Inisialisasi struktur GetX</div>
+                    <div class="timeline-desc"><code>get init</code> — generate folder app/, routes/, dll.</div>
+                </div>
+                <div class="timeline-entry">
+                    <div class="timeline-week">Step 3</div>
+                    <div class="timeline-title">Buat halaman pertama</div>
+                    <div class="timeline-desc"><code>get create page:home</code> — view + controller + binding + auto register route.</div>
+                </div>
+                <div class="timeline-entry">
+                    <div class="timeline-week">Step 4</div>
+                    <div class="timeline-title">Tambah model & provider</div>
+                    <div class="timeline-desc"><code>get create model:user</code> + <code>get create provider:user</code></div>
+                </div>
+                <div class="timeline-entry">
+                    <div class="timeline-week">Step 5</div>
+                    <div class="timeline-title">Tulis logic di Controller, UI di View</div>
+                    <div class="timeline-desc">Buka file yang sudah di-generate, isi sesuai kebutuhan fitur.</div>
+                </div>
+                <div class="timeline-entry">
+                    <div class="timeline-week">Step 6</div>
+                    <div class="timeline-title">Halaman lanjutan</div>
+                    <div class="timeline-desc"><code>get create page:detail</code>, <code>get create page:profile</code>, dst. Konsisten dengan cepat!</div>
+                </div>
+            </div>
+
+            <h2 class="content-heading">Contoh: Buat 4 Halaman dalam 30 Detik</h2>
+            <p class="content-text">Tanpa CLI, ini butuh bikin folder + 12 file + register route manual = ~30 menit. Dengan CLI: 4 baris perintah.</p>
+
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">terminal — workflow real</span>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-comment"># Setup awal</span>
+flutter create blog_app
+cd blog_app
+flutter pub add get
+get init
+
+<span class="hl-comment"># 4 halaman dalam 4 perintah</span>
+get create page:home
+get create page:detail
+get create page:login
+get create page:profile
+
+<span class="hl-comment"># Model + provider untuk data</span>
+get create model:post
+get create model:user
+get create provider:post
+
+<span class="hl-comment"># Total: 7 perintah → struktur project lengkap! 🚀</span></code></pre>
+            </div>
+
+            <div class="success-box">
+                <div class="success-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                    Konsistensi = Kekuatan
+                </div>
+                <p>Manfaat tersembunyi CLI: <strong>konsistensi</strong>. Semua module punya struktur sama, naming sama, import sama. Saat tim Anda lihat fitur baru, mereka langsung tahu di mana file mana. Tidak ada "ah, fitur ini beda strukturnya karena dibuat sebelum kita standardisasi".</p>
+            </div>
+
+            <h2 class="content-heading">Trouble Shooting</h2>
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab(this, 'ts1')">Command not found</button>
+                <button class="tab-btn" onclick="switchTab(this, 'ts2')">Pubspec invalid</button>
+                <button class="tab-btn" onclick="switchTab(this, 'ts3')">Module sudah ada</button>
+            </div>
+            <div class="tab-content active" id="ts1">
+                <div class="warning-box">
+                    <div class="warning-box-header">⚠ "get: command not found"</div>
+                    <p><strong>Penyebab:</strong> PATH belum ter-set ke folder pub-cache.<br><strong>Solusi (macOS/Linux):</strong> Tambahkan ke <code>~/.zshrc</code> atau <code>~/.bashrc</code>:<br><code>export PATH="$PATH:$HOME/.pub-cache/bin"</code><br><strong>Solusi (Windows):</strong> Add ke Environment Variables: <code>%LOCALAPPDATA%\Pub\Cache\bin</code></p>
+                </div>
+            </div>
+            <div class="tab-content" id="ts2">
+                <div class="warning-box">
+                    <div class="warning-box-header">⚠ "Invalid pubspec.yaml"</div>
+                    <p>CLI biasanya error kalau project Flutter belum punya <code>get</code> di dependencies. Jalankan <code>flutter pub add get</code> dulu sebelum <code>get init</code>.</p>
+                </div>
+            </div>
+            <div class="tab-content" id="ts3">
+                <div class="warning-box">
+                    <div class="warning-box-header">⚠ "Module already exists"</div>
+                    <p>CLI tidak akan overwrite file yang sudah ada (safety feature). Jika ingin reset, hapus folder module-nya manual lalu jalankan ulang. Atau pakai nama berbeda.</p>
+                </div>
+            </div>
+
+            <div class="quiz">
+                <div class="quiz-title">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01"/></svg>
+                    Cek Pemahaman
+                </div>
+                <div class="quiz-question">
+                    <div class="quiz-q-text">1. Perintah <code>get create page:profile</code> akan menghasilkan...</div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'Hanya 1 file? Tidak — CLI juga generate controller & binding.')">Hanya 1 file profile_view.dart</div>
+                        <div class="quiz-option" data-correct="true" onclick="quizAnswer(this, 'Tepat! 3 file: view, controller, binding, + auto-register route.')">3 file (view, controller, binding) + register route</div>
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'Salah — folder profile di modules, bukan di root.')">Folder profile di root project</div>
+                    </div>
+                    <div class="quiz-feedback hidden"></div>
+                </div>
+                <div class="quiz-question">
+                    <div class="quiz-q-text">2. Sebelum bisa pakai GetX CLI, harus install package apa?</div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'flutter_cli bukan package resmi.')">flutter_cli</div>
+                        <div class="quiz-option" data-correct="true" onclick="quizAnswer(this, 'Tepat! get_cli adalah global Dart package.')">get_cli</div>
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'get adalah library state management, bukan CLI.')">get</div>
+                    </div>
+                    <div class="quiz-feedback hidden"></div>
+                </div>
+                <div class="quiz-question">
+                    <div class="quiz-q-text">3. Apa manfaat utama menggunakan CLI dibanding membuat file manual?</div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'CLI tidak otomatis menulis logic — hanya skeleton.')">Otomatis menulis semua logic</div>
+                        <div class="quiz-option" data-correct="true" onclick="quizAnswer(this, 'Tepat! Struktur konsisten, hemat waktu, auto register route.')">Hemat waktu + struktur konsisten antar fitur</div>
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'Salah — performa runtime sama saja.')">Aplikasi jadi lebih cepat</div>
+                    </div>
+                    <div class="quiz-feedback hidden"></div>
+                </div>
+            </div>
+
+            <div class="content-nav">
+                <div class="content-nav-item">
+                    <a href="arsitektur-getx.html" class="nav-btn nav-btn-prev">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                        <div><span class="nav-label">Sebelumnya</span><span class="nav-name">Arsitektur GetX</span></div>
+                    </a>
+                </div>
+                <div class="content-nav-item">
+                    <a href="state-management.html" class="nav-btn nav-btn-next">
+                        <div><span class="nav-label">Selanjutnya</span><span class="nav-name">State Management</span></div>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </a>
+                </div>
+            </div>
+        </article>
+    </main>
+    <script src="/flutter-intermediate/course-layout.js"></script>
+    <script>
+    function copyCode(btn) {
+        const codeBlock = btn.closest('.code-block').querySelector('code');
+        navigator.clipboard.writeText(codeBlock.textContent).then(() => {
+            btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>';
+            setTimeout(() => { btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>'; }, 2000);
+        });
+    }
+
+    const cliOutputs = {
+        init: '<span class="cli-prompt">$ get init</span>\n\n<span class="cli-info">? Set up the structure of the application? (Y/n)</span> y\n<span class="cli-info">? Replace MaterialApp with GetMaterialApp? (Y/n)</span> y\n\n<span class="cli-output">Generating folder structure...</span>\n<span class="cli-success">✓ Created lib/app/data/</span>\n<span class="cli-success">✓ Created lib/app/modules/</span>\n<span class="cli-success">✓ Created lib/app/routes/app_pages.dart</span>\n<span class="cli-success">✓ Created lib/app/routes/app_routes.dart</span>\n<span class="cli-success">✓ Updated lib/main.dart</span>\n\n<span class="cli-success">✅ All done! Run "get create page:home" to begin.</span>',
+        page: '<span class="cli-prompt">$ get create page:login</span>\n\n<span class="cli-output">Creating module login...</span>\n<span class="cli-success">✓ Created lib/app/modules/login/views/login_view.dart</span>\n<span class="cli-success">✓ Created lib/app/modules/login/controllers/login_controller.dart</span>\n<span class="cli-success">✓ Created lib/app/modules/login/bindings/login_binding.dart</span>\n<span class="cli-output">Updating routes...</span>\n<span class="cli-success">✓ Added Routes.LOGIN to app_routes.dart</span>\n<span class="cli-success">✓ Registered GetPage in app_pages.dart</span>\n\n<span class="cli-success">✅ Module "login" ready!</span>',
+        controller: '<span class="cli-prompt">$ get create controller:auth on home</span>\n\n<span class="cli-output">Adding controller to module home...</span>\n<span class="cli-success">✓ Created lib/app/modules/home/controllers/auth_controller.dart</span>\n\n<span class="cli-success">✅ Controller "AuthController" created in module "home".</span>\n<span class="cli-info">  Tip: register it in HomeBinding to inject automatically.</span>',
+        model: '<span class="cli-prompt">$ get create model:user</span>\n\n<span class="cli-output">Generating model...</span>\n<span class="cli-success">✓ Created lib/app/data/models/user_model.dart</span>\n\n<span class="cli-output">Generated class includes:</span>\n<span class="cli-info">  • Properties (id, name, email)</span>\n<span class="cli-info">  • Constructor with named parameters</span>\n<span class="cli-info">  • fromJson() factory</span>\n<span class="cli-info">  • toJson() method</span>\n\n<span class="cli-success">✅ Model "User" ready.</span>',
+        provider: '<span class="cli-prompt">$ get create provider:user</span>\n\n<span class="cli-output">Creating provider...</span>\n<span class="cli-success">✓ Created lib/app/data/providers/user_provider.dart</span>\n\n<span class="cli-output">Provider includes:</span>\n<span class="cli-info">  • GET, POST, PUT, DELETE methods</span>\n<span class="cli-info">  • Base URL configuration</span>\n<span class="cli-info">  • Error interceptor</span>\n\n<span class="cli-success">✅ UserProvider extends GetConnect — siap dipakai.</span>',
+        clear: ''
+    };
+    function runCli(cmd) {
+        const body = document.getElementById('cliBody');
+        if (cmd === 'clear') {
+            body.innerHTML = '<span class="cli-info">$ Pilih command di bawah untuk menjalankan...</span>';
+            return;
+        }
+        body.innerHTML = '<span class="cli-info">Running...</span>';
+        setTimeout(() => { body.innerHTML = cliOutputs[cmd]; body.scrollTop = body.scrollHeight; }, 300);
+    }
+
+    function switchTab(btn, id) {
+        btn.parentElement.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        btn.parentElement.parentElement.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+    }
+
+    function quizAnswer(el, feedback) {
+        const question = el.closest('.quiz-question');
+        const options = question.querySelectorAll('.quiz-option');
+        const fb = question.querySelector('.quiz-feedback');
+        options.forEach(o => {
+            o.style.pointerEvents = 'none';
+            if (o.dataset.correct === 'true') o.classList.add('correct');
+        });
+        if (el.dataset.correct !== 'true') el.classList.add('wrong');
+        fb.textContent = feedback;
+        fb.classList.remove('hidden');
+        fb.classList.add('visible');
+    }
+    </script>
+</body>
+</html>

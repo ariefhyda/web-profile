@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dependency Injection GetX — Flutter Intermediate</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/flutter/course.css">
+    <link rel="stylesheet" href="/flutter-intermediate/course.css">
+</head>
+<body>
+    <div class="bg-grid" aria-hidden="true"></div>
+    <nav class="navbar scrolled" id="navbar"></nav>
+    <div class="mobile-menu" id="mobileMenu"></div>
+    <main class="course-layout">
+        <aside class="course-sidebar" id="courseSidebar"></aside>
+        <article class="course-content">
+            <div class="breadcrumb">
+                <a href="../index.html">Home</a><span>›</span>
+                <a href="index.html">Flutter Intermediate</a><span>›</span>
+                <span style="color: var(--text-primary);">Dependency Injection</span>
+            </div>
+            <header class="content-header">
+                <h1 class="content-title">Modul 7: Dependency Injection (DI)</h1>
+                <div class="content-meta">
+                    <div class="meta-pill"><span>Estimasi: 50 Menit</span></div>
+                    <div class="meta-pill"><span>Teori & Demo</span></div>
+                </div>
+            </header>
+
+            <p class="content-text"><strong>Dependency Injection</strong> (DI) adalah pola di mana sebuah class <em>menerima</em> dependency-nya dari luar — bukan membuatnya sendiri. GetX menyediakan service locator built-in: <code>Get.put()</code>, <code>Get.lazyPut()</code>, dan <code>Get.find()</code>. Tidak perlu singleton manual, tidak perlu global variable.</p>
+
+            <div class="analogy-box">
+                <div class="analogy-icon">🚿</div>
+                <div class="analogy-content">
+                    <strong>Analogi: Kran Air</strong>
+                    <p>Bayangkan rumah tanpa pipa air — setiap kamar harus bikin sumur sendiri. Boros, ribet. <strong>DI</strong> = pipa air pusat (Get). Semua kamar (controller) tinggal buka kran (<code>Get.find</code>) — airnya datang. Mau ganti sumber air? Cukup ganti di satu tempat (Get.put).</p>
+                </div>
+            </div>
+
+            <h2 class="content-heading">Mengapa Butuh DI?</h2>
+
+            <div class="code-compare">
+                <div class="code-compare-block">
+                    <div class="code-compare-header bad">❌ Tanpa DI (tight coupling)</div>
+                    <pre class="code-compare-body"><code><span class="hl-keyword">class</span> ProductController {
+  <span class="hl-comment">// 👇 Bikin sendiri = bermasalah</span>
+  <span class="hl-keyword">final</span> repo = ProductRepository();
+}
+
+class CartController {
+  <span class="hl-comment">// 👇 Bikin lagi instance baru!</span>
+  <span class="hl-keyword">final</span> repo = ProductRepository();
+}
+
+<span class="hl-comment">// 🚨 2 instance berbeda</span>
+<span class="hl-comment">// 🚨 Sulit dites (tidak bisa mock)</span>
+<span class="hl-comment">// 🚨 Boros memory & API call</span></code></pre>
+                </div>
+                <div class="code-compare-block">
+                    <div class="code-compare-header good">✅ Dengan DI (loose coupling)</div>
+                    <pre class="code-compare-body"><code><span class="hl-comment">// Daftar 1x</span>
+Get.put(ProductRepository());
+
+<span class="hl-keyword">class</span> ProductController {
+  <span class="hl-comment">// 👇 Cari instance yang sudah ada</span>
+  <span class="hl-keyword">final</span> repo = Get.find&lt;ProductRepository&gt;();
+}
+
+<span class="hl-keyword">class</span> CartController {
+  <span class="hl-comment">// 👇 Instance yang SAMA</span>
+  <span class="hl-keyword">final</span> repo = Get.find&lt;ProductRepository&gt;();
+}
+
+<span class="hl-comment">// 🎉 1 instance, dipakai berdua</span>
+<span class="hl-comment">// 🎉 Bisa di-mock untuk testing</span>
+<span class="hl-comment">// 🎉 Hemat memory & cache</span></code></pre>
+                </div>
+            </div>
+
+            <h2 class="content-heading">3 Method Utama DI di GetX</h2>
+
+            <table class="compare-table">
+                <thead>
+                    <tr><th>Method</th><th>Kapan Dibuat</th><th>Lifecycle</th><th>Use Case</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>Get.put(X())</code></td><td>Langsung (eager)</td><td>Dihapus saat halaman ditutup (jika di Binding)</td><td>Controller halaman aktif</td></tr>
+                    <tr><td><code>Get.put(X(), permanent: true)</code></td><td>Langsung</td><td>Hidup sampai app mati</td><td>AuthService, ThemeService</td></tr>
+                    <tr><td><code>Get.lazyPut(() =&gt; X())</code></td><td>Saat dipanggil pertama kali</td><td>Dihapus saat tidak dipakai</td><td>Resource berat yang tidak selalu dipakai</td></tr>
+                    <tr><td><code>Get.putAsync(() async =&gt; ...)</code></td><td>Dengan async init</td><td>Sama seperti put</td><td>Init SharedPreferences, Hive</td></tr>
+                    <tr><td><code>Get.create(() =&gt; X())</code></td><td>Instance baru tiap dipanggil</td><td>Tidak di-cache</td><td>Form yang butuh state segar</td></tr>
+                </tbody>
+            </table>
+
+            <h2 class="content-heading">DI Lifecycle Simulator</h2>
+            <p class="content-text">Visualisasikan bagaimana <code>Get.put</code>, <code>Get.lazyPut</code>, dan <code>Get.find</code> bekerja. Coba klik tombol-tombol untuk lihat apa yang terjadi di memory.</p>
+
+            <div class="interactive-card">
+                <div class="interactive-title">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="10" r="3"/><path d="M7 20.662V19a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v1.662"/></svg>
+                    GetX Memory Visualizer
+                </div>
+                <p class="interactive-subtitle">Tombol di bawah mensimulasi panggilan Get.put/lazyPut/find. Lihat instance yang aktif di memory.</p>
+                <div class="di-board">
+                    <div class="di-controls">
+                        <button class="btn-action" onclick="diPut('AuthService', true)">Get.put(AuthService, permanent: true)</button>
+                        <button class="btn-action" onclick="diPut('HomeController', false)">Get.put(HomeController)</button>
+                        <button class="btn-action btn-secondary" onclick="diLazy('SearchController')">Get.lazyPut(SearchController)</button>
+                        <button class="btn-action btn-secondary" onclick="diFind('SearchController')">Get.find&lt;SearchController&gt;()</button>
+                        <button class="btn-action btn-secondary" onclick="diDelete('HomeController')">Get.delete(HomeController)</button>
+                        <button class="btn-action btn-secondary" onclick="diReset()">Reset</button>
+                    </div>
+                    <div style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.08em;">📦 Memory (Get._instances)</div>
+                    <div class="di-instances" id="diInstances">
+                        <span style="grid-column: 1 / -1; padding: 14px; text-align: center; color: var(--text-muted); font-size: 0.85rem;">(memory kosong)</span>
+                    </div>
+                    <div class="di-log" id="diLog"></div>
+                </div>
+            </div>
+
+            <h2 class="content-heading">Pola Penggunaan Tipikal</h2>
+
+            <h3 class="content-subheading">1. AuthService — Permanent (dipakai sepanjang app)</h3>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">main.dart</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-keyword">void</span> main() <span class="hl-keyword">async</span> {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  <span class="hl-comment">// Service yang dipakai SEPANJANG app — permanent</span>
+  Get.put(AuthService(),  permanent: <span class="hl-keyword">true</span>);
+  Get.put(ThemeService(), permanent: <span class="hl-keyword">true</span>);
+
+  <span class="hl-comment">// Service async (perlu await init)</span>
+  <span class="hl-keyword">await</span> Get.putAsync(() <span class="hl-keyword">async</span> {
+    <span class="hl-keyword">final</span> service = StorageService();
+    <span class="hl-keyword">await</span> service.init();
+    <span class="hl-keyword">return</span> service;
+  });
+
+  runApp(MyApp());
+}</code></pre>
+            </div>
+
+            <h3 class="content-subheading">2. Controller via Binding (per route)</h3>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">home_binding.dart</span>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-keyword">class</span> HomeBinding <span class="hl-keyword">extends</span> Bindings {
+  <span class="hl-keyword">@override</span>
+  <span class="hl-keyword">void</span> dependencies() {
+    <span class="hl-comment">// Repository — lazyPut, dibuat saat pertama dipanggil</span>
+    Get.lazyPut(() =&gt; ProductRepository());
+
+    <span class="hl-comment">// Controller — pakai Get.find untuk inject repository</span>
+    Get.lazyPut(() =&gt; HomeController(
+      repository: Get.find&lt;ProductRepository&gt;(),
+    ));
+  }
+}
+
+<span class="hl-comment">// Saat /home dibuka → dependencies() jalan</span>
+<span class="hl-comment">// Saat /home ditutup → dependency dihapus dari memory</span></code></pre>
+            </div>
+
+            <h3 class="content-subheading">3. Akses dari Controller / Service Lain</h3>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">akses dependency</span>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-keyword">class</span> CartController <span class="hl-keyword">extends</span> GetxController {
+  <span class="hl-comment">// Cara 1: di property — Get.find dijalankan saat instance dibuat</span>
+  <span class="hl-keyword">final</span> AuthService _auth = Get.find&lt;AuthService&gt;();
+
+  <span class="hl-comment">// Cara 2: di method (lebih flexible)</span>
+  <span class="hl-keyword">void</span> checkout() {
+    <span class="hl-keyword">final</span> auth = Get.find&lt;AuthService&gt;();
+    <span class="hl-keyword">if</span> (!auth.isLoggedIn) {
+      Get.toNamed(<span class="hl-string">'/login'</span>);
+      <span class="hl-keyword">return</span>;
+    }
+    <span class="hl-comment">// ... lanjut checkout</span>
+  }
+}
+
+<span class="hl-comment">// Helper shortcut — kalau hanya 1 instance</span>
+<span class="hl-keyword">final</span> auth = Get.find&lt;AuthService&gt;();
+<span class="hl-comment">// Setara dengan: Get.find&lt;AuthService&gt;(tag: null)</span>
+
+<span class="hl-comment">// Beberapa instance dengan tag</span>
+Get.put(ApiClient(<span class="hl-string">'prod'</span>), tag: <span class="hl-string">'prod'</span>);
+Get.put(ApiClient(<span class="hl-string">'staging'</span>), tag: <span class="hl-string">'staging'</span>);
+<span class="hl-keyword">final</span> stagingApi = Get.find&lt;ApiClient&gt;(tag: <span class="hl-string">'staging'</span>);</code></pre>
+            </div>
+
+            <h2 class="content-heading">Get.put vs lazyPut — Kapan Pakai Apa?</h2>
+            <table class="compare-table">
+                <thead>
+                    <tr><th>Skenario</th><th>Rekomendasi</th><th>Alasan</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Service global (Auth, Theme)</td><td><code>put(permanent: true)</code></td><td>Dipakai sepanjang app</td></tr>
+                    <tr><td>Controller halaman aktif</td><td><code>lazyPut</code> di Binding</td><td>Hanya saat halaman aktif</td></tr>
+                    <tr><td>Resource berat & jarang dipakai</td><td><code>lazyPut</code></td><td>Hanya dibuat jika perlu</td></tr>
+                    <tr><td>Init async (Hive, SharedPreferences)</td><td><code>putAsync</code></td><td>Bisa await init</td></tr>
+                    <tr><td>State per-form (registrasi)</td><td><code>create</code></td><td>Instance segar tiap dipanggil</td></tr>
+                </tbody>
+            </table>
+
+            <h2 class="content-heading">GetxService vs GetxController</h2>
+            <p class="content-text">GetX punya dua tipe class untuk DI: <code>GetxController</code> (dihapus saat tidak dipakai) dan <code>GetxService</code> (tidak pernah dihapus, kecuali manual). Pilih sesuai kebutuhan.</p>
+
+            <div class="code-compare">
+                <div class="code-compare-block">
+                    <div class="code-compare-header bad">📦 GetxController</div>
+                    <pre class="code-compare-body"><code><span class="hl-keyword">class</span> ProductController <span class="hl-keyword">extends</span> GetxController {
+  <span class="hl-keyword">final</span> products = &lt;Product&gt;[].obs;
+
+  <span class="hl-comment">// Hidup hanya saat halaman aktif</span>
+  <span class="hl-comment">// Auto-deleted saat halaman ditutup</span>
+}
+
+<span class="hl-comment">// Daftarkan di Binding</span>
+Get.lazyPut(() =&gt; ProductController());</code></pre>
+                </div>
+                <div class="code-compare-block">
+                    <div class="code-compare-header good">🌟 GetxService</div>
+                    <pre class="code-compare-body"><code><span class="hl-keyword">class</span> ApiClient <span class="hl-keyword">extends</span> GetxService {
+  Future&lt;ApiClient&gt; init() <span class="hl-keyword">async</span> {
+    <span class="hl-comment">// init logic</span>
+    <span class="hl-keyword">return</span> <span class="hl-keyword">this</span>;
+  }
+
+  <span class="hl-comment">// Hidup selama app jalan</span>
+  <span class="hl-comment">// Tidak akan dihapus Get.delete()</span>
+}
+
+<span class="hl-comment">// Daftarkan di main()</span>
+<span class="hl-keyword">await</span> Get.putAsync(() =&gt; ApiClient().init());</code></pre>
+                </div>
+            </div>
+
+            <h2 class="content-heading">Testing dengan DI (Bonus)</h2>
+            <p class="content-text">Salah satu keuntungan terbesar DI: kemudahan testing. Anda bisa <em>mock</em> service untuk unit test.</p>
+
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">test/home_controller_test.dart</span>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-keyword">import</span> <span class="hl-string">'package:flutter_test/flutter_test.dart'</span>;
+<span class="hl-keyword">import</span> <span class="hl-string">'package:get/get.dart'</span>;
+<span class="hl-keyword">import</span> <span class="hl-string">'package:mockito/mockito.dart'</span>;
+
+<span class="hl-keyword">class</span> MockProductRepo <span class="hl-keyword">extends</span> Mock <span class="hl-keyword">implements</span> ProductRepository {}
+
+<span class="hl-keyword">void</span> main() {
+  test(<span class="hl-string">'HomeController loads products'</span>, () <span class="hl-keyword">async</span> {
+    <span class="hl-keyword">final</span> mockRepo = MockProductRepo();
+    when(mockRepo.getAll()).thenAnswer((_) <span class="hl-keyword">async</span> =&gt; [Product(...)]);
+
+    <span class="hl-comment">// Inject mock</span>
+    Get.put&lt;ProductRepository&gt;(mockRepo);
+
+    <span class="hl-keyword">final</span> controller = HomeController(repository: mockRepo);
+    <span class="hl-keyword">await</span> controller.loadProducts();
+
+    expect(controller.products.length, <span class="hl-number">1</span>);
+  });
+}</code></pre>
+            </div>
+
+            <h2 class="content-heading">Best Practices</h2>
+            <ol class="content-list">
+                <li><strong>Daftarkan service global di <code>main()</code></strong> dengan <code>permanent: true</code>. Contoh: AuthService, ThemeService, ApiClient.</li>
+                <li><strong>Pakai Binding untuk controller halaman</strong>. GetX akan auto-cleanup saat halaman ditutup.</li>
+                <li><strong>Pakai <code>lazyPut</code> kalau ragu</strong>. Resource hanya dibuat jika benar-benar dipakai = hemat memory & startup time.</li>
+                <li><strong>Inject lewat constructor</strong> (bukan <code>Get.find</code> di property) saat butuh testable code. Membuat dependency eksplisit.</li>
+                <li><strong>Hindari Get.find di build()</strong>. Panggil di onInit() controller atau di constructor — bukan di setiap rebuild widget.</li>
+            </ol>
+
+            <div class="warning-box">
+                <div class="warning-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+                    "Get.find raised an Exception"
+                </div>
+                <p>Error paling umum. Penyebab: panggil <code>Get.find&lt;X&gt;()</code> sebelum X di-<code>put()</code>. Solusinya: pastikan di-put dulu (di main, binding, atau dalam initState parent widget). Cek juga apakah Binding sudah di-attach ke route.</p>
+            </div>
+
+            <div class="quiz">
+                <div class="quiz-title">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01"/></svg>
+                    Cek Pemahaman
+                </div>
+                <div class="quiz-question">
+                    <div class="quiz-q-text">1. Apa beda <code>Get.put()</code> dan <code>Get.lazyPut()</code>?</div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'Salah — lazyPut justru memorize, hanya buat saat dibutuhkan.')">put lebih lambat</div>
+                        <div class="quiz-option" data-correct="true" onclick="quizAnswer(this, 'Tepat! put = langsung, lazyPut = ditunda sampai Get.find().')">put langsung instantiate, lazyPut menunda sampai dipanggil</div>
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'Salah — lifetime tergantung opsi, bukan tipe method.')">put hidup selamanya, lazyPut hanya sementara</div>
+                    </div>
+                    <div class="quiz-feedback hidden"></div>
+                </div>
+                <div class="quiz-question">
+                    <div class="quiz-q-text">2. Untuk service global (AuthService) yang harus hidup sepanjang app, opsi yang tepat adalah...</div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'lazyPut bisa dihapus saat tidak dipakai — tidak cocok.')">Get.lazyPut(() => AuthService())</div>
+                        <div class="quiz-option" data-correct="true" onclick="quizAnswer(this, 'Tepat! permanent: true cegah dari auto-delete.')">Get.put(AuthService(), permanent: true)</div>
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'Ini malah membuat instance BARU tiap panggilan.')">Get.create(() => AuthService())</div>
+                    </div>
+                    <div class="quiz-feedback hidden"></div>
+                </div>
+                <div class="quiz-question">
+                    <div class="quiz-q-text">3. Apa keuntungan DI untuk testing?</div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'DI tidak mempengaruhi sintaks test secara langsung.')">Test lebih cepat dijalankan</div>
+                        <div class="quiz-option" data-correct="true" onclick="quizAnswer(this, 'Tepat! Bisa swap repository asli dengan mock untuk unit test.')">Bisa mock dependency untuk isolated unit test</div>
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'Salah — test tetap perlu ditulis manual.')">Otomatis generate test</div>
+                    </div>
+                    <div class="quiz-feedback hidden"></div>
+                </div>
+            </div>
+
+            <div class="content-nav">
+                <div class="content-nav-item">
+                    <a href="routing-middleware.html" class="nav-btn nav-btn-prev">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                        <div><span class="nav-label">Sebelumnya</span><span class="nav-name">Routing & Middleware</span></div>
+                    </a>
+                </div>
+                <div class="content-nav-item">
+                    <a href="final-project.html" class="nav-btn nav-btn-next">
+                        <div><span class="nav-label">Selanjutnya</span><span class="nav-name">Final Project</span></div>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </a>
+                </div>
+            </div>
+        </article>
+    </main>
+    <script src="/flutter-intermediate/course-layout.js"></script>
+    <script>
+    function copyCode(btn) {
+        const codeBlock = btn.closest('.code-block').querySelector('code');
+        navigator.clipboard.writeText(codeBlock.textContent).then(() => {
+            btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>';
+            setTimeout(() => { btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>'; }, 2000);
+        });
+    }
+
+    const instances = {};
+    function diRender() {
+        const el = document.getElementById('diInstances');
+        const keys = Object.keys(instances);
+        if (keys.length === 0) {
+            el.innerHTML = '<span style="grid-column: 1 / -1; padding: 14px; text-align: center; color: var(--text-muted); font-size: 0.85rem;">(memory kosong)</span>';
+            return;
+        }
+        el.innerHTML = keys.map(k => {
+            const inst = instances[k];
+            const cls = (inst.permanent ? 'permanent' : '') + (inst.lazy ? ' lazy' : '') + (inst.activated ? ' activated' : '');
+            const tag = inst.permanent ? 'permanent' : (inst.lazy && !inst.activated ? 'lazy (belum aktif)' : (inst.lazy ? 'lazy (aktif)' : 'normal'));
+            return `<div class="di-instance ${cls}"><div class="di-instance-name">${k}</div><div class="di-instance-tag">${tag}</div></div>`;
+        }).join('');
+    }
+    function diLog(msg, type) {
+        const el = document.getElementById('diLog');
+        const color = type === 'success' ? '#c3e88d' : (type === 'warn' ? '#ffcb6b' : '#e2e8f0');
+        el.innerHTML += `<div style="color:${color}">${msg}</div>`;
+        el.scrollTop = el.scrollHeight;
+    }
+    function diPut(name, permanent) {
+        if (instances[name]) {
+            diLog(`⚠ ${name} sudah ada — Get.put() menimpa instance lama.`, 'warn');
+        } else {
+            diLog(`✓ Get.put(${name}()${permanent ? ', permanent: true' : ''}) — instance dibuat.`, 'success');
+        }
+        instances[name] = { permanent, lazy: false, activated: true };
+        diRender();
+    }
+    function diLazy(name) {
+        if (instances[name]) {
+            diLog(`⚠ ${name} sudah ada di memory.`, 'warn');
+        } else {
+            instances[name] = { permanent: false, lazy: true, activated: false };
+            diLog(`💤 Get.lazyPut(() => ${name}()) — terdaftar, belum dibuat. Akan dibuat saat pertama kali Get.find.`, 'success');
+        }
+        diRender();
+    }
+    function diFind(name) {
+        if (!instances[name]) {
+            diLog(`✗ Get.find<${name}>() ERROR: instance belum terdaftar!`, 'warn');
+            return;
+        }
+        if (instances[name].lazy && !instances[name].activated) {
+            instances[name].activated = true;
+            diLog(`✨ Get.find<${name}>() — lazy instance baru saja dibuat!`, 'success');
+        } else {
+            diLog(`✓ Get.find<${name}>() — mengembalikan instance yang sudah ada.`, 'success');
+        }
+        diRender();
+    }
+    function diDelete(name) {
+        if (!instances[name]) {
+            diLog(`✗ Get.delete<${name}>() — tidak ada instance yang bisa dihapus.`, 'warn');
+            return;
+        }
+        if (instances[name].permanent) {
+            diLog(`✗ Get.delete<${name}>() — permanent: true, tidak bisa dihapus!`, 'warn');
+            return;
+        }
+        delete instances[name];
+        diLog(`🗑 Get.delete<${name}>() — instance dihapus dari memory.`, 'success');
+        diRender();
+    }
+    function diReset() {
+        Object.keys(instances).forEach(k => delete instances[k]);
+        document.getElementById('diLog').innerHTML = '';
+        diRender();
+    }
+
+    function quizAnswer(el, feedback) {
+        const question = el.closest('.quiz-question');
+        const options = question.querySelectorAll('.quiz-option');
+        const fb = question.querySelector('.quiz-feedback');
+        options.forEach(o => {
+            o.style.pointerEvents = 'none';
+            if (o.dataset.correct === 'true') o.classList.add('correct');
+        });
+        if (el.dataset.correct !== 'true') el.classList.add('wrong');
+        fb.textContent = feedback;
+        fb.classList.remove('hidden');
+        fb.classList.add('visible');
+    }
+    </script>
+</body>
+</html>

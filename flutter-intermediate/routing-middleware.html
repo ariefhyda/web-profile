@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Routing & Middleware GetX — Flutter Intermediate</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/flutter/course.css">
+    <link rel="stylesheet" href="/flutter-intermediate/course.css">
+</head>
+<body>
+    <div class="bg-grid" aria-hidden="true"></div>
+    <nav class="navbar scrolled" id="navbar"></nav>
+    <div class="mobile-menu" id="mobileMenu"></div>
+    <main class="course-layout">
+        <aside class="course-sidebar" id="courseSidebar"></aside>
+        <article class="course-content">
+            <div class="breadcrumb">
+                <a href="../index.html">Home</a><span>›</span>
+                <a href="index.html">Flutter Intermediate</a><span>›</span>
+                <span style="color: var(--text-primary);">Routing & Middleware</span>
+            </div>
+            <header class="content-header">
+                <h1 class="content-title">Modul 6: Routing & Middleware</h1>
+                <div class="content-meta">
+                    <div class="meta-pill"><span>Estimasi: 55 Menit</span></div>
+                    <div class="meta-pill"><span>Teori & Praktikum</span></div>
+                </div>
+            </header>
+
+            <p class="content-text">Salah satu fitur GetX yang paling disukai: <strong>navigasi tanpa context</strong>. Anda bisa pindah halaman, lempar parameter, atau push dialog dari mana saja — Controller, Service, bahkan dari background task. Plus, sistem <strong>middleware</strong>-nya jauh lebih simpel daripada Navigator 2.0.</p>
+
+            <div class="analogy-box">
+                <div class="analogy-icon">🗺️</div>
+                <div class="analogy-content">
+                    <strong>Analogi: GPS vs Peta Lipat</strong>
+                    <p><strong>Navigator manual</strong> = peta lipat. Anda harus tahu posisi (context), buka peta, cari jalan. <strong>GetX routing</strong> = GPS. "Anter saya ke /profile" — selesai. Tidak peduli posisi saat ini. Hemat banyak baris kode.</p>
+                </div>
+            </div>
+
+            <h2 class="content-heading">Navigasi Dasar</h2>
+            <p class="content-text">Ada dua cara navigasi di GetX: <strong>direct push</strong> (lempar widget langsung) dan <strong>named route</strong> (pakai nama yang sudah didaftarkan).</p>
+
+            <div class="code-compare">
+                <div class="code-compare-block">
+                    <div class="code-compare-header bad">😐 Cara Navigator Klasik</div>
+                    <pre class="code-compare-body"><code><span class="hl-comment">// Push</span>
+Navigator.push(
+  context,
+  MaterialPageRoute(
+    builder: (_) =&gt; DetailPage(),
+  ),
+);
+
+<span class="hl-comment">// Named route</span>
+Navigator.pushNamed(context, <span class="hl-string">'/detail'</span>);
+
+<span class="hl-comment">// Pop</span>
+Navigator.pop(context);
+
+<span class="hl-comment">// 👎 Butuh context di mana-mana</span></code></pre>
+                </div>
+                <div class="code-compare-block">
+                    <div class="code-compare-header good">✨ Cara GetX</div>
+                    <pre class="code-compare-body"><code><span class="hl-comment">// Push</span>
+Get.to(() =&gt; DetailPage());
+
+<span class="hl-comment">// Named route</span>
+Get.toNamed(<span class="hl-string">'/detail'</span>);
+
+<span class="hl-comment">// Pop</span>
+Get.back();
+
+<span class="hl-comment">// 👍 Tanpa context</span>
+<span class="hl-comment">// 👍 Bisa dipanggil dari Controller</span>
+<span class="hl-comment">// 👍 Lebih singkat</span></code></pre>
+                </div>
+            </div>
+
+            <h2 class="content-heading">Method Navigasi Lengkap</h2>
+            <table class="compare-table">
+                <thead>
+                    <tr><th>Method</th><th>Padanan Navigator</th><th>Fungsi</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>Get.to(Page())</code></td><td>push</td><td>Push halaman baru, halaman lama tetap di stack</td></tr>
+                    <tr><td><code>Get.toNamed("/x")</code></td><td>pushNamed</td><td>Push pakai nama route</td></tr>
+                    <tr><td><code>Get.off(Page())</code></td><td>pushReplacement</td><td>Ganti halaman saat ini (halaman lama hilang)</td></tr>
+                    <tr><td><code>Get.offAll(Page())</code></td><td>pushAndRemoveUntil</td><td>Hapus seluruh stack, jadikan halaman ini root</td></tr>
+                    <tr><td><code>Get.back()</code></td><td>pop</td><td>Kembali ke halaman sebelumnya</td></tr>
+                    <tr><td><code>Get.back(result: data)</code></td><td>pop dengan data</td><td>Kembali sambil kirim data</td></tr>
+                    <tr><td><code>Get.until((r) =&gt; r.name == '/home')</code></td><td>popUntil</td><td>Pop sampai ketemu route tertentu</td></tr>
+                </tbody>
+            </table>
+
+            <h2 class="content-heading">Setup Named Routes (Wajib untuk Project Beneran)</h2>
+            <p class="content-text">Hardcode <code>Get.toNamed('/detail')</code> rentan typo. Pakai konstanta:</p>
+
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">app/routes/app_routes.dart</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-comment">// Konstanta nama route</span>
+<span class="hl-keyword">abstract</span> <span class="hl-keyword">class</span> Routes {
+  <span class="hl-keyword">static</span> <span class="hl-keyword">const</span> SPLASH = <span class="hl-string">'/'</span>;
+  <span class="hl-keyword">static</span> <span class="hl-keyword">const</span> LOGIN = <span class="hl-string">'/login'</span>;
+  <span class="hl-keyword">static</span> <span class="hl-keyword">const</span> HOME = <span class="hl-string">'/home'</span>;
+  <span class="hl-keyword">static</span> <span class="hl-keyword">const</span> PROFILE = <span class="hl-string">'/profile'</span>;
+  <span class="hl-keyword">static</span> <span class="hl-keyword">const</span> POST_DETAIL = <span class="hl-string">'/post/:id'</span>; <span class="hl-comment">// dengan parameter</span>
+}</code></pre>
+            </div>
+
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">app/routes/app_pages.dart</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-keyword">class</span> AppPages {
+  <span class="hl-keyword">static</span> <span class="hl-keyword">final</span> List&lt;GetPage&gt; routes = [
+    GetPage(
+      name: Routes.SPLASH,
+      page: () =&gt; <span class="hl-keyword">const</span> SplashView(),
+      binding: SplashBinding(),
+    ),
+    GetPage(
+      name: Routes.LOGIN,
+      page: () =&gt; <span class="hl-keyword">const</span> LoginView(),
+      binding: LoginBinding(),
+      transition: Transition.fadeIn,        <span class="hl-comment">// kustom transisi</span>
+      transitionDuration: Duration(milliseconds: 300),
+    ),
+    GetPage(
+      name: Routes.HOME,
+      page: () =&gt; <span class="hl-keyword">const</span> HomeView(),
+      binding: HomeBinding(),
+      middlewares: [AuthMiddleware()],       <span class="hl-comment">// proteksi route</span>
+    ),
+    GetPage(
+      name: Routes.POST_DETAIL,
+      page: () =&gt; <span class="hl-keyword">const</span> PostDetailView(),
+      binding: PostDetailBinding(),
+    ),
+  ];
+}</code></pre>
+            </div>
+
+            <h2 class="content-heading">Passing Parameter Antar Halaman</h2>
+
+            <h3 class="content-subheading">Cara 1: Arguments (Object/Map)</h3>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">arguments</span>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-comment">// 1. Kirim — bisa Map, atau object apapun</span>
+Get.toNamed(Routes.PROFILE, arguments: {
+  <span class="hl-string">'userId'</span>: <span class="hl-number">42</span>,
+  <span class="hl-string">'name'</span>: <span class="hl-string">'Arif'</span>,
+});
+
+<span class="hl-comment">// 2. Terima di halaman tujuan</span>
+<span class="hl-keyword">class</span> ProfileView <span class="hl-keyword">extends</span> StatelessWidget {
+  <span class="hl-keyword">@override</span>
+  Widget build(_) {
+    <span class="hl-keyword">final</span> args = Get.arguments <span class="hl-keyword">as</span> Map;
+    <span class="hl-keyword">final</span> userId = args[<span class="hl-string">'userId'</span>];
+    <span class="hl-keyword">final</span> name   = args[<span class="hl-string">'name'</span>];
+    <span class="hl-keyword">return</span> Text(<span class="hl-string">'Halo $name (ID: $userId)'</span>);
+  }
+}</code></pre>
+            </div>
+
+            <h3 class="content-subheading">Cara 2: URL Parameter (Lebih RESTful)</h3>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">URL parameter</span>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-comment">// Definisi route dengan placeholder :id</span>
+GetPage(name: <span class="hl-string">'/post/:id'</span>, page: () =&gt; PostDetailView()),
+
+<span class="hl-comment">// Kirim</span>
+Get.toNamed(<span class="hl-string">'/post/42'</span>);
+<span class="hl-comment">// Atau: Get.toNamed('/post/${post.id}');</span>
+
+<span class="hl-comment">// Terima</span>
+<span class="hl-keyword">final</span> id = Get.parameters[<span class="hl-string">'id'</span>]; <span class="hl-comment">// '42'</span>
+
+<span class="hl-comment">// Query string</span>
+Get.toNamed(<span class="hl-string">'/search?q=flutter&page=2'</span>);
+<span class="hl-comment">// Terima</span>
+<span class="hl-keyword">final</span> q    = Get.parameters[<span class="hl-string">'q'</span>];
+<span class="hl-keyword">final</span> page = Get.parameters[<span class="hl-string">'page'</span>];</code></pre>
+            </div>
+
+            <h3 class="content-subheading">Cara 3: Async Result (Tunggu Halaman Balik)</h3>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">async result</span>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-comment">// Di halaman A</span>
+<span class="hl-keyword">final</span> result = <span class="hl-keyword">await</span> Get.toNamed(<span class="hl-string">'/picker'</span>);
+print(result); <span class="hl-comment">// 'apel'</span>
+
+<span class="hl-comment">// Di halaman B (picker)</span>
+ElevatedButton(
+  onPressed: () =&gt; Get.back(result: <span class="hl-string">'apel'</span>),
+  child: Text(<span class="hl-string">'Pilih Apel'</span>),
+)</code></pre>
+            </div>
+
+            <h2 class="content-heading">Transition Animations</h2>
+            <p class="content-text">GetX menyediakan 13+ transisi siap pakai. Set di <code>GetPage</code> atau saat <code>Get.to()</code>.</p>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">transitions</span>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-comment">// Per halaman (di app_pages.dart)</span>
+GetPage(
+  name: Routes.LOGIN,
+  page: () =&gt; LoginView(),
+  transition: Transition.rightToLeft,
+  transitionDuration: Duration(milliseconds: 400),
+)
+
+<span class="hl-comment">// Atau ad-hoc di Get.to()</span>
+Get.to(DetailPage(), transition: Transition.fadeIn);
+
+<span class="hl-comment">// Default untuk seluruh app</span>
+GetMaterialApp(
+  defaultTransition: Transition.cupertino,
+  transitionDuration: Duration(milliseconds: 300),
+)
+
+<span class="hl-comment">// Available: fade, fadeIn, rightToLeft, leftToRight, upToDown, downToUp,</span>
+<span class="hl-comment">// rightToLeftWithFade, leftToRightWithFade, zoom, topLevel, noTransition,</span>
+<span class="hl-comment">// cupertino, cupertinoDialog, size, native</span></code></pre>
+            </div>
+
+            <h2 class="content-heading">Middleware — Auth Guard</h2>
+            <p class="content-text"><strong>Middleware</strong> adalah filter yang dijalankan <em>sebelum</em> halaman dimuat. Tipikal: cek login, cek role, redirect, atau logging. GetX punya 5 method override.</p>
+
+            <table class="compare-table">
+                <thead>
+                    <tr><th>Method</th><th>Kapan Dipanggil</th><th>Use Case</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>redirect()</code></td><td>Sebelum halaman dimuat</td><td>Auth guard, role check</td></tr>
+                    <tr><td><code>onPageCalled()</code></td><td>Saat route dipanggil (sebelum binding)</td><td>Modifikasi halaman</td></tr>
+                    <tr><td><code>onBindingsStart()</code></td><td>Sebelum Binding.dependencies() jalan</td><td>Persiapan dependency tambahan</td></tr>
+                    <tr><td><code>onPageBuildStart()</code></td><td>Sebelum widget di-build</td><td>Logging</td></tr>
+                    <tr><td><code>onPageDispose()</code></td><td>Saat halaman ditutup</td><td>Cleanup khusus halaman</td></tr>
+                </tbody>
+            </table>
+
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">middleware/auth_middleware.dart</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-keyword">import</span> <span class="hl-string">'package:get/get.dart'</span>;
+<span class="hl-keyword">import</span> <span class="hl-string">'package:flutter/material.dart'</span>;
+
+<span class="hl-keyword">class</span> AuthMiddleware <span class="hl-keyword">extends</span> GetMiddleware {
+  <span class="hl-keyword">@override</span>
+  <span class="hl-keyword">int</span>? <span class="hl-keyword">get</span> priority =&gt; <span class="hl-number">1</span>; <span class="hl-comment">// urutan eksekusi (lebih rendah duluan)</span>
+
+  <span class="hl-keyword">@override</span>
+  RouteSettings? redirect(String? route) {
+    <span class="hl-comment">// Cek apakah user sudah login</span>
+    <span class="hl-keyword">final</span> auth = Get.find&lt;AuthService&gt;();
+
+    <span class="hl-keyword">if</span> (!auth.isLoggedIn) {
+      <span class="hl-comment">// Belum login → redirect ke login</span>
+      <span class="hl-keyword">return</span> <span class="hl-keyword">const</span> RouteSettings(name: Routes.LOGIN);
+    }
+
+    <span class="hl-keyword">return</span> <span class="hl-keyword">null</span>; <span class="hl-comment">// null = lanjut ke halaman tujuan</span>
+  }
+}</code></pre>
+            </div>
+
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">attach ke route</span>
+                </div>
+                <pre class="code-block-body"><code>GetPage(
+  name: Routes.DASHBOARD,
+  page: () =&gt; DashboardView(),
+  binding: DashboardBinding(),
+  middlewares: [
+    AuthMiddleware(),         <span class="hl-comment">// dijalankan pertama</span>
+    RoleAdminMiddleware(),    <span class="hl-comment">// lalu yang ini</span>
+    AnalyticsMiddleware(),    <span class="hl-comment">// terakhir</span>
+  ],
+),</code></pre>
+            </div>
+
+            <h2 class="content-heading">Visualisasi Middleware Flow</h2>
+            <p class="content-text">Simulasi user mencoba akses <code>/dashboard</code> dengan kondisi berbeda. Toggle status & klik "Run".</p>
+
+            <div class="interactive-card">
+                <div class="interactive-title">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12h6l3-9 4 18 3-9h4"/></svg>
+                    Route Middleware Simulator
+                </div>
+                <p class="interactive-subtitle">Toggle status user lalu klik Run. Middleware akan diperiksa berurutan.</p>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px;">
+                    <button class="btn-action btn-secondary" id="mwLoginBtn" onclick="toggleMw('login')">🔓 Belum login</button>
+                    <button class="btn-action btn-secondary" id="mwRoleBtn" onclick="toggleMw('role')">👤 Role: user</button>
+                </div>
+                <div class="pipeline">
+                    <div class="pipeline-node pipeline-route">📥 Get.toNamed("/dashboard")</div>
+                    <div class="pipeline-arrow">→</div>
+                    <div class="pipeline-node pipeline-mw" id="mwLoginNode">AuthMiddleware</div>
+                    <div class="pipeline-arrow">→</div>
+                    <div class="pipeline-node pipeline-mw" id="mwRoleNode">RoleMiddleware</div>
+                    <div class="pipeline-arrow">→</div>
+                    <div class="pipeline-node pipeline-page">DashboardView</div>
+                </div>
+                <div class="pipeline-log" id="mwLog"></div>
+                <div style="margin-top: 10px;">
+                    <button class="btn-action" onclick="runMw()">▶ Run Navigation</button>
+                </div>
+            </div>
+
+            <h2 class="content-heading">Bottom Navigation dengan GetX</h2>
+            <p class="content-text">Untuk app dengan tab bar di bawah, pakai <code>IndexedStack</code> + <code>Obx</code> untuk track tab aktif:</p>
+
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">main_view.dart</span>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-keyword">class</span> MainController <span class="hl-keyword">extends</span> GetxController {
+  <span class="hl-keyword">final</span> currentIndex = 0.obs;
+  <span class="hl-keyword">void</span> changeTab(<span class="hl-keyword">int</span> i) =&gt; currentIndex.value = i;
+}
+
+<span class="hl-keyword">class</span> MainView <span class="hl-keyword">extends</span> GetView&lt;MainController&gt; {
+  <span class="hl-keyword">final</span> pages = [HomeView(), SearchView(), ProfileView()];
+
+  <span class="hl-keyword">@override</span>
+  Widget build(_) {
+    <span class="hl-keyword">return</span> Scaffold(
+      body: Obx(() =&gt; IndexedStack(
+        index: controller.currentIndex.value,
+        children: pages,
+      )),
+      bottomNavigationBar: Obx(() =&gt; BottomNavigationBar(
+        currentIndex: controller.currentIndex.value,
+        onTap: controller.changeTab,
+        items: [...],
+      )),
+    );
+  }
+}</code></pre>
+            </div>
+
+            <div class="quiz">
+                <div class="quiz-title">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01"/></svg>
+                    Cek Pemahaman
+                </div>
+                <div class="quiz-question">
+                    <div class="quiz-q-text">1. Apa beda <code>Get.to()</code> dan <code>Get.off()</code>?</div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'Tidak benar.')">Get.off() lebih cepat</div>
+                        <div class="quiz-option" data-correct="true" onclick="quizAnswer(this, 'Tepat! to push (tetap di stack), off replace (halaman lama hilang).')">to() push, off() replace</div>
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'Salah — keduanya untuk navigasi.')">off() untuk dialog saja</div>
+                    </div>
+                    <div class="quiz-feedback hidden"></div>
+                </div>
+                <div class="quiz-question">
+                    <div class="quiz-q-text">2. Cara mengambil parameter <code>:id</code> dari URL <code>/post/42</code>?</div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'arguments untuk Map yang dilempar, bukan URL param.')">Get.arguments['id']</div>
+                        <div class="quiz-option" data-correct="true" onclick="quizAnswer(this, 'Tepat! parameters untuk URL placeholder.')">Get.parameters['id']</div>
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'route hanya string, tidak punya method id.')">Get.route.id</div>
+                    </div>
+                    <div class="quiz-feedback hidden"></div>
+                </div>
+                <div class="quiz-question">
+                    <div class="quiz-q-text">3. Apa yang dikembalikan oleh <code>redirect()</code> agar request lanjut (tidak di-redirect)?</div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'true bukan tipe RouteSettings.')">true</div>
+                        <div class="quiz-option" data-correct="true" onclick="quizAnswer(this, 'Tepat! null = "tidak ada redirect, lanjutkan".')">null</div>
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'String tidak valid sebagai return type.')">"continue"</div>
+                    </div>
+                    <div class="quiz-feedback hidden"></div>
+                </div>
+            </div>
+
+            <div class="content-nav">
+                <div class="content-nav-item">
+                    <a href="state-management.html" class="nav-btn nav-btn-prev">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                        <div><span class="nav-label">Sebelumnya</span><span class="nav-name">State Management</span></div>
+                    </a>
+                </div>
+                <div class="content-nav-item">
+                    <a href="dependency-injection.html" class="nav-btn nav-btn-next">
+                        <div><span class="nav-label">Selanjutnya</span><span class="nav-name">Dependency Injection</span></div>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </a>
+                </div>
+            </div>
+        </article>
+    </main>
+    <script src="/flutter-intermediate/course-layout.js"></script>
+    <script>
+    function copyCode(btn) {
+        const codeBlock = btn.closest('.code-block').querySelector('code');
+        navigator.clipboard.writeText(codeBlock.textContent).then(() => {
+            btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>';
+            setTimeout(() => { btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>'; }, 2000);
+        });
+    }
+
+    const mwState = { login: false, role: false };
+    const mwLabels = {
+        login: ['🔓 Belum login', '🔒 Sudah login'],
+        role: ['👤 Role: user', '👑 Role: admin']
+    };
+    function toggleMw(name) {
+        mwState[name] = !mwState[name];
+        document.getElementById('mw' + name.charAt(0).toUpperCase() + name.slice(1) + 'Btn').textContent = mwLabels[name][mwState[name] ? 1 : 0];
+    }
+
+    function runMw() {
+        const log = document.getElementById('mwLog');
+        log.innerHTML = '';
+        ['mwLoginNode', 'mwRoleNode'].forEach(id => document.getElementById(id).classList.remove('blocked'));
+        const steps = [
+            { id: 'mwLoginNode', name: 'AuthMiddleware', pass: mwState.login, ok: 'isLoggedIn = true. redirect() return null. Lanjut.', fail: 'isLoggedIn = false. redirect() return RouteSettings(name: "/login"). REDIRECT!' },
+            { id: 'mwRoleNode', name: 'RoleMiddleware', pass: mwState.role, ok: 'role = admin. Lanjut ke halaman.', fail: 'role = user. redirect() return /unauthorized. BLOCKED!' }
+        ];
+        let i = 0;
+        function tick() {
+            if (i >= steps.length) {
+                log.innerHTML += '<div class="log-pass">✓ DashboardBinding.dependencies() dijalankan...</div>';
+                log.innerHTML += '<div class="log-pass">✓ DashboardView ditampilkan ke user. 🎉</div>';
+                return;
+            }
+            const s = steps[i];
+            log.innerHTML += '<div class="log-info">[' + s.name + '.redirect()] checking...</div>';
+            setTimeout(() => {
+                if (s.pass) {
+                    log.innerHTML += '<div class="log-pass">  ✓ ' + s.ok + '</div>';
+                    i++; tick();
+                } else {
+                    document.getElementById(s.id).classList.add('blocked');
+                    log.innerHTML += '<div class="log-block">  ✗ ' + s.fail + '</div>';
+                }
+                log.scrollTop = log.scrollHeight;
+            }, 500);
+        }
+        tick();
+    }
+
+    function quizAnswer(el, feedback) {
+        const question = el.closest('.quiz-question');
+        const options = question.querySelectorAll('.quiz-option');
+        const fb = question.querySelector('.quiz-feedback');
+        options.forEach(o => {
+            o.style.pointerEvents = 'none';
+            if (o.dataset.correct === 'true') o.classList.add('correct');
+        });
+        if (el.dataset.correct !== 'true') el.classList.add('wrong');
+        fb.textContent = feedback;
+        fb.classList.remove('hidden');
+        fb.classList.add('visible');
+    }
+    </script>
+</body>
+</html>

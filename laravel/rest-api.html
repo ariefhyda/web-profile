@@ -25,15 +25,138 @@
             <header class="content-header">
                 <h1 class="content-title">Modul 13: Membangun REST API</h1>
                 <div class="content-meta">
-                    <div class="meta-pill"><span>Estimasi: 45 Menit</span></div>
+                    <div class="meta-pill"><span>Estimasi: 55 Menit</span></div>
                     <div class="meta-pill"><span>Teori & Praktikum</span></div>
                 </div>
             </header>
 
-            <p class="content-text">Selain digunakan sebagai aplikasi web full-stack, Laravel juga merupakan framework yang sangat luar biasa untuk membangun backend RESTful API. API backend ini nantinya akan dikonsumsi oleh aplikasi Mobile (Android/iOS) atau framework Frontend SPA (seperti React, Vue, atau Angular).</p>
+            <p class="content-text">Selain sebagai aplikasi web full-stack, Laravel juga sangat baik sebagai <strong>backend API</strong>. API ini bisa di-konsumsi oleh aplikasi Mobile (Android/iOS), frontend SPA (React/Vue), atau aplikasi pihak ketiga. Modul ini fokus pada pola RESTful — standar industri untuk API.</p>
 
-            <h2 class="content-heading">Routing API</h2>
-            <p class="content-text">Semua route untuk API dideklarasikan di dalam file <code>routes/api.php</code> (bukan di <code>web.php</code>). Laravel secara otomatis akan menambahkan prefix <code>/api</code> pada URL tersebut.</p>
+            <div class="analogy-box">
+                <div class="analogy-icon">📡</div>
+                <div class="analogy-content">
+                    <strong>Analogi: Pelayan Restoran</strong>
+                    <p>API = pelayan yang menjembatani Anda (client) dengan dapur (server/database). Anda kirim pesanan (request), pelayan bawa balik makanan (response). Tidak ada interaksi langsung dengan dapur. REST = aturan komunikasi: pakai "bahasa" HTTP (GET, POST, PUT, DELETE) untuk operasi CRUD.</p>
+                </div>
+            </div>
+
+            <h2 class="content-heading">REST: Aturan Main API yang Baik</h2>
+            <ol class="content-list">
+                <li><strong>Stateless</strong><br>Setiap request berdiri sendiri — server tidak menyimpan "konteks" antar request. Tiap request bawa info lengkap (termasuk auth token).</li>
+                <li><strong>Resource-based</strong><br>URL menggambarkan <em>resource</em> (kata benda), bukan aksi. <code>/users</code> bukan <code>/getAllUsers</code>.</li>
+                <li><strong>HTTP Methods semantik</strong><br>GET=baca, POST=buat, PUT=update penuh, PATCH=update sebagian, DELETE=hapus.</li>
+                <li><strong>Standard response (JSON)</strong><br>Format response konsisten — JSON dengan status code HTTP yang tepat.</li>
+            </ol>
+
+            <h2 class="content-heading">API Tester Interaktif</h2>
+            <p class="content-text">Coba kirim request ke API simulasi <code>/api/products</code>. Lihat response JSON dan status code-nya.</p>
+
+            <div class="interactive-card">
+                <div class="interactive-title">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                    API Request Simulator
+                </div>
+                <p class="interactive-subtitle">Simulasi server dengan endpoint <code>/api/products</code> + <code>/api/products/{id}</code>. Klik tombol untuk lihat berbagai skenario.</p>
+                <div class="api-tester">
+                    <div class="api-tester-bar">
+                        <select id="apiMethod">
+                            <option value="GET">GET</option>
+                            <option value="POST">POST</option>
+                            <option value="PUT">PUT</option>
+                            <option value="DELETE">DELETE</option>
+                        </select>
+                        <input type="text" id="apiUrl" value="/api/products" placeholder="/api/products">
+                        <button class="btn-action" onclick="sendApi()">Send</button>
+                    </div>
+                    <div class="api-response" id="apiResponse">
+                        <span style="color: var(--text-muted);">Klik "Send" untuk melihat response...</span>
+                    </div>
+                </div>
+                <div style="margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap;">
+                    <button class="btn-action btn-secondary" onclick="apiPreset('GET','/api/products')">List semua</button>
+                    <button class="btn-action btn-secondary" onclick="apiPreset('GET','/api/products/1')">Detail #1</button>
+                    <button class="btn-action btn-secondary" onclick="apiPreset('GET','/api/products/999')">Tidak ada → 404</button>
+                    <button class="btn-action btn-secondary" onclick="apiPreset('POST','/api/products')">Create</button>
+                    <button class="btn-action btn-secondary" onclick="apiPreset('POST','/api/products?invalid=1')">Validasi gagal → 422</button>
+                    <button class="btn-action btn-secondary" onclick="apiPreset('DELETE','/api/products/1')">Delete</button>
+                </div>
+            </div>
+
+            <h2 class="content-heading">HTTP Status Code Cheatsheet</h2>
+            <p class="content-text">Status code bukan dekorasi — ia <em>memberi tahu</em> client apa yang terjadi. Klien yang baik (mobile app, frontend) akan merespons berbeda untuk 200 vs 404 vs 500.</p>
+            <div class="status-grid">
+                <div class="status-card s2xx">
+                    <div class="status-code">200</div>
+                    <div class="status-name">OK</div>
+                    <div class="status-desc">Request sukses (GET, PUT, DELETE).</div>
+                </div>
+                <div class="status-card s2xx">
+                    <div class="status-code">201</div>
+                    <div class="status-name">Created</div>
+                    <div class="status-desc">Resource baru berhasil dibuat (POST).</div>
+                </div>
+                <div class="status-card s2xx">
+                    <div class="status-code">204</div>
+                    <div class="status-name">No Content</div>
+                    <div class="status-desc">Sukses, tapi tidak ada body. (DELETE)</div>
+                </div>
+                <div class="status-card s3xx">
+                    <div class="status-code">301</div>
+                    <div class="status-name">Moved</div>
+                    <div class="status-desc">Resource pindah permanen.</div>
+                </div>
+                <div class="status-card s4xx">
+                    <div class="status-code">400</div>
+                    <div class="status-name">Bad Request</div>
+                    <div class="status-desc">Request malformed — sintaks salah.</div>
+                </div>
+                <div class="status-card s4xx">
+                    <div class="status-code">401</div>
+                    <div class="status-name">Unauthorized</div>
+                    <div class="status-desc">Belum login / token tidak ada.</div>
+                </div>
+                <div class="status-card s4xx">
+                    <div class="status-code">403</div>
+                    <div class="status-name">Forbidden</div>
+                    <div class="status-desc">Login OK, tapi tidak punya izin.</div>
+                </div>
+                <div class="status-card s4xx">
+                    <div class="status-code">404</div>
+                    <div class="status-name">Not Found</div>
+                    <div class="status-desc">Resource tidak ditemukan.</div>
+                </div>
+                <div class="status-card s4xx">
+                    <div class="status-code">422</div>
+                    <div class="status-name">Unprocessable</div>
+                    <div class="status-desc">Validasi gagal (Laravel default).</div>
+                </div>
+                <div class="status-card s4xx">
+                    <div class="status-code">429</div>
+                    <div class="status-name">Too Many</div>
+                    <div class="status-desc">Rate limit terlampaui (throttle).</div>
+                </div>
+                <div class="status-card s5xx">
+                    <div class="status-code">500</div>
+                    <div class="status-name">Server Error</div>
+                    <div class="status-desc">Error tak terduga di server.</div>
+                </div>
+                <div class="status-card s5xx">
+                    <div class="status-code">503</div>
+                    <div class="status-name">Unavailable</div>
+                    <div class="status-desc">Maintenance / overload.</div>
+                </div>
+            </div>
+
+            <h2 class="content-heading">Routing API di Laravel</h2>
+            <p class="content-text">Semua route API dideklarasikan di <code>routes/api.php</code>. URL otomatis di-prefix <code>/api</code>.</p>
+
+            <div class="info-box">
+                <div class="info-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                    <strong>Laravel 11+: install:api</strong>
+                </div>
+                <p>Mulai Laravel 11, file <code>api.php</code> tidak tersedia secara default. Aktifkan dengan: <code>php artisan install:api</code>. Perintah ini juga akan menginstal <strong>Laravel Sanctum</strong> untuk token authentication.</p>
+            </div>
 
             <div class="code-block">
                 <div class="code-block-header">
@@ -43,26 +166,23 @@
                 </div>
                 <pre class="code-block-body"><code><span class="hl-keyword">use</span> App\Http\Controllers\Api\ProductController;
 
-<span class="hl-comment">// URL yang diakses nantinya: http://localhost:8000/api/products</span>
+<span class="hl-comment">// URL otomatis dapat prefix /api/</span>
 Route::<span class="hl-func">get</span>(<span class="hl-string">'/products'</span>, [ProductController::<span class="hl-keyword">class</span>, <span class="hl-string">'index'</span>]);
 Route::<span class="hl-func">post</span>(<span class="hl-string">'/products'</span>, [ProductController::<span class="hl-keyword">class</span>, <span class="hl-string">'store'</span>]);
-Route::<span class="hl-func">get</span>(<span class="hl-string">'/products/{id}'</span>, [ProductController::<span class="hl-keyword">class</span>, <span class="hl-string">'show'</span>]);
+Route::<span class="hl-func">get</span>(<span class="hl-string">'/products/{product}'</span>, [ProductController::<span class="hl-keyword">class</span>, <span class="hl-string">'show'</span>]);
 
-<span class="hl-comment">// Atau gunakan apiResource (sama seperti resource, tapi menghilangkan route 'create' dan 'edit' yang menghasilkan view HTML)</span>
-Route::<span class="hl-func">apiResource</span>(<span class="hl-string">'products'</span>, ProductController::<span class="hl-keyword">class</span>);</code></pre>
+<span class="hl-comment">// apiResource → 5 route CRUD (tanpa create & edit, karena tidak butuh form view)</span>
+Route::<span class="hl-func">apiResource</span>(<span class="hl-string">'products'</span>, ProductController::<span class="hl-keyword">class</span>);
+
+<span class="hl-comment">// Group dengan auth Sanctum</span>
+Route::<span class="hl-func">middleware</span>(<span class="hl-string">'auth:sanctum'</span>)-><span class="hl-func">group</span>(<span class="hl-keyword">function</span> () {
+    Route::<span class="hl-func">post</span>(<span class="hl-string">'/products'</span>, [ProductController::<span class="hl-keyword">class</span>, <span class="hl-string">'store'</span>]);
+    Route::<span class="hl-func">delete</span>(<span class="hl-string">'/products/{product}'</span>, [ProductController::<span class="hl-keyword">class</span>, <span class="hl-string">'destroy'</span>]);
+});</code></pre>
             </div>
 
-            <div class="info-box">
-                <div class="info-box-header">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
-                    <strong>Mengaktifkan API Routes di Laravel 11+</strong>
-                </div>
-                <p>Mulai Laravel 11, file <code>api.php</code> tidak terinstal secara otomatis. Untuk mempublikasikannya, Anda perlu menjalankan perintah: <br><code>php artisan install:api</code></p>
-            </div>
-
-            <h2 class="content-heading">Mengembalikan JSON Response</h2>
-            <p class="content-text">Di Controller web, biasanya Anda me-return view <code>return view('page');</code>. Di API, Anda me-return collection Eloquent atau array, dan Laravel secara otomatis akan mengubahnya menjadi JSON.</p>
-
+            <h2 class="content-heading">Controller API — Return JSON</h2>
+            <p class="content-text">Di Controller web, biasanya return view. Di API, return array/collection — Laravel otomatis serialize ke JSON dengan content-type yang benar.</p>
             <div class="code-block">
                 <div class="code-block-header">
                     <div class="code-block-dots"><span></span><span></span><span></span></div>
@@ -71,39 +191,61 @@ Route::<span class="hl-func">apiResource</span>(<span class="hl-string">'product
                 </div>
                 <pre class="code-block-body"><code><span class="hl-keyword">class</span> ProductController <span class="hl-keyword">extends</span> Controller
 {
+    <span class="hl-comment">// GET /api/products — list semua</span>
     <span class="hl-keyword">public function</span> <span class="hl-func">index</span>()
     {
-        <span class="hl-comment">// Mengembalikan koleksi model. Otomatis jadi JSON!</span>
         <span class="hl-keyword">return</span> Product::<span class="hl-func">all</span>();
+        <span class="hl-comment">// → 200 OK + JSON array</span>
     }
 
+    <span class="hl-comment">// GET /api/products/{product} — detail</span>
+    <span class="hl-keyword">public function</span> <span class="hl-func">show</span>(Product $product)
+    {
+        <span class="hl-keyword">return</span> $product;
+        <span class="hl-comment">// → 200 OK + JSON object</span>
+        <span class="hl-comment">// → 404 Not Found jika tidak ada (auto via Route Model Binding)</span>
+    }
+
+    <span class="hl-comment">// POST /api/products — create baru</span>
     <span class="hl-keyword">public function</span> <span class="hl-func">store</span>(Request $request)
     {
-        <span class="hl-comment">// Validasi</span>
-        $validated = $request-&gt;<span class="hl-func">validate</span>([
-            <span class="hl-string">'name'</span> =&gt; <span class="hl-string">'required|string'</span>,
-            <span class="hl-string">'price'</span> =&gt; <span class="hl-string">'required|integer'</span>
+        $validated = $request-><span class="hl-func">validate</span>([
+            <span class="hl-string">'name'</span>  => <span class="hl-string">'required|string|max:255'</span>,
+            <span class="hl-string">'price'</span> => <span class="hl-string">'required|integer|min:0'</span>,
         ]);
+        <span class="hl-comment">// Validasi gagal → otomatis 422 + JSON errors</span>
 
         $product = Product::<span class="hl-func">create</span>($validated);
 
-        <span class="hl-comment">// Response custom menggunakan helper response()-&gt;json() dengan HTTP Status Code 201 (Created)</span>
-        <span class="hl-keyword">return</span> <span class="hl-func">response</span>()-&gt;<span class="hl-func">json</span>([
-            <span class="hl-string">'message'</span> =&gt; <span class="hl-string">'Produk berhasil ditambahkan'</span>,
-            <span class="hl-string">'data'</span> =&gt; $product
-        ], <span class="hl-number">201</span>);
+        <span class="hl-keyword">return</span> <span class="hl-func">response</span>()-><span class="hl-func">json</span>([
+            <span class="hl-string">'message'</span> => <span class="hl-string">'Produk berhasil dibuat'</span>,
+            <span class="hl-string">'data'</span>    => $product,
+        ], <span class="hl-number">201</span>); <span class="hl-comment">// 201 Created</span>
+    }
+
+    <span class="hl-comment">// PUT /api/products/{product}</span>
+    <span class="hl-keyword">public function</span> <span class="hl-func">update</span>(Request $request, Product $product)
+    {
+        $product-><span class="hl-func">update</span>($request-><span class="hl-func">validated</span>());
+        <span class="hl-keyword">return</span> $product;
+    }
+
+    <span class="hl-comment">// DELETE /api/products/{product}</span>
+    <span class="hl-keyword">public function</span> <span class="hl-func">destroy</span>(Product $product)
+    {
+        $product-><span class="hl-func">delete</span>();
+        <span class="hl-keyword">return</span> <span class="hl-func">response</span>()-><span class="hl-func">noContent</span>(); <span class="hl-comment">// 204 No Content</span>
     }
 }</code></pre>
             </div>
 
-            <h2 class="content-heading">API Resources (Format Output yang Rapi)</h2>
-            <p class="content-text">Ketika membangun API berskala besar, mengembalikan Model Eloquent secara langsung bukanlah praktik terbaik karena akan mengekspos semua atribut (termasuk yang sensitif). Anda sebaiknya menggunakan <strong>Eloquent API Resources</strong> untuk menjadi "jembatan transformasi" dari database ke JSON.</p>
+            <h2 class="content-heading">API Resources — Format Output Konsisten</h2>
+            <p class="content-text">Mengembalikan Model langsung mengekspos semua kolom (termasuk yang sensitif!). Pakai <strong>Eloquent API Resources</strong> untuk transformasi data sebelum dikirim ke client.</p>
 
             <div class="code-block">
                 <div class="code-block-header">
                     <div class="code-block-dots"><span></span><span></span><span></span></div>
                     <span class="code-block-filename">Terminal</span>
-                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
                 </div>
                 <pre class="code-block-body"><code>php artisan make:resource ProductResource</code></pre>
             </div>
@@ -112,16 +254,20 @@ Route::<span class="hl-func">apiResource</span>(<span class="hl-string">'product
                 <div class="code-block-header">
                     <div class="code-block-dots"><span></span><span></span><span></span></div>
                     <span class="code-block-filename">app/Http/Resources/ProductResource.php</span>
-                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
                 </div>
                 <pre class="code-block-body"><code><span class="hl-keyword">public function</span> <span class="hl-func">toArray</span>(Request $request): <span class="hl-keyword">array</span>
 {
-    <span class="hl-comment">// Mendefinisikan kolom apa saja yang boleh dilihat oleh API Consumer</span>
     <span class="hl-keyword">return</span> [
-        <span class="hl-string">'id'</span> =&gt; $<span class="hl-keyword">this</span>-&gt;id,
-        <span class="hl-string">'product_name'</span> =&gt; $<span class="hl-keyword">this</span>-&gt;name, <span class="hl-comment">// Mengubah nama key output json</span>
-        <span class="hl-string">'price_formatted'</span> =&gt; <span class="hl-string">'Rp '</span> . <span class="hl-func">number_format</span>($<span class="hl-keyword">this</span>-&gt;price, <span class="hl-number">0</span>, <span class="hl-string">','</span>, <span class="hl-string">'.'</span>),
-        <span class="hl-string">'created_at'</span> =&gt; $<span class="hl-keyword">this</span>-&gt;created_at-&gt;<span class="hl-func">format</span>(<span class="hl-string">'d-M-Y'</span>),
+        <span class="hl-string">'id'</span>              => $<span class="hl-keyword">this</span>->id,
+        <span class="hl-string">'name'</span>            => $<span class="hl-keyword">this</span>->name,
+        <span class="hl-string">'price'</span>           => $<span class="hl-keyword">this</span>->price,
+        <span class="hl-string">'price_formatted'</span> => <span class="hl-string">'Rp '</span> . <span class="hl-func">number_format</span>($<span class="hl-keyword">this</span>->price, <span class="hl-number">0</span>, <span class="hl-string">','</span>, <span class="hl-string">'.'</span>),
+        <span class="hl-string">'image_url'</span>       => $<span class="hl-keyword">this</span>->image_path ? <span class="hl-func">asset</span>($<span class="hl-keyword">this</span>->image_path) : <span class="hl-keyword">null</span>,
+        <span class="hl-string">'created_at'</span>      => $<span class="hl-keyword">this</span>->created_at-><span class="hl-func">format</span>(<span class="hl-string">'Y-m-d H:i'</span>),
+        <span class="hl-comment">// Conditional: include hanya jika user ini owner</span>
+        <span class="hl-string">'cost_price'</span>      => $<span class="hl-keyword">this</span>-><span class="hl-func">when</span>($request->user()?->id === $<span class="hl-keyword">this</span>->user_id, $<span class="hl-keyword">this</span>->cost_price),
+        <span class="hl-comment">// Include relasi</span>
+        <span class="hl-string">'category'</span>        => CategoryResource::<span class="hl-func">make</span>($<span class="hl-keyword">this</span>-><span class="hl-func">whenLoaded</span>(<span class="hl-string">'category'</span>)),
     ];
 }</code></pre>
             </div>
@@ -129,14 +275,137 @@ Route::<span class="hl-func">apiResource</span>(<span class="hl-string">'product
             <div class="code-block">
                 <div class="code-block-header">
                     <div class="code-block-dots"><span></span><span></span><span></span></div>
-                    <span class="code-block-filename">app/Http/Controllers/Api/ProductController.php</span>
-                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                    <span class="code-block-filename">ProductController.php (pakai Resource)</span>
                 </div>
                 <pre class="code-block-body"><code><span class="hl-keyword">public function</span> <span class="hl-func">index</span>()
 {
-    <span class="hl-comment">// Me-return data yang sudah di-wrap dan difilter oleh Resource</span>
-    <span class="hl-keyword">return</span> ProductResource::<span class="hl-func">collection</span>(Product::<span class="hl-func">all</span>());
+    <span class="hl-comment">// Banyak: pakai collection()</span>
+    <span class="hl-keyword">return</span> ProductResource::<span class="hl-func">collection</span>(
+        Product::<span class="hl-func">with</span>(<span class="hl-string">'category'</span>)-><span class="hl-func">paginate</span>(<span class="hl-number">15</span>)
+    );
+}
+
+<span class="hl-keyword">public function</span> <span class="hl-func">show</span>(Product $product)
+{
+    <span class="hl-comment">// Satu: pakai make()</span>
+    <span class="hl-keyword">return</span> ProductResource::<span class="hl-func">make</span>($product-><span class="hl-func">load</span>(<span class="hl-string">'category'</span>));
 }</code></pre>
+            </div>
+
+            <h2 class="content-heading">Authentication API: Laravel Sanctum</h2>
+            <p class="content-text">Untuk API yang dipakai mobile/SPA, butuh autentikasi via <em>token</em> (bukan session cookie). <strong>Sanctum</strong> adalah package resmi yang sederhana dan ringan.</p>
+
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">Setup Sanctum</span>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-comment"># Install (sudah include di install:api Laravel 11+)</span>
+composer require laravel/sanctum
+php artisan vendor:publish --provider=<span class="hl-string">"Laravel\Sanctum\SanctumServiceProvider"</span>
+php artisan migrate
+
+<span class="hl-comment"># Tambahkan trait di User model</span>
+<span class="hl-keyword">use</span> Laravel\Sanctum\HasApiTokens;
+<span class="hl-keyword">class</span> User <span class="hl-keyword">extends</span> Authenticatable
+{
+    <span class="hl-keyword">use</span> HasApiTokens, HasFactory, Notifiable;
+}</code></pre>
+            </div>
+
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">routes/api.php — login endpoint</span>
+                </div>
+                <pre class="code-block-body"><code>Route::<span class="hl-func">post</span>(<span class="hl-string">'/login'</span>, <span class="hl-keyword">function</span> (Request $request) {
+    $credentials = $request-><span class="hl-func">validate</span>([
+        <span class="hl-string">'email'</span>    => <span class="hl-string">'required|email'</span>,
+        <span class="hl-string">'password'</span> => <span class="hl-string">'required'</span>,
+    ]);
+
+    <span class="hl-keyword">if</span> (!Auth::<span class="hl-func">attempt</span>($credentials)) {
+        <span class="hl-keyword">return</span> <span class="hl-func">response</span>()-><span class="hl-func">json</span>([<span class="hl-string">'message'</span> => <span class="hl-string">'Email atau password salah.'</span>], <span class="hl-number">401</span>);
+    }
+
+    $user  = Auth::<span class="hl-func">user</span>();
+    $token = $user-><span class="hl-func">createToken</span>(<span class="hl-string">'api-token'</span>)->plainTextToken;
+
+    <span class="hl-keyword">return</span> <span class="hl-func">response</span>()-><span class="hl-func">json</span>([
+        <span class="hl-string">'token'</span> => $token,
+        <span class="hl-string">'user'</span>  => $user,
+    ]);
+});
+
+<span class="hl-comment">// Route protected — wajib kirim header: Authorization: Bearer &lt;token&gt;</span>
+Route::<span class="hl-func">middleware</span>(<span class="hl-string">'auth:sanctum'</span>)-><span class="hl-func">group</span>(<span class="hl-keyword">function</span> () {
+    Route::<span class="hl-func">get</span>(<span class="hl-string">'/me'</span>, <span class="hl-keyword">fn</span> (Request $r) =&gt; $r-><span class="hl-func">user</span>());
+    Route::<span class="hl-func">post</span>(<span class="hl-string">'/logout'</span>, <span class="hl-keyword">fn</span> (Request $r) =&gt; $r-><span class="hl-func">user</span>()-><span class="hl-func">currentAccessToken</span>()-><span class="hl-func">delete</span>());
+});</code></pre>
+            </div>
+
+            <h2 class="content-heading">Testing API dengan Postman / Thunder Client</h2>
+            <div class="info-box">
+                <div class="info-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                    <strong>Tools yang Wajib Dimiliki</strong>
+                </div>
+                <p>Untuk test API tanpa harus build frontend dulu, pakai <strong>Postman</strong>, <strong>Insomnia</strong>, atau <strong>Thunder Client</strong> (ekstensi VS Code). Anda bisa kirim request lengkap (method, header, body) dan lihat response JSON. Wajib untuk debug API.</p>
+            </div>
+
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">contoh: kirim request lewat cURL</span>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-comment"># GET — list semua produk</span>
+curl http://localhost:8000/api/products
+
+<span class="hl-comment"># POST — create produk (tanpa auth)</span>
+curl -X POST http://localhost:8000/api/products \
+  -H <span class="hl-string">"Content-Type: application/json"</span> \
+  -H <span class="hl-string">"Accept: application/json"</span> \
+  -d <span class="hl-string">'{"name":"Laptop","price":15000000}'</span>
+
+<span class="hl-comment"># POST — pakai token Sanctum</span>
+curl -X POST http://localhost:8000/api/products \
+  -H <span class="hl-string">"Authorization: Bearer 1|abcdef123..."</span> \
+  -H <span class="hl-string">"Content-Type: application/json"</span> \
+  -d <span class="hl-string">'{"name":"Laptop","price":15000000}'</span></code></pre>
+            </div>
+
+            <div class="quiz">
+                <div class="quiz-title">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01"/></svg>
+                    Cek Pemahaman
+                </div>
+                <div class="quiz-question">
+                    <div class="quiz-q-text">1. Status code apa yang tepat untuk response setelah berhasil POST resource baru?</div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, '200 untuk operasi sukses umum (GET, PUT). 201 lebih spesifik untuk Create.')">200 OK</div>
+                        <div class="quiz-option" data-correct="true" onclick="quizAnswer(this, 'Tepat! 201 = Created, makna spesifik resource baru terbentuk.')">201 Created</div>
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, '204 = No Content, biasanya untuk DELETE.')">204 No Content</div>
+                    </div>
+                    <div class="quiz-feedback hidden"></div>
+                </div>
+                <div class="quiz-question">
+                    <div class="quiz-q-text">2. Validasi gagal di API menghasilkan status code...</div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, '400 untuk request malformed, bukan validasi.')">400 Bad Request</div>
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, '500 server error, bukan kesalahan input.')">500 Server Error</div>
+                        <div class="quiz-option" data-correct="true" onclick="quizAnswer(this, 'Tepat! Laravel default 422 untuk validasi gagal.')">422 Unprocessable Entity</div>
+                    </div>
+                    <div class="quiz-feedback hidden"></div>
+                </div>
+                <div class="quiz-question">
+                    <div class="quiz-q-text">3. Mengapa pakai API Resource bukan return Model langsung?</div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'Performa sama saja.')">Lebih cepat</div>
+                        <div class="quiz-option" data-correct="true" onclick="quizAnswer(this, 'Tepat! Resource bisa filter kolom, format, dan tambah field turunan.')">Untuk kontrol kolom yang dipublikasi & format data</div>
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'Tidak wajib — bisa langsung return.')">Wajib di Laravel</div>
+                    </div>
+                    <div class="quiz-feedback hidden"></div>
+                </div>
             </div>
 
             <div class="content-nav">
@@ -163,6 +432,93 @@ Route::<span class="hl-func">apiResource</span>(<span class="hl-string">'product
             btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>';
             setTimeout(() => { btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>'; }, 2000);
         });
+    }
+
+    function apiPreset(method, url) {
+        document.getElementById('apiMethod').value = method;
+        document.getElementById('apiUrl').value = url;
+        sendApi();
+    }
+    function fmtJson(obj) {
+        const json = JSON.stringify(obj, null, 2);
+        return json
+            .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+            .replace(/("(?:[^"\\]|\\.)*")(\s*:)/g, '<span class="json-key">$1</span>$2')
+            .replace(/:\s*("(?:[^"\\]|\\.)*")/g, ': <span class="json-string">$1</span>')
+            .replace(/:\s*(\d+\.?\d*)/g, ': <span class="json-number">$1</span>')
+            .replace(/:\s*(true|false|null)/g, ': <span class="json-bool">$1</span>');
+    }
+    function sendApi() {
+        const method = document.getElementById('apiMethod').value;
+        const url = document.getElementById('apiUrl').value;
+        const out = document.getElementById('apiResponse');
+        out.innerHTML = '<span style="color: var(--text-muted);">Mengirim request...</span>';
+        setTimeout(() => {
+            let status, body;
+            if (method === 'GET' && url === '/api/products') {
+                status = 200;
+                body = {
+                    data: [
+                        { id: 1, name: 'Laptop Asus', price: 15000000, category: 'Elektronik' },
+                        { id: 2, name: 'Mouse Logitech', price: 350000, category: 'Aksesoris' },
+                        { id: 3, name: 'Keyboard Mech', price: 1200000, category: 'Aksesoris' }
+                    ],
+                    meta: { total: 3, per_page: 15, current_page: 1 }
+                };
+            } else if (method === 'GET' && url.match(/^\/api\/products\/\d+$/)) {
+                const id = parseInt(url.split('/').pop());
+                if (id === 999 || id > 3) {
+                    status = 404;
+                    body = { message: 'No query results for model [App\\Models\\Product] ' + id };
+                } else {
+                    status = 200;
+                    body = { data: { id, name: 'Laptop Asus', price: 15000000, stock: 5, category: 'Elektronik', created_at: '2026-05-22T10:30:00Z' } };
+                }
+            } else if (method === 'POST' && url.includes('invalid')) {
+                status = 422;
+                body = {
+                    message: 'The given data was invalid.',
+                    errors: {
+                        name: ['The name field is required.'],
+                        price: ['The price must be an integer.', 'The price must be at least 0.']
+                    }
+                };
+            } else if (method === 'POST' && url === '/api/products') {
+                status = 201;
+                body = {
+                    message: 'Produk berhasil dibuat',
+                    data: { id: 4, name: 'Produk Baru', price: 100000, created_at: '2026-05-24T14:22:00Z' }
+                };
+            } else if (method === 'PUT' && url.match(/^\/api\/products\/\d+$/)) {
+                status = 200;
+                body = { data: { id: 1, name: 'Laptop Asus (Updated)', price: 14500000 } };
+            } else if (method === 'DELETE' && url.match(/^\/api\/products\/\d+$/)) {
+                status = 204;
+                body = null;
+            } else {
+                status = 404;
+                body = { message: 'Route not found.' };
+            }
+            const cls = 'api-status-' + (status < 300 ? (status === 201 ? '201' : '200') : status);
+            let html = '<div class="api-status ' + cls + '">HTTP ' + status + '</div>';
+            html += '<div class="api-json">' + (body === null ? '<span style="color: var(--text-muted);">(No Content)</span>' : fmtJson(body)) + '</div>';
+            out.innerHTML = html;
+        }, 350);
+    }
+    sendApi();
+
+    function quizAnswer(el, feedback) {
+        const question = el.closest('.quiz-question');
+        const options = question.querySelectorAll('.quiz-option');
+        const fb = question.querySelector('.quiz-feedback');
+        options.forEach(o => {
+            o.style.pointerEvents = 'none';
+            if (o.dataset.correct === 'true') o.classList.add('correct');
+        });
+        if (el.dataset.correct !== 'true') el.classList.add('wrong');
+        fb.textContent = feedback;
+        fb.classList.remove('hidden');
+        fb.classList.add('visible');
     }
     </script>
 </body>

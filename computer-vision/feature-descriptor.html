@@ -1,9 +1,10 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Feature Descriptor - Computer Vision</title>
+    <meta name="description" content="Feature descriptor pada Computer Vision: HOG, SIFT, SURF, ORB — keypoint, descriptor, dan matching dengan OpenCV.">
+    <title>Feature Descriptor (HOG, SIFT) — Computer Vision</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -14,29 +15,274 @@
     <div class="bg-grid" aria-hidden="true"></div>
     <nav class="navbar scrolled" id="navbar"></nav>
     <div class="mobile-menu" id="mobileMenu"></div>
+
     <main class="course-layout">
         <aside class="course-sidebar" id="courseSidebar"></aside>
         <article class="course-content">
+
             <div class="breadcrumb">
                 <a href="../index.html">Home</a><span>&#8250;</span>
                 <a href="index.html">Computer Vision</a><span>&#8250;</span>
                 <span style="color: var(--text-primary);">Feature Descriptor</span>
             </div>
+
             <header class="content-header">
-                <h1 class="content-title">Modul 7: Feature Descriptor (HOG, SIFT)</h1>
+                <h1 class="content-title">Modul 7: Feature Descriptor (HOG, SIFT, ORB)</h1>
                 <div class="content-meta">
-                    <div class="meta-pill"><span>Coming Soon</span></div>
+                    <div class="meta-pill">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 5V8.5L10.5 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/></svg>
+                        <span>Estimasi: 85 Menit</span>
+                    </div>
+                    <div class="meta-pill">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="10" rx="1" stroke="currentColor" stroke-width="1.5"/><path d="M5 7h6M5 10h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                        <span>Teori & Praktikum</span>
+                    </div>
                 </div>
             </header>
+
+            <p class="content-text">
+                <strong>Feature descriptor</strong> adalah representasi numerik yang mendeskripsikan karakteristik lokal pada sebuah titik di citra. Dua citra yang berbeda dapat dibandingkan dengan mencari kemiripan descriptor — fondasi untuk task seperti <em>image matching</em>, <em>object recognition</em>, <em>panorama stitching</em>, hingga <em>SLAM</em> pada robotika.
+            </p>
+
+            <h2 class="content-heading">Keypoint vs Descriptor</h2>
+            <ol class="content-list">
+                <li><strong>Keypoint (Feature Point)</strong><br>Lokasi spesifik pada citra yang dianggap "menarik" — biasanya sudut (corner), blob, atau titik dengan tekstur khas. Dideteksi oleh algoritma <em>feature detector</em> (mis. Harris, FAST, DoG).</li>
+                <li><strong>Descriptor</strong><br>Vektor numerik yang merangkum penampakan area di sekitar keypoint. Descriptor yang baik harus <em>invariant</em> terhadap rotasi, skala, dan perubahan iluminasi sehingga keypoint yang sama tetap dapat dicocokkan meskipun citra ditransformasi.</li>
+            </ol>
+
+            <h2 class="content-heading">1. HOG (Histogram of Oriented Gradients)</h2>
+            <p class="content-text">
+                Diperkenalkan oleh Dalal & Triggs (2005) untuk <em>pedestrian detection</em>. HOG tidak menghasilkan descriptor pada keypoint sparse — sebaliknya, ia <strong>menghitung descriptor dense</strong> pada grid cell berukuran tetap di seluruh citra.
+            </p>
+            <p class="content-text">
+                Cara kerja HOG:
+            </p>
+            <ol class="content-list">
+                <li><strong>Hitung gradient</strong> magnitude dan arah pada setiap pixel.</li>
+                <li><strong>Bagi citra menjadi cell</strong> (mis. 8&times;8 pixel). Hitung histogram arah gradient (umumnya 9 bin: 0°–180°) untuk setiap cell.</li>
+                <li><strong>Kelompokkan cell menjadi block</strong> (mis. 2&times;2 cell = 16&times;16 pixel). Normalisasi histogram dalam block untuk robust terhadap perubahan pencahayaan.</li>
+                <li><strong>Concatenate</strong> semua block descriptor menjadi satu vektor besar (untuk window 64&times;128 menghasilkan 3.780 dimensi).</li>
+            </ol>
+            <p class="content-text">
+                HOG biasanya dipasangkan dengan klasifikator <strong>SVM</strong> untuk deteksi objek dengan bentuk khas (pejalan kaki, kendaraan, wajah).
+            </p>
+
+            <h2 class="content-heading">2. SIFT (Scale-Invariant Feature Transform)</h2>
+            <p class="content-text">
+                Dipublikasikan oleh David Lowe (1999, 2004). SIFT adalah <em>gold standard</em> untuk feature matching karena invariant terhadap skala, rotasi, dan cukup robust terhadap perubahan iluminasi serta sudut pandang.
+            </p>
+            <p class="content-text">
+                Tahapan SIFT:
+            </p>
+            <ol class="content-list">
+                <li><strong>Scale-Space Extrema Detection</strong><br>Bangun <em>pyramid</em> citra pada berbagai skala (Gaussian + DoG). Cari ekstrema lokal pada DoG sebagai keypoint kandidat.</li>
+                <li><strong>Keypoint Localization</strong><br>Filter keypoint yang berkontras rendah atau terletak di tepi (edge response) — hanya pertahankan yang stabil.</li>
+                <li><strong>Orientation Assignment</strong><br>Berikan arah dominan pada setiap keypoint berdasarkan histogram gradient di sekitarnya. Ini yang membuat SIFT <em>rotation-invariant</em>.</li>
+                <li><strong>Descriptor Generation</strong><br>Bagi area 16&times;16 di sekitar keypoint menjadi 16 sub-region 4&times;4, masing-masing menghasilkan histogram 8 arah → descriptor 128 dimensi.</li>
+            </ol>
+
             <div class="info-box">
                 <div class="info-box-header">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
-                    <strong>Modul Dalam Pengembangan</strong>
+                    <strong>Lisensi & Alternatif</strong>
                 </div>
-                <p>Materi ini sedang dalam proses penyusunan dan akan segera tersedia. Silakan cek kembali nanti atau akses modul lain yang sudah tersedia di sidebar navigasi.</p>
+                <p>SIFT sebelumnya dipatenkan (kedaluwarsa 2020). <strong>SURF</strong> (Speeded-Up Robust Features) adalah versi lebih cepat yang juga sempat dipatenkan. Alternatif gratis sejak awal: <strong>ORB</strong>, <strong>BRISK</strong>, <strong>AKAZE</strong>. Pada OpenCV 4.4+, SIFT sudah tersedia di modul utama tanpa <code style="color:#22d3ee;">opencv-contrib</code>.</p>
             </div>
+
+            <h2 class="content-heading">3. ORB (Oriented FAST and Rotated BRIEF)</h2>
+            <p class="content-text">
+                Dikembangkan oleh OpenCV Labs (2011) sebagai alternatif open-source SIFT/SURF. ORB sangat cepat dan cocok untuk aplikasi real-time (mobile, AR, robotika).
+            </p>
+            <ol class="content-list">
+                <li><strong>Detector: FAST</strong> &mdash; mendeteksi sudut dengan membandingkan intensitas pixel pada lingkaran Bresenham radius 3.</li>
+                <li><strong>Descriptor: BRIEF</strong> &mdash; binary descriptor 256-bit, dihasilkan dari hasil perbandingan pasangan pixel tertentu. Sangat hemat memori dan cepat untuk matching (Hamming distance).</li>
+                <li><strong>Orientasi</strong> ditambahkan via <em>intensity centroid</em> untuk membuatnya rotation-invariant.</li>
+            </ol>
+
+            <h2 class="content-heading">Perbandingan Singkat</h2>
+            <div style="overflow-x: auto; margin: 20px 0;">
+                <table style="width: 100%; border-collapse: collapse; background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden;">
+                    <thead style="background: rgba(34,211,238,0.08);">
+                        <tr style="border-bottom: 1px solid var(--border-color);">
+                            <th style="padding: 10px 14px; text-align: left; color: #22d3ee;">Algoritma</th>
+                            <th style="padding: 10px 14px; text-align: left; color: #22d3ee;">Tipe</th>
+                            <th style="padding: 10px 14px; text-align: left; color: #22d3ee;">Dim.</th>
+                            <th style="padding: 10px 14px; text-align: left; color: #22d3ee;">Kecepatan</th>
+                            <th style="padding: 10px 14px; text-align: left; color: #22d3ee;">Use Case</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="border-bottom: 1px solid var(--border-color);">
+                            <td style="padding: 10px 14px; font-weight: 600; color: var(--text-primary);">HOG</td>
+                            <td style="padding: 10px 14px; color: #c5c5d4;">Dense</td>
+                            <td style="padding: 10px 14px; color: #c5c5d4;">3.780</td>
+                            <td style="padding: 10px 14px; color: #c5c5d4;">Sedang</td>
+                            <td style="padding: 10px 14px; color: #c5c5d4;">Deteksi pejalan kaki, klasifikasi bentuk</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid var(--border-color);">
+                            <td style="padding: 10px 14px; font-weight: 600; color: var(--text-primary);">SIFT</td>
+                            <td style="padding: 10px 14px; color: #c5c5d4;">Sparse, float</td>
+                            <td style="padding: 10px 14px; color: #c5c5d4;">128</td>
+                            <td style="padding: 10px 14px; color: #c5c5d4;">Lambat</td>
+                            <td style="padding: 10px 14px; color: #c5c5d4;">Panorama stitching, recognition akurat</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid var(--border-color);">
+                            <td style="padding: 10px 14px; font-weight: 600; color: var(--text-primary);">SURF</td>
+                            <td style="padding: 10px 14px; color: #c5c5d4;">Sparse, float</td>
+                            <td style="padding: 10px 14px; color: #c5c5d4;">64</td>
+                            <td style="padding: 10px 14px; color: #c5c5d4;">Cepat</td>
+                            <td style="padding: 10px 14px; color: #c5c5d4;">Alternatif SIFT lebih cepat</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px 14px; font-weight: 600; color: var(--text-primary);">ORB</td>
+                            <td style="padding: 10px 14px; color: #c5c5d4;">Sparse, binary</td>
+                            <td style="padding: 10px 14px; color: #c5c5d4;">256-bit</td>
+                            <td style="padding: 10px 14px; color: #c5c5d4;">Sangat cepat</td>
+                            <td style="padding: 10px 14px; color: #c5c5d4;">Real-time, mobile, SLAM, AR</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h2 class="content-heading">Praktikum: Feature Detection & Matching</h2>
+
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">feature_matching.py</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                    </button>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-keyword">import</span> cv2
+<span class="hl-keyword">import</span> numpy <span class="hl-keyword">as</span> np
+
+img1 = cv2.<span class="hl-func">imread</span>(<span class="hl-string">'scene.jpg'</span>, cv2.IMREAD_GRAYSCALE)
+img2 = cv2.<span class="hl-func">imread</span>(<span class="hl-string">'object.jpg'</span>, cv2.IMREAD_GRAYSCALE)
+
+<span class="hl-comment"># === SIFT ===</span>
+sift = cv2.SIFT_<span class="hl-func">create</span>(nfeatures=<span class="hl-number">500</span>)
+kp1, des1 = sift.<span class="hl-func">detectAndCompute</span>(img1, <span class="hl-keyword">None</span>)
+kp2, des2 = sift.<span class="hl-func">detectAndCompute</span>(img2, <span class="hl-keyword">None</span>)
+<span class="hl-func">print</span>(f<span class="hl-string">"SIFT keypoints: {len(kp1)} & {len(kp2)}"</span>)
+
+<span class="hl-comment"># Visualisasi keypoint</span>
+img_kp = cv2.<span class="hl-func">drawKeypoints</span>(
+    img1, kp1, <span class="hl-keyword">None</span>,
+    flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS
+)
+
+<span class="hl-comment"># === Matching dengan FLANN matcher (untuk SIFT/SURF) ===</span>
+FLANN_INDEX_KDTREE = <span class="hl-number">1</span>
+index_params = <span class="hl-func">dict</span>(algorithm=FLANN_INDEX_KDTREE, trees=<span class="hl-number">5</span>)
+search_params = <span class="hl-func">dict</span>(checks=<span class="hl-number">50</span>)
+flann = cv2.<span class="hl-func">FlannBasedMatcher</span>(index_params, search_params)
+matches = flann.<span class="hl-func">knnMatch</span>(des1, des2, k=<span class="hl-number">2</span>)
+
+<span class="hl-comment"># Ratio test (Lowe) — saring match yang ambigu</span>
+good = []
+<span class="hl-keyword">for</span> m, n <span class="hl-keyword">in</span> matches:
+    <span class="hl-keyword">if</span> m.distance &lt; <span class="hl-number">0.7</span> * n.distance:
+        good.<span class="hl-func">append</span>(m)
+<span class="hl-func">print</span>(f<span class="hl-string">"Good matches: {len(good)}"</span>)
+
+<span class="hl-comment"># === ORB (alternative cepat) ===</span>
+orb = cv2.ORB_<span class="hl-func">create</span>(nfeatures=<span class="hl-number">1000</span>)
+kp1o, des1o = orb.<span class="hl-func">detectAndCompute</span>(img1, <span class="hl-keyword">None</span>)
+kp2o, des2o = orb.<span class="hl-func">detectAndCompute</span>(img2, <span class="hl-keyword">None</span>)
+
+bf = cv2.<span class="hl-func">BFMatcher</span>(cv2.NORM_HAMMING, crossCheck=<span class="hl-keyword">True</span>)
+matches_orb = <span class="hl-func">sorted</span>(bf.<span class="hl-func">match</span>(des1o, des2o), key=<span class="hl-keyword">lambda</span> x: x.distance)
+
+<span class="hl-comment"># Gambar 30 match terbaik</span>
+img_match = cv2.<span class="hl-func">drawMatches</span>(
+    img1, kp1o, img2, kp2o, matches_orb[:<span class="hl-number">30</span>], <span class="hl-keyword">None</span>,
+    flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS
+)
+
+cv2.<span class="hl-func">imshow</span>(<span class="hl-string">'ORB Matches'</span>, img_match)
+cv2.<span class="hl-func">waitKey</span>(<span class="hl-number">0</span>)</code></pre>
+            </div>
+
+            <h2 class="content-heading">Praktikum: HOG untuk Pedestrian Detection</h2>
+
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">hog_pedestrian.py</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                    </button>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-keyword">import</span> cv2
+
+img = cv2.<span class="hl-func">imread</span>(<span class="hl-string">'street.jpg'</span>)
+
+<span class="hl-comment"># HOG descriptor + SVM pre-trained (pedestrian)</span>
+hog = cv2.<span class="hl-func">HOGDescriptor</span>()
+hog.<span class="hl-func">setSVMDetector</span>(cv2.HOGDescriptor_<span class="hl-func">getDefaultPeopleDetector</span>())
+
+<span class="hl-comment"># Multi-scale detection</span>
+rects, weights = hog.<span class="hl-func">detectMultiScale</span>(
+    img,
+    winStride=(<span class="hl-number">8</span>, <span class="hl-number">8</span>),
+    padding=(<span class="hl-number">16</span>, <span class="hl-number">16</span>),
+    scale=<span class="hl-number">1.05</span>
+)
+
+<span class="hl-keyword">for</span> (x, y, w, h), conf <span class="hl-keyword">in</span> <span class="hl-func">zip</span>(rects, weights):
+    cv2.<span class="hl-func">rectangle</span>(img, (x, y), (x+w, y+h), (<span class="hl-number">0</span>, <span class="hl-number">255</span>, <span class="hl-number">0</span>), <span class="hl-number">2</span>)
+    cv2.<span class="hl-func">putText</span>(img, f<span class="hl-string">"{conf[0]:.2f}"</span>, (x, y-<span class="hl-number">5</span>),
+                cv2.FONT_HERSHEY_SIMPLEX, <span class="hl-number">0.5</span>, (<span class="hl-number">0</span>,<span class="hl-number">255</span>,<span class="hl-number">0</span>), <span class="hl-number">1</span>)
+
+cv2.<span class="hl-func">imshow</span>(<span class="hl-string">'HOG Pedestrian'</span>, img)
+cv2.<span class="hl-func">waitKey</span>(<span class="hl-number">0</span>)</code></pre>
+            </div>
+
+            <div class="info-box">
+                <div class="info-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                    <strong>Era Deep Learning</strong>
+                </div>
+                <p>Sejak 2012 (AlexNet), descriptor klasik seperti HOG dan SIFT mulai digeser oleh fitur yang dipelajari otomatis oleh CNN. Namun mereka tetap relevan untuk: aplikasi <em>resource-constrained</em>, dataset kecil tanpa training, <em>geometric matching</em> (panorama, SLAM), dan baseline pembanding penelitian.</p>
+            </div>
+
+            <!-- Navigation Prev/Next -->
+            <div class="content-nav">
+                <div class="content-nav-item">
+                    <a href="histogram.html" class="nav-btn nav-btn-prev">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                        <div>
+                            <span class="nav-label">Sebelumnya</span>
+                            <span class="nav-name">Histogram & Thresholding</span>
+                        </div>
+                    </a>
+                </div>
+                <div class="content-nav-item">
+                    <a href="cnn.html" class="nav-btn nav-btn-next">
+                        <div>
+                            <span class="nav-label">Selanjutnya</span>
+                            <span class="nav-name">Convolutional Neural Network</span>
+                        </div>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </a>
+                </div>
+            </div>
+
         </article>
     </main>
+
     <script src="/computer-vision/course-layout.js"></script>
+    <script>
+    function copyCode(btn) {
+        const codeBlock = btn.closest('.code-block').querySelector('code');
+        navigator.clipboard.writeText(codeBlock.textContent).then(() => {
+            btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>';
+            setTimeout(() => {
+                btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+            }, 2000);
+        });
+    }
+    </script>
 </body>
 </html>

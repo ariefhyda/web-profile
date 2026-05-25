@@ -1,9 +1,10 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Object Detection - Computer Vision</title>
+    <meta name="description" content="Object detection dengan YOLO: arsitektur one-stage detector, bounding box, IoU, NMS, dan implementasi dengan Ultralytics YOLOv8.">
+    <title>Object Detection (YOLO) — Computer Vision</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -14,29 +15,351 @@
     <div class="bg-grid" aria-hidden="true"></div>
     <nav class="navbar scrolled" id="navbar"></nav>
     <div class="mobile-menu" id="mobileMenu"></div>
+
     <main class="course-layout">
         <aside class="course-sidebar" id="courseSidebar"></aside>
         <article class="course-content">
+
             <div class="breadcrumb">
                 <a href="../index.html">Home</a><span>&#8250;</span>
                 <a href="index.html">Computer Vision</a><span>&#8250;</span>
                 <span style="color: var(--text-primary);">Object Detection</span>
             </div>
+
             <header class="content-header">
                 <h1 class="content-title">Modul 9: Object Detection (YOLO)</h1>
                 <div class="content-meta">
-                    <div class="meta-pill"><span>Coming Soon</span></div>
+                    <div class="meta-pill">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 5V8.5L10.5 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/></svg>
+                        <span>Estimasi: 90 Menit</span>
+                    </div>
+                    <div class="meta-pill">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="10" rx="1" stroke="currentColor" stroke-width="1.5"/><path d="M5 7h6M5 10h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                        <span>Teori, Simulasi & Praktikum</span>
+                    </div>
                 </div>
             </header>
+
+            <p class="content-text">
+                <strong>Object detection</strong> adalah task Computer Vision yang menjawab dua pertanyaan sekaligus: <em>"Apa objek di citra?"</em> dan <em>"Di mana lokasinya?"</em>. Outputnya adalah bounding box (kotak pembatas) plus label kelas untuk setiap objek yang terdeteksi. Berbeda dengan klasifikasi yang hanya memberi satu label per citra.
+            </p>
+
+            <h2 class="content-heading">Klasifikasi vs Localization vs Detection</h2>
+            <ol class="content-list">
+                <li><strong>Image Classification</strong><br>Satu citra &rarr; satu label kelas. Contoh: "kucing".</li>
+                <li><strong>Classification + Localization</strong><br>Satu citra &rarr; satu label + satu bounding box. Asumsi: hanya satu objek per citra.</li>
+                <li><strong>Object Detection</strong><br>Satu citra &rarr; <em>banyak</em> bounding box + label untuk setiap objek. Inilah task yang paling realistis.</li>
+                <li><strong>Instance Segmentation</strong><br>Object detection + pixel-level mask untuk setiap instance. Dibahas di modul Segmentation.</li>
+            </ol>
+
+            <h2 class="content-heading">Two-Stage vs One-Stage Detector</h2>
+            <p class="content-text">
+                Pendekatan modern object detection terbagi dua kategori:
+            </p>
+            <ol class="content-list">
+                <li><strong>Two-Stage (R-CNN family)</strong><br>Tahap 1: usulkan region kandidat (Region Proposal). Tahap 2: klasifikasikan dan refine bounding box. Contoh: R-CNN, Fast R-CNN, Faster R-CNN. <em>Akurat tapi lambat.</em></li>
+                <li><strong>One-Stage (YOLO, SSD, RetinaNet)</strong><br>Langsung prediksi class + bounding box dari fitur citra dalam satu kali forward pass. <em>Lebih cepat, ideal untuk real-time.</em></li>
+            </ol>
+
+            <h2 class="content-heading">YOLO — You Only Look Once</h2>
+            <p class="content-text">
+                Diperkenalkan oleh Joseph Redmon (2016). Idenya: bagi citra menjadi <strong>grid S&times;S</strong>, lalu setiap cell bertanggung jawab memprediksi B bounding box + confidence + class probability untuk objek yang pusatnya jatuh di cell tersebut.
+            </p>
+            <p class="content-text">
+                Output YOLO untuk satu cell: vektor <code style="color:#22d3ee;">[x, y, w, h, conf, p_class_1, ..., p_class_n]</code>. Untuk grid 7&times;7 dengan 2 box dan 20 kelas, totalnya 7&times;7&times;30 = 1470 nilai.
+            </p>
+            <p class="content-text">
+                Evolusi YOLO:
+            </p>
+            <ol class="content-list">
+                <li><strong>YOLOv1 (2016)</strong> &mdash; konsep awal, akurat tapi lemah pada objek kecil.</li>
+                <li><strong>YOLOv2/v3 (2017–2018)</strong> &mdash; anchor box, multi-scale prediction (3 skala), Darknet-53.</li>
+                <li><strong>YOLOv4/v5 (2020)</strong> &mdash; CSPDarknet, mosaic augmentation, fokus pada akurasi & kecepatan.</li>
+                <li><strong>YOLOv7 / YOLOv8 / YOLOv11 (2022–2024)</strong> &mdash; anchor-free, multi-task (detect, segment, pose). Distribusi paket modern: <em>Ultralytics</em>.</li>
+            </ol>
+
+            <h2 class="content-heading">Konsep Kunci: IoU & NMS</h2>
+            <p class="content-text">
+                <strong>IoU (Intersection over Union)</strong> mengukur seberapa baik dua bounding box saling tumpang tindih. Nilainya 0 (tidak overlap) hingga 1 (identik). IoU adalah dasar dari evaluasi (mAP) dan pemilihan box (NMS).
+            </p>
+
+            <!-- Interactive IoU Demo -->
+            <div class="interactive-box" id="iouDemo">
+                <div class="interactive-header">
+                    <div class="interactive-title">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="13" height="13"/><rect x="8" y="8" width="13" height="13"/></svg>
+                        Simulator IoU (Intersection over Union)
+                    </div>
+                    <div class="interactive-controls">
+                        <span id="iouVal" style="font-family: 'JetBrains Mono', monospace; font-size: 0.95rem; color: #22d3ee; font-weight: 600;">IoU: 0.000</span>
+                        <button class="control-input" onclick="resetIoU()" style="cursor:pointer; background: rgba(34,211,238,0.15); border-color: rgba(34,211,238,0.3); color: #22d3ee;">⟳ Reset</button>
+                    </div>
+                </div>
+                <div class="interactive-area" style="height: 320px; position: relative; background: #0a0a12;">
+                    <canvas id="iouCanvas" width="700" height="320" style="width: 100%; height: 100%; display: block; cursor: move;"></canvas>
+                </div>
+                <div class="interactive-footer">
+                    Drag kotak <span style="color:#22d3ee; font-weight:600;">cyan</span> (prediction) atau <span style="color:#ff5c8a; font-weight:600;">pink</span> (ground truth) untuk melihat perubahan IoU. IoU &ge; 0.5 dianggap "True Positive" pada evaluasi standar.
+                </div>
+            </div>
+
+            <p class="content-text">
+                <strong>Non-Maximum Suppression (NMS)</strong> adalah post-processing untuk menghilangkan bounding box duplikat. Algoritmanya:
+            </p>
+            <ol class="content-list">
+                <li>Urutkan semua box berdasarkan confidence dari tertinggi ke terendah.</li>
+                <li>Ambil box dengan confidence tertinggi sebagai "winner" &mdash; simpan ke output.</li>
+                <li>Hapus semua box lain yang memiliki IoU dengan winner &gt; threshold (mis. 0.5).</li>
+                <li>Ulangi dari langkah 2 hingga tidak ada box tersisa.</li>
+            </ol>
+
+            <h2 class="content-heading">Metrik Evaluasi: mAP</h2>
+            <p class="content-text">
+                <strong>mAP (mean Average Precision)</strong> adalah metrik standar untuk object detection. Dihitung dengan langkah:
+            </p>
+            <ol class="content-list">
+                <li>Untuk setiap kelas, urutkan prediksi berdasarkan confidence.</li>
+                <li>Tentukan setiap prediksi sebagai TP atau FP berdasarkan IoU dengan ground truth (threshold mis. 0.5).</li>
+                <li>Plot precision-recall curve, hitung Average Precision (AP) = area di bawah kurva.</li>
+                <li>mAP = rata-rata AP semua kelas. mAP@0.5 = IoU threshold 0.5; mAP@[.5:.95] = rata-rata pada threshold 0.5 hingga 0.95.</li>
+            </ol>
+
+            <h2 class="content-heading">Praktikum: YOLO dengan Ultralytics</h2>
+
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">install.sh</span>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-comment"># Install Ultralytics (mencakup YOLOv8 / YOLOv11)</span>
+pip install ultralytics opencv-python</code></pre>
+            </div>
+
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">yolo_inference.py</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                    </button>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-keyword">from</span> ultralytics <span class="hl-keyword">import</span> YOLO
+<span class="hl-keyword">import</span> cv2
+
+<span class="hl-comment"># 1. Load pretrained model (otomatis download dari Ultralytics)</span>
+<span class="hl-comment">#    Pilihan: yolov8n (nano), yolov8s (small), yolov8m, yolov8l, yolov8x</span>
+model = <span class="hl-func">YOLO</span>(<span class="hl-string">'yolov8n.pt'</span>)
+
+<span class="hl-comment"># 2. Inference pada gambar</span>
+results = <span class="hl-func">model</span>(<span class="hl-string">'street.jpg'</span>, conf=<span class="hl-number">0.25</span>, iou=<span class="hl-number">0.45</span>)
+
+<span class="hl-comment"># 3. Akses hasil deteksi</span>
+<span class="hl-keyword">for</span> r <span class="hl-keyword">in</span> results:
+    boxes = r.boxes
+    <span class="hl-keyword">for</span> box <span class="hl-keyword">in</span> boxes:
+        x1, y1, x2, y2 = box.xyxy[<span class="hl-number">0</span>].<span class="hl-func">tolist</span>()
+        conf = box.conf[<span class="hl-number">0</span>].<span class="hl-func">item</span>()
+        cls  = <span class="hl-func">int</span>(box.cls[<span class="hl-number">0</span>])
+        label = model.names[cls]
+        <span class="hl-func">print</span>(f<span class="hl-string">"{label}: {conf:.2f} at [{x1:.0f},{y1:.0f},{x2:.0f},{y2:.0f}]"</span>)
+
+<span class="hl-comment"># 4. Simpan hasil dengan annotation</span>
+<span class="hl-keyword">for</span> r <span class="hl-keyword">in</span> results:
+    annotated = r.<span class="hl-func">plot</span>()  <span class="hl-comment"># BGR numpy array dengan box + label</span>
+    cv2.<span class="hl-func">imwrite</span>(<span class="hl-string">'output.jpg'</span>, annotated)
+
+<span class="hl-comment"># 5. Inference pada video / webcam</span>
+results = <span class="hl-func">model</span>(<span class="hl-string">'video.mp4'</span>, stream=<span class="hl-keyword">True</span>, save=<span class="hl-keyword">True</span>)
+<span class="hl-keyword">for</span> r <span class="hl-keyword">in</span> results:
+    <span class="hl-keyword">pass</span>  <span class="hl-comment"># proses frame-by-frame</span></code></pre>
+            </div>
+
+            <h2 class="content-heading">Training pada Dataset Custom</h2>
+
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">train_custom.py</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                    </button>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-comment"># Struktur folder dataset (format YOLO):</span>
+<span class="hl-comment"># dataset/</span>
+<span class="hl-comment">#   ├── images/{train,val}/*.jpg</span>
+<span class="hl-comment">#   ├── labels/{train,val}/*.txt  → class x_center y_center w h (normalized)</span>
+<span class="hl-comment">#   └── data.yaml</span>
+
+<span class="hl-comment"># data.yaml</span>
+<span class="hl-comment"># path: ./dataset</span>
+<span class="hl-comment"># train: images/train</span>
+<span class="hl-comment"># val:   images/val</span>
+<span class="hl-comment"># names: [helm, rompi, sepatu]</span>
+
+<span class="hl-keyword">from</span> ultralytics <span class="hl-keyword">import</span> YOLO
+
+model = <span class="hl-func">YOLO</span>(<span class="hl-string">'yolov8n.pt'</span>)   <span class="hl-comment"># transfer learning dari pretrained</span>
+
+results = model.<span class="hl-func">train</span>(
+    data=<span class="hl-string">'data.yaml'</span>,
+    epochs=<span class="hl-number">100</span>,
+    imgsz=<span class="hl-number">640</span>,
+    batch=<span class="hl-number">16</span>,
+    name=<span class="hl-string">'ppe_detector'</span>,
+    patience=<span class="hl-number">20</span>      <span class="hl-comment"># early stopping</span>
+)
+
+<span class="hl-comment"># Evaluasi pada validation set</span>
+metrics = model.<span class="hl-func">val</span>()
+<span class="hl-func">print</span>(f<span class="hl-string">"mAP@0.5     = {metrics.box.map50:.3f}"</span>)
+<span class="hl-func">print</span>(f<span class="hl-string">"mAP@0.5:.95 = {metrics.box.map:.3f}"</span>)</code></pre>
+            </div>
+
             <div class="info-box">
                 <div class="info-box-header">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
-                    <strong>Modul Dalam Pengembangan</strong>
+                    <strong>Tools Anotasi</strong>
                 </div>
-                <p>Materi ini sedang dalam proses penyusunan dan akan segera tersedia. Silakan cek kembali nanti atau akses modul lain yang sudah tersedia di sidebar navigasi.</p>
+                <p>Untuk membuat label bounding box, gunakan tool seperti <strong>LabelImg</strong>, <strong>Roboflow</strong>, atau <strong>CVAT</strong>. Format YOLO menggunakan koordinat ternormalisasi (0–1): <code style="color:#22d3ee;">&lt;class_id&gt; &lt;x_center&gt; &lt;y_center&gt; &lt;width&gt; &lt;height&gt;</code>.</p>
             </div>
+
+            <!-- Navigation Prev/Next -->
+            <div class="content-nav">
+                <div class="content-nav-item">
+                    <a href="cnn.html" class="nav-btn nav-btn-prev">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                        <div>
+                            <span class="nav-label">Sebelumnya</span>
+                            <span class="nav-name">Convolutional Neural Network</span>
+                        </div>
+                    </a>
+                </div>
+                <div class="content-nav-item">
+                    <a href="segmentation.html" class="nav-btn nav-btn-next">
+                        <div>
+                            <span class="nav-label">Selanjutnya</span>
+                            <span class="nav-name">Image Segmentation</span>
+                        </div>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </a>
+                </div>
+            </div>
+
         </article>
     </main>
+
     <script src="/computer-vision/course-layout.js"></script>
+    <script>
+    // ---- IoU Demo ----
+    const iouCanvas = document.getElementById('iouCanvas');
+    const ictx = iouCanvas.getContext('2d');
+
+    let boxA = { x: 130, y: 80,  w: 200, h: 160, color: '#22d3ee', label: 'Prediction' };
+    let boxB = { x: 320, y: 110, w: 220, h: 170, color: '#ff5c8a', label: 'Ground Truth' };
+    let dragging = null, offsetX = 0, offsetY = 0;
+
+    function drawIoU() {
+        const W = iouCanvas.width, H = iouCanvas.height;
+        ictx.fillStyle = '#0a0a12'; ictx.fillRect(0, 0, W, H);
+
+        // Intersection
+        const ix1 = Math.max(boxA.x, boxB.x);
+        const iy1 = Math.max(boxA.y, boxB.y);
+        const ix2 = Math.min(boxA.x + boxA.w, boxB.x + boxB.w);
+        const iy2 = Math.min(boxA.y + boxA.h, boxB.y + boxB.h);
+        const iw = Math.max(0, ix2 - ix1);
+        const ih = Math.max(0, iy2 - iy1);
+        const interArea = iw * ih;
+        const unionArea = boxA.w * boxA.h + boxB.w * boxB.h - interArea;
+        const iou = unionArea > 0 ? interArea / unionArea : 0;
+
+        // Highlight intersection
+        if (interArea > 0) {
+            ictx.fillStyle = 'rgba(34, 197, 94, 0.35)';
+            ictx.fillRect(ix1, iy1, iw, ih);
+        }
+
+        // Draw boxes
+        [boxA, boxB].forEach(b => {
+            ictx.strokeStyle = b.color; ictx.lineWidth = 2.5;
+            ictx.strokeRect(b.x, b.y, b.w, b.h);
+            ictx.fillStyle = b.color + 'cc';
+            ictx.fillRect(b.x, b.y - 18, ictx.measureText(b.label).width + 14, 18);
+            ictx.fillStyle = '#0a0a12';
+            ictx.font = 'bold 11px sans-serif';
+            ictx.fillText(b.label, b.x + 6, b.y - 5);
+        });
+
+        // IoU label
+        document.getElementById('iouVal').textContent = `IoU: ${iou.toFixed(3)}`;
+        const color = iou >= 0.5 ? '#22c55e' : iou >= 0.3 ? '#facc15' : '#ef4444';
+        document.getElementById('iouVal').style.color = color;
+    }
+
+    function hit(x, y, b) {
+        return x >= b.x && x <= b.x + b.w && y >= b.y && y <= b.y + b.h;
+    }
+
+    iouCanvas.addEventListener('mousedown', (e) => {
+        const r = iouCanvas.getBoundingClientRect();
+        const x = (e.clientX - r.left) * iouCanvas.width / r.width;
+        const y = (e.clientY - r.top)  * iouCanvas.height / r.height;
+        // Topmost wins (B drawn last)
+        if (hit(x, y, boxB)) { dragging = boxB; offsetX = x - boxB.x; offsetY = y - boxB.y; }
+        else if (hit(x, y, boxA)) { dragging = boxA; offsetX = x - boxA.x; offsetY = y - boxA.y; }
+    });
+    iouCanvas.addEventListener('mousemove', (e) => {
+        if (!dragging) return;
+        const r = iouCanvas.getBoundingClientRect();
+        const x = (e.clientX - r.left) * iouCanvas.width / r.width;
+        const y = (e.clientY - r.top)  * iouCanvas.height / r.height;
+        dragging.x = Math.max(0, Math.min(iouCanvas.width  - dragging.w, x - offsetX));
+        dragging.y = Math.max(0, Math.min(iouCanvas.height - dragging.h, y - offsetY));
+        drawIoU();
+    });
+    iouCanvas.addEventListener('mouseup',   () => dragging = null);
+    iouCanvas.addEventListener('mouseleave',() => dragging = null);
+
+    // Touch support
+    iouCanvas.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        const t = e.touches[0];
+        const r = iouCanvas.getBoundingClientRect();
+        const x = (t.clientX - r.left) * iouCanvas.width / r.width;
+        const y = (t.clientY - r.top)  * iouCanvas.height / r.height;
+        if (hit(x, y, boxB)) { dragging = boxB; offsetX = x - boxB.x; offsetY = y - boxB.y; }
+        else if (hit(x, y, boxA)) { dragging = boxA; offsetX = x - boxA.x; offsetY = y - boxA.y; }
+    }, { passive: false });
+    iouCanvas.addEventListener('touchmove', (e) => {
+        if (!dragging) return;
+        e.preventDefault();
+        const t = e.touches[0];
+        const r = iouCanvas.getBoundingClientRect();
+        const x = (t.clientX - r.left) * iouCanvas.width / r.width;
+        const y = (t.clientY - r.top)  * iouCanvas.height / r.height;
+        dragging.x = Math.max(0, Math.min(iouCanvas.width  - dragging.w, x - offsetX));
+        dragging.y = Math.max(0, Math.min(iouCanvas.height - dragging.h, y - offsetY));
+        drawIoU();
+    }, { passive: false });
+    iouCanvas.addEventListener('touchend', () => dragging = null);
+
+    function resetIoU() {
+        boxA = { x: 130, y: 80,  w: 200, h: 160, color: '#22d3ee', label: 'Prediction' };
+        boxB = { x: 320, y: 110, w: 220, h: 170, color: '#ff5c8a', label: 'Ground Truth' };
+        drawIoU();
+    }
+
+    drawIoU();
+
+    function copyCode(btn) {
+        const codeBlock = btn.closest('.code-block').querySelector('code');
+        navigator.clipboard.writeText(codeBlock.textContent).then(() => {
+            btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>';
+            setTimeout(() => {
+                btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+            }, 2000);
+        });
+    }
+    </script>
 </body>
 </html>

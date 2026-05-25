@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pengenalan GetX — Flutter Intermediate</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/flutter/course.css">
+    <link rel="stylesheet" href="/flutter-intermediate/course.css">
+</head>
+<body>
+    <div class="bg-grid" aria-hidden="true"></div>
+    <nav class="navbar scrolled" id="navbar"></nav>
+    <div class="mobile-menu" id="mobileMenu"></div>
+    <main class="course-layout">
+        <aside class="course-sidebar" id="courseSidebar"></aside>
+        <article class="course-content">
+            <div class="breadcrumb">
+                <a href="../index.html">Home</a><span>›</span>
+                <a href="index.html">Flutter Intermediate</a><span>›</span>
+                <span style="color: var(--text-primary);">Pengenalan GetX</span>
+            </div>
+            <header class="content-header">
+                <h1 class="content-title">Modul 2: Pengenalan GetX</h1>
+                <div class="content-meta">
+                    <div class="meta-pill"><span>Estimasi: 50 Menit</span></div>
+                    <div class="meta-pill"><span>Teori & Demo</span></div>
+                </div>
+            </header>
+
+            <p class="content-text"><strong>GetX</strong> adalah package Flutter buatan <em>Jonny Borges</em> yang menggabungkan tiga kebutuhan utama aplikasi modern dalam satu paket: <strong>State Management</strong>, <strong>Route Management</strong>, dan <strong>Dependency Injection</strong>. Tagline-nya: <em>"Open Source, Performant, Productive"</em>.</p>
+
+            <div class="analogy-box">
+                <div class="analogy-icon">🛠️</div>
+                <div class="analogy-content">
+                    <strong>Analogi: Swiss Army Knife</strong>
+                    <p>Bayangkan harus selalu bawa 3 alat: pisau (state management), obeng (routing), tang (DI). GetX = pisau lipat Swiss Army — satu alat, semua fungsi tersedia. Hemat tempat di tas (project), hemat berat (dependency), dan API-nya konsisten.</p>
+                </div>
+            </div>
+
+            <h2 class="content-heading">Filosofi GetX</h2>
+            <ol class="content-list">
+                <li><strong>Productivity</strong> — kode pendek, sintaks intuitif. Aksi yang biasanya 10 baris cukup 1 baris.</li>
+                <li><strong>Performance</strong> — minimal overhead. State management-nya bahkan tidak butuh <code>BuildContext</code>.</li>
+                <li><strong>Organization</strong> — pisahkan View dari Business Logic dengan mudah, tanpa boilerplate.</li>
+                <li><strong>All-in-one</strong> — tidak perlu campur banyak package (Provider + Get_it + auto_route). Satu GetX cukup.</li>
+            </ol>
+
+            <h2 class="content-heading">Perbandingan: GetX vs Provider vs Bloc</h2>
+            <p class="content-text">Tidak ada solusi sempurna. Setiap package punya kelebihan & kekurangan. Berikut perbandingan jujur:</p>
+
+            <table class="compare-table">
+                <thead>
+                    <tr><th>Aspek</th><th>setState</th><th>Provider</th><th>Bloc</th><th>GetX</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Learning curve</td><td>Mudah</td><td>Sedang</td><td>Curam</td><td>Mudah</td></tr>
+                    <tr><td>Boilerplate</td><td>Tidak ada</td><td>Sedikit</td><td>Banyak</td><td>Sangat sedikit</td></tr>
+                    <tr><td>Butuh context</td><td>Ya</td><td>Ya</td><td>Ya</td><td>Tidak</td></tr>
+                    <tr><td>Routing</td><td>Manual</td><td>Manual</td><td>Manual</td><td>Include</td></tr>
+                    <tr><td>DI / Service locator</td><td>Manual</td><td>Manual</td><td>Manual</td><td>Include</td></tr>
+                    <tr><td>Cocok untuk</td><td>App kecil</td><td>App menengah</td><td>App enterprise</td><td>App kecil-besar</td></tr>
+                    <tr><td>Popularitas Indonesia</td><td>Tinggi</td><td>Tinggi</td><td>Sedang</td><td>Sangat tinggi</td></tr>
+                </tbody>
+            </table>
+
+            <div class="info-box">
+                <div class="info-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                    <strong>Mengapa GetX Populer di Indonesia?</strong>
+                </div>
+                <p>Sintaks ringkas + CLI scaffolding + komunitas Indonesia yang aktif. Banyak channel YouTube Indonesia (Erico Darmawan, Programmer Zaman Now, dll) yang mengangkat GetX. Cocok untuk freelance & startup yang butuh delivery cepat.</p>
+            </div>
+
+            <h2 class="content-heading">3 Pilar GetX</h2>
+
+            <div class="interactive-card">
+                <div class="interactive-title">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                    Komponen Utama GetX
+                </div>
+                <p class="interactive-subtitle">Klik tiap pilar untuk lihat detailnya.</p>
+                <div class="arch-flow">
+                    <div class="arch-node active" data-pilar="state" onclick="showPilar('state', this)">
+                        <div class="arch-node-icon">⚡</div>
+                        <div class="arch-node-name">State</div>
+                        <div class="arch-node-role">Reactive UI</div>
+                    </div>
+                    <div class="arch-node" data-pilar="route" onclick="showPilar('route', this)">
+                        <div class="arch-node-icon">🗺️</div>
+                        <div class="arch-node-name">Route</div>
+                        <div class="arch-node-role">Navigasi</div>
+                    </div>
+                    <div class="arch-node" data-pilar="di" onclick="showPilar('di', this)">
+                        <div class="arch-node-icon">💉</div>
+                        <div class="arch-node-name">DI</div>
+                        <div class="arch-node-role">Dependency Injection</div>
+                    </div>
+                </div>
+                <div class="arch-detail" id="pilarDetail"></div>
+            </div>
+
+            <h2 class="content-heading">Hello World GetX</h2>
+            <p class="content-text">Berikut contoh paling sederhana: counter app dengan GetX. Bandingkan dengan setState.</p>
+
+            <div class="code-compare">
+                <div class="code-compare-block">
+                    <div class="code-compare-header bad">😐 Cara setState (klasik)</div>
+                    <pre class="code-compare-body"><code><span class="hl-keyword">class</span> Counter <span class="hl-keyword">extends</span> StatefulWidget {
+  <span class="hl-keyword">final</span> _State createState() =&gt; _State();
+}
+
+<span class="hl-keyword">class</span> _State <span class="hl-keyword">extends</span> State&lt;Counter&gt; {
+  <span class="hl-keyword">int</span> count = 0;
+
+  <span class="hl-keyword">void</span> tambah() {
+    setState(() {
+      count++;
+    });
+  }
+
+  <span class="hl-keyword">@override</span>
+  Widget build(_) {
+    <span class="hl-keyword">return</span> Scaffold(
+      body: Text(<span class="hl-string">'$count'</span>),
+      floatingActionButton: FAB(
+        onPressed: tambah,
+      ),
+    );
+  }
+}</code></pre>
+                </div>
+                <div class="code-compare-block">
+                    <div class="code-compare-header good">✨ Cara GetX (ringkas)</div>
+                    <pre class="code-compare-body"><code><span class="hl-comment">// 1. Controller terpisah</span>
+<span class="hl-keyword">class</span> CounterController <span class="hl-keyword">extends</span> GetxController {
+  <span class="hl-keyword">final</span> count = 0.obs; <span class="hl-comment">// Reactive!</span>
+  <span class="hl-keyword">void</span> tambah() =&gt; count++;
+}
+
+<span class="hl-comment">// 2. View — StatelessWidget!</span>
+<span class="hl-keyword">class</span> Counter <span class="hl-keyword">extends</span> StatelessWidget {
+  <span class="hl-keyword">final</span> c = Get.put(CounterController());
+
+  <span class="hl-keyword">@override</span>
+  Widget build(_) {
+    <span class="hl-keyword">return</span> Scaffold(
+      body: Obx(() =&gt; Text(<span class="hl-string">'${c.count}'</span>)),
+      floatingActionButton: FAB(
+        onPressed: c.tambah,
+      ),
+    );
+  }
+}</code></pre>
+                </div>
+            </div>
+
+            <div class="success-box">
+                <div class="success-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                    Tiga Keuntungan Langsung
+                </div>
+                <p><strong>1.</strong> Tidak butuh StatefulWidget lagi — StatelessWidget cukup. <strong>2.</strong> Logic dipisah ke Controller — bisa dites, bisa dipakai ulang. <strong>3.</strong> <code>setState()</code> hilang — tinggal <code>Obx()</code> di tempat yang perlu rebuild.</p>
+            </div>
+
+            <h2 class="content-heading">Demo Counter Live</h2>
+            <p class="content-text">Coba sendiri! Klik tombol di simulator HP berikut — perhatikan rebuild counter sangat efisien (hanya widget Text yang rebuild, bukan seluruh Scaffold).</p>
+
+            <div class="interactive-card">
+                <div class="interactive-title">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                    Simulator Counter (GetX Style)
+                </div>
+                <p class="interactive-subtitle">Tap tombol + untuk increment. Hanya Text yang rebuild — lihat counter rebuild di bawah.</p>
+                <div class="phone-frame">
+                    <div class="phone-statusbar"><span>9:41</span><span>📶 100%</span></div>
+                    <div class="phone-screen">
+                        <div class="phone-title">Counter App</div>
+                        <div class="phone-counter" id="phoneCounter">0</div>
+                        <button class="phone-fab" onclick="incrementPhone()">+</button>
+                    </div>
+                </div>
+                <div style="text-align: center; margin-top: 14px;">
+                    <span class="rebuild-counter">Widget Text rebuild: <strong id="rebuildCount">0</strong> kali</span>
+                </div>
+                <div style="text-align: center; margin-top: 10px;">
+                    <button class="btn-action btn-secondary" onclick="resetPhone()">↺ Reset</button>
+                </div>
+            </div>
+
+            <h2 class="content-heading">Instalasi GetX</h2>
+            <p class="content-text">Tambahkan dependency di <code>pubspec.yaml</code> lalu jalankan <code>flutter pub get</code>:</p>
+
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">pubspec.yaml</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-keyword">dependencies</span>:
+  flutter:
+    sdk: flutter
+  <span class="hl-keyword">get</span>: <span class="hl-string">^4.6.6</span>   <span class="hl-comment"># versi stabil terbaru</span></code></pre>
+            </div>
+
+            <p class="content-text">Lalu di <code>main.dart</code>, ganti <code>MaterialApp</code> dengan <code>GetMaterialApp</code> agar fitur routing GetX aktif:</p>
+
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">main.dart</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-keyword">import</span> <span class="hl-string">'package:flutter/material.dart'</span>;
+<span class="hl-keyword">import</span> <span class="hl-string">'package:get/get.dart'</span>;
+
+<span class="hl-keyword">void</span> main() {
+  runApp(<span class="hl-keyword">const</span> MyApp());
+}
+
+<span class="hl-keyword">class</span> MyApp <span class="hl-keyword">extends</span> StatelessWidget {
+  <span class="hl-keyword">const</span> MyApp({<span class="hl-keyword">super</span>.key});
+
+  <span class="hl-keyword">@override</span>
+  Widget build(BuildContext context) {
+    <span class="hl-keyword">return</span> GetMaterialApp(   <span class="hl-comment">// 👈 bukan MaterialApp lagi</span>
+      title: <span class="hl-string">'My App'</span>,
+      home: HomePage(),
+    );
+  }
+}</code></pre>
+            </div>
+
+            <h2 class="content-heading">Snackbar, Dialog, BottomSheet — Tanpa Context!</h2>
+            <p class="content-text">Salah satu fitur GetX yang paling disukai: tampilkan UI overlay tanpa harus pegang <code>BuildContext</code>. Cocok dipanggil dari Controller.</p>
+
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">Dart</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-comment">// Snackbar</span>
+Get.snackbar(<span class="hl-string">'Sukses'</span>, <span class="hl-string">'Data tersimpan!'</span>);
+
+<span class="hl-comment">// Snackbar dengan kustom</span>
+Get.snackbar(
+  <span class="hl-string">'Error'</span>,
+  <span class="hl-string">'Login gagal'</span>,
+  backgroundColor: Colors.red,
+  snackPosition: SnackPosition.BOTTOM,
+);
+
+<span class="hl-comment">// Dialog</span>
+Get.defaultDialog(
+  title: <span class="hl-string">'Konfirmasi'</span>,
+  middleText: <span class="hl-string">'Hapus item ini?'</span>,
+  textConfirm: <span class="hl-string">'Ya'</span>,
+  textCancel: <span class="hl-string">'Batal'</span>,
+  onConfirm: () =&gt; deleteItem(),
+);
+
+<span class="hl-comment">// Bottom Sheet</span>
+Get.bottomSheet(
+  Container(
+    color: Colors.white,
+    child: Column(...),
+  ),
+);
+
+<span class="hl-comment">// Navigasi (lihat Modul 6 untuk detail)</span>
+Get.to(DetailPage()); <span class="hl-comment">// push</span>
+Get.back();           <span class="hl-comment">// pop</span>
+Get.off(LoginPage()); <span class="hl-comment">// replace</span></code></pre>
+            </div>
+
+            <h2 class="content-heading">Kekurangan GetX (Jujur)</h2>
+            <ol class="content-list">
+                <li><strong>"Magic"</strong> — fitur otomatisnya kadang sulit di-debug saat ada bug.</li>
+                <li><strong>Dependency tunggal</strong> — kalau GetX bermasalah, banyak hal terdampak.</li>
+                <li><strong>Bukan standar resmi Flutter team</strong> — beberapa proyek korporat lebih suka Provider/Bloc/Riverpod.</li>
+                <li><strong>Hot reload kadang lebih lambat</strong> dibanding Provider untuk reactive state.</li>
+                <li><strong>Komunitas global lebih kecil</strong> dari Provider/Bloc — meski di Indonesia justru sebaliknya.</li>
+            </ol>
+
+            <div class="info-box">
+                <div class="info-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                    <strong>Tetap Belajar Multiple Tools</strong>
+                </div>
+                <p>Walaupun course ini fokus ke GetX, jangan stuck di satu solusi. Setelah lulus, eksplor juga <strong>Riverpod</strong> (penerus Provider yang modern) dan <strong>Bloc</strong> (jika ingin masuk perusahaan besar). Skill yang fleksibel = lebih marketable.</p>
+            </div>
+
+            <div class="quiz">
+                <div class="quiz-title">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01"/></svg>
+                    Cek Pemahaman
+                </div>
+                <div class="quiz-question">
+                    <div class="quiz-q-text">1. GetX menggabungkan berapa fitur utama dalam satu package?</div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'Bukan — hanya 1 fitur kurang.')">1 fitur</div>
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'Kurang satu.')">2 fitur</div>
+                        <div class="quiz-option" data-correct="true" onclick="quizAnswer(this, 'Tepat! State Management + Route Management + Dependency Injection.')">3 fitur (State + Route + DI)</div>
+                    </div>
+                    <div class="quiz-feedback hidden"></div>
+                </div>
+                <div class="quiz-question">
+                    <div class="quiz-q-text">2. Apa yang harus diganti dari MaterialApp agar fitur GetX routing aktif?</div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'CupertinoApp itu untuk iOS-style, bukan GetX.')">CupertinoApp</div>
+                        <div class="quiz-option" data-correct="true" onclick="quizAnswer(this, 'Tepat! GetMaterialApp adalah subclass yang aktivasi GetX routing.')">GetMaterialApp</div>
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'Salah — tidak ada GetXApp.')">GetXApp</div>
+                    </div>
+                    <div class="quiz-feedback hidden"></div>
+                </div>
+                <div class="quiz-question">
+                    <div class="quiz-q-text">3. Apa keunikan GetX dibanding Provider/Bloc?</div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'Tidak benar — semua sama-sama gratis & open source.')">Lebih mahal</div>
+                        <div class="quiz-option" data-correct="true" onclick="quizAnswer(this, 'Tepat! Tidak butuh context — bisa dipanggil dari Controller/Service.')">Tidak perlu BuildContext untuk operasi UI</div>
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'Salah — GetX justru jalan di Flutter, tidak independent.')">Hanya jalan di iOS</div>
+                    </div>
+                    <div class="quiz-feedback hidden"></div>
+                </div>
+            </div>
+
+            <div class="content-nav">
+                <div class="content-nav-item">
+                    <a href="index.html" class="nav-btn nav-btn-prev">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                        <div><span class="nav-label">Sebelumnya</span><span class="nav-name">Review & Arsitektur</span></div>
+                    </a>
+                </div>
+                <div class="content-nav-item">
+                    <a href="arsitektur-getx.html" class="nav-btn nav-btn-next">
+                        <div><span class="nav-label">Selanjutnya</span><span class="nav-name">Arsitektur GetX</span></div>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </a>
+                </div>
+            </div>
+        </article>
+    </main>
+    <script src="/flutter-intermediate/course-layout.js"></script>
+    <script>
+    function copyCode(btn) {
+        const codeBlock = btn.closest('.code-block').querySelector('code');
+        navigator.clipboard.writeText(codeBlock.textContent).then(() => {
+            btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>';
+            setTimeout(() => { btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>'; }, 2000);
+        });
+    }
+
+    const pilarDetails = {
+        state: '<strong>State Management</strong> — Atur data yang berubah seiring waktu (counter, login status, data API). GetX punya 2 mode: <em>Reactive</em> (otomatis update UI saat data berubah, pakai <code>.obs</code> & <code>Obx()</code>) dan <em>Simple</em> (manual trigger update, pakai <code>GetBuilder</code>). Dibahas detail di Modul 5.',
+        route: '<strong>Route Management</strong> — Navigasi antar halaman tanpa context. <code>Get.to(NextPage())</code> = push. <code>Get.back()</code> = pop. <code>Get.toNamed("/detail")</code> = named route. Tambah middleware untuk auth guard, transition animation, dll. Dibahas di Modul 6.',
+        di: '<strong>Dependency Injection</strong> — Daftarkan service/controller agar bisa diakses dari mana saja. <code>Get.put(UserService())</code> = daftar, <code>Get.find&lt;UserService&gt;()</code> = panggil. Tidak perlu global variable atau singleton manual. Dibahas di Modul 7.'
+    };
+    function showPilar(key, el) {
+        document.querySelectorAll('.arch-node').forEach(n => n.classList.remove('active'));
+        el.classList.add('active');
+        document.getElementById('pilarDetail').innerHTML = pilarDetails[key];
+    }
+    showPilar('state', document.querySelector('.arch-node'));
+
+    let counter = 0;
+    let rebuilds = 0;
+    function incrementPhone() {
+        counter++;
+        rebuilds++;
+        const el = document.getElementById('phoneCounter');
+        el.textContent = counter;
+        el.classList.add('pulse');
+        setTimeout(() => el.classList.remove('pulse'), 200);
+        document.getElementById('rebuildCount').textContent = rebuilds;
+    }
+    function resetPhone() {
+        counter = 0; rebuilds = 0;
+        document.getElementById('phoneCounter').textContent = '0';
+        document.getElementById('rebuildCount').textContent = '0';
+    }
+
+    function quizAnswer(el, feedback) {
+        const question = el.closest('.quiz-question');
+        const options = question.querySelectorAll('.quiz-option');
+        const fb = question.querySelector('.quiz-feedback');
+        options.forEach(o => {
+            o.style.pointerEvents = 'none';
+            if (o.dataset.correct === 'true') o.classList.add('correct');
+        });
+        if (el.dataset.correct !== 'true') el.classList.add('wrong');
+        fb.textContent = feedback;
+        fb.classList.remove('hidden');
+        fb.classList.add('visible');
+    }
+    </script>
+</body>
+</html>

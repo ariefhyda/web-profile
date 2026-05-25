@@ -19,23 +19,23 @@ const courseConfig = {
         {
             group: "GetX Ecosystem",
             items: [
-                { title: "Pengenalan GetX", url: "#", icon: "2" },
-                { title: "Arsitektur GetX", url: "#", icon: "3" },
-                { title: "GetX CLI & Scaffolding", url: "#", icon: "4" }
+                { title: "Pengenalan GetX", url: "/flutter-intermediate/pengenalan-getx.html", icon: "2" },
+                { title: "Arsitektur GetX", url: "/flutter-intermediate/arsitektur-getx.html", icon: "3" },
+                { title: "GetX CLI & Scaffolding", url: "/flutter-intermediate/getx-cli.html", icon: "4" }
             ]
         },
         {
             group: "GetX Lanjutan",
             items: [
-                { title: "State Management (GetX)", url: "#", icon: "5" },
-                { title: "Routing & Middleware", url: "#", icon: "6" },
-                { title: "Dependency Injection", url: "#", icon: "7" }
+                { title: "State Management (GetX)", url: "/flutter-intermediate/state-management.html", icon: "5" },
+                { title: "Routing & Middleware", url: "/flutter-intermediate/routing-middleware.html", icon: "6" },
+                { title: "Dependency Injection", url: "/flutter-intermediate/dependency-injection.html", icon: "7" }
             ]
         },
         {
             group: "Proyek",
             items: [
-                { title: "Final Project Intermediate", url: "#", icon: "8" }
+                { title: "Final Project Intermediate", url: "/flutter-intermediate/final-project.html", icon: "8" }
             ]
         }
     ]

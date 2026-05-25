@@ -30,98 +30,228 @@
                 </div>
             </header>
 
-            <p class="content-text">Selamat! Anda telah mencapai akhir dari rangkaian modul dasar Laravel. Untuk memastikan pemahaman Anda terhadap arsitektur MVC, ORM, Routing, Blade, dan Middleware, Anda diwajibkan untuk mengerjakan sebuah <strong>Final Project (Tugas Besar)</strong> secara individu atau berkelompok.</p>
+            <p class="content-text">Selamat! Anda telah mencapai akhir rangkaian modul Laravel. Untuk membuktikan pemahaman Anda, kerjakan <strong>Final Project</strong> ini secara individu atau kelompok (maks 3 orang). Project ini menggabungkan semua materi dari Modul 1 sampai 13.</p>
 
-            <h2 class="content-heading">Deskripsi Proyek: Aplikasi Blog Sederhana</h2>
-            <p class="content-text">Tugas Anda adalah membangun sebuah sistem CMS (Content Management System) atau Aplikasi Blog Sederhana (mirip seperti Medium atau Dev.to) yang mengimplementasikan semua konsep yang telah dipelajari dari Modul 1 hingga Modul 13.</p>
+            <div class="analogy-box">
+                <div class="analogy-icon">🎓</div>
+                <div class="analogy-content">
+                    <strong>Skripsi Mini</strong>
+                    <p>Anggap project ini sebagai "skripsi mini" — Anda menggabungkan semua skill yang sudah dipelajari menjadi satu aplikasi yang utuh. Selesaikan ini, dan Anda sudah siap untuk freelance project sederhana atau internship sebagai web developer.</p>
+                </div>
+            </div>
+
+            <h2 class="content-heading">Tema Proyek: Mini Blog CMS</h2>
+            <p class="content-text">Bangun sistem <strong>Content Management System (CMS)</strong> atau aplikasi blog sederhana — mirip Medium atau Dev.to dalam skala kecil. Aplikasi ini punya 2 sisi: <em>halaman publik</em> (pembaca) dan <em>dashboard</em> (penulis).</p>
 
             <div class="info-box">
                 <div class="info-box-header">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
                     <strong>Tech Stack Wajib</strong>
                 </div>
-                <p>Backend: <strong>Laravel 10 / 11</strong><br>
-                Database: <strong>MySQL / PostgreSQL / SQLite</strong><br>
-                Frontend: <strong>Blade Templating + TailwindCSS / Bootstrap 5</strong></p>
+                <p>
+                    <strong>Backend:</strong> Laravel 10 atau 11<br>
+                    <strong>Database:</strong> MySQL / MariaDB / PostgreSQL / SQLite<br>
+                    <strong>Frontend:</strong> Blade + Tailwind CSS atau Bootstrap 5<br>
+                    <strong>Auth:</strong> Laravel Breeze (boleh manual jika ingin lebih custom)
+                </p>
             </div>
 
-            <h2 class="content-heading">Kriteria dan Fitur Wajib</h2>
-            
-            <h3 class="content-heading" style="margin-top: 1.5rem;">1. Autentikasi & Otorisasi</h3>
-            <ul class="content-list">
-                <li>Sistem Login dan Register (Boleh menggunakan Breeze/Jetstream).</li>
-                <li>Dua role utama: <strong>Admin</strong> (bisa mengelola semua artikel & user) dan <strong>User/Penulis</strong> (hanya bisa mengelola artikelnya sendiri).</li>
-                <li>Gunakan Middleware untuk memproteksi halaman Dashboard.</li>
-            </ul>
+            <h2 class="content-heading">Project Progress Tracker</h2>
+            <p class="content-text">Checklist interaktif berikut akan menjadi panduan mingguan. Centang ketika selesai — progress bar akan menunjukkan kemajuan Anda.</p>
 
-            <h3 class="content-heading" style="margin-top: 1.5rem;">2. Manajemen Artikel (CRUD)</h3>
-            <ul class="content-list">
-                <li>Fitur Create, Read, Update, Delete untuk tabel <code>posts</code> atau <code>articles</code>.</li>
-                <li>Input form wajib divalidasi (Judul wajib, konten minimal 50 karakter).</li>
-                <li>Artikel memiliki <em>slug</em> untuk URL yang ramah SEO (contoh: <code>/post/cara-belajar-laravel</code>).</li>
-                <li>Fitur upload gambar untuk <em>thumbnail</em> artikel.</li>
-            </ul>
+            <div class="interactive-card">
+                <div class="interactive-title">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                    Final Project Checklist
+                </div>
+                <p class="interactive-subtitle">Centang item ketika selesai. Progress tersimpan di browser ini.</p>
 
-            <h3 class="content-heading" style="margin-top: 1.5rem;">3. Relasi Database (Eloquent)</h3>
-            <ul class="content-list">
-                <li>Relasi <strong>One-to-Many</strong> antara User dan Post (Satu penulis bisa punya banyak artikel).</li>
-                <li>Relasi <strong>One-to-Many</strong> antara Category dan Post (Satu kategori memiliki banyak artikel).</li>
-                <li>(Opsional Nilai Plus): Relasi <strong>Many-to-Many</strong> antara Post dan Tag.</li>
-            </ul>
+                <h4 style="margin: 12px 0 6px; color: var(--accent-laravel); font-size: 0.92rem;">📦 Setup & Persiapan</h4>
+                <ul class="checklist" id="setupList">
+                    <li class="checklist-item" onclick="toggleCheck(this)"><div class="checklist-checkbox"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><div class="checklist-text"><strong>Project Laravel baru</strong> di-create + connect database</div></li>
+                    <li class="checklist-item" onclick="toggleCheck(this)"><div class="checklist-checkbox"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><div class="checklist-text"><strong>Install Breeze</strong> — login, register, dashboard sudah jalan</div></li>
+                    <li class="checklist-item" onclick="toggleCheck(this)"><div class="checklist-checkbox"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><div class="checklist-text"><strong>Repository Git</strong> dibuat + push initial commit</div></li>
+                    <li class="checklist-item" onclick="toggleCheck(this)"><div class="checklist-checkbox"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><div class="checklist-text"><strong>Tailwind/Bootstrap</strong> ter-compile (Vite npm run dev jalan)</div></li>
+                </ul>
 
-            <h3 class="content-heading" style="margin-top: 1.5rem;">4. Tampilan (Blade Views)</h3>
-            <ul class="content-list">
-                <li>Halaman Landing/Beranda: Menampilkan daftar semua artikel terbaru dari semua penulis (Pagination diterapkan).</li>
-                <li>Halaman Detail Artikel: Menampilkan isi lengkap beserta nama penulis, tanggal (format manusiawi pakai <code>diffForHumans()</code>), dan kategori.</li>
-                <li>Gunakan Blade Layout (<code>@extends</code> atau Component <code>&lt;x-layout&gt;</code>).</li>
-            </ul>
+                <h4 style="margin: 16px 0 6px; color: var(--accent-laravel); font-size: 0.92rem;">🗄️ Database & Model</h4>
+                <ul class="checklist" id="dbList">
+                    <li class="checklist-item" onclick="toggleCheck(this)"><div class="checklist-checkbox"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><div class="checklist-text">Migration <strong>posts</strong> (title, slug, body, thumbnail, user_id, category_id)</div></li>
+                    <li class="checklist-item" onclick="toggleCheck(this)"><div class="checklist-checkbox"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><div class="checklist-text">Migration <strong>categories</strong> (name, slug)</div></li>
+                    <li class="checklist-item" onclick="toggleCheck(this)"><div class="checklist-checkbox"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><div class="checklist-text">Relasi <strong>User-hasMany-Posts</strong> & <strong>Category-hasMany-Posts</strong></div></li>
+                    <li class="checklist-item" onclick="toggleCheck(this)"><div class="checklist-checkbox"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><div class="checklist-text">Seeder: 1 admin + 3 user + 5 kategori + 20 post dummy</div></li>
+                    <li class="checklist-item" onclick="toggleCheck(this)"><div class="checklist-checkbox"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><div class="checklist-text">Kolom <code>role</code> di users (enum: admin, user)</div></li>
+                    <li class="checklist-item" onclick="toggleCheck(this)"><div class="checklist-checkbox"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><div class="checklist-text">(Bonus) Tabel <strong>tags</strong> + pivot <strong>post_tag</strong> (many-to-many)</div></li>
+                </ul>
 
-            <h2 class="content-heading">Sistem Penilaian (Rubrik)</h2>
-            <div style="overflow-x: auto; margin-top: 1rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
-                <table style="width: 100%; border-collapse: collapse; text-align: left;">
-                    <thead>
-                        <tr style="background: rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.1);">
-                            <th style="padding: 12px 16px; font-weight: 600;">Aspek Penilaian</th>
-                            <th style="padding: 12px 16px; font-weight: 600;">Bobot</th>
-                            <th style="padding: 12px 16px; font-weight: 600;">Keterangan</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
-                            <td style="padding: 12px 16px;">Fungsionalitas CRUD</td>
-                            <td style="padding: 12px 16px;">30%</td>
-                            <td style="padding: 12px 16px; color: var(--text-secondary);">Semua fungsi berjalan normal tanpa error 500.</td>
-                        </tr>
-                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
-                            <td style="padding: 12px 16px;">Database & Relasi</td>
-                            <td style="padding: 12px 16px;">25%</td>
-                            <td style="padding: 12px 16px; color: var(--text-secondary);">Desain skema (Migration) yang tepat dan implementasi Eloquent.</td>
-                        </tr>
-                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
-                            <td style="padding: 12px 16px;">UI / UX (Blade)</td>
-                            <td style="padding: 12px 16px;">20%</td>
-                            <td style="padding: 12px 16px; color: var(--text-secondary);">Tampilan rapi, responsif, menggunakan layout yang dapat digunakan kembali.</td>
-                        </tr>
-                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
-                            <td style="padding: 12px 16px;">Keamanan (Auth & Validasi)</td>
-                            <td style="padding: 12px 16px;">15%</td>
-                            <td style="padding: 12px 16px; color: var(--text-secondary);">Form diproteksi CSRF, input divalidasi, dan route diamankan.</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 12px 16px;">Kode Bersih (Clean Code)</td>
-                            <td style="padding: 12px 16px;">10%</td>
-                            <td style="padding: 12px 16px; color: var(--text-secondary);">Penamaan variabel yang jelas, controller tidak berisi terlalu banyak logika, dll.</td>
-                        </tr>
-                    </tbody>
-                </table>
+                <h4 style="margin: 16px 0 6px; color: var(--accent-laravel); font-size: 0.92rem;">🔐 Auth & Authorization</h4>
+                <ul class="checklist" id="authList">
+                    <li class="checklist-item" onclick="toggleCheck(this)"><div class="checklist-checkbox"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><div class="checklist-text">Login, register, logout sudah jalan</div></li>
+                    <li class="checklist-item" onclick="toggleCheck(this)"><div class="checklist-checkbox"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><div class="checklist-text">Middleware <code>auth</code> proteksi route <code>/dashboard/*</code></div></li>
+                    <li class="checklist-item" onclick="toggleCheck(this)"><div class="checklist-checkbox"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><div class="checklist-text">Middleware/Policy: hanya owner yang bisa edit/hapus post-nya</div></li>
+                    <li class="checklist-item" onclick="toggleCheck(this)"><div class="checklist-checkbox"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><div class="checklist-text">Admin bisa kelola semua post & semua user</div></li>
+                </ul>
+
+                <h4 style="margin: 16px 0 6px; color: var(--accent-laravel); font-size: 0.92rem;">📝 Fitur CRUD Posts</h4>
+                <ul class="checklist" id="crudList">
+                    <li class="checklist-item" onclick="toggleCheck(this)"><div class="checklist-checkbox"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><div class="checklist-text">List post di dashboard (hanya milik user yg login, pagination)</div></li>
+                    <li class="checklist-item" onclick="toggleCheck(this)"><div class="checklist-checkbox"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><div class="checklist-text">Form Create post — validasi (title required, body min 50)</div></li>
+                    <li class="checklist-item" onclick="toggleCheck(this)"><div class="checklist-checkbox"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><div class="checklist-text">Slug otomatis dari title (URL: <code>/post/judul-artikel</code>)</div></li>
+                    <li class="checklist-item" onclick="toggleCheck(this)"><div class="checklist-checkbox"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><div class="checklist-text">Upload thumbnail image — disimpan di <code>storage/app/public/posts</code></div></li>
+                    <li class="checklist-item" onclick="toggleCheck(this)"><div class="checklist-checkbox"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><div class="checklist-text">Edit & Update post (form pre-filled)</div></li>
+                    <li class="checklist-item" onclick="toggleCheck(this)"><div class="checklist-checkbox"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><div class="checklist-text">Delete post (dengan konfirmasi)</div></li>
+                </ul>
+
+                <h4 style="margin: 16px 0 6px; color: var(--accent-laravel); font-size: 0.92rem;">🌐 Halaman Publik</h4>
+                <ul class="checklist" id="publicList">
+                    <li class="checklist-item" onclick="toggleCheck(this)"><div class="checklist-checkbox"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><div class="checklist-text">Beranda: list semua post terbaru (pagination 9 per halaman)</div></li>
+                    <li class="checklist-item" onclick="toggleCheck(this)"><div class="checklist-checkbox"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><div class="checklist-text">Detail post: judul, body, penulis, kategori, tanggal (<code>diffForHumans</code>)</div></li>
+                    <li class="checklist-item" onclick="toggleCheck(this)"><div class="checklist-checkbox"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><div class="checklist-text">Filter berdasarkan kategori (<code>/category/{slug}</code>)</div></li>
+                    <li class="checklist-item" onclick="toggleCheck(this)"><div class="checklist-checkbox"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><div class="checklist-text">Halaman penulis: list post per author (<code>/author/{username}</code>)</div></li>
+                    <li class="checklist-item" onclick="toggleCheck(this)"><div class="checklist-checkbox"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><div class="checklist-text">Search post (by title atau body)</div></li>
+                    <li class="checklist-item" onclick="toggleCheck(this)"><div class="checklist-checkbox"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><div class="checklist-text">Layout reusable (<code>&lt;x-layout&gt;</code> atau <code>@extends</code>)</div></li>
+                </ul>
+
+                <h4 style="margin: 16px 0 6px; color: var(--accent-laravel); font-size: 0.92rem;">✨ Polish & Submit</h4>
+                <ul class="checklist" id="polishList">
+                    <li class="checklist-item" onclick="toggleCheck(this)"><div class="checklist-checkbox"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><div class="checklist-text">Halaman responsif (cek di mobile/tablet)</div></li>
+                    <li class="checklist-item" onclick="toggleCheck(this)"><div class="checklist-checkbox"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><div class="checklist-text">Flash message untuk semua aksi (create/update/delete)</div></li>
+                    <li class="checklist-item" onclick="toggleCheck(this)"><div class="checklist-checkbox"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><div class="checklist-text">Error handler kustom 404 & 500</div></li>
+                    <li class="checklist-item" onclick="toggleCheck(this)"><div class="checklist-checkbox"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><div class="checklist-text">README.md jelas (cara install, login admin, screenshot)</div></li>
+                    <li class="checklist-item" onclick="toggleCheck(this)"><div class="checklist-checkbox"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><div class="checklist-text"><code>.env.example</code> include semua key yang dibutuhkan</div></li>
+                    <li class="checklist-item" onclick="toggleCheck(this)"><div class="checklist-checkbox"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><div class="checklist-text">Push final + tag <code>v1.0</code> ke GitHub</div></li>
+                    <li class="checklist-item" onclick="toggleCheck(this)"><div class="checklist-checkbox"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><div class="checklist-text">Submit URL repo ke platform e-learning</div></li>
+                </ul>
+
+                <div class="progress-track"><div class="progress-fill" id="projProgress" style="width: 0%"></div></div>
+                <div class="progress-label"><span id="projLabel">0 dari 0 task selesai</span><strong id="projPct">0%</strong></div>
+                <div style="margin-top: 10px;">
+                    <button class="btn-action btn-secondary" onclick="resetProgress()">↺ Reset Progress</button>
+                </div>
+            </div>
+
+            <h2 class="content-heading">Roadmap 2 Minggu</h2>
+            <p class="content-text">Berikut estimasi pembagian waktu pengerjaan. Sesuaikan dengan ritme tim Anda — yang penting konsisten setiap hari.</p>
+
+            <div class="timeline-list">
+                <div class="timeline-entry">
+                    <div class="timeline-week">Hari 1–2</div>
+                    <div class="timeline-title">Setup & Database Design</div>
+                    <div class="timeline-desc">Buat project, install Breeze, desain ERD (Entity Relationship Diagram). Definisikan migration semua tabel dengan relasi.</div>
+                </div>
+                <div class="timeline-entry">
+                    <div class="timeline-week">Hari 3–4</div>
+                    <div class="timeline-title">Model + Seeder + Auth</div>
+                    <div class="timeline-desc">Tulis semua Model dengan relasi & $fillable. Buat factory + seeder data dummy. Tambahkan kolom role di User.</div>
+                </div>
+                <div class="timeline-entry">
+                    <div class="timeline-week">Hari 5–7</div>
+                    <div class="timeline-title">CRUD Posts (Dashboard)</div>
+                    <div class="timeline-desc">Form create/edit dengan validasi. Upload gambar. Policy untuk owner check. Pagination di list.</div>
+                </div>
+                <div class="timeline-entry">
+                    <div class="timeline-week">Hari 8–10</div>
+                    <div class="timeline-title">Halaman Publik</div>
+                    <div class="timeline-desc">Beranda dengan list, detail post dengan slug, filter kategori, search. Layout component reusable.</div>
+                </div>
+                <div class="timeline-entry">
+                    <div class="timeline-week">Hari 11–12</div>
+                    <div class="timeline-title">Polish UI/UX</div>
+                    <div class="timeline-desc">Responsif (Tailwind/Bootstrap). Flash message. Custom 404 page. Loading state. Empty state.</div>
+                </div>
+                <div class="timeline-entry">
+                    <div class="timeline-week">Hari 13</div>
+                    <div class="timeline-title">Testing Manual & Bug Fix</div>
+                    <div class="timeline-desc">Test semua skenario (register baru → login → buat post → edit → hapus → publik baca). Fix bug yang ditemukan.</div>
+                </div>
+                <div class="timeline-entry">
+                    <div class="timeline-week">Hari 14</div>
+                    <div class="timeline-title">Dokumentasi & Submit</div>
+                    <div class="timeline-desc">README.md lengkap + screenshot. Push final tag. Buat slide presentasi singkat. Submit!</div>
+                </div>
+            </div>
+
+            <h2 class="content-heading">Rubrik Penilaian</h2>
+            <table class="compare-table">
+                <thead>
+                    <tr><th>Aspek</th><th>Bobot</th><th>Kriteria</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Fungsionalitas CRUD</strong></td>
+                        <td>30%</td>
+                        <td>Semua fungsi jalan tanpa error 500. CRUD lengkap. Pagination. Validasi.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Database & Relasi</strong></td>
+                        <td>25%</td>
+                        <td>Migration well-designed (foreign key, default, index). Eloquent relasi dipakai dengan benar (eager loading).</td>
+                    </tr>
+                    <tr>
+                        <td><strong>UI / UX</strong></td>
+                        <td>20%</td>
+                        <td>Tampilan rapi & responsif. Pakai layout reusable. Flash message. Custom 404.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Keamanan</strong></td>
+                        <td>15%</td>
+                        <td>CSRF, validasi input, password hash, policy/authorize, $fillable diatur.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Clean Code</strong></td>
+                        <td>10%</td>
+                        <td>Penamaan jelas, kode terstruktur, fitur dipisah jadi controller terpisah, comment seperlunya.</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2 class="content-heading">Bonus untuk Nilai A+</h2>
+            <ol class="content-list">
+                <li><strong>Fitur Tag</strong> (Many-to-Many): post bisa punya banyak tag</li>
+                <li><strong>Komentar</strong> di setiap post (One-to-Many dengan moderasi admin)</li>
+                <li><strong>Like / Bookmark</strong> sistem (Many-to-Many user-post)</li>
+                <li><strong>Email Verification</strong> aktif (Breeze sudah include)</li>
+                <li><strong>Markdown Editor</strong> untuk body (pakai SimpleMDE atau EasyMDE)</li>
+                <li><strong>REST API</strong> endpoint untuk semua resource (siap dipakai mobile app)</li>
+                <li><strong>Deploy live</strong> ke Vercel/Railway/000webhost — dosen bisa langsung akses</li>
+                <li><strong>Dark mode toggle</strong> dengan persistence (localStorage)</li>
+                <li><strong>SEO meta tags</strong> per post (Open Graph, Twitter Card)</li>
+                <li><strong>RSS feed</strong> untuk artikel terbaru</li>
+            </ol>
+
+            <h2 class="content-heading">Sumber Belajar Tambahan</h2>
+            <ol class="content-list">
+                <li><strong>Dokumentasi Resmi</strong> — <em>laravel.com/docs</em> (selalu rujukan utama)</li>
+                <li><strong>Laracasts</strong> — <em>laracasts.com</em> (video tutorial premium, banyak yang gratis)</li>
+                <li><strong>Laravel Daily YouTube</strong> — channel YouTube terbaik untuk tips Laravel</li>
+                <li><strong>Laravel News</strong> — <em>laravel-news.com</em> (update fitur & best practice)</li>
+                <li><strong>GitHub: Awesome Laravel</strong> — kumpulan package keren</li>
+            </ol>
+
+            <div class="success-box">
+                <div class="success-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                    Tips Sukses
+                </div>
+                <p><strong>1.</strong> Mulai sederhana — fitur dasar dulu, baru polish. <strong>2.</strong> Commit kecil & sering ke Git ("commit-driven development"). <strong>3.</strong> Test di environment bersih sebelum submit (clone repo + composer install + npm install + migrate). <strong>4.</strong> Jangan malu bertanya — tapi search dulu di Google/StackOverflow, jawaban biasanya ada.</p>
             </div>
 
             <h2 class="content-heading">Langkah Pengumpulan</h2>
             <ol class="content-list">
-                <li>Push kode akhir Anda ke repositori GitHub. (Pastikan <strong>tidak</strong> mem-push folder <code>vendor/</code> dan file <code>.env</code> asli).</li>
-                <li>Ekspor database Anda (file <code>.sql</code>) atau pastikan Seeder berfungsi dengan sempurna.</li>
-                <li>Submit URL Repositori ke platform e-learning kampus/kelas Anda.</li>
+                <li>Push kode final ke GitHub (pastikan <strong>tidak</strong> commit <code>vendor/</code>, <code>node_modules/</code>, <code>.env</code>).</li>
+                <li>Buat <strong>README.md</strong> berisi: deskripsi project, cara install, kredensial admin default, screenshot, link demo (jika ada).</li>
+                <li>Tambah <strong>.env.example</strong> dengan semua key yang dibutuhkan (kosongi nilai sensitif).</li>
+                <li>Tag rilis final: <code>git tag v1.0 -a -m "Final submission"</code> dan <code>git push --tags</code>.</li>
+                <li>Submit <strong>URL repository</strong> ke platform e-learning beserta nama anggota tim.</li>
             </ol>
+
+            <div class="info-box">
+                <div class="info-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                    <strong>Akhir Kata</strong>
+                </div>
+                <p>Selamat! Setelah menyelesaikan project ini, Anda sudah punya satu portofolio yang dapat ditunjukkan ke calon employer atau klien. Lanjutkan eksplorasi — coba framework frontend (Vue/React), pelajari deployment (DigitalOcean, AWS), dan kontribusi ke project open-source Laravel. <strong>Selamat berkarya!</strong> 🚀</p>
+            </div>
 
             <div class="content-nav">
                 <div class="content-nav-item">
@@ -135,5 +265,53 @@
         </article>
     </main>
     <script src="/laravel/course-layout.js"></script>
+    <script>
+    const STORAGE_KEY = 'laravel-final-project-progress';
+
+    function toggleCheck(el) {
+        el.classList.toggle('checked');
+        updateProgress();
+        saveProgress();
+    }
+
+    function updateProgress() {
+        const items = document.querySelectorAll('.checklist-item');
+        const done = document.querySelectorAll('.checklist-item.checked').length;
+        const total = items.length;
+        const pct = total === 0 ? 0 : Math.round((done / total) * 100);
+        document.getElementById('projProgress').style.width = pct + '%';
+        document.getElementById('projLabel').textContent = done + ' dari ' + total + ' task selesai';
+        document.getElementById('projPct').textContent = pct + '%';
+    }
+
+    function saveProgress() {
+        const checked = [];
+        document.querySelectorAll('.checklist-item').forEach((el, i) => {
+            if (el.classList.contains('checked')) checked.push(i);
+        });
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(checked)); } catch (_) {}
+    }
+
+    function loadProgress() {
+        try {
+            const raw = localStorage.getItem(STORAGE_KEY);
+            if (!raw) return;
+            const checked = JSON.parse(raw);
+            document.querySelectorAll('.checklist-item').forEach((el, i) => {
+                if (checked.includes(i)) el.classList.add('checked');
+            });
+        } catch (_) {}
+        updateProgress();
+    }
+
+    function resetProgress() {
+        if (!confirm('Yakin reset semua progress?')) return;
+        document.querySelectorAll('.checklist-item').forEach(el => el.classList.remove('checked'));
+        try { localStorage.removeItem(STORAGE_KEY); } catch (_) {}
+        updateProgress();
+    }
+
+    loadProgress();
+    </script>
 </body>
 </html>

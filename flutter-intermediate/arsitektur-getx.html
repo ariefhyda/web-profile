@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arsitektur GetX — Flutter Intermediate</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/flutter/course.css">
+    <link rel="stylesheet" href="/flutter-intermediate/course.css">
+</head>
+<body>
+    <div class="bg-grid" aria-hidden="true"></div>
+    <nav class="navbar scrolled" id="navbar"></nav>
+    <div class="mobile-menu" id="mobileMenu"></div>
+    <main class="course-layout">
+        <aside class="course-sidebar" id="courseSidebar"></aside>
+        <article class="course-content">
+            <div class="breadcrumb">
+                <a href="../index.html">Home</a><span>›</span>
+                <a href="index.html">Flutter Intermediate</a><span>›</span>
+                <span style="color: var(--text-primary);">Arsitektur GetX</span>
+            </div>
+            <header class="content-header">
+                <h1 class="content-title">Modul 3: Arsitektur GetX Pattern</h1>
+                <div class="content-meta">
+                    <div class="meta-pill"><span>Estimasi: 55 Menit</span></div>
+                    <div class="meta-pill"><span>Teori & Praktikum</span></div>
+                </div>
+            </header>
+
+            <p class="content-text">Sekarang setelah Anda paham GetX adalah apa, mari pelajari bagaimana <strong>mengorganisasi kode</strong> menggunakannya. Pola yang direkomendasikan tim GetX adalah <strong>GetX Pattern</strong> — feature-first dengan 3 komponen utama: <strong>View</strong>, <strong>Controller</strong>, <strong>Binding</strong>.</p>
+
+            <div class="analogy-box">
+                <div class="analogy-icon">🎭</div>
+                <div class="analogy-content">
+                    <strong>Analogi: Pementasan Drama</strong>
+                    <p><strong>View</strong> = panggung yang dilihat penonton. <strong>Controller</strong> = sutradara di balik layar yang atur cerita & emosi. <strong>Binding</strong> = produser yang menyiapkan semua kebutuhan (kostum, properti) sebelum pementasan dimulai. Tiga peran terpisah — semua bekerja sama menghasilkan pertunjukan yang bagus.</p>
+                </div>
+            </div>
+
+            <h2 class="content-heading">3 Komponen Utama GetX Pattern</h2>
+
+            <div class="interactive-card">
+                <div class="interactive-title">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33"/></svg>
+                    Komponen GetX Pattern
+                </div>
+                <p class="interactive-subtitle">Klik tiap komponen untuk lihat tanggung jawab dan kode contohnya.</p>
+                <div class="arch-flow">
+                    <div class="arch-node active" data-comp="view" onclick="showComp('view', this)">
+                        <div class="arch-node-icon">👁️</div>
+                        <div class="arch-node-name">View</div>
+                        <div class="arch-node-role">UI / Layout</div>
+                    </div>
+                    <div class="arch-node" data-comp="controller" onclick="showComp('controller', this)">
+                        <div class="arch-node-icon">🎮</div>
+                        <div class="arch-node-name">Controller</div>
+                        <div class="arch-node-role">State & Logic</div>
+                    </div>
+                    <div class="arch-node" data-comp="binding" onclick="showComp('binding', this)">
+                        <div class="arch-node-icon">🔗</div>
+                        <div class="arch-node-name">Binding</div>
+                        <div class="arch-node-role">DI per route</div>
+                    </div>
+                </div>
+                <div class="arch-detail" id="compDetail"></div>
+            </div>
+
+            <h2 class="content-heading">Struktur Folder Standar</h2>
+            <p class="content-text">GetX merekomendasikan <em>feature-first</em> — folder dikelompokkan berdasarkan fitur, bukan per tipe file. Inilah strukturnya:</p>
+
+            <div class="folder-tree">
+<span class="folder">lib/</span>
+├── <span class="file special">main.dart</span><span class="comment"># Entry point + GetMaterialApp + initialRoute</span>
+├── <span class="folder">app/</span>
+│   ├── <span class="folder">data/</span><span class="comment"># Lapisan data (terpisah dari fitur)</span>
+│   │   ├── <span class="folder">models/</span>
+│   │   │   └── <span class="file">user_model.dart</span>
+│   │   ├── <span class="folder">providers/</span><span class="comment"># API client</span>
+│   │   │   └── <span class="file">user_provider.dart</span>
+│   │   └── <span class="folder">repositories/</span>
+│   │       └── <span class="file">user_repository.dart</span>
+│   │
+│   ├── <span class="folder">modules/</span><span class="comment"># Satu folder = satu halaman / fitur</span>
+│   │   ├── <span class="folder">home/</span>
+│   │   │   ├── <span class="file special">home_view.dart</span><span class="comment"># Widget UI</span>
+│   │   │   ├── <span class="file special">home_controller.dart</span><span class="comment"># State & logic</span>
+│   │   │   └── <span class="file special">home_binding.dart</span><span class="comment"># DI registration</span>
+│   │   ├── <span class="folder">login/</span>
+│   │   │   ├── <span class="file">login_view.dart</span>
+│   │   │   ├── <span class="file">login_controller.dart</span>
+│   │   │   └── <span class="file">login_binding.dart</span>
+│   │   └── <span class="folder">profile/</span>
+│   │       └── ... <span class="comment"># pola yang sama</span>
+│   │
+│   ├── <span class="folder">routes/</span>
+│   │   ├── <span class="file">app_pages.dart</span><span class="comment"># Daftar semua route + binding</span>
+│   │   └── <span class="file">app_routes.dart</span><span class="comment"># Konstanta route name</span>
+│   │
+│   └── <span class="folder">utils/</span>
+│       ├── <span class="file">constants.dart</span>
+│       └── <span class="file">themes.dart</span>
+            </div>
+
+            <div class="success-box">
+                <div class="success-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                    Kenapa Feature-first?
+                </div>
+                <p>Saat kerja di fitur "Login", semua file relevan ada di satu folder <code>modules/login/</code>. Tidak perlu lompat ke <code>controllers/</code>, <code>views/</code>, <code>bindings/</code> yang berbeda-beda. Hemat waktu, mudah refactor — kalau fitur Login dihapus, tinggal hapus 1 folder.</p>
+            </div>
+
+            <h2 class="content-heading">Contoh Lengkap: Module Home</h2>
+
+            <h3 class="content-subheading">1. Controller (Logic & State)</h3>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">modules/home/home_controller.dart</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-keyword">import</span> <span class="hl-string">'package:get/get.dart'</span>;
+<span class="hl-keyword">import</span> <span class="hl-string">'../../data/repositories/user_repository.dart'</span>;
+<span class="hl-keyword">import</span> <span class="hl-string">'../../data/models/user_model.dart'</span>;
+
+<span class="hl-keyword">class</span> HomeController <span class="hl-keyword">extends</span> GetxController {
+  <span class="hl-comment">// Repository di-inject lewat constructor</span>
+  <span class="hl-keyword">final</span> UserRepository _repo;
+  HomeController(<span class="hl-keyword">this</span>._repo);
+
+  <span class="hl-comment">// State (reactive)</span>
+  <span class="hl-keyword">final</span> users = &lt;User&gt;[].obs;
+  <span class="hl-keyword">final</span> isLoading = <span class="hl-keyword">false</span>.obs;
+  <span class="hl-keyword">final</span> errorMessage = <span class="hl-string">''</span>.obs;
+
+  <span class="hl-keyword">@override</span>
+  <span class="hl-keyword">void</span> onInit() {
+    <span class="hl-keyword">super</span>.onInit();
+    fetchUsers(); <span class="hl-comment">// Auto-load saat controller dibuat</span>
+  }
+
+  Future&lt;<span class="hl-keyword">void</span>&gt; fetchUsers() <span class="hl-keyword">async</span> {
+    <span class="hl-keyword">try</span> {
+      isLoading.value = <span class="hl-keyword">true</span>;
+      users.value = <span class="hl-keyword">await</span> _repo.getAll();
+    } <span class="hl-keyword">catch</span> (e) {
+      errorMessage.value = e.toString();
+    } <span class="hl-keyword">finally</span> {
+      isLoading.value = <span class="hl-keyword">false</span>;
+    }
+  }
+
+  <span class="hl-keyword">void</span> deleteUser(<span class="hl-keyword">int</span> id) {
+    users.removeWhere((u) =&gt; u.id == id);
+  }
+}</code></pre>
+            </div>
+
+            <h3 class="content-subheading">2. View (UI)</h3>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">modules/home/home_view.dart</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-keyword">import</span> <span class="hl-string">'package:flutter/material.dart'</span>;
+<span class="hl-keyword">import</span> <span class="hl-string">'package:get/get.dart'</span>;
+<span class="hl-keyword">import</span> <span class="hl-string">'home_controller.dart'</span>;
+
+<span class="hl-comment">// 👇 GetView = ada properti `controller` otomatis</span>
+<span class="hl-keyword">class</span> HomeView <span class="hl-keyword">extends</span> GetView&lt;HomeController&gt; {
+  <span class="hl-keyword">const</span> HomeView({<span class="hl-keyword">super</span>.key});
+
+  <span class="hl-keyword">@override</span>
+  Widget build(BuildContext context) {
+    <span class="hl-keyword">return</span> Scaffold(
+      appBar: AppBar(title: <span class="hl-keyword">const</span> Text(<span class="hl-string">'Home'</span>)),
+
+      <span class="hl-comment">// 👇 Obx() = rebuild otomatis saat data .obs berubah</span>
+      body: Obx(() {
+        <span class="hl-keyword">if</span> (controller.isLoading.value) {
+          <span class="hl-keyword">return</span> <span class="hl-keyword">const</span> Center(child: CircularProgressIndicator());
+        }
+        <span class="hl-keyword">if</span> (controller.errorMessage.isNotEmpty) {
+          <span class="hl-keyword">return</span> Center(child: Text(controller.errorMessage.value));
+        }
+        <span class="hl-keyword">return</span> ListView.builder(
+          itemCount: controller.users.length,
+          itemBuilder: (_, i) =&gt; ListTile(
+            title: Text(controller.users[i].name),
+            trailing: IconButton(
+              icon: <span class="hl-keyword">const</span> Icon(Icons.delete),
+              onPressed: () =&gt; controller.deleteUser(controller.users[i].id),
+            ),
+          ),
+        );
+      }),
+
+      floatingActionButton: FloatingActionButton(
+        onPressed: () =&gt; controller.fetchUsers(),
+        child: <span class="hl-keyword">const</span> Icon(Icons.refresh),
+      ),
+    );
+  }
+}</code></pre>
+            </div>
+
+            <h3 class="content-subheading">3. Binding (Dependency Injection)</h3>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">modules/home/home_binding.dart</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-keyword">import</span> <span class="hl-string">'package:get/get.dart'</span>;
+<span class="hl-keyword">import</span> <span class="hl-string">'home_controller.dart'</span>;
+<span class="hl-keyword">import</span> <span class="hl-string">'../../data/repositories/user_repository.dart'</span>;
+
+<span class="hl-keyword">class</span> HomeBinding <span class="hl-keyword">extends</span> Bindings {
+  <span class="hl-keyword">@override</span>
+  <span class="hl-keyword">void</span> dependencies() {
+    <span class="hl-comment">// Daftarkan dependency yang dibutuhkan halaman Home</span>
+    Get.lazyPut&lt;UserRepository&gt;(() =&gt; UserRepository());
+    Get.lazyPut&lt;HomeController&gt;(
+      () =&gt; HomeController(Get.find&lt;UserRepository&gt;()),
+    );
+  }
+}</code></pre>
+            </div>
+
+            <h2 class="content-heading">4. Mendaftarkan Route dengan Binding</h2>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">routes/app_pages.dart</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-keyword">import</span> <span class="hl-string">'package:get/get.dart'</span>;
+<span class="hl-keyword">import</span> <span class="hl-string">'../modules/home/home_view.dart'</span>;
+<span class="hl-keyword">import</span> <span class="hl-string">'../modules/home/home_binding.dart'</span>;
+<span class="hl-keyword">import</span> <span class="hl-string">'app_routes.dart'</span>;
+
+<span class="hl-keyword">class</span> AppPages {
+  <span class="hl-keyword">static</span> <span class="hl-keyword">final</span> List&lt;GetPage&gt; routes = [
+    GetPage(
+      name: Routes.HOME,
+      page: () =&gt; <span class="hl-keyword">const</span> HomeView(),
+      binding: HomeBinding(), <span class="hl-comment">// 👈 binding di-attach ke route</span>
+    ),
+    GetPage(
+      name: Routes.LOGIN,
+      page: () =&gt; <span class="hl-keyword">const</span> LoginView(),
+      binding: LoginBinding(),
+    ),
+  ];
+}</code></pre>
+            </div>
+
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">routes/app_routes.dart</span>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-comment">// Konstanta untuk nama route — hindari typo!</span>
+<span class="hl-keyword">abstract</span> <span class="hl-keyword">class</span> Routes {
+  <span class="hl-keyword">static</span> <span class="hl-keyword">const</span> HOME = <span class="hl-string">'/home'</span>;
+  <span class="hl-keyword">static</span> <span class="hl-keyword">const</span> LOGIN = <span class="hl-string">'/login'</span>;
+  <span class="hl-keyword">static</span> <span class="hl-keyword">const</span> PROFILE = <span class="hl-string">'/profile'</span>;
+}</code></pre>
+            </div>
+
+            <h2 class="content-heading">5. Daftarkan di main.dart</h2>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">main.dart</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-keyword">void</span> main() {
+  runApp(<span class="hl-keyword">const</span> MyApp());
+}
+
+<span class="hl-keyword">class</span> MyApp <span class="hl-keyword">extends</span> StatelessWidget {
+  <span class="hl-keyword">const</span> MyApp({<span class="hl-keyword">super</span>.key});
+
+  <span class="hl-keyword">@override</span>
+  Widget build(BuildContext context) {
+    <span class="hl-keyword">return</span> GetMaterialApp(
+      title: <span class="hl-string">'My App'</span>,
+      initialRoute: Routes.HOME,         <span class="hl-comment">// halaman pertama</span>
+      getPages: AppPages.routes,         <span class="hl-comment">// daftar semua halaman</span>
+      defaultTransition: Transition.fade,
+    );
+  }
+}</code></pre>
+            </div>
+
+            <h2 class="content-heading">Lifecycle Controller</h2>
+            <p class="content-text">GetxController punya 3 method lifecycle yang bisa di-override. Pahami kapan masing-masing dipanggil:</p>
+
+            <table class="compare-table">
+                <thead>
+                    <tr><th>Method</th><th>Kapan Dipanggil</th><th>Cocok untuk</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>onInit()</code></td><td>Saat controller pertama kali dibuat (sebelum widget tampil)</td><td>Fetch data awal, init listener</td></tr>
+                    <tr><td><code>onReady()</code></td><td>1 frame setelah widget pertama kali tampil</td><td>Tampilkan dialog/snackbar setelah load</td></tr>
+                    <tr><td><code>onClose()</code></td><td>Saat controller dihapus dari memory</td><td>Cancel stream, dispose controller text</td></tr>
+                </tbody>
+            </table>
+
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">contoh lifecycle</span>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-keyword">class</span> ChatController <span class="hl-keyword">extends</span> GetxController {
+  <span class="hl-keyword">final</span> messages = &lt;Message&gt;[].obs;
+  StreamSubscription? _sub;
+  TextEditingController? textCtrl;
+
+  <span class="hl-keyword">@override</span>
+  <span class="hl-keyword">void</span> onInit() {
+    <span class="hl-keyword">super</span>.onInit();
+    textCtrl = TextEditingController();
+    _sub = chatService.stream.listen((m) =&gt; messages.add(m));
+  }
+
+  <span class="hl-keyword">@override</span>
+  <span class="hl-keyword">void</span> onReady() {
+    <span class="hl-keyword">super</span>.onReady();
+    <span class="hl-keyword">if</span> (messages.isEmpty) {
+      Get.snackbar(<span class="hl-string">'Info'</span>, <span class="hl-string">'Belum ada pesan'</span>);
+    }
+  }
+
+  <span class="hl-keyword">@override</span>
+  <span class="hl-keyword">void</span> onClose() {
+    _sub?.cancel(); <span class="hl-comment">// hindari memory leak!</span>
+    textCtrl?.dispose();
+    <span class="hl-keyword">super</span>.onClose();
+  }
+}</code></pre>
+            </div>
+
+            <h2 class="content-heading">GetView vs StatelessWidget Manual</h2>
+            <p class="content-text">Anda bisa pakai <code>StatelessWidget</code> biasa, tapi <code>GetView</code> lebih ringkas:</p>
+
+            <div class="code-compare">
+                <div class="code-compare-block">
+                    <div class="code-compare-header bad">😐 StatelessWidget biasa</div>
+                    <pre class="code-compare-body"><code><span class="hl-keyword">class</span> HomeView <span class="hl-keyword">extends</span> StatelessWidget {
+  <span class="hl-keyword">@override</span>
+  Widget build(_) {
+    <span class="hl-keyword">final</span> controller = Get.find&lt;HomeController&gt;();
+    <span class="hl-keyword">return</span> Scaffold(
+      body: Obx(() =&gt; Text(<span class="hl-string">'${controller.count}'</span>)),
+    );
+  }
+}</code></pre>
+                </div>
+                <div class="code-compare-block">
+                    <div class="code-compare-header good">✨ GetView</div>
+                    <pre class="code-compare-body"><code><span class="hl-keyword">class</span> HomeView <span class="hl-keyword">extends</span> GetView&lt;HomeController&gt; {
+  <span class="hl-keyword">@override</span>
+  Widget build(_) {
+    <span class="hl-keyword">return</span> Scaffold(
+      body: Obx(() =&gt; Text(<span class="hl-string">'${controller.count}'</span>)),
+      <span class="hl-comment">// ⬆ "controller" otomatis tersedia,</span>
+      <span class="hl-comment">//   tidak perlu Get.find sendiri</span>
+    );
+  }
+}</code></pre>
+                </div>
+            </div>
+
+            <div class="info-box">
+                <div class="info-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                    <strong>Konvensi Penamaan</strong>
+                </div>
+                <p>Ikuti konvensi: <code>FiturView</code> + <code>FiturController</code> + <code>FiturBinding</code>. Misal: <code>LoginView</code>, <code>LoginController</code>, <code>LoginBinding</code>. Konsisten = mudah dibaca tim.</p>
+            </div>
+
+            <div class="quiz">
+                <div class="quiz-title">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01"/></svg>
+                    Cek Pemahaman
+                </div>
+                <div class="quiz-question">
+                    <div class="quiz-q-text">1. Komponen GetX yang bertanggung jawab atas state & business logic adalah?</div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'View hanya menampilkan UI.')">View</div>
+                        <div class="quiz-option" data-correct="true" onclick="quizAnswer(this, 'Tepat! Controller berisi semua state .obs & business logic.')">Controller</div>
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'Binding hanya untuk DI registration.')">Binding</div>
+                    </div>
+                    <div class="quiz-feedback hidden"></div>
+                </div>
+                <div class="quiz-question">
+                    <div class="quiz-q-text">2. Kapan method <code>onClose()</code> dipanggil di GetxController?</div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'Salah — itu onInit.')">Saat controller pertama dibuat</div>
+                        <div class="quiz-option" data-correct="true" onclick="quizAnswer(this, 'Tepat! onClose = saat dispose. Cocok untuk cancel stream.')">Saat controller dihapus dari memory</div>
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'Salah — onReady = setelah first frame.')">Setelah build() selesai pertama kali</div>
+                    </div>
+                    <div class="quiz-feedback hidden"></div>
+                </div>
+                <div class="quiz-question">
+                    <div class="quiz-q-text">3. Kenapa Binding penting dalam GetX pattern?</div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'Salah — Binding bukan untuk styling.')">Untuk styling UI</div>
+                        <div class="quiz-option" data-correct="true" onclick="quizAnswer(this, 'Tepat! Binding pastikan dependency tersedia saat route dibuka & dihapus otomatis saat ditinggal.')">Mengatur lifecycle dependency per route</div>
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'Tidak wajib — tapi sangat recommended untuk clean code.')">Tidak penting, opsional saja</div>
+                    </div>
+                    <div class="quiz-feedback hidden"></div>
+                </div>
+            </div>
+
+            <div class="content-nav">
+                <div class="content-nav-item">
+                    <a href="pengenalan-getx.html" class="nav-btn nav-btn-prev">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                        <div><span class="nav-label">Sebelumnya</span><span class="nav-name">Pengenalan GetX</span></div>
+                    </a>
+                </div>
+                <div class="content-nav-item">
+                    <a href="getx-cli.html" class="nav-btn nav-btn-next">
+                        <div><span class="nav-label">Selanjutnya</span><span class="nav-name">GetX CLI & Scaffolding</span></div>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </a>
+                </div>
+            </div>
+        </article>
+    </main>
+    <script src="/flutter-intermediate/course-layout.js"></script>
+    <script>
+    function copyCode(btn) {
+        const codeBlock = btn.closest('.code-block').querySelector('code');
+        navigator.clipboard.writeText(codeBlock.textContent).then(() => {
+            btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>';
+            setTimeout(() => { btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>'; }, 2000);
+        });
+    }
+
+    const compDetails = {
+        view: '<strong>View</strong> — Hanya berisi UI/widget tree. Pakai <code>GetView&lt;Controller&gt;</code> untuk akses otomatis ke controller. Tidak ada logika di sini — hanya menampilkan state dan memanggil method controller. Contoh: <code>HomeView</code> dengan <code>Obx(() =&gt; Text(controller.title.value))</code>.',
+        controller: '<strong>Controller</strong> — Extends <code>GetxController</code>. Berisi semua state (<code>.obs</code>) + business logic + komunikasi dengan repository/service. Method <code>onInit()</code>, <code>onReady()</code>, <code>onClose()</code> untuk lifecycle. Inilah "otak" halaman.',
+        binding: '<strong>Binding</strong> — Class yang extends <code>Bindings</code>. Tugasnya: register controller & dependency lewat <code>Get.lazyPut()</code> atau <code>Get.put()</code>. Dipanggil otomatis oleh GetX saat route dibuka. Controller akan dihapus otomatis saat halaman ditutup → hemat memory.'
+    };
+    function showComp(key, el) {
+        document.querySelectorAll('.arch-node').forEach(n => n.classList.remove('active'));
+        el.classList.add('active');
+        document.getElementById('compDetail').innerHTML = compDetails[key];
+    }
+    showComp('view', document.querySelector('.arch-node'));
+
+    function quizAnswer(el, feedback) {
+        const question = el.closest('.quiz-question');
+        const options = question.querySelectorAll('.quiz-option');
+        const fb = question.querySelector('.quiz-feedback');
+        options.forEach(o => {
+            o.style.pointerEvents = 'none';
+            if (o.dataset.correct === 'true') o.classList.add('correct');
+        });
+        if (el.dataset.correct !== 'true') el.classList.add('wrong');
+        fb.textContent = feedback;
+        fb.classList.remove('hidden');
+        fb.classList.add('visible');
+    }
+    </script>
+</body>
+</html>
