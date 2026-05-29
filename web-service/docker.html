@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Pertemuan 14: Containerization dengan Docker — Image, Container, Dockerfile, Docker Compose untuk orkestrasi multi-service, dan praktik terbaik production.">
+    <title>Docker & Containerization — Web Service — Arif Hidayah</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/web-service/course.css">
+    <style>
+        .vm-vs { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 14px 0; }
+        @media (max-width: 800px) { .vm-vs { grid-template-columns: 1fr; } }
+        .vm-stack { padding: 18px; background: rgba(0,0,0,0.4); border: 1px solid var(--border-color); border-radius: var(--radius-md); }
+        .vm-stack h3 { margin: 0 0 12px; font-size: 1rem; font-weight: 700; text-align: center; }
+        .vm-stack.vm h3 { color: #ff8a8a; }
+        .vm-stack.ct h3 { color: var(--accent-ws); }
+        .layer { padding: 8px 12px; margin: 4px 0; border-radius: 4px; font-size: 0.78rem; font-family: 'JetBrains Mono', monospace; font-weight: 600; text-align: center; }
+        .layer.app { background: rgba(195, 232, 141, 0.12); color: #c3e88d; }
+        .layer.bins { background: rgba(199, 146, 234, 0.1); color: #c792ea; }
+        .layer.guest-os { background: rgba(247, 140, 108, 0.12); color: #f78c6c; padding: 14px; }
+        .layer.engine { background: rgba(255, 203, 107, 0.12); color: #ffcb6b; }
+        .layer.host-os { background: rgba(130, 170, 255, 0.12); color: #82aaff; }
+        .layer.hw { background: rgba(255,255,255,0.04); color: var(--text-muted); }
+
+        .concept-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin: 14px 0; }
+        .cc { padding: 14px 16px; background: rgba(0,0,0,0.4); border: 1px solid var(--border-color); border-radius: var(--radius-sm); }
+        .cc-icon { font-size: 1.4rem; margin-bottom: 6px; }
+        .cc-name { font-size: 0.95rem; font-weight: 700; color: var(--accent-ws); margin-bottom: 4px; font-family: 'JetBrains Mono', monospace; }
+        .cc-desc { font-size: 0.8rem; color: var(--text-muted); line-height: 1.6; }
+
+        .cmd-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin: 14px 0; }
+        .cmd-table th { padding: 10px 12px; background: rgba(16, 185, 129, 0.08); color: var(--accent-ws); text-align: left; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 2px solid rgba(16, 185, 129, 0.25); }
+        .cmd-table td { padding: 10px 12px; border-bottom: 1px solid var(--border-color); vertical-align: top; }
+        .cmd-table td code { font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: #c3e88d; background: rgba(0,0,0,0.4); padding: 2px 6px; border-radius: 4px; }
+        .cmd-table tr:hover td { background: rgba(255,255,255,0.02); }
+    </style>
+</head>
+<body>
+    <div class="bg-grid" aria-hidden="true"></div>
+    <nav class="navbar scrolled" id="navbar"></nav>
+    <div class="mobile-menu" id="mobileMenu"></div>
+
+    <main class="course-layout">
+        <aside class="course-sidebar" id="courseSidebar"></aside>
+        <article class="course-content">
+
+            <div class="breadcrumb">
+                <a href="../index.html">Home</a><span>›</span>
+                <a href="index.html">Web Service</a><span>›</span>
+                <span style="color: var(--text-primary);">Bagian 2 — GraphQL &amp; Microservices</span>
+            </div>
+
+            <header class="content-header">
+                <h1 class="content-title">Pertemuan 14: Containerization dengan Docker</h1>
+                <div class="content-meta">
+                    <div class="meta-pill">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 5V8.5L10.5 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/></svg>
+                        <span>Estimasi: 100 Menit</span>
+                    </div>
+                    <div class="meta-pill">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="10" rx="1" stroke="currentColor" stroke-width="1.5"/><path d="M5 7h6M5 10h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                        <span>Praktikum</span>
+                    </div>
+                    <div class="meta-pill">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="3" y="4" width="10" height="8" rx="1" stroke="currentColor" stroke-width="1.5"/></svg>
+                        <span>Docker · Compose</span>
+                    </div>
+                </div>
+            </header>
+
+            <div class="video-container">
+                <div class="video-placeholder">
+                    <div class="video-overlay">
+                        <div class="play-btn" onclick="playVideo()">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                        </div>
+                        <h3 style="font-weight: 600; margin-top: 16px; color: white;">Video: Docker untuk Microservices</h3>
+                        <p style="color: rgba(255,255,255,0.6); font-size: 0.85rem; margin-top: 6px;">Klik untuk memutar</p>
+                    </div>
+                </div>
+            </div>
+
+            <p class="content-text">
+                Kita sudah punya banyak microservice — masing-masing dengan dependency &amp; versi bahasa berbeda. Bagaimana cara <em>menjalankan</em> semuanya tanpa neraka instalasi? Jawabannya: <strong>Container</strong>. Sebuah container membungkus aplikasi + semua dependency-nya menjadi satu paket yang berjalan identik di laptop Anda, di server staging, dan di production cloud. <strong>Docker</strong> adalah implementasi container yang paling populer.
+            </p>
+
+            <div class="info-box">
+                <div class="info-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                    <strong>Capaian Pertemuan Ini</strong>
+                </div>
+                <p>Mahasiswa mampu (1) menjelaskan perbedaan VM vs Container, (2) menulis Dockerfile untuk aplikasi Node.js/Laravel, (3) menjalankan multi-service stack dengan Docker Compose, dan (4) menerapkan praktik terbaik (multi-stage build, non-root user, .dockerignore).</p>
+            </div>
+
+            <h2 class="content-heading">VM vs Container — Apa Bedanya?</h2>
+            <div class="vm-vs">
+                <div class="vm-stack vm">
+                    <h3>🖥️ Virtual Machine</h3>
+                    <div class="layer app">App A</div>
+                    <div class="layer bins">Bins/Libs</div>
+                    <div class="layer guest-os">Guest OS</div>
+                    <div class="layer app">App B</div>
+                    <div class="layer bins">Bins/Libs</div>
+                    <div class="layer guest-os">Guest OS</div>
+                    <div class="layer engine">Hypervisor (VMware/VirtualBox)</div>
+                    <div class="layer host-os">Host Operating System</div>
+                    <div class="layer hw">Hardware</div>
+                    <p style="font-size: 0.78rem; color: var(--text-muted); text-align: center; margin: 10px 0 0;">~GB ukuran, boot puluhan detik</p>
+                </div>
+                <div class="vm-stack ct">
+                    <h3>📦 Container</h3>
+                    <div class="layer app">App A</div>
+                    <div class="layer bins">Bins/Libs</div>
+                    <div class="layer app">App B</div>
+                    <div class="layer bins">Bins/Libs</div>
+                    <div class="layer app">App C</div>
+                    <div class="layer bins">Bins/Libs</div>
+                    <div class="layer engine">Container Engine (Docker)</div>
+                    <div class="layer host-os">Host Operating System</div>
+                    <div class="layer hw">Hardware</div>
+                    <p style="font-size: 0.78rem; color: var(--text-muted); text-align: center; margin: 10px 0 0;">~MB ukuran, boot &lt; 1 detik</p>
+                </div>
+            </div>
+            <p class="content-text">
+                Kunci perbedaan: <strong>container berbagi kernel host</strong>, tidak perlu boot OS sendiri. Hasilnya — lebih ringan, lebih cepat start, lebih banyak yang bisa muat di satu mesin.
+            </p>
+
+            <div class="analogy-box">
+                <div class="analogy-icon">🚢</div>
+                <div class="analogy-content">
+                    <strong>Analogi: Kontainer Kapal</strong>
+                    <p>Sebelum container shipping ditemukan, setiap barang dikemas berbeda — keramik dengan jerami, anggur di kayu, mesin di crate. Bongkar-muat = mimpi buruk. Setelah <em>container standar</em> hadir: semua dimuat ke kontainer 20-feet yang sama, crane mengangkut tanpa peduli isinya. <strong>Itulah esensi Docker</strong> — standarisasi cara membungkus &amp; menjalankan aplikasi.</p>
+                </div>
+            </div>
+
+            <h2 class="content-heading">Konsep Inti Docker</h2>
+            <div class="concept-grid">
+                <div class="cc">
+                    <div class="cc-icon">🧾</div>
+                    <div class="cc-name">Dockerfile</div>
+                    <div class="cc-desc">Resep teks untuk membuat image — daftar langkah build.</div>
+                </div>
+                <div class="cc">
+                    <div class="cc-icon">📀</div>
+                    <div class="cc-name">Image</div>
+                    <div class="cc-desc">Snapshot read-only berisi aplikasi + dependency. Imutable.</div>
+                </div>
+                <div class="cc">
+                    <div class="cc-icon">📦</div>
+                    <div class="cc-name">Container</div>
+                    <div class="cc-desc">Instance image yang sedang berjalan. 1 image → banyak container.</div>
+                </div>
+                <div class="cc">
+                    <div class="cc-icon">☁️</div>
+                    <div class="cc-name">Registry</div>
+                    <div class="cc-desc">Tempat menyimpan/membagikan image (Docker Hub, GHCR, AWS ECR).</div>
+                </div>
+                <div class="cc">
+                    <div class="cc-icon">📁</div>
+                    <div class="cc-name">Volume</div>
+                    <div class="cc-desc">Penyimpanan data persistent di luar container (DB data, uploads).</div>
+                </div>
+                <div class="cc">
+                    <div class="cc-icon">🕸️</div>
+                    <div class="cc-name">Network</div>
+                    <div class="cc-desc">Jembatan komunikasi antar container, otomatis DNS resolution.</div>
+                </div>
+            </div>
+
+            <h2 class="content-heading">Dockerfile — Membungkus Aplikasi Node.js</h2>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">Dockerfile (single-stage, sederhana)</span>
+                </div>
+<pre class="code-block-body"><code><span class="hl-comment"># Base image — pilih versi tag spesifik (jangan 'latest')</span>
+<span class="hl-keyword">FROM</span> node:<span class="hl-number">20</span>-alpine
+
+<span class="hl-comment"># Buat folder kerja di dalam container</span>
+<span class="hl-keyword">WORKDIR</span> /app
+
+<span class="hl-comment"># Copy manifest dulu — agar 'npm install' bisa cache layer</span>
+<span class="hl-keyword">COPY</span> package*.json ./
+<span class="hl-keyword">RUN</span> npm ci --only=production
+
+<span class="hl-comment"># Copy sisa source code</span>
+<span class="hl-keyword">COPY</span> . .
+
+<span class="hl-comment"># Expose port (informatif, untuk dokumentasi)</span>
+<span class="hl-keyword">EXPOSE</span> <span class="hl-number">3000</span>
+
+<span class="hl-comment"># Perintah default saat container dijalankan</span>
+<span class="hl-keyword">CMD</span> [<span class="hl-string">"node"</span>, <span class="hl-string">"server.js"</span>]</code></pre>
+            </div>
+
+            <h2 class="content-heading">Multi-Stage Build — Image yang Lebih Ramping</h2>
+            <p class="content-text">
+                Dependency build (TypeScript compiler, Webpack) tidak diperlukan saat runtime. <strong>Multi-stage build</strong> membuat dua tahap: tahap build (gemuk, dengan toolchain), tahap runtime (ringan, hanya artefak hasil build).
+            </p>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">Dockerfile (multi-stage, production-grade)</span>
+                </div>
+<pre class="code-block-body"><code><span class="hl-comment"># ===== Stage 1: Build =====</span>
+<span class="hl-keyword">FROM</span> node:<span class="hl-number">20</span>-alpine <span class="hl-keyword">AS</span> builder
+<span class="hl-keyword">WORKDIR</span> /app
+<span class="hl-keyword">COPY</span> package*.json ./
+<span class="hl-keyword">RUN</span> npm ci
+<span class="hl-keyword">COPY</span> . .
+<span class="hl-keyword">RUN</span> npm run build
+
+<span class="hl-comment"># ===== Stage 2: Runtime — minimal =====</span>
+<span class="hl-keyword">FROM</span> node:<span class="hl-number">20</span>-alpine
+<span class="hl-keyword">WORKDIR</span> /app
+
+<span class="hl-comment"># Non-root user untuk keamanan</span>
+<span class="hl-keyword">RUN</span> addgroup -S app &amp;&amp; adduser -S app -G app
+<span class="hl-keyword">USER</span> app
+
+<span class="hl-keyword">COPY</span> --from=builder --chown=app:app /app/dist ./dist
+<span class="hl-keyword">COPY</span> --from=builder --chown=app:app /app/node_modules ./node_modules
+<span class="hl-keyword">COPY</span> --from=builder --chown=app:app /app/package.json ./
+
+<span class="hl-keyword">EXPOSE</span> <span class="hl-number">3000</span>
+<span class="hl-keyword">HEALTHCHECK</span> --interval=30s --timeout=3s \
+  <span class="hl-keyword">CMD</span> wget -q -O- http://localhost:3000/health || <span class="hl-keyword">exit</span> <span class="hl-number">1</span>
+
+<span class="hl-keyword">CMD</span> [<span class="hl-string">"node"</span>, <span class="hl-string">"dist/server.js"</span>]</code></pre>
+            </div>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">.dockerignore — jangan ikut copy file ini</span>
+                </div>
+<pre class="code-block-body"><code>node_modules
+.git
+.env
+.vscode
+*.log
+.DS_Store
+dist
+coverage</code></pre>
+            </div>
+
+            <h2 class="content-heading">Perintah Docker Esensial</h2>
+            <table class="cmd-table">
+                <thead>
+                    <tr><th>Perintah</th><th>Fungsi</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>docker build -t api-kampus:1.0 .</code></td><td>Build image dari Dockerfile di folder saat ini</td></tr>
+                    <tr><td><code>docker run -d -p 3000:3000 --name api api-kampus:1.0</code></td><td>Jalankan container di background, port 3000 host → 3000 container</td></tr>
+                    <tr><td><code>docker ps</code></td><td>List container yang berjalan</td></tr>
+                    <tr><td><code>docker logs -f api</code></td><td>Tail log container</td></tr>
+                    <tr><td><code>docker exec -it api sh</code></td><td>Masuk shell di dalam container</td></tr>
+                    <tr><td><code>docker stop api && docker rm api</code></td><td>Stop &amp; hapus container</td></tr>
+                    <tr><td><code>docker push myrepo/api-kampus:1.0</code></td><td>Upload image ke registry</td></tr>
+                    <tr><td><code>docker pull node:20-alpine</code></td><td>Download image dari registry</td></tr>
+                    <tr><td><code>docker image prune -a</code></td><td>Hapus image yang tidak terpakai (free disk)</td></tr>
+                </tbody>
+            </table>
+
+            <h2 class="content-heading">Docker Compose — Mengorkestra Banyak Service</h2>
+            <p class="content-text">
+                <strong>Docker Compose</strong> mendeskripsikan stack multi-container di satu file YAML. Cocok untuk development environment yang butuh API + database + cache + message broker sekaligus. Sekali <code>docker compose up</code> → semua siap.
+            </p>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">docker-compose.yml — full microservices stack</span>
+                </div>
+<pre class="code-block-body"><code><span class="hl-func">services</span>:
+  <span class="hl-comment"># --- Database ---</span>
+  <span class="hl-func">postgres</span>:
+    <span class="hl-func">image</span>: <span class="hl-string">postgres:16-alpine</span>
+    <span class="hl-func">environment</span>:
+      <span class="hl-func">POSTGRES_DB</span>: <span class="hl-string">kampus</span>
+      <span class="hl-func">POSTGRES_USER</span>: <span class="hl-string">app</span>
+      <span class="hl-func">POSTGRES_PASSWORD</span>: <span class="hl-string">secret</span>
+    <span class="hl-func">volumes</span>:
+      - <span class="hl-string">pgdata:/var/lib/postgresql/data</span>
+    <span class="hl-func">ports</span>: [<span class="hl-string">"5432:5432"</span>]
+
+  <span class="hl-comment"># --- Message Broker ---</span>
+  <span class="hl-func">rabbitmq</span>:
+    <span class="hl-func">image</span>: <span class="hl-string">rabbitmq:3-management-alpine</span>
+    <span class="hl-func">ports</span>: [<span class="hl-string">"5672:5672"</span>, <span class="hl-string">"15672:15672"</span>]  <span class="hl-comment"># AMQP + UI</span>
+
+  <span class="hl-comment"># --- API Service (Mahasiswa) ---</span>
+  <span class="hl-func">mahasiswa-api</span>:
+    <span class="hl-func">build</span>: <span class="hl-string">./services/mahasiswa</span>
+    <span class="hl-func">environment</span>:
+      <span class="hl-func">DB_HOST</span>: <span class="hl-string">postgres</span>      <span class="hl-comment"># pakai nama service sebagai hostname</span>
+      <span class="hl-func">DB_NAME</span>: <span class="hl-string">kampus</span>
+      <span class="hl-func">AMQP_URL</span>: <span class="hl-string">amqp://rabbitmq:5672</span>
+    <span class="hl-func">depends_on</span>: [<span class="hl-string">postgres</span>, <span class="hl-string">rabbitmq</span>]
+    <span class="hl-func">ports</span>: [<span class="hl-string">"3001:3000"</span>]
+
+  <span class="hl-comment"># --- API Service (Nilai) ---</span>
+  <span class="hl-func">nilai-api</span>:
+    <span class="hl-func">build</span>: <span class="hl-string">./services/nilai</span>
+    <span class="hl-func">environment</span>:
+      <span class="hl-func">DB_HOST</span>: <span class="hl-string">postgres</span>
+      <span class="hl-func">AMQP_URL</span>: <span class="hl-string">amqp://rabbitmq:5672</span>
+    <span class="hl-func">depends_on</span>: [<span class="hl-string">postgres</span>, <span class="hl-string">rabbitmq</span>]
+    <span class="hl-func">ports</span>: [<span class="hl-string">"3002:3000"</span>]
+
+  <span class="hl-comment"># --- API Gateway (NGINX) ---</span>
+  <span class="hl-func">gateway</span>:
+    <span class="hl-func">image</span>: <span class="hl-string">nginx:alpine</span>
+    <span class="hl-func">volumes</span>:
+      - <span class="hl-string">./nginx.conf:/etc/nginx/nginx.conf:ro</span>
+    <span class="hl-func">depends_on</span>: [<span class="hl-string">mahasiswa-api</span>, <span class="hl-string">nilai-api</span>]
+    <span class="hl-func">ports</span>: [<span class="hl-string">"8080:80"</span>]
+
+<span class="hl-func">volumes</span>:
+  <span class="hl-func">pgdata</span>:</code></pre>
+            </div>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">terminal</span>
+                </div>
+<pre class="code-block-body"><code><span class="hl-comment"># Bangun semua image &amp; start stack</span>
+docker compose up -d --build
+
+<span class="hl-comment"># Lihat status</span>
+docker compose ps
+
+<span class="hl-comment"># Tail log salah satu service</span>
+docker compose logs -f mahasiswa-api
+
+<span class="hl-comment"># Stop &amp; hapus semua (volume dipertahankan)</span>
+docker compose down
+
+<span class="hl-comment"># Stop &amp; hapus semua TERMASUK volume (HATI-HATI: data hilang)</span>
+docker compose down -v</code></pre>
+            </div>
+            <p class="content-text">
+                Compose otomatis: (1) membuat jaringan privat <em>kampus_default</em> tempat semua service saling kenal via nama, (2) mengelola dependency start order, (3) menyatukan volume.
+            </p>
+
+            <h2 class="content-heading">Praktik Terbaik Production</h2>
+            <ol class="content-list">
+                <li><strong>Pakai versi tag spesifik</strong> — <code>node:20.11-alpine</code>, bukan <code>node:latest</code>. <em>latest</em> bisa berubah diam-diam.</li>
+                <li><strong>Image sekecil mungkin</strong> — Alpine/distroless lebih kecil &amp; lebih sedikit CVE. Multi-stage build untuk buang dependency build.</li>
+                <li><strong>Jangan jalankan sebagai root</strong> — Buat user khusus dengan <code>USER</code> di Dockerfile.</li>
+                <li><strong>Konfigurasi via environment variable</strong> — Jangan hard-code DB credential di image. Pakai <code>.env</code> file di luar.</li>
+                <li><strong>Tambahkan HEALTHCHECK</strong> — Agar orchestrator (Kubernetes, Swarm) tahu container Anda sehat.</li>
+                <li><strong>Stateless container</strong> — Jangan menyimpan data penting di filesystem container; pakai volume / external DB.</li>
+                <li><strong>Cache layer dengan urutan benar</strong> — Copy <code>package.json</code> lalu install dependency <em>sebelum</em> copy source code. Build berikutnya jadi cepat saat source berubah tapi dependency tidak.</li>
+                <li><strong>Scan vulnerability</strong> — Pakai <code>docker scout cves</code> atau Trivy untuk cek CVE sebelum push ke production.</li>
+            </ol>
+
+            <h2 class="content-heading">Di Atas Docker Compose: Kubernetes</h2>
+            <p class="content-text">
+                Compose hebat untuk development &amp; deployment kecil. Untuk produksi skala besar yang butuh self-healing, autoscaling, rolling update, dan multi-node — Anda akan naik level ke <strong>Kubernetes</strong> (k8s). Konsepnya mirip: Pod (≈ container), Deployment (set pod), Service (load balancer), Ingress (gateway). Banyak proyek menulis manifest k8s sejajar dengan <code>docker-compose.yml</code> dev.
+            </p>
+            <div class="info-box">
+                <div class="info-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                    <strong>Roadmap Singkat</strong>
+                </div>
+                <p>Mulai dari: <em>Docker (1 container)</em> → <em>Docker Compose (multi-service dev)</em> → <em>Kubernetes (production scale)</em>. Tidak harus loncat ke k8s langsung — kompleksitasnya besar. Compose sering cukup untuk staging dan deployment kecil (VPS, single VM).</p>
+            </div>
+
+            <div class="success-box">
+                <div class="success-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    <strong>Tantangan Take-home</strong>
+                </div>
+                <p>(1) Buat <code>Dockerfile</code> multi-stage untuk project Laravel REST API Anda (Pertemuan 5). (2) Susun <code>docker-compose.yml</code> yang menjalankan: aplikasi Laravel + MySQL + Redis + Nginx. (3) Tambahkan healthcheck di tiap service.</p>
+            </div>
+
+            <div class="quiz">
+                <div class="quiz-title">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01"/></svg>
+                    Cek Pemahaman Anda
+                </div>
+                <div class="quiz-question">
+                    <div class="quiz-q-text">1. Apa keuntungan utama container dibanding virtual machine?</div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'Container TIDAK lebih aman karena berbagi kernel — isolasi VM jauh lebih kuat.')">Container lebih aman karena terisolasi penuh dari OS</div>
+                        <div class="quiz-option" data-correct="true" onclick="quizAnswer(this, 'Tepat! Berbagi kernel host = boot &lt; 1 detik, ukuran MB bukan GB, lebih banyak yang muat di satu mesin.')">Container lebih ringan &amp; lebih cepat start karena berbagi kernel host</div>
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'Container tidak otomatis menjalankan kode lebih cepat; performanya sebanding dengan host native.')">Container otomatis menjalankan kode lebih cepat dari native</div>
+                    </div>
+                    <div class="quiz-feedback hidden"></div>
+                </div>
+                <div class="quiz-question">
+                    <div class="quiz-q-text">2. Mengapa di Dockerfile kita COPY <code>package.json</code> dulu, baru COPY source code?</div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'Urutan copy tidak ada hubungannya dengan ukuran image final; semua layer tetap masuk ke image.')">Agar ukuran image lebih kecil</div>
+                        <div class="quiz-option" data-correct="true" onclick="quizAnswer(this, 'Benar! Cache layer: selama package.json tidak berubah, npm install di-cache. Build berikutnya hanya re-build dari layer source code.')">Agar Docker bisa cache layer <code>npm install</code> saat hanya source code yang berubah</div>
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'Docker tidak memerlukan urutan tertentu untuk berfungsi; ini optimasi cache, bukan keharusan.')">Karena Docker tidak bisa membaca file dalam urutan acak</div>
+                    </div>
+                    <div class="quiz-feedback hidden"></div>
+                </div>
+                <div class="quiz-question">
+                    <div class="quiz-q-text">3. Di <code>docker-compose.yml</code>, service <code>mahasiswa-api</code> ingin konek ke Postgres. Apa hostname yang dipakai?</div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'localhost di dalam container = container itu sendiri, bukan service lain di stack.')">localhost</div>
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'IP host (127.0.0.1) sama-sama menunjuk ke container itu sendiri di dalam network compose.')">127.0.0.1</div>
+                        <div class="quiz-option" data-correct="true" onclick="quizAnswer(this, 'Tepat! Compose membuat DNS otomatis: nama service = hostname. Jadi cukup `postgres`.')"><code>postgres</code> (nama service di compose file)</div>
+                    </div>
+                    <div class="quiz-feedback hidden"></div>
+                </div>
+            </div>
+
+            <div class="content-nav">
+                <div class="content-nav-item">
+                    <a href="api-gateway.html" class="nav-btn nav-btn-prev">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                        <div><span class="nav-label">Sebelumnya</span><span class="nav-name">API Gateway &amp; Service Discovery</span></div>
+                    </a>
+                </div>
+                <div class="content-nav-item">
+                    <a href="monitoring.html" class="nav-btn nav-btn-next">
+                        <div><span class="nav-label">Selanjutnya</span><span class="nav-name">Monitoring &amp; Final Review</span></div>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </a>
+                </div>
+            </div>
+        </article>
+    </main>
+
+    <script src="/web-service/course-layout.js"></script>
+    <script>
+    function copyCode(btn) {
+        const codeBlock = btn.closest('.code-block').querySelector('code');
+        navigator.clipboard.writeText(codeBlock.textContent).then(() => {
+            btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>';
+            setTimeout(() => { btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>'; }, 2000);
+        });
+    }
+    function playVideo() { alert('Video kuliah belum tersedia.'); }
+
+    function quizAnswer(el, feedback) {
+        const question = el.closest('.quiz-question');
+        const options = question.querySelectorAll('.quiz-option');
+        const fb = question.querySelector('.quiz-feedback');
+        options.forEach(o => {
+            o.style.pointerEvents = 'none';
+            if (o.dataset.correct === 'true') o.classList.add('correct');
+        });
+        if (el.dataset.correct !== 'true') el.classList.add('wrong');
+        fb.textContent = feedback;
+        fb.classList.remove('hidden');
+        fb.classList.add('visible');
+    }
+    </script>
+</body>
+</html>

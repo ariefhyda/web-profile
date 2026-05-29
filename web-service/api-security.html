@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Pertemuan 7: Keamanan API — perbedaan API Key vs JWT, anatomi JSON Web Token, Role-Based Access Control (RBAC), serta praktik terbaik di Laravel Sanctum.">
+    <title>Keamanan API — Web Service — Arif Hidayah</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/web-service/course.css">
+    <style>
+        .auth-cmp { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 14px 0; }
+        @media (max-width: 800px) { .auth-cmp { grid-template-columns: 1fr; } }
+        .concept-card { padding: 18px 20px; background: rgba(0,0,0,0.4); border: 1px solid var(--border-color); border-radius: var(--radius-md); }
+        .concept-card.aut { border-top: 3px solid #82aaff; }
+        .concept-card.aut h3 { color: #82aaff; }
+        .concept-card.aut2 { border-top: 3px solid #f78c6c; }
+        .concept-card.aut2 h3 { color: #f78c6c; }
+        .concept-card h3 { margin: 0 0 8px; font-size: 1.05rem; font-weight: 700; }
+        .concept-card p { margin: 0; font-size: 0.88rem; color: #c5c5d4; line-height: 1.7; }
+
+        .jwt-block { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0; margin: 14px 0; border: 1px solid var(--border-color); border-radius: var(--radius-md); overflow: hidden; }
+        @media (max-width: 800px) { .jwt-block { grid-template-columns: 1fr; } }
+        .jwt-part { padding: 14px 16px; }
+        .jwt-part-label { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
+        .jwt-part-value { font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; word-break: break-all; line-height: 1.55; }
+        .jwt-h { background: rgba(195, 232, 141, 0.08); }
+        .jwt-h .jwt-part-label { color: #c3e88d; }
+        .jwt-h .jwt-part-value { color: #c3e88d; }
+        .jwt-p { background: rgba(199, 146, 234, 0.08); }
+        .jwt-p .jwt-part-label { color: #c792ea; }
+        .jwt-p .jwt-part-value { color: #c792ea; }
+        .jwt-s { background: rgba(130, 170, 255, 0.08); }
+        .jwt-s .jwt-part-label { color: #82aaff; }
+        .jwt-s .jwt-part-value { color: #82aaff; }
+
+        .flow-diagram { display: flex; flex-direction: column; gap: 8px; margin: 14px 0; }
+        .flow-row { display: flex; gap: 12px; align-items: center; padding: 12px 16px; background: rgba(0,0,0,0.35); border: 1px solid var(--border-color); border-radius: var(--radius-sm); }
+        .flow-actor { flex-shrink: 0; min-width: 90px; padding: 6px 12px; border-radius: 100px; font-size: 0.78rem; font-weight: 700; text-align: center; font-family: 'JetBrains Mono', monospace; }
+        .flow-actor.client { background: rgba(130, 170, 255, 0.12); color: #82aaff; border: 1px solid rgba(130, 170, 255, 0.3); }
+        .flow-actor.server { background: rgba(16, 185, 129, 0.12); color: var(--accent-ws); border: 1px solid rgba(16, 185, 129, 0.3); }
+        .flow-arrow { font-family: 'JetBrains Mono', monospace; color: var(--text-muted); }
+        .flow-msg { flex: 1; font-size: 0.86rem; color: #c5c5d4; line-height: 1.55; }
+        .flow-msg code { background: rgba(0,0,0,0.4); padding: 1px 5px; border-radius: 3px; font-size: 0.78rem; color: #c3e88d; }
+
+        .rbac-matrix { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 0.85rem; }
+        .rbac-matrix th, .rbac-matrix td { padding: 10px 14px; border: 1px solid var(--border-color); text-align: center; }
+        .rbac-matrix th { background: rgba(16, 185, 129, 0.08); color: var(--accent-ws); font-weight: 700; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em; }
+        .rbac-matrix td:first-child { text-align: left; font-family: 'JetBrains Mono', monospace; color: #82aaff; font-weight: 600; }
+        .rbac-yes { color: #c3e88d; font-weight: 700; }
+        .rbac-no  { color: #ff5555; font-weight: 700; }
+        .rbac-self { color: #ffcb6b; font-weight: 700; }
+    </style>
+</head>
+<body>
+    <div class="bg-grid" aria-hidden="true"></div>
+    <nav class="navbar scrolled" id="navbar"></nav>
+    <div class="mobile-menu" id="mobileMenu"></div>
+
+    <main class="course-layout">
+        <aside class="course-sidebar" id="courseSidebar"></aside>
+        <article class="course-content">
+
+            <div class="breadcrumb">
+                <a href="../index.html">Home</a><span>›</span>
+                <a href="index.html">Web Service</a><span>›</span>
+                <span style="color: var(--text-primary);">Bagian 1 — Fondasi</span>
+            </div>
+
+            <header class="content-header">
+                <h1 class="content-title">Pertemuan 7: Keamanan API — JWT &amp; RBAC</h1>
+                <div class="content-meta">
+                    <div class="meta-pill">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 5V8.5L10.5 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/></svg>
+                        <span>Estimasi: 90 Menit</span>
+                    </div>
+                    <div class="meta-pill">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1L2 4v4c0 3.5 2.5 6.5 6 7 3.5-.5 6-3.5 6-7V4l-6-3z" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+                        <span>Security Critical</span>
+                    </div>
+                </div>
+            </header>
+
+            <div class="video-container">
+                <div class="video-placeholder">
+                    <div class="video-overlay">
+                        <div class="play-btn" onclick="playVideo()">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                        </div>
+                        <h3 style="font-weight: 600; margin-top: 16px; color: white;">Video: Auth API dengan JWT</h3>
+                        <p style="color: rgba(255,255,255,0.6); font-size: 0.85rem; margin-top: 6px;">Klik untuk memutar</p>
+                    </div>
+                </div>
+            </div>
+
+            <p class="content-text">
+                API tanpa keamanan = pintu rumah yang dibuka 24 jam. Sebagus apa pun desain endpoint Anda, jika siapa saja bisa mengakses dan memodifikasi data, semuanya runtuh. Pertemuan ini membahas dua pondasi keamanan API: <strong>Autentikasi</strong> (siapa Anda?) dan <strong>Otorisasi</strong> (apa yang boleh Anda lakukan?), dengan dua mekanisme yang paling sering ditanya dalam wawancara backend: <strong>JWT</strong> dan <strong>RBAC</strong>.
+            </p>
+
+            <div class="info-box">
+                <div class="info-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                    <strong>Capaian Pertemuan Ini</strong>
+                </div>
+                <p>Mahasiswa mampu (1) membedakan autentikasi vs otorisasi, (2) memilih antara API Key dan JWT untuk kasus tertentu, (3) menjelaskan anatomi JWT, dan (4) merancang RBAC sederhana di Laravel.</p>
+            </div>
+
+            <h2 class="content-heading">Autentikasi vs Otorisasi — Sering Tertukar</h2>
+            <div class="auth-cmp">
+                <div class="concept-card aut">
+                    <h3>🔐 Autentikasi (AuthN)</h3>
+                    <p><em>Siapa Anda?</em> Memverifikasi identitas pengguna. Contoh: email + password, sidik jari, OTP, JWT, API Key. Output: server tahu user X yang sedang request.</p>
+                </div>
+                <div class="concept-card aut2">
+                    <h3>🛡️ Otorisasi (AuthZ)</h3>
+                    <p><em>Apa yang boleh Anda lakukan?</em> Memutuskan akses ke resource. Contoh: hanya admin boleh hapus user, dosen hanya boleh edit nilai kelas miliknya. Berlangsung <strong>setelah</strong> autentikasi.</p>
+                </div>
+            </div>
+            <div class="analogy-box">
+                <div class="analogy-icon">🏢</div>
+                <div class="analogy-content">
+                    <strong>Analogi: Masuk Gedung Kantor</strong>
+                    <p>Satpam mengecek <em>KTP/ID-card</em> Anda → ini <strong>autentikasi</strong>. Setelah masuk, ID-card Anda hanya bisa membuka lantai 5 (HR), tidak bisa lantai 12 (Keuangan) → itu <strong>otorisasi</strong>. Dua hal berbeda, dilakukan oleh dua mekanisme berbeda.</p>
+                </div>
+            </div>
+
+            <h2 class="content-heading">Cara Autentikasi 1 — API Key</h2>
+            <p class="content-text">
+                <strong>API Key</strong> adalah string panjang acak yang dibuatkan untuk seorang konsumen (developer atau aplikasi). Klien menyertakan key di setiap request, biasanya di header. Sederhana, tapi minim fitur.
+            </p>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">Request dengan API Key</span>
+                </div>
+<pre class="code-block-body"><code>GET /api/v1/mahasiswa HTTP/1.1
+Host: api.kampus.ac.id
+X-API-Key: <span class="hl-string">sk_live_CONTOH_API_KEY_jangan_pakai_yang_asli</span></code></pre>
+            </div>
+            <p class="content-text">
+                <strong>Kapan dipakai?</strong> Server-to-server (Cron job memanggil API, microservice ke microservice), atau API publik untuk developer pihak ketiga (Stripe, Google Maps, OpenWeather). Tidak cocok untuk user-facing apps karena key statis &amp; sulit menambahkan info user.
+            </p>
+
+            <h2 class="content-heading">Cara Autentikasi 2 — JWT (JSON Web Token)</h2>
+            <p class="content-text">
+                <strong>JWT</strong> adalah token <em>stateless</em> berbentuk string base64 yang membawa data user + tanda tangan kriptografi. Berbeda dengan session di server, JWT menyimpan klaim di token itu sendiri — server tidak perlu menyimpan apa-apa untuk memverifikasinya.
+            </p>
+
+            <h2 class="content-heading">Anatomi JWT — Tiga Bagian Dipisah Titik</h2>
+            <div class="code-block" style="margin-bottom: 8px;">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">Sample JWT</span>
+                </div>
+<pre class="code-block-body"><code><span style="color: #c3e88d;">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9</span>.<span style="color: #c792ea;">eyJzdWIiOiIxMiIsIm5hbWUiOiJBcmlmIiwicm9sZSI6ImRvc2VuIiwiZXhwIjoxNzQ4MzQ0NTAwfQ</span>.<span style="color: #82aaff;">8q3jK_FxN-2Yz1aBcDeFgHiJkLmNoPqRsTuVwXyZ012</span></code></pre>
+            </div>
+            <div class="jwt-block">
+                <div class="jwt-part jwt-h">
+                    <div class="jwt-part-label">1. Header</div>
+                    <div class="jwt-part-value">{ "alg": "HS256", "typ": "JWT" }</div>
+                </div>
+                <div class="jwt-part jwt-p">
+                    <div class="jwt-part-label">2. Payload (Claims)</div>
+                    <div class="jwt-part-value">{ "sub": "12", "name": "Arif", "role": "dosen", "exp": 1748344500 }</div>
+                </div>
+                <div class="jwt-part jwt-s">
+                    <div class="jwt-part-label">3. Signature</div>
+                    <div class="jwt-part-value">HMACSHA256(<br>&nbsp;&nbsp;base64(header)+"."+base64(payload),<br>&nbsp;&nbsp;SECRET_KEY<br>)</div>
+                </div>
+            </div>
+            <ol class="content-list">
+                <li><strong>Header</strong> — algoritma tanda tangan (HS256, RS256) dan tipe token.</li>
+                <li><strong>Payload</strong> — klaim (claims): <code>sub</code> (subject/user id), <code>exp</code> (expiry), <code>iat</code> (issued at), serta custom claims (role, nama, dll). <em>Catatan: payload hanya di-encode base64, BUKAN dienkripsi — siapa saja bisa membacanya.</em></li>
+                <li><strong>Signature</strong> — hasil HMAC/RSA dari header+payload dengan SECRET_KEY server. Klien tidak punya SECRET, jadi tidak bisa memalsukan signature.</li>
+            </ol>
+
+            <h2 class="content-heading">Alur Login dengan JWT</h2>
+            <div class="flow-diagram">
+                <div class="flow-row">
+                    <span class="flow-actor client">CLIENT</span>
+                    <span class="flow-arrow">→</span>
+                    <span class="flow-actor server">SERVER</span>
+                    <span class="flow-msg"><strong>1.</strong> <code>POST /login</code> dengan email + password</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-actor server">SERVER</span>
+                    <span class="flow-arrow">⚙</span>
+                    <span class="flow-actor server">SERVER</span>
+                    <span class="flow-msg"><strong>2.</strong> Cek password → valid → generate JWT (sign dengan SECRET_KEY)</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-actor server">SERVER</span>
+                    <span class="flow-arrow">←</span>
+                    <span class="flow-actor client">CLIENT</span>
+                    <span class="flow-msg"><strong>3.</strong> Response <code>200 OK</code> + body <code>{ token: "eyJhbGc..." }</code></span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-actor client">CLIENT</span>
+                    <span class="flow-arrow">→</span>
+                    <span class="flow-actor server">SERVER</span>
+                    <span class="flow-msg"><strong>4.</strong> Request berikutnya menyertakan <code>Authorization: Bearer eyJhbGc...</code></span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-actor server">SERVER</span>
+                    <span class="flow-arrow">⚙</span>
+                    <span class="flow-actor server">SERVER</span>
+                    <span class="flow-msg"><strong>5.</strong> Verifikasi signature dengan SECRET_KEY, cek <code>exp</code> &amp; klaim → lolos → lanjut handler</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-actor server">SERVER</span>
+                    <span class="flow-arrow">←</span>
+                    <span class="flow-actor client">CLIENT</span>
+                    <span class="flow-msg"><strong>6.</strong> Response data (atau <code>401</code> jika token expired / palsu)</span>
+                </div>
+            </div>
+
+            <h2 class="content-heading">API Key vs JWT — Perbandingan</h2>
+            <table class="compare-table">
+                <thead>
+                    <tr>
+                        <th>Aspek</th>
+                        <th>API Key</th>
+                        <th>JWT</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>State di Server</td>
+                        <td>Wajib lookup ke DB tiap request</td>
+                        <td>Stateless — cukup verifikasi signature</td>
+                    </tr>
+                    <tr>
+                        <td>Membawa Identitas User</td>
+                        <td>Tidak (key milik aplikasi)</td>
+                        <td>Ya (claim <code>sub</code>, <code>role</code>, dll)</td>
+                    </tr>
+                    <tr>
+                        <td>Expiry</td>
+                        <td>Permanen sampai dicabut manual</td>
+                        <td>Built-in via klaim <code>exp</code></td>
+                    </tr>
+                    <tr>
+                        <td>Revoke Token</td>
+                        <td>Mudah (hapus dari DB)</td>
+                        <td>Sulit — perlu blacklist/short expiry</td>
+                    </tr>
+                    <tr>
+                        <td>Cocok Untuk</td>
+                        <td>Server-to-server, public API developer</td>
+                        <td>Aplikasi user-facing (mobile/SPA)</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2 class="content-heading">Implementasi: Laravel Sanctum (JWT-style)</h2>
+            <p class="content-text">
+                Laravel menyediakan <strong>Sanctum</strong> untuk token-based auth yang sederhana. Mekanismenya mirip JWT (token Bearer di header), namun token disimpan di DB sehingga mudah di-revoke.
+            </p>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">Setup &amp; controller login</span>
+                </div>
+<pre class="code-block-body"><code><span class="hl-comment"># Install (Laravel 11 sudah include via install:api)</span>
+php artisan install:api
+
+<span class="hl-comment"># app/Http/Controllers/AuthController.php</span>
+<span class="hl-keyword">public function</span> <span class="hl-func">login</span>(Request <span class="hl-func">$req</span>) {
+    <span class="hl-func">$data</span> = <span class="hl-func">$req</span>-&gt;<span class="hl-func">validate</span>([
+        <span class="hl-string">'email'</span> =&gt; <span class="hl-string">'required|email'</span>,
+        <span class="hl-string">'password'</span> =&gt; <span class="hl-string">'required'</span>,
+    ]);
+    <span class="hl-func">$user</span> = User::<span class="hl-func">where</span>(<span class="hl-string">'email'</span>, <span class="hl-func">$data</span>[<span class="hl-string">'email'</span>])-&gt;<span class="hl-func">first</span>();
+    <span class="hl-keyword">if</span> (! <span class="hl-func">$user</span> || ! Hash::<span class="hl-func">check</span>(<span class="hl-func">$data</span>[<span class="hl-string">'password'</span>], <span class="hl-func">$user</span>-&gt;password)) {
+        <span class="hl-keyword">return</span> <span class="hl-func">response</span>()-&gt;<span class="hl-func">json</span>([<span class="hl-string">'message'</span> =&gt; <span class="hl-string">'Invalid credentials'</span>], <span class="hl-number">401</span>);
+    }
+    <span class="hl-func">$token</span> = <span class="hl-func">$user</span>-&gt;<span class="hl-func">createToken</span>(<span class="hl-string">'api'</span>)-&gt;plainTextToken;
+    <span class="hl-keyword">return</span> [<span class="hl-string">'token'</span> =&gt; <span class="hl-func">$token</span>, <span class="hl-string">'user'</span> =&gt; <span class="hl-func">$user</span>];
+}</code></pre>
+            </div>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">routes/api.php — proteksi dengan middleware</span>
+                </div>
+<pre class="code-block-body"><code>Route::<span class="hl-func">post</span>(<span class="hl-string">'/login'</span>, [AuthController::<span class="hl-keyword">class</span>, <span class="hl-string">'login'</span>]);
+
+<span class="hl-comment">// Semua route di group ini wajib token valid</span>
+Route::<span class="hl-func">middleware</span>(<span class="hl-string">'auth:sanctum'</span>)-&gt;<span class="hl-func">group</span>(<span class="hl-keyword">function</span> () {
+    Route::<span class="hl-func">apiResource</span>(<span class="hl-string">'mahasiswa'</span>, MahasiswaController::<span class="hl-keyword">class</span>);
+    Route::<span class="hl-func">post</span>(<span class="hl-string">'/logout'</span>, [AuthController::<span class="hl-keyword">class</span>, <span class="hl-string">'logout'</span>]);
+});</code></pre>
+            </div>
+
+            <h2 class="content-heading">Otorisasi: Role-Based Access Control (RBAC)</h2>
+            <p class="content-text">
+                Setelah server tahu siapa Anda, ia harus tahu <em>apa yang boleh Anda lakukan</em>. Pola paling populer adalah <strong>RBAC</strong> — setiap user memiliki <em>role</em> (admin, dosen, mahasiswa), dan setiap endpoint membutuhkan role tertentu.
+            </p>
+            <table class="rbac-matrix">
+                <thead>
+                    <tr>
+                        <th style="text-align: left;">Endpoint</th>
+                        <th>Admin</th>
+                        <th>Dosen</th>
+                        <th>Mahasiswa</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>GET /mahasiswa</td><td class="rbac-yes">✓ Semua</td><td class="rbac-yes">✓ Semua</td><td class="rbac-self">⚠ Diri sendiri</td></tr>
+                    <tr><td>POST /mahasiswa</td><td class="rbac-yes">✓</td><td class="rbac-no">✗</td><td class="rbac-no">✗</td></tr>
+                    <tr><td>PATCH /mahasiswa/{id}</td><td class="rbac-yes">✓</td><td class="rbac-self">⚠ Diri sendiri</td><td class="rbac-self">⚠ Diri sendiri</td></tr>
+                    <tr><td>DELETE /mahasiswa/{id}</td><td class="rbac-yes">✓</td><td class="rbac-no">✗</td><td class="rbac-no">✗</td></tr>
+                    <tr><td>POST /nilai</td><td class="rbac-yes">✓</td><td class="rbac-yes">✓ Kelas-nya</td><td class="rbac-no">✗</td></tr>
+                </tbody>
+            </table>
+
+            <h2 class="content-heading">Implementasi RBAC di Laravel</h2>
+            <p class="content-text">Tambahkan kolom <code>role</code> di tabel users, lalu buat custom middleware:</p>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">app/Http/Middleware/CheckRole.php</span>
+                </div>
+<pre class="code-block-body"><code><span class="hl-keyword">class</span> <span class="hl-func">CheckRole</span> {
+    <span class="hl-keyword">public function</span> <span class="hl-func">handle</span>(Request <span class="hl-func">$req</span>, Closure <span class="hl-func">$next</span>, ...<span class="hl-func">$roles</span>) {
+        <span class="hl-keyword">if</span> (! <span class="hl-func">in_array</span>(<span class="hl-func">$req</span>-&gt;<span class="hl-func">user</span>()-&gt;role, <span class="hl-func">$roles</span>)) {
+            <span class="hl-keyword">return</span> <span class="hl-func">response</span>()-&gt;<span class="hl-func">json</span>([<span class="hl-string">'message'</span> =&gt; <span class="hl-string">'Forbidden'</span>], <span class="hl-number">403</span>);
+        }
+        <span class="hl-keyword">return</span> <span class="hl-func">$next</span>(<span class="hl-func">$req</span>);
+    }
+}</code></pre>
+            </div>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">routes/api.php — kombinasikan dengan auth</span>
+                </div>
+<pre class="code-block-body"><code>Route::<span class="hl-func">middleware</span>([<span class="hl-string">'auth:sanctum'</span>, <span class="hl-string">'role:admin'</span>])-&gt;<span class="hl-func">group</span>(<span class="hl-keyword">function</span> () {
+    Route::<span class="hl-func">post</span>(<span class="hl-string">'/mahasiswa'</span>, [MahasiswaController::<span class="hl-keyword">class</span>, <span class="hl-string">'store'</span>]);
+    Route::<span class="hl-func">delete</span>(<span class="hl-string">'/mahasiswa/{id}'</span>, [MahasiswaController::<span class="hl-keyword">class</span>, <span class="hl-string">'destroy'</span>]);
+});
+
+Route::<span class="hl-func">middleware</span>([<span class="hl-string">'auth:sanctum'</span>, <span class="hl-string">'role:admin,dosen'</span>])-&gt;<span class="hl-func">group</span>(<span class="hl-keyword">function</span> () {
+    Route::<span class="hl-func">get</span>(<span class="hl-string">'/mahasiswa'</span>, [MahasiswaController::<span class="hl-keyword">class</span>, <span class="hl-string">'index'</span>]);
+});</code></pre>
+            </div>
+
+            <h2 class="content-heading">Untuk Aturan yang Lebih Halus — Policy</h2>
+            <p class="content-text">
+                Saat aturan <em>"dosen hanya boleh edit nilai kelas miliknya"</em> tidak bisa dinyatakan dengan role saja, gunakan <strong>Policy</strong>:
+            </p>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">app/Policies/NilaiPolicy.php</span>
+                </div>
+<pre class="code-block-body"><code><span class="hl-keyword">public function</span> <span class="hl-func">update</span>(User <span class="hl-func">$user</span>, Nilai <span class="hl-func">$nilai</span>): <span class="hl-keyword">bool</span> {
+    <span class="hl-keyword">return</span> <span class="hl-func">$user</span>-&gt;role === <span class="hl-string">'admin'</span>
+        || (<span class="hl-func">$user</span>-&gt;role === <span class="hl-string">'dosen'</span> &amp;&amp; <span class="hl-func">$nilai</span>-&gt;kelas-&gt;dosen_id === <span class="hl-func">$user</span>-&gt;id);
+}
+
+<span class="hl-comment">// Di Controller:</span>
+<span class="hl-func">$this</span>-&gt;<span class="hl-func">authorize</span>(<span class="hl-string">'update'</span>, <span class="hl-func">$nilai</span>);  <span class="hl-comment">// auto 403 jika gagal</span></code></pre>
+            </div>
+
+            <h2 class="content-heading">Praktik Wajib Keamanan API</h2>
+            <ol class="content-list">
+                <li><strong>HTTPS only</strong> — Tanpa HTTPS, token Anda lewat di plain-text dan bisa disadap di WiFi publik. Wajib di production.</li>
+                <li><strong>Rate Limiting</strong> — Batasi request per menit per IP/user (Laravel: <code>throttle:60,1</code>) untuk mencegah brute-force &amp; DoS.</li>
+                <li><strong>Hash password dengan bcrypt/argon2</strong> — Jangan pernah simpan password plain-text. Laravel pakai bcrypt secara default.</li>
+                <li><strong>Validasi semua input</strong> — Termasuk yang dari query string. SQL injection &amp; XSS biasanya masuk lewat input yang diabaikan.</li>
+                <li><strong>CORS dikonfigurasi sempit</strong> — Whitelist origin yang boleh memanggil API, bukan <code>*</code>.</li>
+                <li><strong>Token expiry pendek + refresh token</strong> — Access token 15 menit, refresh token 7 hari. Bocor → kerugian terbatas.</li>
+                <li><strong>Jangan log token / password</strong> — Bersihkan request body dari field sensitif sebelum tulis log.</li>
+            </ol>
+
+            <div class="warning-box">
+                <div class="warning-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                    <strong>Awas: JWT Payload Bisa Dibaca Siapa Saja</strong>
+                </div>
+                <p>JWT hanya <em>di-encode</em> base64, BUKAN dienkripsi. Siapa pun yang punya token bisa membuka di <code>jwt.io</code> dan membaca payload. <strong>Jangan masukkan data sensitif</strong> (password, NIK, nomor kartu kredit) ke dalam claim. Tanda tangan hanya menjamin integritas (tidak dimodifikasi), bukan kerahasiaan.</p>
+            </div>
+
+            <div class="success-box">
+                <div class="success-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    <strong>Persiapan UTS</strong>
+                </div>
+                <p>UTS akan menggabungkan Pertemuan 1-7: teori arsitektur (SOA, REST, REST vs SOAP) + praktik membuat REST API CRUD <em>dengan</em> proteksi auth. Pastikan Anda nyaman dengan: status code, validasi, route resource, Sanctum, dan middleware role.</p>
+            </div>
+
+            <div class="quiz">
+                <div class="quiz-title">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01"/></svg>
+                    Cek Pemahaman Anda
+                </div>
+                <div class="quiz-question">
+                    <div class="quiz-q-text">1. User berhasil login tetapi tidak boleh menghapus user lain. Status code yang tepat untuk request DELETE-nya?</div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, '401 = belum login / token salah. Di sini user sudah login, jadi bukan 401.')">401 Unauthorized</div>
+                        <div class="quiz-option" data-correct="true" onclick="quizAnswer(this, 'Benar! 403 Forbidden — identitas valid tetapi tidak punya hak akses ke resource ini.')">403 Forbidden</div>
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, '404 dipakai jika resource tidak ada — bukan untuk masalah otorisasi.')">404 Not Found</div>
+                    </div>
+                    <div class="quiz-feedback hidden"></div>
+                </div>
+                <div class="quiz-question">
+                    <div class="quiz-q-text">2. Apa yang membuat signature JWT tidak bisa dipalsukan oleh klien?</div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'Klien justru bisa membaca payload dengan mudah (base64 decode). Yang dilindungi adalah signature, bukan payload.')">Karena payload dienkripsi end-to-end</div>
+                        <div class="quiz-option" data-correct="true" onclick="quizAnswer(this, 'Tepat! Signature di-hash dengan SECRET_KEY yang hanya dimiliki server. Klien tidak bisa membentuk signature valid untuk payload palsu.')">Karena signature memerlukan SECRET_KEY yang hanya dimiliki server</div>
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'JWT sendiri tidak menyimpan apa pun di DB; itu prinsip statelessness JWT.')">Karena token disimpan di database server</div>
+                    </div>
+                    <div class="quiz-feedback hidden"></div>
+                </div>
+                <div class="quiz-question">
+                    <div class="quiz-q-text">3. Aturan "dosen hanya boleh mengubah nilai kelas miliknya sendiri" paling tepat diimplementasikan dengan ...</div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'Middleware role hanya bisa cek role kasar (dosen / bukan). Untuk aturan yang melibatkan kepemilikan resource, role saja tidak cukup.')">Middleware role <code>role:dosen</code> saja</div>
+                        <div class="quiz-option" data-correct="true" onclick="quizAnswer(this, 'Benar! Policy bisa memeriksa relasi user-resource (apakah dosen pemilik kelas ini) — granular &amp; mudah dimaintain.')">Policy yang memeriksa relasi user-resource</div>
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'CORS mengatur asal request (origin) — tidak ada hubungan dengan kepemilikan data.')">Mengatur CORS</div>
+                    </div>
+                    <div class="quiz-feedback hidden"></div>
+                </div>
+            </div>
+
+            <div class="content-nav">
+                <div class="content-nav-item">
+                    <a href="api-docs-testing.html" class="nav-btn nav-btn-prev">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                        <div><span class="nav-label">Sebelumnya</span><span class="nav-name">API Documentation &amp; Testing</span></div>
+                    </a>
+                </div>
+                <div class="content-nav-item">
+                    <a href="graphql-intro.html" class="nav-btn nav-btn-next">
+                        <div><span class="nav-label">Selanjutnya</span><span class="nav-name">Pengenalan GraphQL (loncat UTS)</span></div>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </a>
+                </div>
+            </div>
+        </article>
+    </main>
+
+    <script src="/web-service/course-layout.js"></script>
+    <script>
+    function copyCode(btn) {
+        const codeBlock = btn.closest('.code-block').querySelector('code');
+        navigator.clipboard.writeText(codeBlock.textContent).then(() => {
+            btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>';
+            setTimeout(() => { btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>'; }, 2000);
+        });
+    }
+    function playVideo() { alert('Video kuliah belum tersedia.'); }
+
+    function quizAnswer(el, feedback) {
+        const question = el.closest('.quiz-question');
+        const options = question.querySelectorAll('.quiz-option');
+        const fb = question.querySelector('.quiz-feedback');
+        options.forEach(o => {
+            o.style.pointerEvents = 'none';
+            if (o.dataset.correct === 'true') o.classList.add('correct');
+        });
+        if (el.dataset.correct !== 'true') el.classList.add('wrong');
+        fb.textContent = feedback;
+        fb.classList.remove('hidden');
+        fb.classList.add('visible');
+    }
+    </script>
+</body>
+</html>

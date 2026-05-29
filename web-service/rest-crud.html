@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Pertemuan 5: Hands-on membangun REST API CRUD dengan Laravel — migration, model Eloquent, route resource, dan controller untuk operasi GET/POST/PUT/DELETE.">
+    <title>Hands-on REST API CRUD — Web Service — Arif Hidayah</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/web-service/course.css">
+    <style>
+        .endpoint-table { width: 100%; border-collapse: collapse; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; margin: 14px 0; }
+        .endpoint-table th { padding: 10px 12px; background: rgba(16, 185, 129, 0.1); color: var(--accent-ws); text-align: left; font-size: 0.78rem; font-family: 'Inter', sans-serif; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 2px solid rgba(16, 185, 129, 0.25); }
+        .endpoint-table td { padding: 10px 12px; border-bottom: 1px solid var(--border-color); color: #e2e8f0; vertical-align: middle; }
+        .endpoint-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+        .step-block { display: flex; gap: 14px; margin: 14px 0 22px; align-items: flex-start; }
+        .step-num { flex-shrink: 0; width: 36px; height: 36px; border-radius: 50%; background: var(--accent-ws); color: white; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.95rem; box-shadow: 0 6px 18px rgba(16, 185, 129, 0.3); }
+        .step-body { flex: 1; min-width: 0; }
+        .step-title { font-size: 1.05rem; font-weight: 700; color: var(--text-primary); margin-bottom: 6px; }
+        .step-text { font-size: 0.92rem; color: #c5c5d4; line-height: 1.75; margin-bottom: 8px; }
+
+        .tester { background: rgba(0,0,0,0.4); border: 1px solid var(--border-color); border-radius: var(--radius-md); margin: 14px 0; overflow: hidden; }
+        .tester-tabs { display: flex; gap: 2px; padding: 0 8px; background: rgba(255,255,255,0.03); border-bottom: 1px solid var(--border-color); overflow-x: auto; }
+        .tester-tab { padding: 10px 14px; background: transparent; border: none; color: var(--text-muted); font-size: 0.82rem; font-weight: 600; cursor: pointer; border-bottom: 2px solid transparent; font-family: 'JetBrains Mono', monospace; white-space: nowrap; transition: var(--transition-fast); }
+        .tester-tab:hover { color: var(--text-primary); }
+        .tester-tab.active { color: var(--accent-ws); border-bottom-color: var(--accent-ws); }
+        .tester-body { padding: 16px; display: none; }
+        .tester-body.active { display: block; }
+        .tester-req, .tester-res { font-family: 'JetBrains Mono', monospace; font-size: 0.83rem; line-height: 1.7; padding: 12px 14px; border-radius: var(--radius-sm); background: rgba(0,0,0,0.5); margin-bottom: 10px; overflow-x: auto; color: #e2e8f0; border-left: 3px solid; }
+        .tester-req { border-left-color: #82aaff; }
+        .tester-res { border-left-color: #c3e88d; }
+        .tester-label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 6px; }
+    </style>
+</head>
+<body>
+    <div class="bg-grid" aria-hidden="true"></div>
+    <nav class="navbar scrolled" id="navbar"></nav>
+    <div class="mobile-menu" id="mobileMenu"></div>
+
+    <main class="course-layout">
+        <aside class="course-sidebar" id="courseSidebar"></aside>
+        <article class="course-content">
+
+            <div class="breadcrumb">
+                <a href="../index.html">Home</a><span>›</span>
+                <a href="index.html">Web Service</a><span>›</span>
+                <span style="color: var(--text-primary);">Bagian 1 — Fondasi</span>
+            </div>
+
+            <header class="content-header">
+                <h1 class="content-title">Pertemuan 5: Hands-on — Membangun REST API CRUD</h1>
+                <div class="content-meta">
+                    <div class="meta-pill">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 5V8.5L10.5 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/></svg>
+                        <span>Estimasi: 100 Menit</span>
+                    </div>
+                    <div class="meta-pill">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="10" rx="1" stroke="currentColor" stroke-width="1.5"/><path d="M5 7h6M5 10h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                        <span>Praktikum</span>
+                    </div>
+                    <div class="meta-pill">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 3h10v10H3z" stroke="currentColor" stroke-width="1.5"/><path d="M3 7h10M7 3v10" stroke="currentColor" stroke-width="1.5"/></svg>
+                        <span>Laravel 11</span>
+                    </div>
+                </div>
+            </header>
+
+            <div class="video-container">
+                <div class="video-placeholder">
+                    <div class="video-overlay">
+                        <div class="play-btn" onclick="playVideo()">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                        </div>
+                        <h3 style="font-weight: 600; margin-top: 16px; color: white;">Video Praktikum: CRUD API</h3>
+                        <p style="color: rgba(255,255,255,0.6); font-size: 0.85rem; margin-top: 6px;">Klik untuk memutar</p>
+                    </div>
+                </div>
+            </div>
+
+            <p class="content-text">
+                Setelah memahami prinsip REST, saatnya tangan kotor. Pada praktikum ini kita akan membangun <strong>REST API Mahasiswa</strong> dari nol menggunakan <strong>Laravel</strong> — framework PHP yang sudah Anda kenal dari mata kuliah Web Framework. Tujuannya: satu endpoint <code>/api/v1/mahasiswa</code> yang menerima <span class="http-method http-get">GET</span> <span class="http-method http-post">POST</span> <span class="http-method http-put">PUT</span> <span class="http-method http-delete">DELETE</span> dan menyimpan data di MySQL.
+            </p>
+
+            <div class="info-box">
+                <div class="info-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                    <strong>Capaian Pertemuan Ini</strong>
+                </div>
+                <p>Mahasiswa mampu (1) memetakan operasi CRUD ke method &amp; URL REST, (2) menggunakan <code>php artisan</code> untuk men-generate model + migration + controller, (3) menulis <code>Route::apiResource</code>, dan (4) menguji endpoint dengan curl/Postman.</p>
+            </div>
+
+            <h2 class="content-heading">Peta Endpoint yang Akan Kita Bangun</h2>
+            <table class="endpoint-table">
+                <thead>
+                    <tr>
+                        <th style="width: 100px;">Method</th>
+                        <th>URL</th>
+                        <th>Aksi</th>
+                        <th style="width: 110px;">Status Sukses</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td><span class="http-method http-get">GET</span></td><td>/api/v1/mahasiswa</td><td>List semua mahasiswa</td><td style="color:#c3e88d;">200 OK</td></tr>
+                    <tr><td><span class="http-method http-get">GET</span></td><td>/api/v1/mahasiswa/{id}</td><td>Detail satu mahasiswa</td><td style="color:#c3e88d;">200 OK</td></tr>
+                    <tr><td><span class="http-method http-post">POST</span></td><td>/api/v1/mahasiswa</td><td>Buat mahasiswa baru</td><td style="color:#c3e88d;">201 Created</td></tr>
+                    <tr><td><span class="http-method http-put">PUT</span></td><td>/api/v1/mahasiswa/{id}</td><td>Update seluruh data</td><td style="color:#c3e88d;">200 OK</td></tr>
+                    <tr><td><span class="http-method http-patch">PATCH</span></td><td>/api/v1/mahasiswa/{id}</td><td>Update sebagian field</td><td style="color:#c3e88d;">200 OK</td></tr>
+                    <tr><td><span class="http-method http-delete">DELETE</span></td><td>/api/v1/mahasiswa/{id}</td><td>Hapus mahasiswa</td><td style="color:#c3e88d;">204 No Content</td></tr>
+                </tbody>
+            </table>
+
+            <h2 class="content-heading">Langkah Demi Langkah</h2>
+
+            <div class="step-block">
+                <div class="step-num">1</div>
+                <div class="step-body">
+                    <div class="step-title">Buat project Laravel baru</div>
+                    <div class="step-text">Pastikan PHP 8.2+ dan Composer terpasang. Jalankan perintah berikut di terminal:</div>
+                    <div class="code-block">
+                        <div class="code-block-header">
+                            <div class="code-block-dots"><span></span><span></span><span></span></div>
+                            <span class="code-block-filename">terminal</span>
+                        </div>
+<pre class="code-block-body"><code><span class="hl-comment"># 1. Buat project baru</span>
+composer create-project laravel/laravel api-kampus
+<span class="hl-keyword">cd</span> api-kampus
+
+<span class="hl-comment"># 2. Salin .env.example dan generate APP_KEY</span>
+cp .env.example .env
+php artisan key:generate
+
+<span class="hl-comment"># 3. Konfigurasi koneksi MySQL di .env</span>
+<span class="hl-comment">#    DB_DATABASE=api_kampus  &nbsp;  DB_USERNAME=root  &nbsp;  DB_PASSWORD=</span>
+
+<span class="hl-comment"># 4. Aktifkan route API (Laravel 11 perlu install:api)</span>
+php artisan install:api</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <div class="step-block">
+                <div class="step-num">2</div>
+                <div class="step-body">
+                    <div class="step-title">Generate Model + Migration + Controller sekaligus</div>
+                    <div class="step-text">Artisan punya shortcut untuk membuat ketiganya dalam satu perintah. Flag <code>--api</code> akan men-generate controller tanpa method <code>create</code> dan <code>edit</code> (karena API tidak butuh form HTML):</div>
+                    <div class="code-block">
+                        <div class="code-block-header">
+                            <div class="code-block-dots"><span></span><span></span><span></span></div>
+                            <span class="code-block-filename">terminal</span>
+                        </div>
+<pre class="code-block-body"><code>php artisan make:model Mahasiswa --migration --controller --api --requests</code></pre>
+                    </div>
+                    <div class="step-text">Hasil: <code>app/Models/Mahasiswa.php</code>, <code>database/migrations/xxxx_create_mahasiswas_table.php</code>, <code>app/Http/Controllers/MahasiswaController.php</code>, plus dua Form Request untuk validasi.</div>
+                </div>
+            </div>
+
+            <div class="step-block">
+                <div class="step-num">3</div>
+                <div class="step-body">
+                    <div class="step-title">Definisikan skema tabel di Migration</div>
+                    <div class="step-text">Buka file migration baru dan isi method <code>up()</code>:</div>
+                    <div class="code-block">
+                        <div class="code-block-header">
+                            <div class="code-block-dots"><span></span><span></span><span></span></div>
+                            <span class="code-block-filename">database/migrations/xxxx_create_mahasiswas_table.php</span>
+                        </div>
+<pre class="code-block-body"><code><span class="hl-keyword">public function</span> <span class="hl-func">up</span>(): <span class="hl-keyword">void</span>
+{
+    Schema::<span class="hl-func">create</span>(<span class="hl-string">'mahasiswas'</span>, <span class="hl-keyword">function</span> (Blueprint <span class="hl-func">$table</span>) {
+        <span class="hl-func">$table</span>-&gt;<span class="hl-func">id</span>();
+        <span class="hl-func">$table</span>-&gt;<span class="hl-func">string</span>(<span class="hl-string">'nim'</span>, <span class="hl-number">10</span>)-&gt;<span class="hl-func">unique</span>();
+        <span class="hl-func">$table</span>-&gt;<span class="hl-func">string</span>(<span class="hl-string">'nama'</span>);
+        <span class="hl-func">$table</span>-&gt;<span class="hl-func">string</span>(<span class="hl-string">'email'</span>)-&gt;<span class="hl-func">unique</span>();
+        <span class="hl-func">$table</span>-&gt;<span class="hl-func">string</span>(<span class="hl-string">'prodi'</span>);
+        <span class="hl-func">$table</span>-&gt;<span class="hl-func">decimal</span>(<span class="hl-string">'ipk'</span>, <span class="hl-number">3</span>, <span class="hl-number">2</span>)-&gt;<span class="hl-func">nullable</span>();
+        <span class="hl-func">$table</span>-&gt;<span class="hl-func">timestamps</span>();
+    });
+}</code></pre>
+                    </div>
+                    <div class="step-text">Jalankan migration: <code>php artisan migrate</code> — Laravel akan membuat tabel <code>mahasiswas</code> di MySQL.</div>
+                </div>
+            </div>
+
+            <div class="step-block">
+                <div class="step-num">4</div>
+                <div class="step-body">
+                    <div class="step-title">Setel mass-assignment di Model</div>
+                    <div class="step-text">Edit <code>app/Models/Mahasiswa.php</code> agar field yang boleh diisi dari API tertulis eksplisit (mencegah mass-assignment vulnerability):</div>
+                    <div class="code-block">
+                        <div class="code-block-header">
+                            <div class="code-block-dots"><span></span><span></span><span></span></div>
+                            <span class="code-block-filename">app/Models/Mahasiswa.php</span>
+                        </div>
+<pre class="code-block-body"><code><span class="hl-keyword">class</span> <span class="hl-func">Mahasiswa</span> <span class="hl-keyword">extends</span> Model
+{
+    <span class="hl-keyword">use</span> HasFactory;
+
+    <span class="hl-keyword">protected</span> <span class="hl-func">$fillable</span> = [<span class="hl-string">'nim'</span>, <span class="hl-string">'nama'</span>, <span class="hl-string">'email'</span>, <span class="hl-string">'prodi'</span>, <span class="hl-string">'ipk'</span>];
+}</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <div class="step-block">
+                <div class="step-num">5</div>
+                <div class="step-body">
+                    <div class="step-title">Daftarkan route dengan <code>apiResource</code></div>
+                    <div class="step-text">Satu baris route resource akan otomatis mendaftarkan <em>5 endpoint sekaligus</em> (index, store, show, update, destroy):</div>
+                    <div class="code-block">
+                        <div class="code-block-header">
+                            <div class="code-block-dots"><span></span><span></span><span></span></div>
+                            <span class="code-block-filename">routes/api.php</span>
+                        </div>
+<pre class="code-block-body"><code><span class="hl-keyword">use</span> App\Http\Controllers\MahasiswaController;
+<span class="hl-keyword">use</span> Illuminate\Support\Facades\Route;
+
+Route::<span class="hl-func">prefix</span>(<span class="hl-string">'v1'</span>)-&gt;<span class="hl-func">group</span>(<span class="hl-keyword">function</span> () {
+    Route::<span class="hl-func">apiResource</span>(<span class="hl-string">'mahasiswa'</span>, MahasiswaController::<span class="hl-keyword">class</span>);
+});</code></pre>
+                    </div>
+                    <div class="step-text">Cek hasil mapping route: <code>php artisan route:list --path=api</code>.</div>
+                </div>
+            </div>
+
+            <div class="step-block">
+                <div class="step-num">6</div>
+                <div class="step-body">
+                    <div class="step-title">Isi Controller dengan 5 method</div>
+                    <div class="step-text">Edit <code>MahasiswaController.php</code>. Laravel sudah membuat skeleton method-nya — tinggal kita isi:</div>
+                    <div class="code-block">
+                        <div class="code-block-header">
+                            <div class="code-block-dots"><span></span><span></span><span></span></div>
+                            <span class="code-block-filename">app/Http/Controllers/MahasiswaController.php</span>
+                        </div>
+<pre class="code-block-body"><code><span class="hl-keyword">use</span> App\Models\Mahasiswa;
+<span class="hl-keyword">use</span> Illuminate\Http\Request;
+
+<span class="hl-keyword">class</span> <span class="hl-func">MahasiswaController</span> <span class="hl-keyword">extends</span> Controller
+{
+    <span class="hl-comment">// GET /api/v1/mahasiswa</span>
+    <span class="hl-keyword">public function</span> <span class="hl-func">index</span>()
+    {
+        <span class="hl-keyword">return</span> Mahasiswa::<span class="hl-func">paginate</span>(<span class="hl-number">10</span>);
+    }
+
+    <span class="hl-comment">// POST /api/v1/mahasiswa</span>
+    <span class="hl-keyword">public function</span> <span class="hl-func">store</span>(Request <span class="hl-func">$request</span>)
+    {
+        <span class="hl-func">$data</span> = <span class="hl-func">$request</span>-&gt;<span class="hl-func">validate</span>([
+            <span class="hl-string">'nim'</span>   =&gt; <span class="hl-string">'required|string|size:8|unique:mahasiswas,nim'</span>,
+            <span class="hl-string">'nama'</span>  =&gt; <span class="hl-string">'required|string|max:100'</span>,
+            <span class="hl-string">'email'</span> =&gt; <span class="hl-string">'required|email|unique:mahasiswas,email'</span>,
+            <span class="hl-string">'prodi'</span> =&gt; <span class="hl-string">'required|string'</span>,
+            <span class="hl-string">'ipk'</span>   =&gt; <span class="hl-string">'nullable|numeric|between:0,4'</span>,
+        ]);
+        <span class="hl-func">$mhs</span> = Mahasiswa::<span class="hl-func">create</span>(<span class="hl-func">$data</span>);
+        <span class="hl-keyword">return</span> <span class="hl-func">response</span>()-&gt;<span class="hl-func">json</span>(<span class="hl-func">$mhs</span>, <span class="hl-number">201</span>);
+    }
+
+    <span class="hl-comment">// GET /api/v1/mahasiswa/{id}</span>
+    <span class="hl-keyword">public function</span> <span class="hl-func">show</span>(Mahasiswa <span class="hl-func">$mahasiswa</span>)
+    {
+        <span class="hl-keyword">return</span> <span class="hl-func">$mahasiswa</span>;
+    }
+
+    <span class="hl-comment">// PUT / PATCH /api/v1/mahasiswa/{id}</span>
+    <span class="hl-keyword">public function</span> <span class="hl-func">update</span>(Request <span class="hl-func">$request</span>, Mahasiswa <span class="hl-func">$mahasiswa</span>)
+    {
+        <span class="hl-func">$data</span> = <span class="hl-func">$request</span>-&gt;<span class="hl-func">validate</span>([
+            <span class="hl-string">'nama'</span>  =&gt; <span class="hl-string">'sometimes|string|max:100'</span>,
+            <span class="hl-string">'email'</span> =&gt; <span class="hl-string">'sometimes|email|unique:mahasiswas,email,'</span>.<span class="hl-func">$mahasiswa</span>-&gt;id,
+            <span class="hl-string">'prodi'</span> =&gt; <span class="hl-string">'sometimes|string'</span>,
+            <span class="hl-string">'ipk'</span>   =&gt; <span class="hl-string">'sometimes|numeric|between:0,4'</span>,
+        ]);
+        <span class="hl-func">$mahasiswa</span>-&gt;<span class="hl-func">update</span>(<span class="hl-func">$data</span>);
+        <span class="hl-keyword">return</span> <span class="hl-func">$mahasiswa</span>;
+    }
+
+    <span class="hl-comment">// DELETE /api/v1/mahasiswa/{id}</span>
+    <span class="hl-keyword">public function</span> <span class="hl-func">destroy</span>(Mahasiswa <span class="hl-func">$mahasiswa</span>)
+    {
+        <span class="hl-func">$mahasiswa</span>-&gt;<span class="hl-func">delete</span>();
+        <span class="hl-keyword">return</span> <span class="hl-func">response</span>()-&gt;<span class="hl-func">noContent</span>(); <span class="hl-comment">// 204</span>
+    }
+}</code></pre>
+                    </div>
+                    <div class="info-box" style="margin-top: 14px;">
+                        <div class="info-box-header">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                            <strong>Catatan: Route Model Binding</strong>
+                        </div>
+                        <p>Parameter <code>Mahasiswa $mahasiswa</code> di method <code>show</code> / <code>update</code> / <code>destroy</code> adalah <em>route model binding</em> — Laravel otomatis cari mahasiswa berdasarkan ID di URL, dan return <strong>404 Not Found</strong> jika tidak ada. Tidak perlu cek manual.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="step-block">
+                <div class="step-num">7</div>
+                <div class="step-body">
+                    <div class="step-title">Jalankan server &amp; uji endpoint</div>
+                    <div class="code-block">
+                        <div class="code-block-header">
+                            <div class="code-block-dots"><span></span><span></span><span></span></div>
+                            <span class="code-block-filename">terminal</span>
+                        </div>
+<pre class="code-block-body"><code>php artisan serve</code></pre>
+                    </div>
+                    <div class="step-text">Server berjalan di <code>http://127.0.0.1:8000</code>. Coba lima endpoint berikut dengan <code>curl</code> atau Postman:</div>
+                </div>
+            </div>
+
+            <h2 class="content-heading">Mini-Lab: Coba Semua Endpoint</h2>
+            <div class="tester">
+                <div class="tester-tabs">
+                    <button class="tester-tab active" onclick="showTab(this, 'list')">GET list</button>
+                    <button class="tester-tab" onclick="showTab(this, 'create')">POST create</button>
+                    <button class="tester-tab" onclick="showTab(this, 'show')">GET show</button>
+                    <button class="tester-tab" onclick="showTab(this, 'update')">PATCH update</button>
+                    <button class="tester-tab" onclick="showTab(this, 'delete')">DELETE</button>
+                    <button class="tester-tab" onclick="showTab(this, 'validate')">422 Validasi</button>
+                </div>
+                <div class="tester-body active" data-tab="list">
+                    <div class="tester-label">Request</div>
+                    <div class="tester-req">curl -i http://127.0.0.1:8000/api/v1/mahasiswa</div>
+                    <div class="tester-label">Response</div>
+                    <div class="tester-res">HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "data": [
+    { "id": 1, "nim": "22550111", "nama": "Siti Aisyah", "prodi": "TI", "ipk": 3.72 },
+    { "id": 2, "nim": "22550112", "nama": "Budi Santoso", "prodi": "TI", "ipk": 3.45 }
+  ],
+  "current_page": 1,
+  "per_page": 10,
+  "total": 2
+}</div>
+                </div>
+                <div class="tester-body" data-tab="create">
+                    <div class="tester-label">Request</div>
+                    <div class="tester-req">curl -i -X POST http://127.0.0.1:8000/api/v1/mahasiswa \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -d '{
+    "nim": "22550113",
+    "nama": "Dewi Lestari",
+    "email": "dewi@kampus.ac.id",
+    "prodi": "Sistem Informasi",
+    "ipk": 3.88
+  }'</div>
+                    <div class="tester-label">Response</div>
+                    <div class="tester-res">HTTP/1.1 201 Created
+Content-Type: application/json
+
+{
+  "id": 3, "nim": "22550113", "nama": "Dewi Lestari",
+  "email": "dewi@kampus.ac.id", "prodi": "Sistem Informasi", "ipk": 3.88,
+  "created_at": "2026-05-25T08:32:11Z"
+}</div>
+                </div>
+                <div class="tester-body" data-tab="show">
+                    <div class="tester-label">Request</div>
+                    <div class="tester-req">curl -i http://127.0.0.1:8000/api/v1/mahasiswa/3</div>
+                    <div class="tester-label">Response</div>
+                    <div class="tester-res">HTTP/1.1 200 OK
+
+{
+  "id": 3, "nim": "22550113", "nama": "Dewi Lestari",
+  "email": "dewi@kampus.ac.id", "prodi": "Sistem Informasi", "ipk": 3.88
+}</div>
+                </div>
+                <div class="tester-body" data-tab="update">
+                    <div class="tester-label">Request</div>
+                    <div class="tester-req">curl -i -X PATCH http://127.0.0.1:8000/api/v1/mahasiswa/3 \
+  -H "Content-Type: application/json" \
+  -d '{ "ipk": 3.92 }'</div>
+                    <div class="tester-label">Response</div>
+                    <div class="tester-res">HTTP/1.1 200 OK
+
+{ "id": 3, "nim": "22550113", "nama": "Dewi Lestari", "ipk": 3.92, ... }</div>
+                </div>
+                <div class="tester-body" data-tab="delete">
+                    <div class="tester-label">Request</div>
+                    <div class="tester-req">curl -i -X DELETE http://127.0.0.1:8000/api/v1/mahasiswa/3</div>
+                    <div class="tester-label">Response</div>
+                    <div class="tester-res">HTTP/1.1 204 No Content
+(empty body — sesuai spec; data sudah terhapus)</div>
+                </div>
+                <div class="tester-body" data-tab="validate">
+                    <div class="tester-label">Request (data tidak valid)</div>
+                    <div class="tester-req">curl -i -X POST http://127.0.0.1:8000/api/v1/mahasiswa \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -d '{ "nim": "X", "nama": "" }'</div>
+                    <div class="tester-label">Response — validasi otomatis dari Laravel</div>
+                    <div class="tester-res">HTTP/1.1 422 Unprocessable Entity
+
+{
+  "message": "The nim field must be 8 characters. (and 3 more errors)",
+  "errors": {
+    "nim":   ["The nim field must be 8 characters."],
+    "nama":  ["The nama field is required."],
+    "email": ["The email field is required."],
+    "prodi": ["The prodi field is required."]
+  }
+}</div>
+                </div>
+            </div>
+
+            <h2 class="content-heading">Konvensi Penting yang Sudah Kita Terapkan</h2>
+            <ol class="content-list">
+                <li><strong>Resource jamak</strong> — <code>/mahasiswa</code>, satu URI untuk koleksi, satu untuk satuan.</li>
+                <li><strong>Prefix versi</strong> — <code>/v1/</code> agar kelak bisa rilis <code>/v2/</code> tanpa merusak klien yang ada.</li>
+                <li><strong>Status code semantik</strong> — 201 untuk create, 204 untuk delete, 422 untuk validasi gagal, 404 otomatis dari model binding.</li>
+                <li><strong>Validasi sebelum eksekusi</strong> — input dicek di Controller sebelum menyentuh database.</li>
+                <li><strong>Pagination</strong> — <code>paginate(10)</code> mencegah satu request mengembalikan jutaan baris.</li>
+                <li><strong>Mass-assignment guard</strong> — hanya field di <code>$fillable</code> yang boleh diisi dari request.</li>
+            </ol>
+
+            <h2 class="content-heading">Alternatif Framework — Sintaks Sangat Mirip</h2>
+            <p class="content-text">Jika tim Anda memilih framework lain, pola pikirnya identik. Ini contoh <strong>Express.js (Node.js)</strong> untuk endpoint yang sama:</p>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">routes/mahasiswa.js — Express</span>
+                </div>
+<pre class="code-block-body"><code><span class="hl-keyword">const</span> express = <span class="hl-func">require</span>(<span class="hl-string">'express'</span>);
+<span class="hl-keyword">const</span> router = express.<span class="hl-func">Router</span>();
+<span class="hl-keyword">const</span> Mahasiswa = <span class="hl-func">require</span>(<span class="hl-string">'../models/Mahasiswa'</span>);
+
+router.<span class="hl-func">get</span>(<span class="hl-string">'/'</span>, <span class="hl-keyword">async</span> (req, res) =&gt; res.<span class="hl-func">json</span>(<span class="hl-keyword">await</span> Mahasiswa.<span class="hl-func">find</span>()));
+router.<span class="hl-func">post</span>(<span class="hl-string">'/'</span>, <span class="hl-keyword">async</span> (req, res) =&gt; {
+    <span class="hl-keyword">const</span> mhs = <span class="hl-keyword">await</span> Mahasiswa.<span class="hl-func">create</span>(req.body);
+    res.<span class="hl-func">status</span>(<span class="hl-number">201</span>).<span class="hl-func">json</span>(mhs);
+});
+router.<span class="hl-func">delete</span>(<span class="hl-string">'/:id'</span>, <span class="hl-keyword">async</span> (req, res) =&gt; {
+    <span class="hl-keyword">await</span> Mahasiswa.<span class="hl-func">findByIdAndDelete</span>(req.params.id);
+    res.<span class="hl-func">status</span>(<span class="hl-number">204</span>).<span class="hl-func">end</span>();
+});
+
+module.exports = router;</code></pre>
+            </div>
+
+            <div class="success-box">
+                <div class="success-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    <strong>Tantangan Tambahan (Take-home)</strong>
+                </div>
+                <p>(1) Tambahkan filter <code>?prodi=TI</code> di endpoint index. (2) Tambahkan endpoint nested <code>GET /api/v1/mahasiswa/{id}/nilai</code> yang menampilkan nilai mahasiswa tersebut. (3) Pakai <strong>API Resource</strong> Laravel agar response keluar dalam format yang konsisten (akan dibahas di Pertemuan 6).</p>
+            </div>
+
+            <div class="quiz">
+                <div class="quiz-title">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01"/></svg>
+                    Cek Pemahaman Anda
+                </div>
+                <div class="quiz-question">
+                    <div class="quiz-q-text">1. Apa keuntungan menggunakan <code>Route::apiResource</code> dibanding mendaftarkan 5 route satu per satu?</div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" data-correct="true" onclick="quizAnswer(this, 'Tepat! Satu baris = 5 endpoint terdaftar dengan konvensi yang konsisten + skip method create/edit yang tidak relevan untuk API.')">Lebih ringkas dan otomatis mengikuti konvensi REST</div>
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'apiResource tidak menambah kecepatan eksekusi — hanya menyederhanakan deklarasi route.')">Lebih cepat saat request diproses</div>
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'apiResource tidak menjamin keamanan; Anda tetap perlu auth/validasi sendiri.')">Otomatis menerapkan otentikasi</div>
+                    </div>
+                    <div class="quiz-feedback hidden"></div>
+                </div>
+                <div class="quiz-question">
+                    <div class="quiz-q-text">2. Saat user mengirim data POST yang tidak lulus validasi (misal email salah format), Laravel mengembalikan status code apa?</div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, '400 dipakai jika format request rusak (mis. JSON tidak valid). Untuk gagal validasi semantik, 422 lebih tepat.')">400 Bad Request</div>
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, '500 menandakan bug di server, bukan kesalahan input dari klien.')">500 Internal Server Error</div>
+                        <div class="quiz-option" data-correct="true" onclick="quizAnswer(this, 'Benar! 422 Unprocessable Entity — request terbaca tetapi gagal validasi field. Standar Laravel.')">422 Unprocessable Entity</div>
+                    </div>
+                    <div class="quiz-feedback hidden"></div>
+                </div>
+                <div class="quiz-question">
+                    <div class="quiz-q-text">3. Mengapa kita menggunakan <code>$fillable</code> di Model?</div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'Tidak ada hubungan langsung dengan kecepatan query.')">Agar query lebih cepat</div>
+                        <div class="quiz-option" data-correct="true" onclick="quizAnswer(this, 'Tepat! Mencegah mass-assignment vulnerability — penyerang tidak bisa menyelipkan field sensitif (mis. is_admin) lewat request body.')">Untuk mencegah mass-assignment vulnerability</div>
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'Validasi format dilakukan di Controller/Form Request, bukan oleh $fillable.')">Untuk validasi format input</div>
+                    </div>
+                    <div class="quiz-feedback hidden"></div>
+                </div>
+            </div>
+
+            <div class="content-nav">
+                <div class="content-nav-item">
+                    <a href="restful-design.html" class="nav-btn nav-btn-prev">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                        <div><span class="nav-label">Sebelumnya</span><span class="nav-name">Prinsip Desain RESTful API</span></div>
+                    </a>
+                </div>
+                <div class="content-nav-item">
+                    <a href="api-docs-testing.html" class="nav-btn nav-btn-next">
+                        <div><span class="nav-label">Selanjutnya</span><span class="nav-name">API Documentation &amp; Testing</span></div>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </a>
+                </div>
+            </div>
+        </article>
+    </main>
+
+    <script src="/web-service/course-layout.js"></script>
+    <script>
+    function copyCode(btn) {
+        const codeBlock = btn.closest('.code-block').querySelector('code');
+        navigator.clipboard.writeText(codeBlock.textContent).then(() => {
+            btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>';
+            setTimeout(() => { btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>'; }, 2000);
+        });
+    }
+    function playVideo() { alert('Video kuliah belum tersedia.'); }
+
+    function showTab(btn, key) {
+        document.querySelectorAll('.tester-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tester-body').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        document.querySelector(`.tester-body[data-tab="${key}"]`).classList.add('active');
+    }
+
+    function quizAnswer(el, feedback) {
+        const question = el.closest('.quiz-question');
+        const options = question.querySelectorAll('.quiz-option');
+        const fb = question.querySelector('.quiz-feedback');
+        options.forEach(o => {
+            o.style.pointerEvents = 'none';
+            if (o.dataset.correct === 'true') o.classList.add('correct');
+        });
+        if (el.dataset.correct !== 'true') el.classList.add('wrong');
+        fb.textContent = feedback;
+        fb.classList.remove('hidden');
+        fb.classList.add('visible');
+    }
+    </script>
+</body>
+</html>

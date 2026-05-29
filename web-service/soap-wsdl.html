@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Pertemuan 3: Memahami SOAP — protokol formal berbasis XML — serta WSDL (Web Services Description Language) sebagai kontrak deskripsi layanan.">
+    <title>SOAP & WSDL — Web Service — Arif Hidayah</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/web-service/course.css">
+    <style>
+        .envelope { background: rgba(0,0,0,0.5); border: 2px solid rgba(16, 185, 129, 0.35); border-radius: var(--radius-md); padding: 16px; margin: 14px 0; position: relative; }
+        .envelope-label { position: absolute; top: -10px; left: 14px; background: var(--bg-primary); padding: 0 10px; font-size: 0.72rem; color: var(--accent-ws); font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; font-family: 'Inter', sans-serif; }
+        .envelope-inner { padding: 14px 14px 14px 16px; border-left: 3px solid #82aaff; background: rgba(130, 170, 255, 0.04); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; margin-top: 6px; position: relative; }
+        .envelope-inner-label { position: absolute; top: -10px; left: 10px; background: var(--bg-primary); padding: 0 8px; font-size: 0.7rem; color: #82aaff; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; font-family: 'Inter', sans-serif; }
+        .envelope pre { margin: 0; font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; line-height: 1.7; color: #e2e8f0; overflow-x: auto; }
+        .envelope pre .tag { color: #c792ea; }
+        .envelope pre .attr { color: #ffcb6b; }
+        .envelope pre .str { color: #c3e88d; }
+        .envelope pre .num { color: #f78c6c; }
+
+        .wsdl-map { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin: 14px 0; }
+        .wsdl-node { padding: 14px 16px; background: rgba(0,0,0,0.4); border: 1px solid var(--border-color); border-radius: var(--radius-sm); }
+        .wsdl-node-name { font-family: 'JetBrains Mono', monospace; font-size: 0.95rem; font-weight: 800; color: var(--accent-ws); margin-bottom: 6px; }
+        .wsdl-node-desc { font-size: 0.82rem; color: var(--text-muted); line-height: 1.6; }
+    </style>
+</head>
+<body>
+    <div class="bg-grid" aria-hidden="true"></div>
+    <nav class="navbar scrolled" id="navbar"></nav>
+    <div class="mobile-menu" id="mobileMenu"></div>
+
+    <main class="course-layout">
+        <aside class="course-sidebar" id="courseSidebar"></aside>
+        <article class="course-content">
+
+            <div class="breadcrumb">
+                <a href="../index.html">Home</a><span>›</span>
+                <a href="index.html">Web Service</a><span>›</span>
+                <span style="color: var(--text-primary);">Bagian 1 — Fondasi</span>
+            </div>
+
+            <header class="content-header">
+                <h1 class="content-title">Pertemuan 3: Legacy Service — SOAP &amp; WSDL</h1>
+                <div class="content-meta">
+                    <div class="meta-pill">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 5V8.5L10.5 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/></svg>
+                        <span>Estimasi: 60 Menit</span>
+                    </div>
+                    <div class="meta-pill">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="10" rx="1" stroke="currentColor" stroke-width="1.5"/><path d="M5 7h6M5 10h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                        <span>Teori &amp; Studi Kasus</span>
+                    </div>
+                </div>
+            </header>
+
+            <div class="video-container">
+                <div class="video-placeholder">
+                    <div class="video-overlay">
+                        <div class="play-btn" onclick="playVideo()">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                        </div>
+                        <h3 style="font-weight: 600; margin-top: 16px; color: white;">Video Kuliah: SOAP &amp; WSDL</h3>
+                        <p style="color: rgba(255,255,255,0.6); font-size: 0.85rem; margin-top: 6px;">Klik untuk memutar</p>
+                    </div>
+                </div>
+            </div>
+
+            <p class="content-text">
+                Sebelum REST berjaya, dunia web service didominasi oleh <strong>SOAP</strong> — protokol formal berbasis XML yang dirancang untuk komunikasi <em>enterprise</em>. Meski namanya terdengar "kuno", SOAP masih hidup dan dipakai luas di sektor perbankan, asuransi, telco, dan integrasi sistem pemerintahan. Memahami SOAP &amp; WSDL adalah modal wajib bagi developer yang berhadapan dengan sistem warisan.
+            </p>
+
+            <div class="info-box">
+                <div class="info-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                    <strong>Capaian Pertemuan Ini</strong>
+                </div>
+                <p>Mahasiswa mampu (1) menjelaskan posisi SOAP dalam evolusi web service, (2) membaca struktur SOAP Envelope, (3) memahami fungsi WSDL sebagai kontrak layanan, dan (4) memutuskan kapan SOAP masih relevan dibanding REST.</p>
+            </div>
+
+            <h2 class="content-heading">Sejarah Singkat: Mengapa SOAP Ada?</h2>
+            <p class="content-text">
+                <strong>SOAP</strong> (Simple Object Access Protocol) dirilis Microsoft &amp; tim XML Working Group pada akhir 1990-an, dibakukan W3C pada 2003. Tujuannya: menyediakan <em>protokol terstandar</em> untuk memanggil prosedur jarak jauh (Remote Procedure Call) di lingkungan enterprise — di mana sistem warisan COBOL, Java, dan .NET harus saling berbicara dengan jaminan kontrak yang ketat.
+            </p>
+            <p class="content-text">
+                SOAP membawa "berkah" yang sekaligus jadi "kutukan": <em>sangat formal</em>. Setiap pesan dibungkus XML dengan envelope, header, dan body. Setiap layanan punya WSDL — file XML yang menggambarkan setiap operasi, tipe data, dan endpoint. Hasilnya: kontrak super jelas, tetapi pesan jadi besar dan kompleks.
+            </p>
+
+            <div class="analogy-box">
+                <div class="analogy-icon">📄</div>
+                <div class="analogy-content">
+                    <strong>Analogi: Surat Resmi Berkop Kementerian</strong>
+                    <p>REST seperti pesan WhatsApp ke teman — cepat, ringkas, langsung ke pokok. SOAP seperti surat resmi kementerian: ada kop, nomor surat, tembusan, lampiran, tanda tangan, stempel. Lebih lambat dan ribet, tapi <em>sah secara hukum</em> dan dapat diaudit. Bank dan asuransi memilih SOAP karena alasan terakhir ini.</p>
+                </div>
+            </div>
+
+            <h2 class="content-heading">Anatomi SOAP Envelope</h2>
+            <p class="content-text">
+                Setiap pesan SOAP — baik request maupun response — wajib dibungkus dalam struktur <strong>Envelope</strong>. Di dalam envelope ada <strong>Header</strong> opsional (untuk metadata seperti otentikasi atau routing) dan <strong>Body</strong> wajib (berisi pemanggilan operasi atau data balasan):
+            </p>
+            <div class="envelope">
+                <span class="envelope-label">SOAP Envelope</span>
+                <div class="envelope-inner">
+                    <span class="envelope-inner-label">Header (opsional)</span>
+                    <pre><span class="tag">&lt;soap:Header&gt;</span>
+  <span class="tag">&lt;auth:Credentials&gt;</span>
+    <span class="tag">&lt;auth:Username&gt;</span>admin<span class="tag">&lt;/auth:Username&gt;</span>
+    <span class="tag">&lt;auth:Token&gt;</span><span class="str">eyJhbGc...</span><span class="tag">&lt;/auth:Token&gt;</span>
+  <span class="tag">&lt;/auth:Credentials&gt;</span>
+<span class="tag">&lt;/soap:Header&gt;</span></pre>
+                </div>
+                <div class="envelope-inner" style="border-left-color: #c3e88d; background: rgba(195, 232, 141, 0.04);">
+                    <span class="envelope-inner-label" style="color: #c3e88d;">Body (wajib)</span>
+                    <pre><span class="tag">&lt;soap:Body&gt;</span>
+  <span class="tag">&lt;tns:GetMahasiswa&gt;</span>
+    <span class="tag">&lt;tns:NIM&gt;</span><span class="num">22550111</span><span class="tag">&lt;/tns:NIM&gt;</span>
+  <span class="tag">&lt;/tns:GetMahasiswa&gt;</span>
+<span class="tag">&lt;/soap:Body&gt;</span></pre>
+                </div>
+            </div>
+
+            <h2 class="content-heading">Contoh Lengkap: SOAP Request &amp; Response</h2>
+            <p class="content-text">Berikut request untuk memanggil operasi <code>GetMahasiswa</code> di sebuah service akademik:</p>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">SOAP Request — POST /akademik</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)" aria-label="Copy">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                    </button>
+                </div>
+<pre class="code-block-body"><code><span class="hl-keyword">&lt;?xml version="1.0"?&gt;</span>
+<span class="hl-keyword">&lt;soap:Envelope</span>
+    xmlns:soap=<span class="hl-string">"http://schemas.xmlsoap.org/soap/envelope/"</span>
+    xmlns:tns=<span class="hl-string">"http://kampus.ac.id/akademik"</span><span class="hl-keyword">&gt;</span>
+  <span class="hl-keyword">&lt;soap:Body&gt;</span>
+    <span class="hl-keyword">&lt;tns:GetMahasiswa&gt;</span>
+      <span class="hl-keyword">&lt;tns:NIM&gt;</span><span class="hl-number">22550111</span><span class="hl-keyword">&lt;/tns:NIM&gt;</span>
+    <span class="hl-keyword">&lt;/tns:GetMahasiswa&gt;</span>
+  <span class="hl-keyword">&lt;/soap:Body&gt;</span>
+<span class="hl-keyword">&lt;/soap:Envelope&gt;</span></code></pre>
+            </div>
+            <p class="content-text">Server akan menjawab dengan envelope serupa, berisi data mahasiswa:</p>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">SOAP Response — 200 OK</span>
+                </div>
+<pre class="code-block-body"><code><span class="hl-keyword">&lt;?xml version="1.0"?&gt;</span>
+<span class="hl-keyword">&lt;soap:Envelope</span> xmlns:soap=<span class="hl-string">"http://schemas.xmlsoap.org/soap/envelope/"</span><span class="hl-keyword">&gt;</span>
+  <span class="hl-keyword">&lt;soap:Body&gt;</span>
+    <span class="hl-keyword">&lt;tns:GetMahasiswaResponse</span> xmlns:tns=<span class="hl-string">"http://kampus.ac.id/akademik"</span><span class="hl-keyword">&gt;</span>
+      <span class="hl-keyword">&lt;tns:Mahasiswa&gt;</span>
+        <span class="hl-keyword">&lt;tns:NIM&gt;</span><span class="hl-number">22550111</span><span class="hl-keyword">&lt;/tns:NIM&gt;</span>
+        <span class="hl-keyword">&lt;tns:Nama&gt;</span>Siti Aisyah<span class="hl-keyword">&lt;/tns:Nama&gt;</span>
+        <span class="hl-keyword">&lt;tns:Prodi&gt;</span>Teknik Informatika<span class="hl-keyword">&lt;/tns:Prodi&gt;</span>
+        <span class="hl-keyword">&lt;tns:IPK&gt;</span><span class="hl-number">3.72</span><span class="hl-keyword">&lt;/tns:IPK&gt;</span>
+      <span class="hl-keyword">&lt;/tns:Mahasiswa&gt;</span>
+    <span class="hl-keyword">&lt;/tns:GetMahasiswaResponse&gt;</span>
+  <span class="hl-keyword">&lt;/soap:Body&gt;</span>
+<span class="hl-keyword">&lt;/soap:Envelope&gt;</span></code></pre>
+            </div>
+
+            <h2 class="content-heading">SOAP Fault — Cara SOAP Mengeluh</h2>
+            <p class="content-text">
+                Jika terjadi error, SOAP tidak memakai HTTP status code seperti REST. Sebagai gantinya, response berisi elemen khusus <code>&lt;soap:Fault&gt;</code> di dalam Body. Empat sub-elemen utamanya: <code>faultcode</code>, <code>faultstring</code>, <code>faultactor</code>, dan <code>detail</code>.
+            </p>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">SOAP Fault — NIM tidak ditemukan</span>
+                </div>
+<pre class="code-block-body"><code><span class="hl-keyword">&lt;soap:Body&gt;</span>
+  <span class="hl-keyword">&lt;soap:Fault&gt;</span>
+    <span class="hl-keyword">&lt;faultcode&gt;</span>soap:Client<span class="hl-keyword">&lt;/faultcode&gt;</span>
+    <span class="hl-keyword">&lt;faultstring&gt;</span>NIM tidak ditemukan<span class="hl-keyword">&lt;/faultstring&gt;</span>
+    <span class="hl-keyword">&lt;detail&gt;</span>
+      <span class="hl-keyword">&lt;errorCode&gt;</span><span class="hl-number">404</span><span class="hl-keyword">&lt;/errorCode&gt;</span>
+      <span class="hl-keyword">&lt;errorNIM&gt;</span><span class="hl-number">99999999</span><span class="hl-keyword">&lt;/errorNIM&gt;</span>
+    <span class="hl-keyword">&lt;/detail&gt;</span>
+  <span class="hl-keyword">&lt;/soap:Fault&gt;</span>
+<span class="hl-keyword">&lt;/soap:Body&gt;</span></code></pre>
+            </div>
+
+            <h2 class="content-heading">Apa itu WSDL?</h2>
+            <p class="content-text">
+                <strong>WSDL</strong> (Web Services Description Language) adalah <em>"kontrak"</em> sebuah SOAP service — sebuah file XML yang mendeskripsikan: operasi apa yang tersedia, input/output tiap operasi, tipe data, dan di alamat mana service bisa dipanggil. Klien membaca WSDL untuk tahu bagaimana cara memanggil service — bahkan banyak IDE (Visual Studio, Eclipse) bisa <em>auto-generate</em> kode klien dari sebuah URL WSDL.
+            </p>
+            <div class="analogy-box">
+                <div class="analogy-icon">📋</div>
+                <div class="analogy-content">
+                    <strong>Analogi: Menu Restoran</strong>
+                    <p>WSDL adalah <em>menu restoran</em> yang sangat detail: nama setiap hidangan (operasi), bahan-bahan yang harus disediakan tamu (input), bentuk hidangan jadi (output), dan alamat dapur (endpoint). Tamu tidak perlu menebak — semua tertulis dengan format baku.</p>
+                </div>
+            </div>
+
+            <h2 class="content-heading">Struktur Utama WSDL</h2>
+            <p class="content-text">
+                Sebuah dokumen WSDL terdiri dari lima elemen kunci. Mengenal nama dan peran masing-masing membuat Anda bisa membaca WSDL apa pun:
+            </p>
+            <div class="wsdl-map">
+                <div class="wsdl-node">
+                    <div class="wsdl-node-name">&lt;types&gt;</div>
+                    <div class="wsdl-node-desc">Definisi tipe data (biasanya XSD) — misal struktur <code>Mahasiswa</code>, <code>Nilai</code>.</div>
+                </div>
+                <div class="wsdl-node">
+                    <div class="wsdl-node-name">&lt;message&gt;</div>
+                    <div class="wsdl-node-desc">Pesan abstrak — input atau output sebuah operasi, terdiri dari satu atau lebih bagian (parts).</div>
+                </div>
+                <div class="wsdl-node">
+                    <div class="wsdl-node-name">&lt;portType&gt;</div>
+                    <div class="wsdl-node-desc">Kumpulan operasi (mirip "interface" di OOP) — daftar method tanpa peduli protokol transport.</div>
+                </div>
+                <div class="wsdl-node">
+                    <div class="wsdl-node-name">&lt;binding&gt;</div>
+                    <div class="wsdl-node-desc">Menentukan bagaimana operasi dipetakan ke protokol nyata (biasanya SOAP over HTTP).</div>
+                </div>
+                <div class="wsdl-node">
+                    <div class="wsdl-node-name">&lt;service&gt;</div>
+                    <div class="wsdl-node-desc">Alamat fisik (URL/port) di mana service dapat diakses. Satu service bisa punya beberapa port.</div>
+                </div>
+            </div>
+
+            <h2 class="content-heading">Contoh WSDL Sederhana</h2>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">akademik.wsdl</span>
+                </div>
+<pre class="code-block-body"><code><span class="hl-keyword">&lt;definitions</span> name=<span class="hl-string">"AkademikService"</span>
+    targetNamespace=<span class="hl-string">"http://kampus.ac.id/akademik"</span>
+    xmlns:tns=<span class="hl-string">"http://kampus.ac.id/akademik"</span>
+    xmlns=<span class="hl-string">"http://schemas.xmlsoap.org/wsdl/"</span><span class="hl-keyword">&gt;</span>
+
+  <span class="hl-comment">&lt;!-- 1. Tipe data --&gt;</span>
+  <span class="hl-keyword">&lt;types&gt;</span>
+    <span class="hl-keyword">&lt;xsd:schema</span> targetNamespace=<span class="hl-string">"http://kampus.ac.id/akademik"</span><span class="hl-keyword">&gt;</span>
+      <span class="hl-keyword">&lt;xsd:element</span> name=<span class="hl-string">"NIM"</span> type=<span class="hl-string">"xsd:string"</span><span class="hl-keyword">/&gt;</span>
+      <span class="hl-keyword">&lt;xsd:element</span> name=<span class="hl-string">"Mahasiswa"</span><span class="hl-keyword">&gt;</span>...<span class="hl-keyword">&lt;/xsd:element&gt;</span>
+    <span class="hl-keyword">&lt;/xsd:schema&gt;</span>
+  <span class="hl-keyword">&lt;/types&gt;</span>
+
+  <span class="hl-comment">&lt;!-- 2. Pesan input/output --&gt;</span>
+  <span class="hl-keyword">&lt;message</span> name=<span class="hl-string">"GetMahasiswaRequest"</span><span class="hl-keyword">&gt;</span>
+    <span class="hl-keyword">&lt;part</span> name=<span class="hl-string">"NIM"</span> element=<span class="hl-string">"tns:NIM"</span><span class="hl-keyword">/&gt;</span>
+  <span class="hl-keyword">&lt;/message&gt;</span>
+  <span class="hl-keyword">&lt;message</span> name=<span class="hl-string">"GetMahasiswaResponse"</span><span class="hl-keyword">&gt;</span>
+    <span class="hl-keyword">&lt;part</span> name=<span class="hl-string">"Mahasiswa"</span> element=<span class="hl-string">"tns:Mahasiswa"</span><span class="hl-keyword">/&gt;</span>
+  <span class="hl-keyword">&lt;/message&gt;</span>
+
+  <span class="hl-comment">&lt;!-- 3. Daftar operasi --&gt;</span>
+  <span class="hl-keyword">&lt;portType</span> name=<span class="hl-string">"AkademikPort"</span><span class="hl-keyword">&gt;</span>
+    <span class="hl-keyword">&lt;operation</span> name=<span class="hl-string">"GetMahasiswa"</span><span class="hl-keyword">&gt;</span>
+      <span class="hl-keyword">&lt;input</span> message=<span class="hl-string">"tns:GetMahasiswaRequest"</span><span class="hl-keyword">/&gt;</span>
+      <span class="hl-keyword">&lt;output</span> message=<span class="hl-string">"tns:GetMahasiswaResponse"</span><span class="hl-keyword">/&gt;</span>
+    <span class="hl-keyword">&lt;/operation&gt;</span>
+  <span class="hl-keyword">&lt;/portType&gt;</span>
+
+  <span class="hl-comment">&lt;!-- 4. Binding ke SOAP/HTTP --&gt;</span>
+  <span class="hl-keyword">&lt;binding</span> name=<span class="hl-string">"AkademikBinding"</span> type=<span class="hl-string">"tns:AkademikPort"</span><span class="hl-keyword">&gt;</span>
+    <span class="hl-keyword">&lt;soap:binding</span> transport=<span class="hl-string">"http://schemas.xmlsoap.org/soap/http"</span><span class="hl-keyword">/&gt;</span>
+    <span class="hl-keyword">&lt;operation</span> name=<span class="hl-string">"GetMahasiswa"</span><span class="hl-keyword">&gt;</span>...<span class="hl-keyword">&lt;/operation&gt;</span>
+  <span class="hl-keyword">&lt;/binding&gt;</span>
+
+  <span class="hl-comment">&lt;!-- 5. Alamat layanan --&gt;</span>
+  <span class="hl-keyword">&lt;service</span> name=<span class="hl-string">"AkademikService"</span><span class="hl-keyword">&gt;</span>
+    <span class="hl-keyword">&lt;port</span> name=<span class="hl-string">"AkademikPort"</span> binding=<span class="hl-string">"tns:AkademikBinding"</span><span class="hl-keyword">&gt;</span>
+      <span class="hl-keyword">&lt;soap:address</span> location=<span class="hl-string">"https://api.kampus.ac.id/akademik"</span><span class="hl-keyword">/&gt;</span>
+    <span class="hl-keyword">&lt;/port&gt;</span>
+  <span class="hl-keyword">&lt;/service&gt;</span>
+<span class="hl-keyword">&lt;/definitions&gt;</span></code></pre>
+            </div>
+
+            <h2 class="content-heading">SOAP vs REST — Perbandingan Mendalam</h2>
+            <table class="compare-table">
+                <thead>
+                    <tr>
+                        <th>Aspek</th>
+                        <th>SOAP</th>
+                        <th>REST</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Format</td>
+                        <td>XML wajib (envelope)</td>
+                        <td>JSON, XML, plain text — bebas</td>
+                    </tr>
+                    <tr>
+                        <td>Protokol Transport</td>
+                        <td>HTTP, SMTP, JMS, TCP</td>
+                        <td>HTTP saja</td>
+                    </tr>
+                    <tr>
+                        <td>Kontrak</td>
+                        <td>WSDL — sangat ketat, machine-readable</td>
+                        <td>OpenAPI/Swagger — opsional, lebih longgar</td>
+                    </tr>
+                    <tr>
+                        <td>Ukuran Payload</td>
+                        <td>Besar (XML + envelope overhead)</td>
+                        <td>Ringan (terutama dengan JSON)</td>
+                    </tr>
+                    <tr>
+                        <td>Caching</td>
+                        <td>Sulit — semua POST</td>
+                        <td>Native — GET bisa di-cache</td>
+                    </tr>
+                    <tr>
+                        <td>Keamanan</td>
+                        <td>WS-Security (built-in, level pesan)</td>
+                        <td>HTTPS + JWT/OAuth (level transport)</td>
+                    </tr>
+                    <tr>
+                        <td>Transaksi</td>
+                        <td>WS-AtomicTransaction — dua/lebih service bisa rollback bersama</td>
+                        <td>Tidak ada standar; harus dirakit sendiri</td>
+                    </tr>
+                    <tr>
+                        <td>Cocok Untuk</td>
+                        <td>Perbankan, asuransi, BPJS, sistem warisan</td>
+                        <td>Mobile app, SPA, public API modern</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2 class="content-heading">Kapan Anda Masih Akan Bertemu SOAP?</h2>
+            <ol class="content-list">
+                <li><strong>Integrasi Perbankan</strong> — Hampir semua API host-to-host bank (transfer, inquiry saldo) masih SOAP karena kebutuhan audit dan transaksi atomik.</li>
+                <li><strong>BPJS &amp; Sistem Pemerintah</strong> — Layanan klaim BPJS Kesehatan, Dukcapil, dan beberapa portal pemerintah masih menyediakan endpoint SOAP.</li>
+                <li><strong>Telco &amp; Billing</strong> — Sistem OSS/BSS di operator seluler banyak yang berbasis SOAP.</li>
+                <li><strong>ERP Lama</strong> — SAP, Oracle EBS dengan versi lawas sering mengekspos service-nya sebagai SOAP.</li>
+                <li><strong>Integrasi Cross-Vendor</strong> — Saat dua perusahaan berbeda harus berbagi data dengan kontrak hukum jelas, WSDL sering jadi pilihan karena ketegasannya.</li>
+            </ol>
+
+            <div class="warning-box">
+                <div class="warning-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                    <strong>Jangan Mulai Project Baru dengan SOAP</strong>
+                </div>
+                <p>Untuk aplikasi baru tahun 2026 — terutama yang melayani mobile/SPA — pilihlah REST atau GraphQL. SOAP hanya rasional jika Anda <em>terpaksa berintegrasi</em> dengan sistem warisan yang sudah ada. Memulai project baru dari nol dengan SOAP akan membuat tim Anda lambat dan kesulitan mencari talenta yang menguasainya.</p>
+            </div>
+
+            <div class="quiz">
+                <div class="quiz-title">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01"/></svg>
+                    Cek Pemahaman Anda
+                </div>
+                <div class="quiz-question">
+                    <div class="quiz-q-text">1. Elemen wajib di setiap pesan SOAP adalah ...</div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'Header itu opsional. Yang wajib adalah Envelope + Body.')">Envelope dan Header</div>
+                        <div class="quiz-option" data-correct="true" onclick="quizAnswer(this, 'Benar! Envelope membungkus seluruh pesan; Body wajib berisi pemanggilan operasi atau fault.')">Envelope dan Body</div>
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'Footer bukan bagian dari spesifikasi SOAP.')">Header dan Footer</div>
+                    </div>
+                    <div class="quiz-feedback hidden"></div>
+                </div>
+                <div class="quiz-question">
+                    <div class="quiz-q-text">2. Fungsi utama WSDL dalam sebuah SOAP service adalah ...</div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'WSDL adalah deskripsi statis; ia tidak mengenkripsi data. Enkripsi diatur oleh WS-Security/HTTPS.')">Mengenkripsi data yang dikirim</div>
+                        <div class="quiz-option" data-correct="true" onclick="quizAnswer(this, 'Tepat! WSDL adalah kontrak/menu — mendeskripsikan operasi, tipe data, dan endpoint agar klien tahu cara memanggil.')">Mendeskripsikan operasi, input/output, dan alamat layanan</div>
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'WSDL tidak menjalankan apa pun; ia hanya dokumen deskripsi.')">Menjalankan operasi service secara otomatis</div>
+                    </div>
+                    <div class="quiz-feedback hidden"></div>
+                </div>
+                <div class="quiz-question">
+                    <div class="quiz-q-text">3. Skenario mana yang paling tepat memilih SOAP dibanding REST?</div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'Untuk aplikasi mobile baru, REST/GraphQL jauh lebih cocok karena lebih ringan.')">Membangun API baru untuk aplikasi mobile e-commerce</div>
+                        <div class="quiz-option" data-correct="true" onclick="quizAnswer(this, 'Benar! Integrasi dengan bank/BPJS/sistem warisan adalah ranah klasik SOAP karena dukungan transaksi &amp; audit.')">Integrasi dengan sistem inti bank atau BPJS</div>
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'Public API modern (Twitter, GitHub, dll.) hampir semuanya REST/GraphQL.')">Public API untuk komunitas developer modern</div>
+                    </div>
+                    <div class="quiz-feedback hidden"></div>
+                </div>
+            </div>
+
+            <div class="content-nav">
+                <div class="content-nav-item">
+                    <a href="http-format-data.html" class="nav-btn nav-btn-prev">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                        <div><span class="nav-label">Sebelumnya</span><span class="nav-name">Protokol HTTP &amp; Format Data</span></div>
+                    </a>
+                </div>
+                <div class="content-nav-item">
+                    <a href="restful-design.html" class="nav-btn nav-btn-next">
+                        <div><span class="nav-label">Selanjutnya</span><span class="nav-name">Prinsip Desain RESTful API</span></div>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </a>
+                </div>
+            </div>
+        </article>
+    </main>
+
+    <script src="/web-service/course-layout.js"></script>
+    <script>
+    function copyCode(btn) {
+        const codeBlock = btn.closest('.code-block').querySelector('code');
+        navigator.clipboard.writeText(codeBlock.textContent).then(() => {
+            btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>';
+            setTimeout(() => { btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>'; }, 2000);
+        });
+    }
+    function playVideo() { alert('Video kuliah belum tersedia.'); }
+
+    function quizAnswer(el, feedback) {
+        const question = el.closest('.quiz-question');
+        const options = question.querySelectorAll('.quiz-option');
+        const fb = question.querySelector('.quiz-feedback');
+        options.forEach(o => {
+            o.style.pointerEvents = 'none';
+            if (o.dataset.correct === 'true') o.classList.add('correct');
+        });
+        if (el.dataset.correct !== 'true') el.classList.add('wrong');
+        fb.textContent = feedback;
+        fb.classList.remove('hidden');
+        fb.classList.add('visible');
+    }
+    </script>
+</body>
+</html>

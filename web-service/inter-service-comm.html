@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Pertemuan 12: Komunikasi antar service di microservices — Synchronous (REST vs gRPC) vs Asynchronous (RabbitMQ, Kafka), serta pola pub/sub dan work queue.">
+    <title>Komunikasi Antar Service — Web Service — Arif Hidayah</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/web-service/course.css">
+    <style>
+        .paradigm-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 14px 0; }
+        @media (max-width: 800px) { .paradigm-grid { grid-template-columns: 1fr; } }
+        .paradigm { padding: 18px 20px; background: rgba(0,0,0,0.4); border: 1px solid var(--border-color); border-radius: var(--radius-md); }
+        .paradigm.sync { border-top: 3px solid #82aaff; }
+        .paradigm.sync h3 { color: #82aaff; }
+        .paradigm.async { border-top: 3px solid #c792ea; }
+        .paradigm.async h3 { color: #c792ea; }
+        .paradigm h3 { margin: 0 0 8px; font-size: 1.05rem; font-weight: 700; }
+        .paradigm p { margin: 0 0 10px; font-size: 0.88rem; line-height: 1.7; color: #c5c5d4; }
+
+        .pattern { display: flex; gap: 10px; align-items: center; padding: 10px 14px; background: rgba(0,0,0,0.35); border: 1px solid var(--border-color); border-radius: var(--radius-sm); margin: 6px 0; font-size: 0.86rem; color: #c5c5d4; }
+        .pattern-svg { flex-shrink: 0; }
+        .pattern strong { color: var(--accent-ws); margin-right: 6px; }
+
+        .arrow-flow { display: flex; flex-direction: column; gap: 4px; margin: 12px 0; padding: 16px; background: rgba(0,0,0,0.35); border: 1px solid var(--border-color); border-radius: var(--radius-md); font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: #e2e8f0; }
+        .arrow-flow .a-row { display: flex; gap: 10px; align-items: center; }
+        .arrow-flow .a-from, .arrow-flow .a-to { padding: 4px 10px; border-radius: 4px; min-width: 70px; text-align: center; }
+        .arrow-flow .a-svc1 { background: rgba(130, 170, 255, 0.15); color: #82aaff; }
+        .arrow-flow .a-svc2 { background: rgba(16, 185, 129, 0.15); color: var(--accent-ws); }
+        .arrow-flow .a-broker { background: rgba(199, 146, 234, 0.15); color: #c792ea; }
+        .arrow-flow .a-arr { color: var(--text-muted); }
+        .arrow-flow .a-msg { color: var(--text-muted); font-size: 0.78rem; }
+    </style>
+</head>
+<body>
+    <div class="bg-grid" aria-hidden="true"></div>
+    <nav class="navbar scrolled" id="navbar"></nav>
+    <div class="mobile-menu" id="mobileMenu"></div>
+
+    <main class="course-layout">
+        <aside class="course-sidebar" id="courseSidebar"></aside>
+        <article class="course-content">
+
+            <div class="breadcrumb">
+                <a href="../index.html">Home</a><span>›</span>
+                <a href="index.html">Web Service</a><span>›</span>
+                <span style="color: var(--text-primary);">Bagian 2 — GraphQL &amp; Microservices</span>
+            </div>
+
+            <header class="content-header">
+                <h1 class="content-title">Pertemuan 12: Komunikasi Antar Service</h1>
+                <div class="content-meta">
+                    <div class="meta-pill">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 5V8.5L10.5 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/></svg>
+                        <span>Estimasi: 90 Menit</span>
+                    </div>
+                    <div class="meta-pill">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="10" rx="1" stroke="currentColor" stroke-width="1.5"/><path d="M5 7h6M5 10h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                        <span>Teori &amp; Pola</span>
+                    </div>
+                </div>
+            </header>
+
+            <div class="video-container">
+                <div class="video-placeholder">
+                    <div class="video-overlay">
+                        <div class="play-btn" onclick="playVideo()">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                        </div>
+                        <h3 style="font-weight: 600; margin-top: 16px; color: white;">Video: gRPC &amp; Message Broker</h3>
+                        <p style="color: rgba(255,255,255,0.6); font-size: 0.85rem; margin-top: 6px;">Klik untuk memutar</p>
+                    </div>
+                </div>
+            </div>
+
+            <p class="content-text">
+                Setelah memecah sistem menjadi banyak service, pertanyaan paling penting muncul: <em>bagaimana mereka saling bicara?</em> Ada dua paradigma besar — <strong>Synchronous</strong> (tanya, tunggu jawab) dan <strong>Asynchronous</strong> (lempar pesan, jalan terus). Memilih yang tepat menentukan latensi, ketahanan, dan kompleksitas sistem Anda.
+            </p>
+
+            <div class="info-box">
+                <div class="info-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                    <strong>Capaian Pertemuan Ini</strong>
+                </div>
+                <p>Mahasiswa mampu (1) membedakan komunikasi sync vs async, (2) menjelaskan gRPC + Protobuf dan kapan dipakai, (3) memahami konsep message broker (RabbitMQ &amp; Kafka), dan (4) memilih pola yang tepat untuk skenario tertentu.</p>
+            </div>
+
+            <h2 class="content-heading">Dua Paradigma Besar</h2>
+            <div class="paradigm-grid">
+                <div class="paradigm sync">
+                    <h3>📞 Synchronous</h3>
+                    <p>Klien <em>menunggu</em> jawaban. Mirip telepon: "Halo, ini saldoku berapa?" — lawan harus jawab sekarang. Latensi terikat oleh service paling lambat dalam rantai.</p>
+                    <p><strong>Tools:</strong> REST, gRPC, GraphQL.</p>
+                </div>
+                <div class="paradigm async">
+                    <h3>📮 Asynchronous</h3>
+                    <p>Pengirim <em>menitipkan pesan</em> ke broker lalu lanjut bekerja. Mirip mengirim WhatsApp: dibalas kapan-kapan. Pengirim tidak diblokir.</p>
+                    <p><strong>Tools:</strong> RabbitMQ, Kafka, AWS SQS, Google Pub/Sub.</p>
+                </div>
+            </div>
+
+            <h2 class="content-heading">Bagian 1 — Synchronous: gRPC</h2>
+            <p class="content-text">
+                <strong>gRPC</strong> (oleh Google, 2016) adalah framework RPC modern yang sangat populer untuk komunikasi <em>antar microservice di dalam datacenter</em>. Ia berjalan di atas HTTP/2 dan menggunakan <strong>Protocol Buffers</strong> (Protobuf) sebagai format pesan binary — jauh lebih ringkas &amp; cepat dari JSON.
+            </p>
+            <ol class="content-list">
+                <li><strong>HTTP/2 multiplexing</strong> — banyak request paralel dalam satu koneksi TCP.</li>
+                <li><strong>Binary Protobuf</strong> — ukuran 5-10× lebih kecil dari JSON setara, parsing cepat.</li>
+                <li><strong>Strong-typed contract</strong> — file <code>.proto</code> jadi kontrak yang di-generate ke kode client/server di banyak bahasa.</li>
+                <li><strong>Streaming dua arah</strong> — server stream, client stream, bidirectional stream — bukan hanya request/response klasik.</li>
+            </ol>
+
+            <h2 class="content-heading">Contoh: Mendefinisikan Service dengan Protobuf</h2>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">mahasiswa.proto</span>
+                </div>
+<pre class="code-block-body"><code><span class="hl-keyword">syntax</span> = <span class="hl-string">"proto3"</span>;
+<span class="hl-keyword">package</span> kampus;
+
+<span class="hl-keyword">service</span> <span class="hl-func">MahasiswaService</span> {
+  <span class="hl-keyword">rpc</span> <span class="hl-func">GetMahasiswa</span>(MahasiswaId) <span class="hl-keyword">returns</span> (Mahasiswa);
+  <span class="hl-keyword">rpc</span> <span class="hl-func">ListMahasiswa</span>(ListRequest) <span class="hl-keyword">returns</span> (<span class="hl-keyword">stream</span> Mahasiswa);  <span class="hl-comment">// server streaming</span>
+  <span class="hl-keyword">rpc</span> <span class="hl-func">CreateMahasiswa</span>(<span class="hl-keyword">stream</span> Mahasiswa) <span class="hl-keyword">returns</span> (BatchResult);  <span class="hl-comment">// client streaming</span>
+}
+
+<span class="hl-keyword">message</span> <span class="hl-func">MahasiswaId</span> {
+  <span class="hl-keyword">string</span> nim = <span class="hl-number">1</span>;
+}
+
+<span class="hl-keyword">message</span> <span class="hl-func">Mahasiswa</span> {
+  <span class="hl-keyword">string</span> nim = <span class="hl-number">1</span>;
+  <span class="hl-keyword">string</span> nama = <span class="hl-number">2</span>;
+  <span class="hl-keyword">string</span> email = <span class="hl-number">3</span>;
+  <span class="hl-keyword">int32</span> prodi_id = <span class="hl-number">4</span>;
+  <span class="hl-keyword">float</span> ipk = <span class="hl-number">5</span>;
+}
+
+<span class="hl-keyword">message</span> <span class="hl-func">ListRequest</span> {
+  <span class="hl-keyword">string</span> prodi_filter = <span class="hl-number">1</span>;
+}
+
+<span class="hl-keyword">message</span> <span class="hl-func">BatchResult</span> {
+  <span class="hl-keyword">int32</span> created = <span class="hl-number">1</span>;
+}</code></pre>
+            </div>
+            <p class="content-text">
+                Generate stub: <code>protoc --go_out=. --go-grpc_out=. mahasiswa.proto</code> — keluar kode Go server &amp; client yang siap pakai. Bahasa lain (Python, Java, Node, Dart) juga didukung.
+            </p>
+
+            <h2 class="content-heading">REST vs gRPC — Perbandingan</h2>
+            <table class="compare-table">
+                <thead>
+                    <tr><th>Aspek</th><th>REST + JSON</th><th>gRPC + Protobuf</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Transport</td><td>HTTP/1.1 (umumnya)</td><td>HTTP/2</td></tr>
+                    <tr><td>Format</td><td>JSON (text)</td><td>Protobuf (binary)</td></tr>
+                    <tr><td>Ukuran payload</td><td>Verbose</td><td>5-10× lebih kecil</td></tr>
+                    <tr><td>Kontrak</td><td>OpenAPI (opsional)</td><td><code>.proto</code> wajib</td></tr>
+                    <tr><td>Streaming</td><td>Tidak native (perlu WebSocket)</td><td>Built-in (uni/bi-directional)</td></tr>
+                    <tr><td>Browser support</td><td>Native</td><td>Perlu grpc-web proxy</td></tr>
+                    <tr><td>Cocok untuk</td><td>API publik, mobile, web</td><td>Service-to-service internal, low-latency</td></tr>
+                </tbody>
+            </table>
+            <div class="info-box">
+                <div class="info-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                    <strong>Aturan Praktis</strong>
+                </div>
+                <p>Pakai <strong>REST/GraphQL</strong> di lapisan paling luar (mobile/web ↔ backend). Pakai <strong>gRPC</strong> di lapisan dalam (service ↔ service di dalam Kubernetes cluster). Banyak perusahaan punya kombinasi ini — REST gateway di tepi, gRPC di tengah.</p>
+            </div>
+
+            <h2 class="content-heading">Bagian 2 — Asynchronous: Message Broker</h2>
+            <p class="content-text">
+                Dengan komunikasi sync, jika service tetangga down → request Anda gagal. Dengan <strong>message broker</strong>, pengirim hanya melempar pesan ke "kotak surat"; konsumen mengambilnya kapan siap. Broker juga otomatis menangani retry, dead-letter queue, fan-out, dll.
+            </p>
+            <div class="analogy-box">
+                <div class="analogy-icon">📬</div>
+                <div class="analogy-content">
+                    <strong>Analogi: Kotak Pos Apartemen</strong>
+                    <p>Anda mengirim paket ke teman → letakkan di kotak posnya, lanjut hidup. Teman ambil kapan dia sempat. Tidak ada yang menunggu. Kalau dia liburan, paket tetap aman di kotak. Kalau dia ingin paket sama dipakai 3 orang sekaligus, sediakan 3 kotak (fan-out). Itulah message broker.</p>
+                </div>
+            </div>
+
+            <h2 class="content-heading">Dua Pemain Besar: RabbitMQ vs Kafka</h2>
+            <table class="compare-table">
+                <thead>
+                    <tr><th>Aspek</th><th>RabbitMQ</th><th>Apache Kafka</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Model</td><td>Message Queue (push)</td><td>Distributed Log (pull)</td></tr>
+                    <tr><td>Pesan setelah dibaca</td><td>Dihapus dari queue</td><td>Tetap tersimpan (replay-able)</td></tr>
+                    <tr><td>Throughput</td><td>~50K msg/sec per node</td><td>Jutaan msg/sec (partitioned)</td></tr>
+                    <tr><td>Latency</td><td>Sangat rendah (ms)</td><td>Sedikit lebih tinggi (~10-50ms)</td></tr>
+                    <tr><td>Persistence</td><td>Opsional</td><td>Wajib (disk-based)</td></tr>
+                    <tr><td>Routing kaya</td><td>Ya (exchanges, topic/fanout/direct)</td><td>Sederhana (topic + partition)</td></tr>
+                    <tr><td>Use case ideal</td><td>Task queue, RPC async, notifikasi</td><td>Event sourcing, log aggregation, stream processing</td></tr>
+                    <tr><td>Pengguna terkenal</td><td>Reddit, Instagram, Trivago</td><td>LinkedIn, Netflix, Uber</td></tr>
+                </tbody>
+            </table>
+
+            <h2 class="content-heading">3 Pola Utama dengan Message Broker</h2>
+
+            <h3 class="content-subheading">Pola 1 — Work Queue (1-to-1)</h3>
+            <p class="content-text">Distribusi pekerjaan ke banyak worker. Cocok untuk task berat: kirim email, generate PDF, proses gambar.</p>
+            <div class="arrow-flow">
+                <div class="a-row"><span class="a-from a-svc1">Producer</span><span class="a-arr">→</span><span class="a-to a-broker">Queue: email</span><span class="a-arr">→</span><span class="a-to a-svc2">Worker 1</span></div>
+                <div class="a-row" style="padding-left: 220px;"><span class="a-arr">↘</span><span class="a-to a-svc2">Worker 2</span><span class="a-msg">(satu pesan = satu worker)</span></div>
+                <div class="a-row" style="padding-left: 220px;"><span class="a-arr">↘</span><span class="a-to a-svc2">Worker 3</span></div>
+            </div>
+
+            <h3 class="content-subheading">Pola 2 — Pub/Sub (1-to-many, fan-out)</h3>
+            <p class="content-text">Satu event di-broadcast ke banyak subscriber. Cocok untuk event domain: <em>"OrderCreated"</em> didengar oleh Inventory, Notification, Analytics, Loyalty — masing-masing bertindak sendiri.</p>
+            <div class="arrow-flow">
+                <div class="a-row"><span class="a-from a-svc1">Order Service</span><span class="a-arr">→</span><span class="a-to a-broker">Topic: order.created</span></div>
+                <div class="a-row" style="padding-left: 260px;"><span class="a-arr">⤿</span><span class="a-to a-svc2">Inventory</span></div>
+                <div class="a-row" style="padding-left: 260px;"><span class="a-arr">⤿</span><span class="a-to a-svc2">Notification</span></div>
+                <div class="a-row" style="padding-left: 260px;"><span class="a-arr">⤿</span><span class="a-to a-svc2">Analytics</span></div>
+                <div class="a-row" style="padding-left: 260px;"><span class="a-arr">⤿</span><span class="a-to a-svc2">Loyalty</span></div>
+            </div>
+
+            <h3 class="content-subheading">Pola 3 — Request-Reply Async</h3>
+            <p class="content-text">RPC dengan callback queue. Jarang dipakai langsung — sering dipakai untuk operasi panjang (mis. generate laporan PDF).</p>
+
+            <h2 class="content-heading">Contoh: Publish &amp; Consume di RabbitMQ (Node.js)</h2>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">producer.js — Order Service mengirim event</span>
+                </div>
+<pre class="code-block-body"><code><span class="hl-keyword">import</span> amqp <span class="hl-keyword">from</span> <span class="hl-string">'amqplib'</span>;
+
+<span class="hl-keyword">const</span> conn = <span class="hl-keyword">await</span> amqp.<span class="hl-func">connect</span>(<span class="hl-string">'amqp://localhost'</span>);
+<span class="hl-keyword">const</span> ch = <span class="hl-keyword">await</span> conn.<span class="hl-func">createChannel</span>();
+<span class="hl-keyword">await</span> ch.<span class="hl-func">assertExchange</span>(<span class="hl-string">'orders'</span>, <span class="hl-string">'fanout'</span>, { durable: <span class="hl-keyword">true</span> });
+
+<span class="hl-keyword">const</span> event = {
+  type: <span class="hl-string">'OrderCreated'</span>,
+  orderId: <span class="hl-string">'ord-1042'</span>,
+  userId: <span class="hl-number">12</span>,
+  total: <span class="hl-number">250000</span>,
+  occurredAt: <span class="hl-keyword">new</span> <span class="hl-func">Date</span>().<span class="hl-func">toISOString</span>(),
+};
+
+ch.<span class="hl-func">publish</span>(<span class="hl-string">'orders'</span>, <span class="hl-string">''</span>, Buffer.<span class="hl-func">from</span>(<span class="hl-func">JSON</span>.<span class="hl-func">stringify</span>(event)), { persistent: <span class="hl-keyword">true</span> });
+<span class="hl-func">console</span>.<span class="hl-func">log</span>(<span class="hl-string">'📤 OrderCreated dipublish'</span>);</code></pre>
+            </div>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">consumer-notif.js — Notification Service mendengarkan</span>
+                </div>
+<pre class="code-block-body"><code><span class="hl-keyword">const</span> conn = <span class="hl-keyword">await</span> amqp.<span class="hl-func">connect</span>(<span class="hl-string">'amqp://localhost'</span>);
+<span class="hl-keyword">const</span> ch = <span class="hl-keyword">await</span> conn.<span class="hl-func">createChannel</span>();
+<span class="hl-keyword">await</span> ch.<span class="hl-func">assertExchange</span>(<span class="hl-string">'orders'</span>, <span class="hl-string">'fanout'</span>, { durable: <span class="hl-keyword">true</span> });
+
+<span class="hl-comment">// Queue eksklusif untuk service ini</span>
+<span class="hl-keyword">const</span> { queue } = <span class="hl-keyword">await</span> ch.<span class="hl-func">assertQueue</span>(<span class="hl-string">'notification.orders'</span>);
+<span class="hl-keyword">await</span> ch.<span class="hl-func">bindQueue</span>(queue, <span class="hl-string">'orders'</span>, <span class="hl-string">''</span>);
+
+ch.<span class="hl-func">consume</span>(queue, (msg) =&gt; {
+  <span class="hl-keyword">const</span> event = <span class="hl-func">JSON</span>.<span class="hl-func">parse</span>(msg.content.<span class="hl-func">toString</span>());
+  <span class="hl-func">console</span>.<span class="hl-func">log</span>(<span class="hl-string">'📥 Kirim notifikasi untuk order'</span>, event.orderId);
+  ch.<span class="hl-func">ack</span>(msg);  <span class="hl-comment">// konfirmasi sukses; pesan dihapus</span>
+});</code></pre>
+            </div>
+            <p class="content-text">
+                Tambahkan <code>consumer-inventory.js</code> &amp; <code>consumer-analytics.js</code> dengan queue masing-masing — semuanya menerima event yang sama tanpa Order Service tahu siapa saja yang mendengarkan. Inilah <strong>loose coupling</strong>.
+            </p>
+
+            <h2 class="content-heading">Kapan Sync, Kapan Async?</h2>
+            <table class="compare-table">
+                <thead>
+                    <tr><th>Skenario</th><th>Pilih</th><th>Alasan</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Cek stok sebelum checkout</td><td><strong>Sync (gRPC)</strong></td><td>User perlu hasil sekarang</td></tr>
+                    <tr><td>Kirim email konfirmasi</td><td><strong>Async</strong></td><td>User tidak perlu menunggu SMTP</td></tr>
+                    <tr><td>Ambil profil user untuk render</td><td><strong>Sync (REST/gRPC)</strong></td><td>Layar butuh data segera</td></tr>
+                    <tr><td>Update analytics, audit log</td><td><strong>Async</strong></td><td>Tidak kritis untuk response</td></tr>
+                    <tr><td>Generate PDF laporan besar</td><td><strong>Async</strong></td><td>Proses lama; user diberi notifikasi saat selesai</td></tr>
+                    <tr><td>Trigger discount loyalty</td><td><strong>Async (event)</strong></td><td>Order Service tidak perlu tahu adanya Loyalty Service</td></tr>
+                </tbody>
+            </table>
+
+            <div class="success-box">
+                <div class="success-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    <strong>Heuristik Sederhana</strong>
+                </div>
+                <p>Tanyakan: <em>"apakah hasil dibutuhkan SEKARANG untuk melanjutkan?"</em> Ya → sync. Tidak → async. Banyak sistem terdistribusi yang skalabel <strong>by default async</strong> dan hanya pakai sync saat benar-benar harus. Pikirkan async lebih dulu, sync sebagai pengecualian.</p>
+            </div>
+
+            <div class="warning-box">
+                <div class="warning-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                    <strong>Async = Eventual Consistency</strong>
+                </div>
+                <p>Begitu Anda pakai async, data tidak akan konsisten <em>seketika</em> di semua service. UI mungkin perlu memberi tahu user "menunggu beberapa detik". Desain dengan kesadaran ini sejak awal — jangan kaget melihat stok terbaru baru terpantul ke laporan beberapa detik kemudian.</p>
+            </div>
+
+            <div class="quiz">
+                <div class="quiz-title">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01"/></svg>
+                    Cek Pemahaman Anda
+                </div>
+                <div class="quiz-question">
+                    <div class="quiz-q-text">1. Mengapa gRPC umumnya lebih ringan dari REST + JSON?</div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" data-correct="true" onclick="quizAnswer(this, 'Tepat! Protobuf binary jauh lebih ringkas dari JSON text + HTTP/2 multiplex banyak request dalam satu koneksi.')">Karena memakai format Protobuf binary di atas HTTP/2 multiplexing</div>
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'gRPC justru sulit di-cache karena tidak native di HTTP cache; bukan keuntungan utama.')">Karena gRPC otomatis di-cache di CDN</div>
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'gRPC butuh deklarasi .proto yang sangat ketat — kebalikan dari "tanpa kontrak".')">Karena gRPC tidak butuh kontrak schema</div>
+                    </div>
+                    <div class="quiz-feedback hidden"></div>
+                </div>
+                <div class="quiz-question">
+                    <div class="quiz-q-text">2. Order Service ingin memberi tahu Inventory, Notification, dan Analytics bahwa sebuah order baru dibuat. Pola paling tepat?</div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'Memanggil 3 REST endpoint berurutan = tight coupling (Order harus tahu semua service tetangga) + latensi tinggi.')">Sync REST call ke 3 service satu per satu</div>
+                        <div class="quiz-option" data-correct="true" onclick="quizAnswer(this, 'Benar! Pub/Sub via message broker — Order publish satu event, semua subscriber dapat secara paralel, loose coupling.')">Publish event ke message broker dengan pola fan-out</div>
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'Polling 3 service dari Order tidak masuk akal arah aliran data — Order yang punya berita baru.')">Setiap service polling Order Service secara berkala</div>
+                    </div>
+                    <div class="quiz-feedback hidden"></div>
+                </div>
+                <div class="quiz-question">
+                    <div class="quiz-q-text">3. Anda butuh menyimpan semua event sistem selama 30 hari, dan beberapa service akan replay event lama untuk membangun ulang state. Broker yang lebih cocok?</div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'RabbitMQ menghapus pesan setelah di-ack; tidak cocok untuk replay history panjang.')">RabbitMQ</div>
+                        <div class="quiz-option" data-correct="true" onclick="quizAnswer(this, 'Tepat! Kafka adalah distributed log — pesan persistent &amp; bisa di-replay dari offset mana pun.')">Apache Kafka</div>
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'SMTP adalah protokol email, bukan message broker.')">SMTP server</div>
+                    </div>
+                    <div class="quiz-feedback hidden"></div>
+                </div>
+            </div>
+
+            <div class="content-nav">
+                <div class="content-nav-item">
+                    <a href="microservices.html" class="nav-btn nav-btn-prev">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                        <div><span class="nav-label">Sebelumnya</span><span class="nav-name">Arsitektur Microservices</span></div>
+                    </a>
+                </div>
+                <div class="content-nav-item">
+                    <a href="api-gateway.html" class="nav-btn nav-btn-next">
+                        <div><span class="nav-label">Selanjutnya</span><span class="nav-name">API Gateway &amp; Service Discovery</span></div>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </a>
+                </div>
+            </div>
+        </article>
+    </main>
+
+    <script src="/web-service/course-layout.js"></script>
+    <script>
+    function copyCode(btn) {
+        const codeBlock = btn.closest('.code-block').querySelector('code');
+        navigator.clipboard.writeText(codeBlock.textContent).then(() => {
+            btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>';
+            setTimeout(() => { btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>'; }, 2000);
+        });
+    }
+    function playVideo() { alert('Video kuliah belum tersedia.'); }
+
+    function quizAnswer(el, feedback) {
+        const question = el.closest('.quiz-question');
+        const options = question.querySelectorAll('.quiz-option');
+        const fb = question.querySelector('.quiz-feedback');
+        options.forEach(o => {
+            o.style.pointerEvents = 'none';
+            if (o.dataset.correct === 'true') o.classList.add('correct');
+        });
+        if (el.dataset.correct !== 'true') el.classList.add('wrong');
+        fb.textContent = feedback;
+        fb.classList.remove('hidden');
+        fb.classList.add('visible');
+    }
+    </script>
+</body>
+</html>

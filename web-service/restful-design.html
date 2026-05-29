@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Pertemuan 4: Prinsip desain RESTful API — statelessness, konvensi penamaan URI, status code yang tepat, dan Richardson Maturity Model (Level 0-3).">
+    <title>Prinsip Desain RESTful API — Web Service — Arif Hidayah</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/web-service/course.css">
+    <style>
+        .constraint-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin: 14px 0; }
+        .constraint { padding: 16px 18px; background: rgba(0,0,0,0.4); border: 1px solid var(--border-color); border-radius: var(--radius-sm); transition: var(--transition-fast); }
+        .constraint:hover { border-color: var(--accent-ws); transform: translateY(-2px); }
+        .constraint-num { display: inline-flex; width: 22px; height: 22px; border-radius: 50%; background: rgba(16, 185, 129, 0.15); color: var(--accent-ws); align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 800; margin-bottom: 8px; }
+        .constraint-name { font-size: 0.95rem; font-weight: 700; color: var(--text-primary); margin-bottom: 6px; }
+        .constraint-desc { font-size: 0.8rem; color: var(--text-muted); line-height: 1.6; }
+
+        .uri-cmp { display: flex; flex-direction: column; gap: 8px; margin: 14px 0; }
+        .uri-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 12px 14px; background: rgba(0,0,0,0.35); border: 1px solid var(--border-color); border-radius: var(--radius-sm); align-items: center; }
+        .uri-bad { color: #ff8a8a; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; }
+        .uri-good { color: #c3e88d; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; }
+        .uri-bad::before { content: '✗ '; font-weight: 800; }
+        .uri-good::before { content: '✓ '; font-weight: 800; }
+        @media (max-width: 700px) { .uri-row { grid-template-columns: 1fr; } }
+
+        .level-list { display: flex; flex-direction: column; gap: 14px; margin: 14px 0; }
+        .level { padding: 18px 20px; background: rgba(0,0,0,0.4); border-left: 4px solid; border-radius: var(--radius-sm); border-top: 1px solid var(--border-color); border-right: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); }
+        .level.l0 { border-left-color: #ff5555; }
+        .level.l1 { border-left-color: #f78c6c; }
+        .level.l2 { border-left-color: #ffcb6b; }
+        .level.l3 { border-left-color: #c3e88d; }
+        .level-head { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; flex-wrap: wrap; }
+        .level-badge { padding: 3px 10px; background: rgba(255,255,255,0.06); border-radius: 100px; font-size: 0.72rem; font-weight: 700; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.04em; }
+        .level.l0 .level-badge { background: rgba(255, 85, 85, 0.12); color: #ff5555; }
+        .level.l1 .level-badge { background: rgba(247, 140, 108, 0.12); color: #f78c6c; }
+        .level.l2 .level-badge { background: rgba(255, 203, 107, 0.12); color: #ffcb6b; }
+        .level.l3 .level-badge { background: rgba(195, 232, 141, 0.12); color: #c3e88d; }
+        .level-title { font-size: 1rem; font-weight: 700; color: var(--text-primary); }
+        .level-desc { font-size: 0.88rem; color: #c5c5d4; line-height: 1.7; margin-bottom: 8px; }
+        .level-example { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; padding: 8px 12px; background: rgba(0,0,0,0.5); border-radius: 4px; color: #e2e8f0; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <div class="bg-grid" aria-hidden="true"></div>
+    <nav class="navbar scrolled" id="navbar"></nav>
+    <div class="mobile-menu" id="mobileMenu"></div>
+
+    <main class="course-layout">
+        <aside class="course-sidebar" id="courseSidebar"></aside>
+        <article class="course-content">
+
+            <div class="breadcrumb">
+                <a href="../index.html">Home</a><span>›</span>
+                <a href="index.html">Web Service</a><span>›</span>
+                <span style="color: var(--text-primary);">Bagian 1 — Fondasi</span>
+            </div>
+
+            <header class="content-header">
+                <h1 class="content-title">Pertemuan 4: Prinsip Desain RESTful API</h1>
+                <div class="content-meta">
+                    <div class="meta-pill">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 5V8.5L10.5 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/></svg>
+                        <span>Estimasi: 75 Menit</span>
+                    </div>
+                    <div class="meta-pill">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="10" rx="1" stroke="currentColor" stroke-width="1.5"/><path d="M5 7h6M5 10h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                        <span>Konsep &amp; Desain</span>
+                    </div>
+                </div>
+            </header>
+
+            <div class="video-container">
+                <div class="video-placeholder">
+                    <div class="video-overlay">
+                        <div class="play-btn" onclick="playVideo()">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                        </div>
+                        <h3 style="font-weight: 600; margin-top: 16px; color: white;">Video Kuliah: Prinsip RESTful</h3>
+                        <p style="color: rgba(255,255,255,0.6); font-size: 0.85rem; margin-top: 6px;">Klik untuk memutar</p>
+                    </div>
+                </div>
+            </div>
+
+            <p class="content-text">
+                Banyak API mengaku "RESTful" tetapi sebenarnya hanya REST <em>aroma</em> — pakai HTTP &amp; JSON, lalu menyebut diri REST. Padahal REST memiliki <strong>6 batasan (constraints)</strong> yang dirumuskan Roy Fielding dalam disertasinya (2000). Memahaminya membuat Anda bisa membedakan API yang benar-benar REST dari yang sekadar "JSON over HTTP", dan merancang API yang konsisten serta enak dipakai klien.
+            </p>
+
+            <div class="info-box">
+                <div class="info-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                    <strong>Capaian Pertemuan Ini</strong>
+                </div>
+                <p>Mahasiswa mampu (1) menjelaskan 6 constraints REST, (2) menerapkan konvensi penamaan URI yang konsisten, (3) memilih status code dengan tepat, dan (4) mengidentifikasi level Richardson sebuah API.</p>
+            </div>
+
+            <h2 class="content-heading">6 Constraints REST</h2>
+            <div class="constraint-grid">
+                <div class="constraint">
+                    <span class="constraint-num">1</span>
+                    <div class="constraint-name">Client-Server</div>
+                    <div class="constraint-desc">Klien dan server terpisah tegas — boleh berevolusi sendiri-sendiri selama kontrak interface tetap.</div>
+                </div>
+                <div class="constraint">
+                    <span class="constraint-num">2</span>
+                    <div class="constraint-name">Stateless</div>
+                    <div class="constraint-desc">Setiap request berdiri sendiri. Server tidak menyimpan sesi — semua info untuk memproses ada di request.</div>
+                </div>
+                <div class="constraint">
+                    <span class="constraint-num">3</span>
+                    <div class="constraint-name">Cacheable</div>
+                    <div class="constraint-desc">Response harus menandai dirinya cacheable atau tidak (header <code>Cache-Control</code>, <code>ETag</code>).</div>
+                </div>
+                <div class="constraint">
+                    <span class="constraint-num">4</span>
+                    <div class="constraint-name">Uniform Interface</div>
+                    <div class="constraint-desc">Konsistensi global: resource-oriented URI, HTTP methods bermakna seragam, representasi standar.</div>
+                </div>
+                <div class="constraint">
+                    <span class="constraint-num">5</span>
+                    <div class="constraint-name">Layered System</div>
+                    <div class="constraint-desc">Klien tidak tahu apakah ia bicara langsung ke server, ke load balancer, atau ke proxy cache.</div>
+                </div>
+                <div class="constraint">
+                    <span class="constraint-num">6</span>
+                    <div class="constraint-name">Code on Demand <em>(opsional)</em></div>
+                    <div class="constraint-desc">Server boleh mengirim kode (JS) yang dijalankan klien. Hanya constraint yang opsional.</div>
+                </div>
+            </div>
+
+            <h2 class="content-heading">Stateless — Constraint yang Paling Sering Dilanggar</h2>
+            <p class="content-text">
+                Stateless berarti server <strong>tidak menyimpan state sesi</strong> klien antar request. Identitas user, preferensi, konteks — semua harus dikirim oleh klien di setiap request (biasanya via token di header <code>Authorization</code>).
+            </p>
+            <div class="analogy-box">
+                <div class="analogy-icon">🎫</div>
+                <div class="analogy-content">
+                    <strong>Analogi: Karcis Kereta</strong>
+                    <p>Kondektur tidak menghafal wajah penumpang. Setiap kali ia datang, Anda tunjukkan tiket. Tiket itu sudah berisi semua info: kelas, nomor kursi, asal-tujuan. Kondektur memproses tanpa perlu mengingat siapa Anda dari stasiun sebelumnya. Itulah <em>stateless</em>.</p>
+                </div>
+            </div>
+            <p class="content-text">
+                Keuntungan praktis: server bisa <strong>di-scale horizontal</strong> tanpa session sticky. Request user yang sama di waktu berbeda boleh dilayani server berbeda. Kelas penyimpan state (session in-memory) adalah musuh utama RESTful API.
+            </p>
+
+            <h2 class="content-heading">URI Naming Convention</h2>
+            <p class="content-text">
+                URI adalah "wajah" API Anda. URI yang konsisten membuat developer lain bisa <em>menebak</em> endpoint tanpa buka dokumentasi. Berikut perbandingan yang sering ditemui:
+            </p>
+            <div class="uri-cmp">
+                <div class="uri-row">
+                    <div class="uri-bad">GET /getMahasiswa</div>
+                    <div class="uri-good">GET /mahasiswa</div>
+                </div>
+                <div class="uri-row">
+                    <div class="uri-bad">POST /createMahasiswa</div>
+                    <div class="uri-good">POST /mahasiswa</div>
+                </div>
+                <div class="uri-row">
+                    <div class="uri-bad">GET /mahasiswa?id=12</div>
+                    <div class="uri-good">GET /mahasiswa/12</div>
+                </div>
+                <div class="uri-row">
+                    <div class="uri-bad">GET /Mahasiswa_List</div>
+                    <div class="uri-good">GET /mahasiswa</div>
+                </div>
+                <div class="uri-row">
+                    <div class="uri-bad">DELETE /mahasiswa/12/delete</div>
+                    <div class="uri-good">DELETE /mahasiswa/12</div>
+                </div>
+                <div class="uri-row">
+                    <div class="uri-bad">GET /mahasiswa/12/getNilai</div>
+                    <div class="uri-good">GET /mahasiswa/12/nilai</div>
+                </div>
+            </div>
+
+            <h2 class="content-heading">7 Aturan Praktis Desain URI</h2>
+            <ol class="content-list">
+                <li><strong>Gunakan kata benda jamak (plural)</strong> — <code>/mahasiswa</code>, <code>/orders</code>, <code>/products</code>. Konsisten di seluruh API.</li>
+                <li><strong>Jangan masukkan kata kerja</strong> — Method HTTP sudah menyatakan aksi. <code>POST /users</code> sudah berarti "buat user".</li>
+                <li><strong>Gunakan path untuk hierarki</strong> — <code>/users/12/orders/5/items</code>. Maksimal 2-3 tingkat agar tetap nyaman dibaca.</li>
+                <li><strong>Gunakan query string untuk filter, sort, pagination</strong> — <code>?status=active&amp;sort=-created_at&amp;page=2&amp;per_page=20</code>.</li>
+                <li><strong>Lowercase + tanda hubung</strong> — <code>/order-items</code>, bukan <code>/OrderItems</code> atau <code>/order_items</code>.</li>
+                <li><strong>Jangan akhiri dengan slash</strong> — <code>/users</code>, bukan <code>/users/</code>. Konsistensi mencegah redirect 301.</li>
+                <li><strong>Versi di prefix</strong> — <code>/api/v1/users</code>. Memudahkan transisi saat breaking change.</li>
+            </ol>
+
+            <h2 class="content-heading">Query String untuk Filter, Sort, &amp; Pagination</h2>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">Contoh URL canggih</span>
+                </div>
+<pre class="code-block-body"><code><span class="hl-comment"># Filter: mahasiswa aktif di prodi TI</span>
+GET /api/v1/mahasiswa?<span class="hl-func">status</span>=<span class="hl-string">active</span>&amp;<span class="hl-func">prodi</span>=<span class="hl-string">TI</span>
+
+<span class="hl-comment"># Sort: tanggal daftar terbaru dulu (- = descending)</span>
+GET /api/v1/mahasiswa?<span class="hl-func">sort</span>=<span class="hl-string">-created_at</span>
+
+<span class="hl-comment"># Pagination: halaman 2, 20 item per halaman</span>
+GET /api/v1/mahasiswa?<span class="hl-func">page</span>=<span class="hl-number">2</span>&amp;<span class="hl-func">per_page</span>=<span class="hl-number">20</span>
+
+<span class="hl-comment"># Field selection: hanya ambil nama &amp; IPK (hemat bandwidth)</span>
+GET /api/v1/mahasiswa?<span class="hl-func">fields</span>=<span class="hl-string">nim,nama,ipk</span>
+
+<span class="hl-comment"># Pencarian teks</span>
+GET /api/v1/mahasiswa?<span class="hl-func">search</span>=<span class="hl-string">arif</span></code></pre>
+            </div>
+
+            <h2 class="content-heading">Memilih Status Code yang Tepat</h2>
+            <table class="compare-table">
+                <thead>
+                    <tr>
+                        <th>Operasi</th>
+                        <th>Sukses</th>
+                        <th>Gagal Umum</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="http-method http-get">GET</span> ambil satu</td>
+                        <td><code>200 OK</code></td>
+                        <td><code>404 Not Found</code></td>
+                    </tr>
+                    <tr>
+                        <td><span class="http-method http-get">GET</span> ambil daftar</td>
+                        <td><code>200 OK</code> (array, bisa kosong)</td>
+                        <td><code>200 OK</code> dengan array kosong, jangan 404</td>
+                    </tr>
+                    <tr>
+                        <td><span class="http-method http-post">POST</span> buat baru</td>
+                        <td><code>201 Created</code> + header <code>Location</code></td>
+                        <td><code>422 Unprocessable Entity</code> (validasi)</td>
+                    </tr>
+                    <tr>
+                        <td><span class="http-method http-put">PUT</span> / <span class="http-method http-patch">PATCH</span> update</td>
+                        <td><code>200 OK</code> + body baru, atau <code>204 No Content</code></td>
+                        <td><code>404</code> jika resource tak ada, <code>409</code> jika konflik</td>
+                    </tr>
+                    <tr>
+                        <td><span class="http-method http-delete">DELETE</span></td>
+                        <td><code>204 No Content</code></td>
+                        <td><code>404 Not Found</code></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2 class="content-heading">Richardson Maturity Model</h2>
+            <p class="content-text">
+                Leonard Richardson mengusulkan <strong>4 level kematangan REST</strong> untuk mengukur seberapa "REST" sebuah API. Banyak API komersial berhenti di Level 2 — dan itu sudah dianggap "RESTful" dalam praktik industri.
+            </p>
+            <div class="level-list">
+                <div class="level l0">
+                    <div class="level-head">
+                        <span class="level-badge">LEVEL 0</span>
+                        <span class="level-title">The Swamp of POX (Plain Old XML)</span>
+                    </div>
+                    <div class="level-desc">Semua request POST ke satu URL. Server mengandalkan body untuk tahu operasi apa yang diminta. Persis seperti SOAP atau XML-RPC. Tidak memanfaatkan HTTP sama sekali.</div>
+                    <div class="level-example">POST /api  → body: { "action": "getMahasiswa", "id": 12 }<br>POST /api  → body: { "action": "createOrder", ... }</div>
+                </div>
+                <div class="level l1">
+                    <div class="level-head">
+                        <span class="level-badge">LEVEL 1</span>
+                        <span class="level-title">Resources</span>
+                    </div>
+                    <div class="level-desc">Mulai mengenal "resource" — endpoint berbeda untuk hal berbeda. Tapi masih pakai 1 method (biasanya POST) untuk semua operasi.</div>
+                    <div class="level-example">POST /api/mahasiswa/get      → { "id": 12 }<br>POST /api/mahasiswa/create   → { "name": "..." }</div>
+                </div>
+                <div class="level l2">
+                    <div class="level-head">
+                        <span class="level-badge">LEVEL 2</span>
+                        <span class="level-title">HTTP Verbs &amp; Status Codes <em>(target praktis industri)</em></span>
+                    </div>
+                    <div class="level-desc">Memanfaatkan GET/POST/PUT/DELETE sesuai semantiknya, dan status code yang konsisten. Inilah yang umum disebut "REST API" di proyek nyata.</div>
+                    <div class="level-example">GET    /api/mahasiswa/12       → 200 OK<br>POST   /api/mahasiswa          → 201 Created<br>PATCH  /api/mahasiswa/12       → 200 OK<br>DELETE /api/mahasiswa/12       → 204 No Content</div>
+                </div>
+                <div class="level l3">
+                    <div class="level-head">
+                        <span class="level-badge">LEVEL 3</span>
+                        <span class="level-title">HATEOAS (Hypermedia as the Engine of Application State)</span>
+                    </div>
+                    <div class="level-desc">Response menyertakan link ke aksi-aksi terkait. Klien dapat "berkelana" di API tanpa hard-code URL. Sangat REST-purist; jarang sepenuhnya diadopsi karena overhead.</div>
+                    <div class="level-example">GET /api/mahasiswa/12 → {<br>&nbsp;&nbsp;"nim": "22550111", "nama": "...", <br>&nbsp;&nbsp;"_links": {<br>&nbsp;&nbsp;&nbsp;&nbsp;"self":   { "href": "/api/mahasiswa/12" },<br>&nbsp;&nbsp;&nbsp;&nbsp;"nilai":  { "href": "/api/mahasiswa/12/nilai" },<br>&nbsp;&nbsp;&nbsp;&nbsp;"hapus":  { "href": "/api/mahasiswa/12", "method": "DELETE" }<br>&nbsp;&nbsp;}<br>}</div>
+                </div>
+            </div>
+
+            <h2 class="content-heading">Versioning API</h2>
+            <p class="content-text">
+                Cepat atau lambat, API Anda akan butuh perubahan yang merusak kompatibilitas (breaking change). Tiga strategi versioning populer:
+            </p>
+            <ol class="content-list">
+                <li><strong>URL versioning</strong> — <code>/api/v1/users</code>. Paling jelas, paling cache-friendly, paling populer.</li>
+                <li><strong>Header versioning</strong> — <code>Accept: application/vnd.kampus.v1+json</code>. Lebih "REST-purist" tapi sulit di-debug dengan browser.</li>
+                <li><strong>Query string versioning</strong> — <code>/api/users?v=1</code>. Sederhana tetapi mengotori URL.</li>
+            </ol>
+
+            <h2 class="content-heading">Mini-Lab: Identifikasi Level Richardson</h2>
+            <div class="interactive-card">
+                <div class="interactive-title">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                    Tebak Levelnya
+                </div>
+                <p class="interactive-subtitle">Klik tiap baris untuk menampilkan level Richardson dari API tersebut.</p>
+                <div class="req-flow">
+                    <div class="req-step" onclick="revealLevel(this, 'Level 0', 'Hanya satu endpoint, semua POST, action di dalam body — klasik POX.')">
+                        <div class="req-step-num">A</div>
+                        <div class="req-step-info">
+                            <div class="req-step-name"><code>POST /api → body: { "op": "getUser", "id": 5 }</code></div>
+                            <div class="req-step-desc">Klik untuk lihat jawaban</div>
+                        </div>
+                    </div>
+                    <div class="req-step" onclick="revealLevel(this, 'Level 1', 'Resource sudah dipisah per-URL, tapi masih POST untuk semua → belum Level 2.')">
+                        <div class="req-step-num">B</div>
+                        <div class="req-step-info">
+                            <div class="req-step-name"><code>POST /api/users/get</code> dan <code>POST /api/users/create</code></div>
+                            <div class="req-step-desc">Klik untuk lihat jawaban</div>
+                        </div>
+                    </div>
+                    <div class="req-step" onclick="revealLevel(this, 'Level 2', 'Memakai GET/POST/PUT/DELETE sesuai semantiknya + status code yang benar — REST praktis industri.')">
+                        <div class="req-step-num">C</div>
+                        <div class="req-step-info">
+                            <div class="req-step-name"><code>GET /api/users/5</code> → 200, <code>DELETE /api/users/5</code> → 204</div>
+                            <div class="req-step-desc">Klik untuk lihat jawaban</div>
+                        </div>
+                    </div>
+                    <div class="req-step" onclick="revealLevel(this, 'Level 3', 'Response menyertakan _links → klien bisa navigasi tanpa hard-code URL.')">
+                        <div class="req-step-num">D</div>
+                        <div class="req-step-info">
+                            <div class="req-step-name"><code>GET /api/users/5</code> → body berisi field <code>_links</code> ke resource terkait</div>
+                            <div class="req-step-desc">Klik untuk lihat jawaban</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="success-box">
+                <div class="success-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    <strong>Tujuan Realistis Sebuah Tim</strong>
+                </div>
+                <p>Untuk proyek akademik dan kebanyakan proyek industri, capailah <strong>Level 2</strong> dengan konsisten — itu sudah membuat API Anda profesional &amp; mudah diintegrasikan. Level 3 (HATEOAS) lebih cocok untuk API publik berumur panjang seperti GitHub atau PayPal.</p>
+            </div>
+
+            <div class="quiz">
+                <div class="quiz-title">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01"/></svg>
+                    Cek Pemahaman Anda
+                </div>
+                <div class="quiz-question">
+                    <div class="quiz-q-text">1. Manakah URI yang paling konsisten dengan konvensi RESTful?</div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'Kata kerja di URI itu anti-pola REST. Method HTTP sudah mengomunikasikan aksi.')">POST /createMahasiswa</div>
+                        <div class="quiz-option" data-correct="true" onclick="quizAnswer(this, 'Tepat! Resource jamak + lowercase + tanpa kata kerja. POST sudah berarti membuat.')">POST /mahasiswa</div>
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'Mixed case &amp; underscore tidak ideal; gunakan lowercase + tanda hubung jika perlu.')">POST /Mahasiswa_New</div>
+                    </div>
+                    <div class="quiz-feedback hidden"></div>
+                </div>
+                <div class="quiz-question">
+                    <div class="quiz-q-text">2. Mengapa REST mensyaratkan stateless?</div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'Stateless tidak otomatis membuat lebih aman; keamanan ditangani oleh HTTPS &amp; token.')">Karena lebih aman dari serangan</div>
+                        <div class="quiz-option" data-correct="true" onclick="quizAnswer(this, 'Benar! Tanpa session di server, request user bisa dilayani server mana pun — memudahkan horizontal scaling &amp; failover.')">Agar server bisa di-scale horizontal tanpa session sticky</div>
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'Stateless justru sering menambah ukuran request (token harus dikirim setiap kali).')">Agar request lebih kecil ukurannya</div>
+                    </div>
+                    <div class="quiz-feedback hidden"></div>
+                </div>
+                <div class="quiz-question">
+                    <div class="quiz-q-text">3. API yang hanya menggunakan POST untuk semua operasi (ambil, simpan, hapus) berada di level Richardson berapa?</div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'Level 0 berarti satu URL tunggal pula. Jika sudah ada URL per resource, sudah Level 1.')">Level 0</div>
+                        <div class="quiz-option" data-correct="true" onclick="quizAnswer(this, 'Benar! Resource sudah dipisah ke URL berbeda, tetapi semua masih POST — itu Level 1.')">Level 1</div>
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'Level 2 menuntut pemakaian GET/PUT/DELETE sesuai semantiknya, bukan POST untuk semua.')">Level 2</div>
+                    </div>
+                    <div class="quiz-feedback hidden"></div>
+                </div>
+            </div>
+
+            <div class="content-nav">
+                <div class="content-nav-item">
+                    <a href="soap-wsdl.html" class="nav-btn nav-btn-prev">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                        <div><span class="nav-label">Sebelumnya</span><span class="nav-name">Legacy Service: SOAP &amp; WSDL</span></div>
+                    </a>
+                </div>
+                <div class="content-nav-item">
+                    <a href="rest-crud.html" class="nav-btn nav-btn-next">
+                        <div><span class="nav-label">Selanjutnya</span><span class="nav-name">Hands-on: REST API CRUD</span></div>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </a>
+                </div>
+            </div>
+        </article>
+    </main>
+
+    <script src="/web-service/course-layout.js"></script>
+    <script>
+    function copyCode(btn) {
+        const codeBlock = btn.closest('.code-block').querySelector('code');
+        navigator.clipboard.writeText(codeBlock.textContent).then(() => {
+            btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>';
+            setTimeout(() => { btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>'; }, 2000);
+        });
+    }
+    function playVideo() { alert('Video kuliah belum tersedia.'); }
+
+    function revealLevel(el, level, reason) {
+        if (el.dataset.revealed) return;
+        el.dataset.revealed = '1';
+        el.classList.add('highlight');
+        const desc = el.querySelector('.req-step-desc');
+        desc.innerHTML = `<strong style="color: var(--accent-ws);">${level}</strong> — ${reason}`;
+    }
+
+    function quizAnswer(el, feedback) {
+        const question = el.closest('.quiz-question');
+        const options = question.querySelectorAll('.quiz-option');
+        const fb = question.querySelector('.quiz-feedback');
+        options.forEach(o => {
+            o.style.pointerEvents = 'none';
+            if (o.dataset.correct === 'true') o.classList.add('correct');
+        });
+        if (el.dataset.correct !== 'true') el.classList.add('wrong');
+        fb.textContent = feedback;
+        fb.classList.remove('hidden');
+        fb.classList.add('visible');
+    }
+    </script>
+</body>
+</html>

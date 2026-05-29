@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Pertemuan 9: Pengenalan GraphQL — menyelesaikan masalah over-fetching & under-fetching REST. Konsep Query, Mutation, dan Schema Definition Language (SDL).">
+    <title>Pengenalan GraphQL — Web Service — Arif Hidayah</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/web-service/course.css">
+    <style>
+        .problem-card { display: flex; gap: 14px; padding: 16px 18px; margin: 14px 0; background: rgba(255, 85, 85, 0.04); border: 1px solid rgba(255, 85, 85, 0.2); border-radius: var(--radius-md); }
+        .problem-icon { flex-shrink: 0; width: 38px; height: 38px; border-radius: 10px; background: rgba(255, 85, 85, 0.12); display: flex; align-items: center; justify-content: center; color: #ff8a8a; font-size: 1.2rem; }
+        .problem-body { flex: 1; }
+        .problem-title { font-size: 1rem; font-weight: 700; color: #ff8a8a; margin-bottom: 6px; }
+        .problem-desc { font-size: 0.9rem; color: #c5c5d4; line-height: 1.7; margin: 0; }
+
+        .gql-toggle { display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; }
+        .gql-toggle button { padding: 8px 14px; background: rgba(255,255,255,0.04); border: 1px solid var(--border-color); color: var(--text-muted); border-radius: var(--radius-sm); font-size: 0.82rem; font-weight: 600; cursor: pointer; font-family: inherit; transition: var(--transition-fast); }
+        .gql-toggle button:hover { color: var(--text-primary); }
+        .gql-toggle button.active { background: rgba(199, 146, 234, 0.12); border-color: #c792ea; color: #c792ea; }
+
+        .split-pane { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border: 1px solid var(--border-color); border-radius: var(--radius-md); overflow: hidden; margin: 14px 0; }
+        @media (max-width: 800px) { .split-pane { grid-template-columns: 1fr; } }
+        .split-side { display: none; padding: 0; }
+        .split-side.active { display: block; }
+        .split-side-head { padding: 8px 14px; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; font-family: 'JetBrains Mono', monospace; border-bottom: 1px solid var(--border-color); }
+        .split-side.q .split-side-head { background: rgba(199, 146, 234, 0.1); color: #c792ea; }
+        .split-side.r .split-side-head { background: rgba(195, 232, 141, 0.1); color: #c3e88d; }
+        .split-side pre { margin: 0; padding: 14px 16px; font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; line-height: 1.75; color: #e2e8f0; overflow-x: auto; background: rgba(0,0,0,0.5); min-height: 240px; }
+        .split-pane.both .split-side { display: block; }
+
+        .roundtrip { display: flex; flex-direction: column; gap: 6px; margin: 14px 0; }
+        .roundtrip-row { display: flex; gap: 10px; align-items: center; padding: 10px 14px; background: rgba(0,0,0,0.35); border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; }
+        .rt-num { flex-shrink: 0; width: 22px; height: 22px; border-radius: 50%; background: rgba(255, 85, 85, 0.15); color: #ff8a8a; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.72rem; }
+        .rt-num.ok { background: rgba(195, 232, 141, 0.15); color: #c3e88d; }
+        .rt-url { color: #82aaff; flex: 1; }
+        .rt-note { font-family: 'Inter', sans-serif; font-size: 0.78rem; color: var(--text-muted); }
+    </style>
+</head>
+<body>
+    <div class="bg-grid" aria-hidden="true"></div>
+    <nav class="navbar scrolled" id="navbar"></nav>
+    <div class="mobile-menu" id="mobileMenu"></div>
+
+    <main class="course-layout">
+        <aside class="course-sidebar" id="courseSidebar"></aside>
+        <article class="course-content">
+
+            <div class="breadcrumb">
+                <a href="../index.html">Home</a><span>›</span>
+                <a href="index.html">Web Service</a><span>›</span>
+                <span style="color: var(--text-primary);">Bagian 2 — GraphQL &amp; Microservices</span>
+            </div>
+
+            <header class="content-header">
+                <h1 class="content-title">Pertemuan 9: Pengenalan GraphQL — Konsep Dasar</h1>
+                <div class="content-meta">
+                    <div class="meta-pill">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 5V8.5L10.5 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/></svg>
+                        <span>Estimasi: 75 Menit</span>
+                    </div>
+                    <div class="meta-pill">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="10" rx="1" stroke="currentColor" stroke-width="1.5"/><path d="M5 7h6M5 10h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                        <span>Teori &amp; Konsep</span>
+                    </div>
+                </div>
+            </header>
+
+            <div class="video-container">
+                <div class="video-placeholder">
+                    <div class="video-overlay">
+                        <div class="play-btn" onclick="playVideo()">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                        </div>
+                        <h3 style="font-weight: 600; margin-top: 16px; color: white;">Video: Mengapa GraphQL?</h3>
+                        <p style="color: rgba(255,255,255,0.6); font-size: 0.85rem; margin-top: 6px;">Klik untuk memutar</p>
+                    </div>
+                </div>
+            </div>
+
+            <p class="content-text">
+                REST sudah hebat — tapi tidak sempurna. Saat aplikasi mobile butuh data dari banyak resource sekaligus, REST sering memaksa kita melakukan <em>beberapa request</em> atau menerima <em>data yang lebih banyak dari yang diperlukan</em>. Inilah celah yang diisi oleh <strong>GraphQL</strong>: bahasa query yang memungkinkan klien <em>meminta tepat data yang dibutuhkan, dalam satu request</em>.
+            </p>
+
+            <div class="info-box">
+                <div class="info-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                    <strong>Capaian Pertemuan Ini</strong>
+                </div>
+                <p>Mahasiswa mampu (1) menjelaskan masalah over-fetching &amp; under-fetching pada REST, (2) memahami konsep Query &amp; Mutation di GraphQL, (3) membaca Schema Definition Language (SDL), dan (4) memutuskan kapan GraphQL lebih cocok daripada REST.</p>
+            </div>
+
+            <h2 class="content-heading">Masalah REST yang Diselesaikan GraphQL</h2>
+            <div class="problem-card">
+                <div class="problem-icon">📥</div>
+                <div class="problem-body">
+                    <div class="problem-title">Over-fetching — Terlalu Banyak Data</div>
+                    <p class="problem-desc">Endpoint <code>GET /api/users/12</code> mengembalikan <em>semua</em> field user: nama, email, alamat, riwayat login, preferensi notifikasi, foto profil, dll. Padahal layar mobile hanya butuh nama &amp; foto. Bandwidth terbuang sia-sia, render lebih lambat.</p>
+                </div>
+            </div>
+            <div class="problem-card">
+                <div class="problem-icon">📤</div>
+                <div class="problem-body">
+                    <div class="problem-title">Under-fetching — Harus Berkali-kali Request</div>
+                    <p class="problem-desc">Untuk menampilkan satu post + author + komentar + balasan komentar, klien harus memanggil 4 endpoint REST berbeda. Setiap request = round-trip jaringan = latensi. Total = lambat.</p>
+                </div>
+            </div>
+            <div class="problem-card">
+                <div class="problem-icon">🔀</div>
+                <div class="problem-body">
+                    <div class="problem-title">Versioning yang Berantakan</div>
+                    <p class="problem-desc">Saat layar mobile butuh field baru, REST sering melahirkan <code>/api/v2/users</code> dan menjaga <code>v1</code> agar klien lama tidak rusak. Repot mempertahankan beberapa versi paralel.</p>
+                </div>
+            </div>
+
+            <h2 class="content-heading">Demonstrasi: Halaman "Detail Mahasiswa" di Mobile</h2>
+            <p class="content-text">Misalkan layar mobile menampilkan: <strong>nama</strong> mahasiswa, <strong>nama prodi</strong>, dan <strong>3 nilai terakhir</strong>. Mari bandingkan beban request REST vs GraphQL.</p>
+
+            <h3 class="content-subheading">Dengan REST — 3 Round-Trip</h3>
+            <div class="roundtrip">
+                <div class="roundtrip-row">
+                    <span class="rt-num">1</span>
+                    <span class="rt-url">GET /api/mahasiswa/12</span>
+                    <span class="rt-note">→ ambil seluruh data mahasiswa (over-fetch)</span>
+                </div>
+                <div class="roundtrip-row">
+                    <span class="rt-num">2</span>
+                    <span class="rt-url">GET /api/prodi/{prodi_id}</span>
+                    <span class="rt-note">→ ambil detail prodi</span>
+                </div>
+                <div class="roundtrip-row">
+                    <span class="rt-num">3</span>
+                    <span class="rt-url">GET /api/mahasiswa/12/nilai?limit=3</span>
+                    <span class="rt-note">→ ambil 3 nilai terakhir</span>
+                </div>
+            </div>
+
+            <h3 class="content-subheading">Dengan GraphQL — 1 Round-Trip, Field Tepat</h3>
+            <div class="gql-toggle">
+                <button class="active" onclick="showGql(this, 'q')">Query Klien</button>
+                <button onclick="showGql(this, 'r')">Response Server</button>
+                <button onclick="showGql(this, 'both')">Kedua-duanya</button>
+            </div>
+            <div class="split-pane" id="gqlPane">
+                <div class="split-side q active">
+                    <div class="split-side-head">📝 Query (dikirim klien)</div>
+<pre>query {
+  mahasiswa(id: 12) {
+    nama
+    prodi {
+      nama
+    }
+    nilai(limit: 3, sort: "-tanggal") {
+      mataKuliah
+      nilai
+    }
+  }
+}</pre>
+                </div>
+                <div class="split-side r">
+                    <div class="split-side-head">✓ Response (dari server)</div>
+<pre>{
+  "data": {
+    "mahasiswa": {
+      "nama": "Siti Aisyah",
+      "prodi": { "nama": "Teknik Informatika" },
+      "nilai": [
+        { "mataKuliah": "Web Service", "nilai": 87 },
+        { "mataKuliah": "Data Mining",  "nilai": 91 },
+        { "mataKuliah": "Mobile Prog.", "nilai": 84 }
+      ]
+    }
+  }
+}</pre>
+                </div>
+            </div>
+            <p class="content-text">
+                Perhatikan: response <strong>mengikuti bentuk query persis</strong>. Tidak ada field <code>email</code>, <code>alamat</code>, atau <code>foto</code> — karena klien tidak memintanya. Inilah <em>"ask for what you need, get exactly that"</em>.
+            </p>
+
+            <h2 class="content-heading">Apa itu GraphQL?</h2>
+            <p class="content-text">
+                <strong>GraphQL</strong> adalah bahasa query untuk API + runtime untuk mengeksekusi query, dirilis Facebook pada 2015 setelah dipakai internal sejak 2012. Ia bukan database, bukan ORM, dan bukan pengganti HTTP — ia adalah <em>lapisan kontrak</em> di atas server Anda yang memungkinkan klien mendeskripsikan data yang diinginkan dengan tepat.
+            </p>
+            <div class="analogy-box">
+                <div class="analogy-icon">🍱</div>
+                <div class="analogy-content">
+                    <strong>Analogi: Prasmanan vs Set Menu</strong>
+                    <p>REST seperti <em>set menu</em> — chef sudah memutuskan tiap paket berisi nasi, ayam, sayur, soup. Anda terima semua meski hanya butuh ayam. GraphQL seperti <em>prasmanan</em> — Anda ambil tepat porsi nasi, secuil ayam, satu sendok sayur, lewati soup. Tidak ada yang terbuang.</p>
+                </div>
+            </div>
+
+            <h2 class="content-heading">Karakteristik Inti GraphQL</h2>
+            <ol class="content-list">
+                <li><strong>Satu endpoint</strong> — Biasanya <code>POST /graphql</code>. Tidak ada lagi puluhan URL berbeda.</li>
+                <li><strong>Klien menentukan bentuk response</strong> — Server hanya menyediakan kapabilitas; klien yang memilih field.</li>
+                <li><strong>Strongly-typed schema</strong> — Setiap field dan tipe didefinisikan kontrak. Validasi otomatis.</li>
+                <li><strong>Introspection</strong> — Klien bisa "bertanya" ke server: <em>"field apa saja yang tersedia?"</em>. Inilah dasar tools seperti GraphiQL &amp; Apollo Playground.</li>
+                <li><strong>Versioning organik</strong> — Tambah field baru tanpa merusak klien lama (mereka tidak meminta field baru = tidak terdampak). Deprecation per-field, bukan per-API.</li>
+            </ol>
+
+            <h2 class="content-heading">Tiga Operasi GraphQL</h2>
+            <table class="compare-table">
+                <thead>
+                    <tr>
+                        <th>Operasi</th>
+                        <th>Tujuan</th>
+                        <th>Analog REST</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Query</strong></td>
+                        <td>Membaca data</td>
+                        <td>GET</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Mutation</strong></td>
+                        <td>Membuat / mengubah / menghapus data</td>
+                        <td>POST / PUT / PATCH / DELETE</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Subscription</strong></td>
+                        <td>Realtime — server <em>push</em> data ke klien saat ada perubahan</td>
+                        <td>(REST tidak punya — biasanya WebSocket terpisah)</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2 class="content-heading">Schema Definition Language (SDL)</h2>
+            <p class="content-text">
+                Sebuah server GraphQL mengekspos <strong>schema</strong>: deklarasi semua tipe dan operasi yang tersedia. Schema ditulis dalam SDL — bahasa deklaratif yang mudah dibaca. Inilah <em>kontrak tunggal</em> antara backend dan semua klien.
+            </p>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">schema.graphql</span>
+                </div>
+<pre class="code-block-body"><code><span class="hl-keyword">type</span> <span class="hl-func">Mahasiswa</span> {
+  id: <span class="hl-keyword">ID</span>!
+  nim: <span class="hl-keyword">String</span>!
+  nama: <span class="hl-keyword">String</span>!
+  email: <span class="hl-keyword">String</span>!
+  prodi: <span class="hl-func">Prodi</span>!
+  nilai(limit: <span class="hl-keyword">Int</span> = <span class="hl-number">10</span>, sort: <span class="hl-keyword">String</span>): [<span class="hl-func">Nilai</span>!]!
+}
+
+<span class="hl-keyword">type</span> <span class="hl-func">Prodi</span> {
+  id: <span class="hl-keyword">ID</span>!
+  nama: <span class="hl-keyword">String</span>!
+  jenjang: <span class="hl-keyword">String</span>!
+  mahasiswa: [<span class="hl-func">Mahasiswa</span>!]!
+}
+
+<span class="hl-keyword">type</span> <span class="hl-func">Nilai</span> {
+  mataKuliah: <span class="hl-keyword">String</span>!
+  nilai: <span class="hl-keyword">Float</span>!
+  tanggal: <span class="hl-keyword">String</span>!
+}
+
+<span class="hl-comment"># Operasi yang bisa dilakukan klien</span>
+<span class="hl-keyword">type</span> <span class="hl-func">Query</span> {
+  mahasiswa(id: <span class="hl-keyword">ID</span>!): <span class="hl-func">Mahasiswa</span>
+  semuaMahasiswa(prodi: <span class="hl-keyword">String</span>): [<span class="hl-func">Mahasiswa</span>!]!
+}
+
+<span class="hl-keyword">type</span> <span class="hl-func">Mutation</span> {
+  daftarMahasiswa(input: <span class="hl-func">MahasiswaInput</span>!): <span class="hl-func">Mahasiswa</span>!
+  hapusMahasiswa(id: <span class="hl-keyword">ID</span>!): <span class="hl-keyword">Boolean</span>!
+}
+
+<span class="hl-keyword">input</span> <span class="hl-func">MahasiswaInput</span> {
+  nim: <span class="hl-keyword">String</span>!
+  nama: <span class="hl-keyword">String</span>!
+  email: <span class="hl-keyword">String</span>!
+  prodiId: <span class="hl-keyword">ID</span>!
+}</code></pre>
+            </div>
+            <p class="content-text" style="font-size: 0.88rem; color: var(--text-muted);">
+                Tanda <code>!</code> = wajib (non-null). <code>[Nilai!]!</code> = array wajib berisi elemen wajib. <code>= 10</code> = default value untuk argumen.
+            </p>
+
+            <h2 class="content-heading">Contoh Query — Mengambil Data</h2>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">Klien — Query dengan argumen &amp; alias</span>
+                </div>
+<pre class="code-block-body"><code><span class="hl-keyword">query</span> <span class="hl-func">DetailMahasiswa</span>($id: <span class="hl-keyword">ID</span>!) {
+  <span class="hl-func">mhs</span>: mahasiswa(id: $id) {       <span class="hl-comment"># alias 'mhs'</span>
+    nim
+    nama
+    prodi {
+      nama
+      jenjang
+    }
+    nilaiTerbaru: nilai(limit: <span class="hl-number">3</span>, sort: <span class="hl-string">"-tanggal"</span>) {
+      mataKuliah
+      nilai
+    }
+  }
+}</code></pre>
+            </div>
+            <p class="content-text">
+                Variabel <code>$id</code> dikirim terpisah di body request (mirip prepared statement) — mencegah injection dan memudahkan reuse query yang sama.
+            </p>
+
+            <h2 class="content-heading">Contoh Mutation — Mengubah Data</h2>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">Klien — Mutation create mahasiswa</span>
+                </div>
+<pre class="code-block-body"><code><span class="hl-keyword">mutation</span> <span class="hl-func">BuatMahasiswa</span>($data: <span class="hl-func">MahasiswaInput</span>!) {
+  daftarMahasiswa(input: $data) {
+    id        <span class="hl-comment"># field yang ingin kita terima sebagai konfirmasi</span>
+    nim
+    nama
+  }
+}
+
+<span class="hl-comment"># Variables:</span>
+{
+  <span class="hl-string">"data"</span>: {
+    <span class="hl-string">"nim"</span>: <span class="hl-string">"22550113"</span>,
+    <span class="hl-string">"nama"</span>: <span class="hl-string">"Dewi Lestari"</span>,
+    <span class="hl-string">"email"</span>: <span class="hl-string">"dewi@kampus.ac.id"</span>,
+    <span class="hl-string">"prodiId"</span>: <span class="hl-string">"5"</span>
+  }
+}</code></pre>
+            </div>
+
+            <h2 class="content-heading">REST vs GraphQL — Kapan Pilih Mana?</h2>
+            <table class="compare-table">
+                <thead>
+                    <tr>
+                        <th>Aspek</th>
+                        <th>REST</th>
+                        <th>GraphQL</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>Jumlah endpoint</td><td>Banyak (satu per resource)</td><td>Satu — biasanya <code>/graphql</code></td></tr>
+                    <tr><td>Ukuran response</td><td>Tetap (semua field)</td><td>Tepat sesuai permintaan klien</td></tr>
+                    <tr><td>Round-trip data terkait</td><td>Multiple</td><td>Satu</td></tr>
+                    <tr><td>Caching HTTP</td><td>Native (GET cacheable)</td><td>Sulit (semua POST)</td></tr>
+                    <tr><td>Status code</td><td>Bermakna (200, 404, 422, ...)</td><td>Selalu 200; error di field <code>errors</code></td></tr>
+                    <tr><td>File upload</td><td>Sederhana (multipart)</td><td>Perlu extension (graphql-upload)</td></tr>
+                    <tr><td>Tooling</td><td>Universal (curl, browser)</td><td>Apollo, Relay, GraphiQL — perlu setup</td></tr>
+                    <tr><td>Cocok Untuk</td><td>API publik, microservice komunikasi internal, layanan sederhana</td><td>Mobile/SPA dengan banyak layar berbeda, BFF (Backend-for-Frontend)</td></tr>
+                </tbody>
+            </table>
+
+            <div class="warning-box">
+                <div class="warning-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                    <strong>GraphQL Bukan Pengganti Universal</strong>
+                </div>
+                <p>GraphQL bersinar saat aplikasi punya banyak layar dengan kebutuhan data berbeda-beda. Untuk API kecil (3-5 resource sederhana) atau API publik untuk developer eksternal, REST + OpenAPI seringkali lebih praktis. Pilih tool berdasarkan masalah, bukan tren.</p>
+            </div>
+
+            <h2 class="content-heading">Tools yang Akan Kita Pakai</h2>
+            <ol class="content-list">
+                <li><strong>Apollo Server</strong> — Library Node.js untuk membangun GraphQL server. Akan kita praktikkan di Pertemuan 10.</li>
+                <li><strong>GraphiQL / Apollo Playground</strong> — UI di browser untuk menjelajahi schema, autocomplete query, dan menjalankan request — mirip Postman untuk GraphQL.</li>
+                <li><strong>Lighthouse</strong> — Library populer untuk membangun GraphQL server di Laravel (alternatif jika Anda tetap ingin di ekosistem PHP).</li>
+            </ol>
+
+            <div class="quiz">
+                <div class="quiz-title">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01"/></svg>
+                    Cek Pemahaman Anda
+                </div>
+                <div class="quiz-question">
+                    <div class="quiz-q-text">1. Klien hanya butuh field <code>nama</code> &amp; <code>foto</code>, tetapi REST mengembalikan semua field user. Ini contoh masalah ...</div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" data-correct="true" onclick="quizAnswer(this, 'Tepat! Server mengirim lebih banyak data dari yang diperlukan klien.')">Over-fetching</div>
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'Under-fetching = data yang kurang sehingga butuh request tambahan. Di sini datanya berlebih, bukan kurang.')">Under-fetching</div>
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'Versioning soal berubahnya API antar versi, bukan ukuran response.')">Versioning</div>
+                    </div>
+                    <div class="quiz-feedback hidden"></div>
+                </div>
+                <div class="quiz-question">
+                    <div class="quiz-q-text">2. Manakah pernyataan paling tepat tentang GraphQL?</div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'GraphQL bukan database. Ia query language di atas server Anda; data tetap ditarik dari DB/Service di belakangnya.')">GraphQL adalah jenis database baru pengganti MySQL</div>
+                        <div class="quiz-option" data-correct="true" onclick="quizAnswer(this, 'Tepat! Satu endpoint, klien tentukan bentuk response sesuai schema yang diekspos server.')">GraphQL adalah query language untuk API yang memungkinkan klien meminta field tepat sesuai kebutuhan</div>
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'GraphQL berjalan di atas HTTP biasa (umumnya), tidak mengganti HTTP.')">GraphQL adalah pengganti HTTP</div>
+                    </div>
+                    <div class="quiz-feedback hidden"></div>
+                </div>
+                <div class="quiz-question">
+                    <div class="quiz-q-text">3. Untuk operasi <em>mengubah</em> data (create/update/delete), operasi GraphQL apa yang dipakai?</div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'Query hanya untuk membaca data; tidak boleh memodifikasi state server.')">Query</div>
+                        <div class="quiz-option" data-correct="true" onclick="quizAnswer(this, 'Benar! Mutation untuk semua operasi yang mengubah state — analog dengan POST/PUT/PATCH/DELETE di REST.')">Mutation</div>
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'Subscription untuk realtime — server push data saat ada perubahan, bukan untuk mengubah data.')">Subscription</div>
+                    </div>
+                    <div class="quiz-feedback hidden"></div>
+                </div>
+            </div>
+
+            <div class="content-nav">
+                <div class="content-nav-item">
+                    <a href="api-security.html" class="nav-btn nav-btn-prev">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                        <div><span class="nav-label">Sebelumnya</span><span class="nav-name">Keamanan API (JWT &amp; RBAC)</span></div>
+                    </a>
+                </div>
+                <div class="content-nav-item">
+                    <a href="graphql-server.html" class="nav-btn nav-btn-next">
+                        <div><span class="nav-label">Selanjutnya</span><span class="nav-name">Hands-on: GraphQL Server</span></div>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </a>
+                </div>
+            </div>
+        </article>
+    </main>
+
+    <script src="/web-service/course-layout.js"></script>
+    <script>
+    function copyCode(btn) {
+        const codeBlock = btn.closest('.code-block').querySelector('code');
+        navigator.clipboard.writeText(codeBlock.textContent).then(() => {
+            btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>';
+            setTimeout(() => { btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>'; }, 2000);
+        });
+    }
+    function playVideo() { alert('Video kuliah belum tersedia.'); }
+
+    function showGql(btn, key) {
+        document.querySelectorAll('.gql-toggle button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const pane = document.getElementById('gqlPane');
+        pane.classList.remove('both');
+        pane.querySelectorAll('.split-side').forEach(s => s.classList.remove('active'));
+        if (key === 'both') {
+            pane.classList.add('both');
+        } else {
+            pane.querySelector('.split-side.' + key).classList.add('active');
+        }
+    }
+
+    function quizAnswer(el, feedback) {
+        const question = el.closest('.quiz-question');
+        const options = question.querySelectorAll('.quiz-option');
+        const fb = question.querySelector('.quiz-feedback');
+        options.forEach(o => {
+            o.style.pointerEvents = 'none';
+            if (o.dataset.correct === 'true') o.classList.add('correct');
+        });
+        if (el.dataset.correct !== 'true') el.classList.add('wrong');
+        fb.textContent = feedback;
+        fb.classList.remove('hidden');
+        fb.classList.add('visible');
+    }
+    </script>
+</body>
+</html>

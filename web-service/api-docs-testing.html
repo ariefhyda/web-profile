@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Pertemuan 6: Dokumentasi API dengan OpenAPI/Swagger dan automated testing menggunakan Postman Collection, Environment, dan Newman untuk CI.">
+    <title>API Documentation & Testing — Web Service — Arif Hidayah</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/web-service/course.css">
+    <style>
+        .why-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin: 14px 0; }
+        .why-card { padding: 16px 18px; background: rgba(0,0,0,0.4); border: 1px solid var(--border-color); border-radius: var(--radius-sm); }
+        .why-icon { font-size: 1.4rem; margin-bottom: 8px; }
+        .why-title { font-size: 0.95rem; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
+        .why-desc { font-size: 0.82rem; color: var(--text-muted); line-height: 1.6; }
+
+        .swagger-mock { background: white; color: #1a1a2e; border-radius: var(--radius-md); margin: 14px 0; overflow: hidden; border: 1px solid var(--border-color); }
+        .swagger-head { padding: 16px 20px; background: linear-gradient(90deg, #4a5568, #2d3748); color: white; }
+        .swagger-head h3 { margin: 0; font-size: 1.05rem; font-weight: 700; }
+        .swagger-head small { font-size: 0.75rem; opacity: 0.7; display: block; margin-top: 2px; }
+        .swagger-row { display: flex; align-items: center; gap: 12px; padding: 10px 16px; border-top: 1px solid #e0e0e8; cursor: pointer; }
+        .swagger-row:hover { background: #f7f8fc; }
+        .swagger-method { padding: 4px 10px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; font-weight: 800; color: white; min-width: 60px; text-align: center; }
+        .swagger-method.get { background: #3b82f6; }
+        .swagger-method.post { background: #10b981; }
+        .swagger-method.put { background: #f59e0b; }
+        .swagger-method.patch { background: #06b6d4; }
+        .swagger-method.delete { background: #ef4444; }
+        .swagger-path { font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; font-weight: 600; color: #1a1a2e; flex: 1; }
+        .swagger-summary { font-size: 0.8rem; color: #606078; }
+
+        .pm-test { background: rgba(0,0,0,0.5); border-radius: var(--radius-md); padding: 0; margin: 14px 0; border: 1px solid var(--border-color); overflow: hidden; }
+        .pm-test-head { padding: 10px 14px; background: rgba(247, 140, 108, 0.08); border-bottom: 1px solid var(--border-color); display: flex; align-items: center; gap: 10px; font-size: 0.85rem; color: #f78c6c; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+        .pm-test pre { margin: 0; padding: 14px 16px; font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; line-height: 1.75; color: #e2e8f0; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <div class="bg-grid" aria-hidden="true"></div>
+    <nav class="navbar scrolled" id="navbar"></nav>
+    <div class="mobile-menu" id="mobileMenu"></div>
+
+    <main class="course-layout">
+        <aside class="course-sidebar" id="courseSidebar"></aside>
+        <article class="course-content">
+
+            <div class="breadcrumb">
+                <a href="../index.html">Home</a><span>›</span>
+                <a href="index.html">Web Service</a><span>›</span>
+                <span style="color: var(--text-primary);">Bagian 1 — Fondasi</span>
+            </div>
+
+            <header class="content-header">
+                <h1 class="content-title">Pertemuan 6: API Documentation &amp; Testing</h1>
+                <div class="content-meta">
+                    <div class="meta-pill">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 5V8.5L10.5 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/></svg>
+                        <span>Estimasi: 90 Menit</span>
+                    </div>
+                    <div class="meta-pill">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="10" rx="1" stroke="currentColor" stroke-width="1.5"/><path d="M5 7h6M5 10h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                        <span>Praktik &amp; Tools</span>
+                    </div>
+                </div>
+            </header>
+
+            <div class="video-container">
+                <div class="video-placeholder">
+                    <div class="video-overlay">
+                        <div class="play-btn" onclick="playVideo()">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                        </div>
+                        <h3 style="font-weight: 600; margin-top: 16px; color: white;">Video: OpenAPI &amp; Postman</h3>
+                        <p style="color: rgba(255,255,255,0.6); font-size: 0.85rem; margin-top: 6px;">Klik untuk memutar</p>
+                    </div>
+                </div>
+            </div>
+
+            <p class="content-text">
+                Sebuah API tanpa <strong>dokumentasi</strong> seperti kamus tanpa indeks — sulit dipakai. Sebuah API tanpa <strong>tes</strong> seperti pesawat tanpa instrumen — terbang dengan keberuntungan. Pertemuan ini membahas dua tools standar industri yang menyelesaikan kedua kebutuhan tersebut: <strong>OpenAPI/Swagger</strong> untuk dokumentasi interaktif, dan <strong>Postman</strong> untuk koleksi request &amp; automated testing.
+            </p>
+
+            <div class="info-box">
+                <div class="info-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                    <strong>Capaian Pertemuan Ini</strong>
+                </div>
+                <p>Mahasiswa mampu (1) menyusun spesifikasi OpenAPI 3.0, (2) menampilkan Swagger UI di project Laravel, (3) membuat Postman Collection &amp; Environment, dan (4) menulis tes otomatis sederhana di Postman.</p>
+            </div>
+
+            <h2 class="content-heading">Bagian 1 — Dokumentasi API</h2>
+            <p class="content-text">
+                Mengapa dokumentasi penting? Karena API Anda akan dipakai oleh orang yang <em>bukan Anda</em>: tim frontend, tim mobile, mitra eksternal, atau bahkan diri Anda sendiri 6 bulan dari sekarang.
+            </p>
+            <div class="why-grid">
+                <div class="why-card">
+                    <div class="why-icon">⚡</div>
+                    <div class="why-title">Onboarding Cepat</div>
+                    <div class="why-desc">Developer baru bisa langsung "main" tanpa harus tanya senior setiap kali.</div>
+                </div>
+                <div class="why-card">
+                    <div class="why-icon">📐</div>
+                    <div class="why-title">Kontrak Jelas</div>
+                    <div class="why-desc">Frontend &amp; backend sepakat soal field, tipe, dan response — sebelum kode ditulis.</div>
+                </div>
+                <div class="why-card">
+                    <div class="why-icon">🤖</div>
+                    <div class="why-title">Auto-Generate Code</div>
+                    <div class="why-desc">Dari OpenAPI bisa di-generate client SDK Dart/TS/Kotlin otomatis.</div>
+                </div>
+                <div class="why-card">
+                    <div class="why-icon">🧪</div>
+                    <div class="why-title">Dasar Automated Testing</div>
+                    <div class="why-desc">Spec bisa dipakai untuk validasi schema response di tes integrasi.</div>
+                </div>
+            </div>
+
+            <h2 class="content-heading">OpenAPI 3.0 — Standar Industri</h2>
+            <p class="content-text">
+                <strong>OpenAPI</strong> (sebelumnya bernama Swagger) adalah spesifikasi standar untuk mendeskripsikan REST API dalam format YAML atau JSON. Spesifikasi ini bisa dirender menjadi UI interaktif (Swagger UI, Redoc), dipakai untuk mock server, dan diturunkan ke client SDK.
+            </p>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">openapi.yaml</span>
+                </div>
+<pre class="code-block-body"><code><span class="hl-func">openapi</span>: <span class="hl-number">3.0.3</span>
+<span class="hl-func">info</span>:
+  <span class="hl-func">title</span>: <span class="hl-string">API Akademik Kampus</span>
+  <span class="hl-func">version</span>: <span class="hl-number">1.0.0</span>
+  <span class="hl-func">description</span>: <span class="hl-string">Endpoint CRUD data mahasiswa</span>
+<span class="hl-func">servers</span>:
+  - <span class="hl-func">url</span>: <span class="hl-string">https://api.kampus.ac.id/v1</span>
+<span class="hl-func">paths</span>:
+  <span class="hl-func">/mahasiswa</span>:
+    <span class="hl-func">get</span>:
+      <span class="hl-func">summary</span>: <span class="hl-string">Daftar semua mahasiswa</span>
+      <span class="hl-func">parameters</span>:
+        - <span class="hl-func">name</span>: <span class="hl-string">prodi</span>
+          <span class="hl-func">in</span>: <span class="hl-string">query</span>
+          <span class="hl-func">schema</span>: { <span class="hl-func">type</span>: <span class="hl-string">string</span> }
+      <span class="hl-func">responses</span>:
+        <span class="hl-string">'200'</span>:
+          <span class="hl-func">description</span>: <span class="hl-string">OK</span>
+          <span class="hl-func">content</span>:
+            <span class="hl-func">application/json</span>:
+              <span class="hl-func">schema</span>:
+                <span class="hl-func">type</span>: <span class="hl-string">array</span>
+                <span class="hl-func">items</span>: { <span class="hl-func">$ref</span>: <span class="hl-string">'#/components/schemas/Mahasiswa'</span> }
+    <span class="hl-func">post</span>:
+      <span class="hl-func">summary</span>: <span class="hl-string">Buat mahasiswa baru</span>
+      <span class="hl-func">requestBody</span>:
+        <span class="hl-func">required</span>: <span class="hl-keyword">true</span>
+        <span class="hl-func">content</span>:
+          <span class="hl-func">application/json</span>:
+            <span class="hl-func">schema</span>: { <span class="hl-func">$ref</span>: <span class="hl-string">'#/components/schemas/MahasiswaInput'</span> }
+      <span class="hl-func">responses</span>:
+        <span class="hl-string">'201'</span>: { <span class="hl-func">description</span>: <span class="hl-string">Created</span> }
+        <span class="hl-string">'422'</span>: { <span class="hl-func">description</span>: <span class="hl-string">Validation Error</span> }
+<span class="hl-func">components</span>:
+  <span class="hl-func">schemas</span>:
+    <span class="hl-func">Mahasiswa</span>:
+      <span class="hl-func">type</span>: <span class="hl-string">object</span>
+      <span class="hl-func">properties</span>:
+        <span class="hl-func">id</span>:    { <span class="hl-func">type</span>: <span class="hl-string">integer</span>, <span class="hl-func">example</span>: <span class="hl-number">1</span> }
+        <span class="hl-func">nim</span>:   { <span class="hl-func">type</span>: <span class="hl-string">string</span>,  <span class="hl-func">example</span>: <span class="hl-string">'22550111'</span> }
+        <span class="hl-func">nama</span>:  { <span class="hl-func">type</span>: <span class="hl-string">string</span>,  <span class="hl-func">example</span>: <span class="hl-string">'Siti Aisyah'</span> }
+        <span class="hl-func">prodi</span>: { <span class="hl-func">type</span>: <span class="hl-string">string</span>,  <span class="hl-func">example</span>: <span class="hl-string">'TI'</span> }
+        <span class="hl-func">ipk</span>:   { <span class="hl-func">type</span>: <span class="hl-string">number</span>,  <span class="hl-func">example</span>: <span class="hl-number">3.72</span> }</code></pre>
+            </div>
+
+            <h2 class="content-heading">Tampilan Swagger UI</h2>
+            <p class="content-text">Setelah spec di-render dengan Swagger UI, tampilannya seperti ini — interaktif dan bisa langsung di-"Try it out":</p>
+            <div class="swagger-mock">
+                <div class="swagger-head">
+                    <h3>API Akademik Kampus</h3>
+                    <small>OAS 3.0 · https://api.kampus.ac.id/v1</small>
+                </div>
+                <div class="swagger-row" onclick="this.style.background='#eef2ff'">
+                    <span class="swagger-method get">GET</span>
+                    <span class="swagger-path">/mahasiswa</span>
+                    <span class="swagger-summary">Daftar semua mahasiswa</span>
+                </div>
+                <div class="swagger-row">
+                    <span class="swagger-method post">POST</span>
+                    <span class="swagger-path">/mahasiswa</span>
+                    <span class="swagger-summary">Buat mahasiswa baru</span>
+                </div>
+                <div class="swagger-row">
+                    <span class="swagger-method get">GET</span>
+                    <span class="swagger-path">/mahasiswa/{id}</span>
+                    <span class="swagger-summary">Detail satu mahasiswa</span>
+                </div>
+                <div class="swagger-row">
+                    <span class="swagger-method patch">PATCH</span>
+                    <span class="swagger-path">/mahasiswa/{id}</span>
+                    <span class="swagger-summary">Update sebagian field</span>
+                </div>
+                <div class="swagger-row">
+                    <span class="swagger-method delete">DELETE</span>
+                    <span class="swagger-path">/mahasiswa/{id}</span>
+                    <span class="swagger-summary">Hapus mahasiswa</span>
+                </div>
+            </div>
+
+            <h2 class="content-heading">Memasang Swagger UI di Laravel</h2>
+            <p class="content-text">
+                Package <strong>l5-swagger</strong> (oleh DarkaOnLine) menyederhanakan integrasi. Anda menulis anotasi langsung di Controller, lalu spec OpenAPI di-generate otomatis.
+            </p>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">terminal</span>
+                </div>
+<pre class="code-block-body"><code>composer require <span class="hl-string">"darkaonline/l5-swagger"</span>
+php artisan vendor:publish --provider=<span class="hl-string">"L5Swagger\L5SwaggerServiceProvider"</span></code></pre>
+            </div>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">app/Http/Controllers/MahasiswaController.php (anotasi)</span>
+                </div>
+<pre class="code-block-body"><code><span class="hl-comment">/**
+ * @OA\Get(
+ *     path="/api/v1/mahasiswa",
+ *     summary="Daftar semua mahasiswa",
+ *     tags={"Mahasiswa"},
+ *     @OA\Parameter(name="prodi", in="query", @OA\Schema(type="string")),
+ *     @OA\Response(response=200, description="OK")
+ * )
+ */</span>
+<span class="hl-keyword">public function</span> <span class="hl-func">index</span>() { ... }</code></pre>
+            </div>
+            <p class="content-text">Lalu generate &amp; akses dokumentasi:</p>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">terminal</span>
+                </div>
+<pre class="code-block-body"><code>php artisan l5-swagger:generate
+<span class="hl-comment"># Buka browser ke: http://127.0.0.1:8000/api/documentation</span></code></pre>
+            </div>
+
+            <h2 class="content-heading">Bagian 2 — Testing dengan Postman</h2>
+            <p class="content-text">
+                <strong>Postman</strong> adalah API client paling populer di dunia (50+ juta developer). Selain mengirim request manual, Postman bisa: menyimpan <em>Collection</em> request, mengganti <em>Environment</em> (dev/staging/prod), menjalankan <em>automated tests</em>, dan mengeksekusi semuanya headless via Newman di CI.
+            </p>
+
+            <h2 class="content-heading">Collection — Album Request Anda</h2>
+            <p class="content-text">
+                Sebuah <em>Collection</em> adalah folder berisi sekumpulan request terkait. Struktur Collection yang baik untuk API kampus:
+            </p>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">api-kampus.postman_collection</span>
+                </div>
+<pre class="code-block-body"><code>📂 <span class="hl-keyword">API Kampus v1</span>
+├── 📂 <span class="hl-func">Auth</span>
+│   ├── <span class="hl-comment">POST</span> Login
+│   └── <span class="hl-comment">POST</span> Logout
+├── 📂 <span class="hl-func">Mahasiswa</span>
+│   ├── <span class="hl-comment">GET</span> List mahasiswa
+│   ├── <span class="hl-comment">POST</span> Create mahasiswa
+│   ├── <span class="hl-comment">GET</span> Show mahasiswa
+│   ├── <span class="hl-comment">PATCH</span> Update mahasiswa
+│   └── <span class="hl-comment">DELETE</span> Delete mahasiswa
+└── 📂 <span class="hl-func">Nilai</span>
+    ├── <span class="hl-comment">GET</span> List nilai per mahasiswa
+    └── <span class="hl-comment">POST</span> Input nilai</code></pre>
+            </div>
+
+            <h2 class="content-heading">Environment — Variabel per Server</h2>
+            <p class="content-text">
+                Anda tidak ingin hard-code URL <code>http://127.0.0.1:8000</code> di setiap request. <em>Environment</em> menyimpan variabel yang berubah per server (lokal, staging, produksi). Buat dua environment: <strong>Local</strong> dan <strong>Production</strong>:
+            </p>
+            <table class="compare-table">
+                <thead>
+                    <tr>
+                        <th>Variabel</th>
+                        <th>Local</th>
+                        <th>Production</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>base_url</code></td>
+                        <td><code>http://127.0.0.1:8000/api/v1</code></td>
+                        <td><code>https://api.kampus.ac.id/v1</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>token</code></td>
+                        <td>(diisi setelah login)</td>
+                        <td>(diisi setelah login)</td>
+                    </tr>
+                    <tr>
+                        <td><code>admin_email</code></td>
+                        <td><code>dev@local.test</code></td>
+                        <td><code>admin@kampus.ac.id</code></td>
+                    </tr>
+                </tbody>
+            </table>
+            <p class="content-text">Lalu di Request URL Anda cukup tulis <code>{{base_url}}/mahasiswa</code>. Pindah environment = ganti server.</p>
+
+            <h2 class="content-heading">Automated Test Script di Postman</h2>
+            <p class="content-text">
+                Setiap request punya tab <strong>Tests</strong> — JavaScript yang dijalankan setelah response diterima. Postman menyediakan global <code>pm</code> dengan assertion library mirip Mocha/Chai:
+            </p>
+            <div class="pm-test">
+                <div class="pm-test-head">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                    Tests untuk: POST Create mahasiswa
+                </div>
+<pre><span class="hl-comment">// 1. Status code harus 201</span>
+pm.<span class="hl-func">test</span>(<span class="hl-string">"Status 201 Created"</span>, () =&gt; {
+    pm.response.<span class="hl-func">to</span>.<span class="hl-func">have</span>.<span class="hl-func">status</span>(<span class="hl-number">201</span>);
+});
+
+<span class="hl-comment">// 2. Response harus mengandung field id</span>
+pm.<span class="hl-func">test</span>(<span class="hl-string">"Response punya id"</span>, () =&gt; {
+    <span class="hl-keyword">const</span> body = pm.response.<span class="hl-func">json</span>();
+    pm.<span class="hl-func">expect</span>(body.id).<span class="hl-func">to</span>.<span class="hl-func">be</span>.<span class="hl-func">a</span>(<span class="hl-string">'number'</span>);
+    pm.<span class="hl-func">expect</span>(body.nim).<span class="hl-func">to</span>.<span class="hl-func">eql</span>(<span class="hl-string">'22550113'</span>);
+});
+
+<span class="hl-comment">// 3. Simpan id ke environment untuk request berikutnya (chaining)</span>
+<span class="hl-keyword">const</span> body = pm.response.<span class="hl-func">json</span>();
+pm.environment.<span class="hl-func">set</span>(<span class="hl-string">'last_mhs_id'</span>, body.id);
+
+<span class="hl-comment">// 4. Response time wajar</span>
+pm.<span class="hl-func">test</span>(<span class="hl-string">"Response &lt; 500ms"</span>, () =&gt; {
+    pm.<span class="hl-func">expect</span>(pm.response.responseTime).<span class="hl-func">to</span>.<span class="hl-func">be</span>.<span class="hl-func">below</span>(<span class="hl-number">500</span>);
+});</pre>
+            </div>
+            <p class="content-text">
+                Setelah disimpan, jalankan <strong>Collection Runner</strong> untuk mengeksekusi seluruh request beserta tes-nya secara berurutan. Anda mendapat report: berapa request lewat, berapa gagal, dan di assertion mana.
+            </p>
+
+            <h2 class="content-heading">Pre-request Script — Persiapan Sebelum Kirim</h2>
+            <div class="pm-test">
+                <div class="pm-test-head">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    Pre-request Script untuk: GET List mahasiswa
+                </div>
+<pre><span class="hl-comment">// Generate timestamp unik untuk request ini</span>
+pm.environment.<span class="hl-func">set</span>(<span class="hl-string">'timestamp'</span>, <span class="hl-func">Date</span>.<span class="hl-func">now</span>());
+
+<span class="hl-comment">// Refresh token kalau habis</span>
+<span class="hl-keyword">if</span> (!pm.environment.<span class="hl-func">get</span>(<span class="hl-string">'token'</span>)) {
+    pm.<span class="hl-func">sendRequest</span>({
+        url: pm.environment.<span class="hl-func">get</span>(<span class="hl-string">'base_url'</span>) + <span class="hl-string">'/login'</span>,
+        method: <span class="hl-string">'POST'</span>,
+        body: { mode: <span class="hl-string">'raw'</span>, raw: <span class="hl-func">JSON</span>.<span class="hl-func">stringify</span>({
+            email: pm.environment.<span class="hl-func">get</span>(<span class="hl-string">'admin_email'</span>),
+            password: <span class="hl-string">'secret'</span>
+        }) }
+    }, (err, res) =&gt; {
+        pm.environment.<span class="hl-func">set</span>(<span class="hl-string">'token'</span>, res.<span class="hl-func">json</span>().token);
+    });
+}</pre>
+            </div>
+
+            <h2 class="content-heading">Newman — Jalankan Collection di Terminal &amp; CI</h2>
+            <p class="content-text">
+                <strong>Newman</strong> adalah Postman versi command-line. Cocok untuk dijalankan di GitHub Actions / GitLab CI agar setiap push otomatis menjalankan tes API.
+            </p>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">terminal</span>
+                </div>
+<pre class="code-block-body"><code><span class="hl-comment"># Pasang newman global</span>
+npm install -g newman
+
+<span class="hl-comment"># Export Collection &amp; Environment dari Postman → simpan sebagai file</span>
+<span class="hl-comment"># Jalankan suite:</span>
+newman run api-kampus.postman_collection.json \
+  -e environment-local.json \
+  --reporters cli,html \
+  --reporter-html-export newman-report.html</code></pre>
+            </div>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">.github/workflows/api-test.yml</span>
+                </div>
+<pre class="code-block-body"><code><span class="hl-func">name</span>: <span class="hl-string">API Tests</span>
+<span class="hl-func">on</span>: [<span class="hl-string">push</span>]
+<span class="hl-func">jobs</span>:
+  <span class="hl-func">test</span>:
+    <span class="hl-func">runs-on</span>: <span class="hl-string">ubuntu-latest</span>
+    <span class="hl-func">steps</span>:
+      - <span class="hl-func">uses</span>: <span class="hl-string">actions/checkout@v4</span>
+      - <span class="hl-func">run</span>: <span class="hl-string">npm install -g newman</span>
+      - <span class="hl-func">run</span>: <span class="hl-string">newman run tests/api-kampus.json -e tests/env-ci.json</span></code></pre>
+            </div>
+
+            <div class="success-box">
+                <div class="success-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    <strong>Tips Dokumentasi yang Hidup</strong>
+                </div>
+                <p>Letakkan file <code>openapi.yaml</code> di dalam repo dan otomatis di-generate dari kode (anotasi/decorator). Dokumentasi yang dipisahkan dari kode pasti basi dalam hitungan minggu. Jadikan dokumentasi <em>artifact dari kode</em>, bukan dokumen terpisah yang harus di-maintain manual.</p>
+            </div>
+
+            <div class="quiz">
+                <div class="quiz-title">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01"/></svg>
+                    Cek Pemahaman Anda
+                </div>
+                <div class="quiz-question">
+                    <div class="quiz-q-text">1. Apa keuntungan utama memakai OpenAPI dibanding menulis dokumentasi di Word/Notion?</div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" data-correct="true" onclick="quizAnswer(this, 'Tepat! OpenAPI = machine-readable → bisa di-generate ke UI interaktif, mock server, SDK klien, dan validasi schema.')">OpenAPI bisa dirender otomatis, di-generate ke client SDK, dan digunakan untuk validasi</div>
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'OpenAPI berbentuk YAML; ia tidak berisi gambar atau styling rich seperti Notion.')">OpenAPI mendukung gambar &amp; styling yang lebih bagus</div>
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'OpenAPI hanya spesifikasi statis; ia tidak mempercepat API runtime.')">OpenAPI membuat API berjalan lebih cepat</div>
+                    </div>
+                    <div class="quiz-feedback hidden"></div>
+                </div>
+                <div class="quiz-question">
+                    <div class="quiz-q-text">2. Mengapa kita memakai Environment di Postman alih-alih mengetik URL di setiap request?</div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" data-correct="true" onclick="quizAnswer(this, 'Benar! Satu klik = pindah server (local → staging → prod). Tidak perlu edit puluhan request.')">Agar bisa pindah server (local/staging/prod) tanpa edit request</div>
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'Environment tidak ada hubungan dengan kecepatan request.')">Agar request lebih cepat dijalankan</div>
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'Environment di Postman tidak otomatis mengenkripsi; gunakan secret vault terpisah untuk kredensial sensitif.')">Agar otomatis mengenkripsi token</div>
+                    </div>
+                    <div class="quiz-feedback hidden"></div>
+                </div>
+                <div class="quiz-question">
+                    <div class="quiz-q-text">3. Apa peran <strong>Newman</strong> dalam alur development API?</div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'Newman tidak men-generate dokumentasi; itu pekerjaan Swagger UI / Redoc.')">Men-generate dokumentasi dari spec OpenAPI</div>
+                        <div class="quiz-option" data-correct="true" onclick="quizAnswer(this, 'Benar! Newman menjalankan Postman Collection di terminal / CI tanpa GUI — cocok untuk pipeline otomatis.')">Menjalankan Postman Collection di command-line / CI</div>
+                        <div class="quiz-option" data-correct="false" onclick="quizAnswer(this, 'Newman bukan mock server; gunakan Prism atau Postman Mock Server untuk itu.')">Menyediakan mock server gratis</div>
+                    </div>
+                    <div class="quiz-feedback hidden"></div>
+                </div>
+            </div>
+
+            <div class="content-nav">
+                <div class="content-nav-item">
+                    <a href="rest-crud.html" class="nav-btn nav-btn-prev">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                        <div><span class="nav-label">Sebelumnya</span><span class="nav-name">Hands-on: REST API CRUD</span></div>
+                    </a>
+                </div>
+                <div class="content-nav-item">
+                    <a href="api-security.html" class="nav-btn nav-btn-next">
+                        <div><span class="nav-label">Selanjutnya</span><span class="nav-name">Keamanan API (JWT &amp; RBAC)</span></div>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </a>
+                </div>
+            </div>
+        </article>
+    </main>
+
+    <script src="/web-service/course-layout.js"></script>
+    <script>
+    function copyCode(btn) {
+        const codeBlock = btn.closest('.code-block').querySelector('code');
+        navigator.clipboard.writeText(codeBlock.textContent).then(() => {
+            btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>';
+            setTimeout(() => { btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>'; }, 2000);
+        });
+    }
+    function playVideo() { alert('Video kuliah belum tersedia.'); }
+
+    function quizAnswer(el, feedback) {
+        const question = el.closest('.quiz-question');
+        const options = question.querySelectorAll('.quiz-option');
+        const fb = question.querySelector('.quiz-feedback');
+        options.forEach(o => {
+            o.style.pointerEvents = 'none';
+            if (o.dataset.correct === 'true') o.classList.add('correct');
+        });
+        if (el.dataset.correct !== 'true') el.classList.add('wrong');
+        fb.textContent = feedback;
+        fb.classList.remove('hidden');
+        fb.classList.add('visible');
+    }
+    </script>
+</body>
+</html>
