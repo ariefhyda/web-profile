@@ -9,6 +9,32 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/style.css">
     <link rel="stylesheet" href="/flutter/course.css">
+    <style>
+        .icon-converter{border:1px solid var(--border,rgba(255,255,255,.1));border-radius:14px;overflow:hidden;margin:24px 0;background:rgba(255,255,255,.02)}
+        .icon-converter-header{display:flex;align-items:center;gap:10px;padding:14px 18px;background:rgba(255,255,255,.04);border-bottom:1px solid var(--border,rgba(255,255,255,.1));color:var(--text-primary,#fff)}
+        .icon-converter-header svg{color:var(--accent,#7c5cff);flex-shrink:0}
+        .icon-converter-body{padding:18px}
+        .icon-drop{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:36px 18px;border:2px dashed var(--border,rgba(255,255,255,.18));border-radius:12px;cursor:pointer;text-align:center;color:var(--text-secondary,#aaa);transition:border-color .2s,background .2s}
+        .icon-drop:hover,.icon-drop.dragover{border-color:var(--accent,#7c5cff);background:rgba(124,92,255,.06)}
+        .icon-drop svg{color:var(--accent,#7c5cff)}
+        .icon-drop-text{font-weight:600;color:var(--text-primary,#fff)}
+        .icon-drop-hint{font-size:.82rem;opacity:.7}
+        .icon-preview-area{display:flex;gap:22px;flex-wrap:wrap;align-items:flex-start}
+        .icon-canvas{width:200px;height:200px;border-radius:18px;border:1px solid var(--border,rgba(255,255,255,.12));background-image:linear-gradient(45deg,#2a2a3a 25%,transparent 25%),linear-gradient(-45deg,#2a2a3a 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#2a2a3a 75%),linear-gradient(-45deg,transparent 75%,#2a2a3a 75%);background-size:18px 18px;background-position:0 0,0 9px,9px -9px,-9px 0;flex-shrink:0}
+        .icon-controls{flex:1;min-width:240px;display:flex;flex-direction:column;gap:14px}
+        .icon-control-row{display:flex;align-items:center;gap:12px}
+        .icon-control-label{font-size:.85rem;font-weight:600;color:var(--text-secondary,#aaa);width:88px;flex-shrink:0}
+        .icon-seg{display:inline-flex;border:1px solid var(--border,rgba(255,255,255,.14));border-radius:8px;overflow:hidden}
+        .icon-seg-btn{padding:7px 16px;background:transparent;border:0;color:var(--text-secondary,#aaa);cursor:pointer;font-size:.85rem;font-weight:600;transition:background .15s,color .15s}
+        .icon-seg-btn.active{background:var(--accent,#7c5cff);color:#fff}
+        .icon-bg-opts{display:flex;align-items:center;gap:8px}
+        .icon-bg-btn{width:34px;height:34px;border-radius:8px;border:1px solid var(--border,rgba(255,255,255,.14));background:transparent;color:var(--text-secondary,#aaa);cursor:pointer;font-size:1.1rem;line-height:1}
+        .icon-bg-btn.active{border-color:var(--accent,#7c5cff);color:var(--accent,#7c5cff)}
+        #iconBgColor{width:34px;height:34px;padding:0;border:1px solid var(--border,rgba(255,255,255,.14));border-radius:8px;background:transparent;cursor:pointer}
+        .icon-meta{font-size:.82rem;color:var(--text-secondary,#aaa);margin:0}
+        .icon-download-btn{display:inline-flex;align-items:center;gap:8px;align-self:flex-start;padding:10px 18px;border:0;border-radius:9px;background:var(--accent,#7c5cff);color:#fff;font-weight:600;font-size:.9rem;cursor:pointer;transition:opacity .15s}
+        .icon-download-btn:hover{opacity:.88}
+    </style>
 </head>
 <body>
     <div class="bg-grid" aria-hidden="true"></div>
@@ -103,7 +129,50 @@ $ flutter clean && flutter pub get</code></pre>
                 <pre class="code-block-body"><code>$ flutter pub add --dev flutter_launcher_icons</code></pre>
             </div>
 
-            <p class="content-text">Buat folder <code>assets/icon/</code> dan simpan ikon Anda dengan nama <code>icon.png</code> berukuran <strong>1024×1024 px</strong>. Lalu tambahkan konfigurasi di <code>pubspec.yaml</code>:</p>
+            <p class="content-text">Buat folder <code>assets/icon/</code> dan simpan ikon Anda dengan nama <code>icon.png</code> berukuran <strong>1024×1024 px</strong>. Belum punya ikon dengan ukuran tepat? Gunakan converter di bawah ini untuk me-resize gambar apa pun (PNG/JPG/WebP) menjadi <code>icon.png</code> 1024×1024 px — semua diproses langsung di browser, gambar tidak dikirim ke server.</p>
+
+            <!-- Icon Converter Widget -->
+            <div class="icon-converter" id="iconConverter">
+                <div class="icon-converter-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+                    <strong>Converter Ikon → 1024×1024 px</strong>
+                </div>
+                <div class="icon-converter-body">
+                    <label class="icon-drop" id="iconDrop">
+                        <input type="file" id="iconFile" accept="image/png,image/jpeg,image/webp" hidden>
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                        <span class="icon-drop-text">Klik atau jatuhkan gambar di sini</span>
+                        <span class="icon-drop-hint">PNG, JPG, atau WebP</span>
+                    </label>
+
+                    <div class="icon-preview-area" id="iconPreviewArea" hidden>
+                        <canvas id="iconCanvas" width="1024" height="1024" class="icon-canvas"></canvas>
+                        <div class="icon-controls">
+                            <div class="icon-control-row">
+                                <span class="icon-control-label">Mode</span>
+                                <div class="icon-seg">
+                                    <button type="button" class="icon-seg-btn active" data-fit="contain">Contain</button>
+                                    <button type="button" class="icon-seg-btn" data-fit="cover">Cover</button>
+                                </div>
+                            </div>
+                            <div class="icon-control-row">
+                                <span class="icon-control-label">Background</span>
+                                <div class="icon-bg-opts">
+                                    <button type="button" class="icon-bg-btn active" data-bg="transparent" title="Transparan">⬚</button>
+                                    <input type="color" id="iconBgColor" value="#1a1a2e" title="Pilih warna">
+                                </div>
+                            </div>
+                            <p class="icon-meta" id="iconMeta"></p>
+                            <button type="button" class="icon-download-btn" id="iconDownload">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                Download icon.png (1024×1024)
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <p class="content-text">Setelah ikon siap, tambahkan konfigurasi di <code>pubspec.yaml</code>:</p>
             <div class="code-block">
                 <div class="code-block-header"><div class="code-block-dots"><span></span><span></span><span></span></div><span class="code-block-filename">pubspec.yaml</span><button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></div>
                 <pre class="code-block-body"><code>flutter_launcher_icons:
@@ -142,6 +211,51 @@ $ flutter clean && flutter pub get</code></pre>
     color: <span class="hl-string">"#1a1a2e"</span>
     image: <span class="hl-string">"assets/icon/splash_logo.png"</span></code></pre>
             </div>
+
+            <p class="content-text">Logo splash sebaiknya <strong>512×512 px</strong> dengan latar transparan (warna background diatur lewat <code>color:</code> di atas). Gunakan generator di bawah untuk menyiapkan <code>splash_logo.png</code> — atur warna preview agar cocok dengan <code>color</code> yang Anda pilih:</p>
+
+            <!-- Splash Logo Generator Widget -->
+            <div class="icon-converter" id="splashConverter">
+                <div class="icon-converter-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                    <strong>Generator Logo Splash → 512×512 px</strong>
+                </div>
+                <div class="icon-converter-body">
+                    <label class="icon-drop">
+                        <input type="file" accept="image/png,image/jpeg,image/webp" hidden>
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                        <span class="icon-drop-text">Klik atau jatuhkan logo di sini</span>
+                        <span class="icon-drop-hint">PNG, JPG, atau WebP</span>
+                    </label>
+
+                    <div class="icon-preview-area" hidden>
+                        <canvas width="512" height="512" class="icon-canvas"></canvas>
+                        <div class="icon-controls">
+                            <div class="icon-control-row">
+                                <span class="icon-control-label">Mode</span>
+                                <div class="icon-seg">
+                                    <button type="button" class="icon-seg-btn active" data-fit="contain">Contain</button>
+                                    <button type="button" class="icon-seg-btn" data-fit="cover">Cover</button>
+                                </div>
+                            </div>
+                            <div class="icon-control-row">
+                                <span class="icon-control-label">Background</span>
+                                <div class="icon-bg-opts">
+                                    <button type="button" class="icon-bg-btn active" data-bg="transparent" title="Transparan (disarankan)">⬚</button>
+                                    <input type="color" value="#1a1a2e" title="Pilih warna">
+                                </div>
+                            </div>
+                            <p class="icon-meta"></p>
+                            <button type="button" class="icon-download-btn">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                Download splash_logo.png (512×512)
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <p class="content-text">Setelah <code>splash_logo.png</code> tersimpan di <code>assets/icon/</code>, jalankan perintah generate:</p>
             <div class="code-block">
                 <div class="code-block-header"><div class="code-block-dots"><span></span><span></span><span></span></div><span class="code-block-filename">Terminal</span><button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></div>
                 <pre class="code-block-body"><code>$ dart run flutter_native_splash:create</code></pre>
@@ -150,14 +264,70 @@ $ flutter clean && flutter pub get</code></pre>
             <!-- Versioning -->
             <h2 class="content-heading">5. Versioning — versionCode & versionName</h2>
             <p class="content-text">
-                Setiap update aplikasi yang Anda upload ke Play Store wajib memiliki <strong>versionCode lebih tinggi</strong> dari versi sebelumnya. Atur di <code>pubspec.yaml</code> (Flutter akan sinkronkan otomatis ke build.gradle):
+                Setiap aplikasi Android punya <strong>dua nomor versi</strong> yang fungsinya berbeda dan sering tertukar. Memahami keduanya itu wajib, karena salah mengatur versi adalah penyebab paling umum penolakan saat upload ke Play Store.
             </p>
+            <ol class="content-list">
+                <li><strong>versionName</strong> — string yang <em>dilihat pengguna</em> (mis. <code>"1.0.0"</code>, <code>"2.3.1"</code>). Boleh berisi teks apa pun (<code>"1.0-beta"</code> sah). Nilainya tidak harus naik dan tidak dipakai sistem untuk membandingkan versi — murni untuk manusia. Muncul di halaman Play Store dan di menu <em>Settings → Apps</em>.</li>
+                <li><strong>versionCode</strong> — bilangan bulat <em>internal</em> yang dipakai Android &amp; Play Store untuk menentukan mana versi yang lebih baru. <strong>Wajib naik (strictly increasing)</strong> tiap kali Anda upload build baru. Pengguna tidak pernah melihat angka ini. Maksimum <code>2.100.000.000</code>.</li>
+            </ol>
+
+            <p class="content-text">Di Flutter, keduanya ditulis dalam satu baris di <code>pubspec.yaml</code> dengan format <code>versionName+versionCode</code>:</p>
             <div class="code-block">
                 <div class="code-block-header"><div class="code-block-dots"><span></span><span></span><span></span></div><span class="code-block-filename">pubspec.yaml</span><button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></div>
                 <pre class="code-block-body"><code>version: <span class="hl-number">1.0</span>.<span class="hl-number">0</span>+<span class="hl-number">1</span>
 <span class="hl-comment">#       └──┬──┘ └┬┘
 #           │     └── versionCode (angka, naik tiap rilis)
 #           └──────── versionName (yang dilihat user)</span></code></pre>
+            </div>
+            <p class="content-text">
+                Tanda <code>+</code> memisahkan keduanya. Bagian sebelum <code>+</code> jadi <code>versionName</code>, bagian sesudahnya jadi <code>versionCode</code>. Jika Anda menulis <code>version: 1.0.0</code> tanpa <code>+</code>, Flutter memakai <code>versionCode</code> default <code>1</code>.
+            </p>
+
+            <h3 class="content-heading" style="font-size:1.15rem;">Memahami versionName (Semantic Versioning)</h3>
+            <p class="content-text">Konvensi umum untuk <code>versionName</code> adalah <strong>Semantic Versioning</strong> berformat <code>MAJOR.MINOR.PATCH</code>:</p>
+            <ol class="content-list">
+                <li><strong>MAJOR</strong> (1.x.x) — perubahan besar yang mungkin tidak kompatibel dengan versi lama (redesign total, fitur inti baru).</li>
+                <li><strong>MINOR</strong> (x.1.x) — penambahan fitur baru yang tetap kompatibel dengan versi sebelumnya.</li>
+                <li><strong>PATCH</strong> (x.x.1) — perbaikan bug kecil tanpa menambah fitur.</li>
+            </ol>
+
+            <h3 class="content-heading" style="font-size:1.15rem;">Bagaimana Flutter menyalurkannya ke Android</h3>
+            <p class="content-text">
+                Saat build, Flutter membaca baris <code>version</code> dan mengisi variabel <code>flutter.versionName</code> dan <code>flutter.versionCode</code> yang dipakai di <code>android/app/build.gradle</code>. Anda tidak perlu mengubah file gradle secara manual — cukup edit <code>pubspec.yaml</code>:
+            </p>
+            <div class="code-block">
+                <div class="code-block-header"><div class="code-block-dots"><span></span><span></span><span></span></div><span class="code-block-filename">android/app/build.gradle (otomatis)</span><button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></div>
+                <pre class="code-block-body"><code>defaultConfig {
+    versionCode flutter.versionCode   <span class="hl-comment">// ← dari angka setelah '+'</span>
+    versionName flutter.versionName   <span class="hl-comment">// ← dari teks sebelum '+'</span>
+}</code></pre>
+            </div>
+
+            <h3 class="content-heading" style="font-size:1.15rem;">Contoh progres versi antar rilis</h3>
+            <p class="content-text">Perhatikan: <code>versionCode</code> <strong>selalu naik</strong>, sementara <code>versionName</code> mengikuti makna perubahan.</p>
+            <div class="code-block">
+                <div class="code-block-header"><div class="code-block-dots"><span></span><span></span><span></span></div><span class="code-block-filename">Riwayat rilis</span><button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></div>
+                <pre class="code-block-body"><code>version: <span class="hl-number">1.0</span>.<span class="hl-number">0</span>+<span class="hl-number">1</span>    <span class="hl-comment"># rilis perdana</span>
+version: <span class="hl-number">1.0</span>.<span class="hl-number">1</span>+<span class="hl-number">2</span>    <span class="hl-comment"># perbaikan bug kecil → PATCH naik</span>
+version: <span class="hl-number">1.1</span>.<span class="hl-number">0</span>+<span class="hl-number">3</span>    <span class="hl-comment"># tambah fitur baru → MINOR naik, PATCH reset</span>
+version: <span class="hl-number">2.0</span>.<span class="hl-number">0</span>+<span class="hl-number">4</span>    <span class="hl-comment"># redesign besar → MAJOR naik</span>
+version: <span class="hl-number">2.0</span>.<span class="hl-number">0</span>+<span class="hl-number">5</span>    <span class="hl-comment"># build ulang (nama sama, code WAJIB naik)</span></code></pre>
+            </div>
+
+            <h3 class="content-heading" style="font-size:1.15rem;">Override saat build (tanpa edit pubspec)</h3>
+            <p class="content-text">Untuk CI/CD atau build cepat, Anda bisa menimpa versi langsung dari terminal:</p>
+            <div class="code-block">
+                <div class="code-block-header"><div class="code-block-dots"><span></span><span></span><span></span></div><span class="code-block-filename">Terminal</span><button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></div>
+                <pre class="code-block-body"><code>$ flutter build appbundle \
+    --build-name=<span class="hl-number">1.2</span>.<span class="hl-number">0</span> \   <span class="hl-comment"># menimpa versionName</span>
+    --build-number=<span class="hl-number">7</span>      <span class="hl-comment"># menimpa versionCode</span></code></pre>
+            </div>
+
+            <div class="info-box">
+                <div class="info-box-header"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><strong>Kesalahan yang Sering Terjadi</strong></div>
+                <p><strong>"Version code 1 has already been used"</strong> — Anda lupa menaikkan angka setelah <code>+</code>. Solusi: naikkan <code>versionCode</code> (mis. dari <code>+1</code> ke <code>+2</code>), build ulang.</p>
+                <p><strong>Menurunkan versionCode</strong> — Play Store <em>menolak</em> build dengan <code>versionCode</code> sama atau lebih kecil dari yang sudah pernah diupload. Angka ini hanya boleh naik, tidak bisa dipakai ulang meski build lama dihapus.</p>
+                <p><strong>Mengubah versionName tapi lupa versionCode</strong> — Play Store tidak peduli <code>versionName</code>; yang menentukan "ini build baru" hanya <code>versionCode</code>. Naikkan keduanya tiap rilis untuk aman.</p>
             </div>
 
             <!-- Keystore -->
@@ -340,6 +510,84 @@ $ ls -lh build/app/outputs/bundle/release/</code></pre>
     <script src="/flutter/course-layout.js"></script>
     <script>
     function copyCode(btn){const c=btn.closest('.code-block').querySelector('code');navigator.clipboard.writeText(c.textContent).then(()=>{btn.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>';setTimeout(()=>{btn.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>'},2000)})}
+
+    // --- Konverter gambar berbasis canvas (ikon & logo splash) ---
+    function initConverter(rootId, filename){
+        const root = document.getElementById(rootId);
+        if(!root) return;
+        const drop = root.querySelector('.icon-drop');
+        const fileInput = root.querySelector('input[type="file"]');
+        const previewArea = root.querySelector('.icon-preview-area');
+        const canvas = root.querySelector('canvas');
+        const ctx = canvas.getContext('2d');
+        const meta = root.querySelector('.icon-meta');
+        const bgColorInput = root.querySelector('input[type="color"]');
+        const transparentBtn = root.querySelector('.icon-bg-btn[data-bg="transparent"]');
+        const downloadBtn = root.querySelector('.icon-download-btn');
+        const SIZE = canvas.width;   // 1024 untuk ikon, 512 untuk splash
+
+        let img = null;            // gambar sumber
+        let fit = 'contain';       // contain | cover
+        let bg = 'transparent';    // 'transparent' | warna hex
+
+        function render(){
+            if(!img) return;
+            ctx.clearRect(0,0,SIZE,SIZE);
+            if(bg !== 'transparent'){ ctx.fillStyle = bg; ctx.fillRect(0,0,SIZE,SIZE); }
+            const r = fit === 'cover'
+                ? Math.max(SIZE/img.width, SIZE/img.height)
+                : Math.min(SIZE/img.width, SIZE/img.height);
+            const w = img.width*r, h = img.height*r;
+            ctx.imageSmoothingQuality = 'high';
+            ctx.drawImage(img, (SIZE-w)/2, (SIZE-h)/2, w, h);
+        }
+
+        function loadFile(file){
+            if(!file || !file.type.startsWith('image/')) return;
+            const url = URL.createObjectURL(file);
+            const im = new Image();
+            im.onload = function(){
+                img = im;
+                meta.textContent = `Sumber: ${im.width}×${im.height}px → keluaran ${SIZE}×${SIZE}px PNG`;
+                previewArea.hidden = false;
+                render();
+                URL.revokeObjectURL(url);
+            };
+            im.src = url;
+        }
+
+        drop.addEventListener('click', ()=> fileInput.click());
+        fileInput.addEventListener('change', e => loadFile(e.target.files[0]));
+        ['dragenter','dragover'].forEach(ev => drop.addEventListener(ev, e=>{ e.preventDefault(); drop.classList.add('dragover'); }));
+        ['dragleave','drop'].forEach(ev => drop.addEventListener(ev, e=>{ e.preventDefault(); drop.classList.remove('dragover'); }));
+        drop.addEventListener('drop', e => loadFile(e.dataTransfer.files[0]));
+
+        root.querySelectorAll('.icon-seg-btn').forEach(btn => btn.addEventListener('click', ()=>{
+            root.querySelectorAll('.icon-seg-btn').forEach(b=>b.classList.remove('active'));
+            btn.classList.add('active'); fit = btn.dataset.fit; render();
+        }));
+
+        transparentBtn.addEventListener('click', ()=>{
+            bg = 'transparent'; transparentBtn.classList.add('active'); render();
+        });
+        bgColorInput.addEventListener('input', ()=>{
+            bg = bgColorInput.value; transparentBtn.classList.remove('active'); render();
+        });
+
+        downloadBtn.addEventListener('click', ()=>{
+            if(!img) return;
+            canvas.toBlob(blob => {
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = filename;
+                a.click();
+                setTimeout(()=> URL.revokeObjectURL(a.href), 1000);
+            }, 'image/png');
+        });
+    }
+
+    initConverter('iconConverter', 'icon.png');
+    initConverter('splashConverter', 'splash_logo.png');
     </script>
 </body>
 </html>

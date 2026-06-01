@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Materi YOLO — Flutter Advanced — Arif Hidayah</title>
-    <meta name="description" content="Tutorial dan pengenalan algoritma YOLO (You Only Look Once) untuk Object Detection di perangkat mobile.">
+    <meta name="description" content="Tutorial dan pengenalan algoritma YOLO (You Only Look Once) untuk Object Detection di perangkat mobile dengan Flutter + GetX.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -26,9 +26,7 @@
                 <span>›</span>
                 <a href="/flutter-advanced/index.html">Flutter Advanced</a>
                 <span>›</span>
-                <a href="/flutter-advanced/yolo.html">YOLO (You Only Look Once)</a>
-                <span>›</span>
-                <span style="color: var(--text-primary);">Materi YOLO</span>
+                <span style="color: var(--text-primary);">YOLO (Object Detection)</span>
             </div>
 
             <header class="content-header">
@@ -36,11 +34,11 @@
                 <div class="content-meta">
                     <div class="meta-pill">
                         <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 5V8.5L10.5 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/></svg>
-                        <span>Estimasi: 30 Menit</span>
+                        <span>Estimasi: 60 Menit</span>
                     </div>
                     <div class="meta-pill">
                         <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 4h8v8H4z" stroke="currentColor" stroke-width="1.5"/><path d="M4 8h8M8 4v8" stroke="currentColor" stroke-width="1.5"/></svg>
-                        <span>Teori & Konsep</span>
+                        <span>Teori & Praktikum</span>
                     </div>
                 </div>
             </header>
@@ -48,8 +46,8 @@
             <p class="content-text"><strong>YOLO (You Only Look Once)</strong> adalah salah satu algoritma Machine Learning paling populer untuk <em>Object Detection</em> (Deteksi Objek) secara <strong>real-time</strong>. Tidak seperti klasifikasi gambar biasa yang hanya menebak "apa" yang ada di gambar, Object Detection menebak "apa" dan "di mana" lokasinya menggunakan kotak pembatas (<em>Bounding Box</em>).</p>
 
             <h2 class="content-heading">1. Mengapa YOLO Sangat Populer?</h2>
-            <p class="content-text">Sebelum YOLO, algoritma deteksi objek menggunakan metode "Two-Stage Detector" (seperti R-CNN), di mana sistem pertama-tama mencari region (area) yang mungkin berisi objek, lalu menjalankan klasifikasi pada setiap area tersebut. Pendekatan ini akurat namun <strong>sangat lambat</strong>.</p>
-            <p class="content-text">Sesuai namanya (<em>You Only Look Once</em>), YOLO memandang seluruh gambar hanya satu kali (satu tahap/one-stage) menggunakan arsitektur jaringan saraf tunggal (Single Neural Network). Ini membuat YOLO sangat cepat dan efisien, sehingga ideal untuk deteksi objek realtime pada video atau kamera ponsel.</p>
+            <p class="content-text">Sebelum YOLO, algoritma deteksi objek menggunakan metode "Two-Stage Detector" (seperti R-CNN), di mana sistem pertama-tama mencari region yang mungkin berisi objek, lalu menjalankan klasifikasi pada setiap area tersebut. Pendekatan ini akurat namun <strong>sangat lambat</strong>.</p>
+            <p class="content-text">Sesuai namanya (<em>You Only Look Once</em>), YOLO memandang seluruh gambar hanya satu kali (satu tahap/one-stage) menggunakan arsitektur jaringan saraf tunggal. Ini membuat YOLO sangat cepat dan efisien — ideal untuk deteksi objek realtime pada video atau kamera ponsel.</p>
 
             <div class="data-collection-grid" style="margin-top: 2rem;">
                 <div class="data-card">
@@ -67,7 +65,7 @@
                     </div>
                     <div class="data-card-content">
                         <h3>Global Context</h3>
-                        <p>Karena memproses seluruh gambar sekaligus, YOLO memahami konteks global dan jarang membuat kesalahan (false positive) pada background.</p>
+                        <p>Karena memproses seluruh gambar sekaligus, YOLO memahami konteks global dan jarang membuat <em>false positive</em> pada background.</p>
                     </div>
                 </div>
                 <div class="data-card">
@@ -82,39 +80,275 @@
             </div>
 
             <h2 class="content-heading" style="margin-top: 3rem;">2. Konsep Kunci dalam YOLO</h2>
-            
-            <h3 style="margin-top: 1.5rem; color: var(--accent-flutter);">A. Bounding Box & Confidence Score</h3>
-            <p class="content-text">YOLO membagi gambar menjadi sebuah grid (misalnya 13x13). Setiap sel grid bertanggung jawab untuk mendeteksi objek yang <strong>titik tengahnya</strong> berada di dalam sel tersebut. Sel akan memprediksi <em>Bounding Box</em> (x, y, lebar, tinggi) dan nilai <strong>Confidence Score</strong> (seberapa yakin kotak itu berisi objek tertentu).</p>
 
-            <h3 style="margin-top: 1.5rem; color: var(--accent-flutter);">B. Intersection over Union (IoU)</h3>
-            <p class="content-text">YOLO sering menghasilkan banyak prediksi kotak untuk satu objek. Untuk membersihkannya, digunakan IoU (Irisan dibagi Gabungan) untuk mengevaluasi seberapa tumpang tindih prediksi kotak dengan area objek sebenarnya, dan algoritma <strong>Non-Maximum Suppression (NMS)</strong> digunakan untuk hanya menyimpan kotak dengan probabilitas tertinggi dan membuang duplikatnya.</p>
+            <h3 style="margin-top: 1.5rem; color: var(--accent-flutter);">A. Bounding Box & Confidence Score</h3>
+            <p class="content-text">YOLO membagi gambar menjadi sebuah grid (misalnya 13×13). Setiap sel grid bertanggung jawab mendeteksi objek yang <strong>titik tengahnya</strong> berada di dalam sel tersebut. Sel memprediksi <em>Bounding Box</em> (x, y, lebar, tinggi) dan <strong>confidence score</strong> (seberapa yakin kotak itu berisi objek tertentu).</p>
+
+            <h3 style="margin-top: 1.5rem; color: var(--accent-flutter);">B. Intersection over Union (IoU) & NMS</h3>
+            <p class="content-text">YOLO sering menghasilkan banyak prediksi kotak untuk satu objek. Untuk membersihkannya, digunakan <strong>IoU</strong> (Intersection over Union) — rasio area irisan dibagi area gabungan dua kotak. Algoritma <strong>Non-Maximum Suppression (NMS)</strong> akan membuang kotak yang IoU-nya terlalu tinggi dengan kotak lain yang confidence-nya lebih besar.</p>
 
             <h2 class="content-heading" style="margin-top: 3rem;">3. Perkembangan Versi YOLO</h2>
             <ul style="margin-left: 1.5rem; margin-bottom: 1.5rem;" class="content-text">
-                <li style="margin-bottom: 0.5rem;"><strong>YOLOv1 hingga v3:</strong> Mengukuhkan dominasi YOLO di bidang deteksi objek real-time.</li>
-                <li style="margin-bottom: 0.5rem;"><strong>YOLOv4 & v5:</strong> Mulai dioptimalkan untuk performa komputasi yang lebih ringan, mempopulerkan implementasi di mobile (iOS/Android).</li>
-                <li style="margin-bottom: 0.5rem;"><strong>YOLOv8 & v10 (Ultralytics):</strong> Versi terbaru yang sangat canggih, tidak hanya untuk deteksi objek (Object Detection), tetapi juga <em>Instance Segmentation</em> dan <em>Pose Estimation</em> dengan akurasi dan efisiensi memori yang jauh lebih baik.</li>
+                <li style="margin-bottom: 0.5rem;"><strong>YOLOv1–v3:</strong> Mengukuhkan dominasi YOLO di bidang deteksi objek real-time.</li>
+                <li style="margin-bottom: 0.5rem;"><strong>YOLOv4 & v5:</strong> Dioptimalkan untuk performa komputasi yang lebih ringan, populer untuk mobile.</li>
+                <li style="margin-bottom: 0.5rem;"><strong>YOLOv8 & v10 (Ultralytics):</strong> Versi modern — tidak hanya untuk Object Detection, tapi juga <em>Instance Segmentation</em> dan <em>Pose Estimation</em> dengan akurasi & efisiensi memori yang jauh lebih baik.</li>
             </ul>
+
+            <h2 class="content-heading" id="implementasi-flutter">4. Praktikum: YOLO di Flutter dengan GetX</h2>
+            <p class="content-text">Kita akan membuat aplikasi sederhana untuk mendeteksi objek dari gambar yang dipilih dari galeri/kamera. Kita pakai package <strong><code>flutter_vision</code></strong> agar tidak perlu menulis post-processing NMS sendiri.</p>
+
+            <h3 style="margin-top: 2rem; margin-bottom: 0.5rem; color: var(--accent-flutter);">Step 1: Siapkan Model YOLO</h3>
+            <p class="content-text">Unduh model YOLOv8n versi TFLite yang sudah di-pretrain dengan dataset COCO (80 kelas: orang, mobil, kucing, dll) dari repo resmi Ultralytics, atau dari halaman <a href="https://github.com/ultralytics/yolov5/releases" target="_blank" style="color: var(--accent-flutter);">releases YOLO</a>. Anda akan mendapatkan:</p>
+            <ul class="content-list">
+                <li><code>yolov8n.tflite</code> — model deteksi (ukuran ~6 MB)</li>
+                <li><code>labels.txt</code> — daftar 80 nama kelas COCO</li>
+            </ul>
+
+            <h3 style="margin-top: 2rem; margin-bottom: 0.5rem; color: var(--accent-flutter);">Step 2: Buat Project Baru</h3>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">Terminal</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code>flutter create deteksi_yolo
+cd deteksi_yolo
+flutter pub add get flutter_vision image_picker</code></pre>
+            </div>
+
+            <p class="content-text">Salin <code>yolov8n.tflite</code> dan <code>labels.txt</code> ke <code>assets/ml/</code>, lalu daftarkan di <code>pubspec.yaml</code>:</p>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">pubspec.yaml</span>
+                </div>
+                <pre class="code-block-body"><code>flutter:
+  assets:
+    - assets/ml/yolov8n.tflite
+    - assets/ml/labels.txt</code></pre>
+            </div>
+            <p class="content-text">Pastikan <code>minSdk = 23</code> di <code>android/app/build.gradle.kts</code>.</p>
+
+            <h3 style="margin-top: 2rem; margin-bottom: 0.5rem; color: var(--accent-flutter);">Step 3: Buat Controller</h3>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">lib/yolo_controller.dart</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-keyword">import</span> <span class="hl-string">'dart:io'</span>;
+<span class="hl-keyword">import</span> <span class="hl-string">'package:flutter_vision/flutter_vision.dart'</span>;
+<span class="hl-keyword">import</span> <span class="hl-string">'package:get/get.dart'</span>;
+<span class="hl-keyword">import</span> <span class="hl-string">'package:image_picker/image_picker.dart'</span>;
+
+<span class="hl-keyword">class</span> <span class="hl-func">YoloController</span> <span class="hl-keyword">extends</span> GetxController {
+  <span class="hl-keyword">final</span> _vision = FlutterVision();
+  <span class="hl-keyword">final</span> _picker = ImagePicker();
+
+  <span class="hl-comment">// State reaktif</span>
+  <span class="hl-keyword">final</span> selectedImage = Rxn&lt;File&gt;();
+  <span class="hl-keyword">final</span> detections = &lt;Map&lt;String, <span class="hl-keyword">dynamic</span>&gt;&gt;[].obs;
+  <span class="hl-keyword">final</span> isLoading = <span class="hl-keyword">false</span>.obs;
+  <span class="hl-keyword">final</span> imageSize = Size.zero.obs;
+
+  @override
+  <span class="hl-keyword">void</span> <span class="hl-func">onInit</span>() {
+    <span class="hl-keyword">super</span>.onInit();
+    <span class="hl-func">_loadModel</span>();
+  }
+
+  @override
+  <span class="hl-keyword">void</span> <span class="hl-func">onClose</span>() {
+    _vision.<span class="hl-func">closeYoloModel</span>();
+    <span class="hl-keyword">super</span>.onClose();
+  }
+
+  Future&lt;<span class="hl-keyword">void</span>&gt; <span class="hl-func">_loadModel</span>() <span class="hl-keyword">async</span> {
+    <span class="hl-keyword">await</span> _vision.<span class="hl-func">loadYoloModel</span>(
+      modelPath: <span class="hl-string">'assets/ml/yolov8n.tflite'</span>,
+      labels: <span class="hl-string">'assets/ml/labels.txt'</span>,
+      modelVersion: <span class="hl-string">'yolov8'</span>,
+      numThreads: <span class="hl-number">2</span>,
+      useGpu: <span class="hl-keyword">false</span>,
+    );
+  }
+
+  Future&lt;<span class="hl-keyword">void</span>&gt; <span class="hl-func">pickAndDetect</span>(ImageSource src) <span class="hl-keyword">async</span> {
+    <span class="hl-keyword">final</span> picked = <span class="hl-keyword">await</span> _picker.<span class="hl-func">pickImage</span>(source: src);
+    <span class="hl-keyword">if</span> (picked == <span class="hl-keyword">null</span>) <span class="hl-keyword">return</span>;
+
+    selectedImage.value = File(picked.path);
+    isLoading.value = <span class="hl-keyword">true</span>;
+
+    <span class="hl-comment">// Baca ukuran gambar asli (untuk hitung skala bounding box)</span>
+    <span class="hl-keyword">final</span> bytes = <span class="hl-keyword">await</span> selectedImage.value!.<span class="hl-func">readAsBytes</span>();
+    <span class="hl-keyword">final</span> decoded = <span class="hl-keyword">await</span> decodeImageFromList(bytes);
+    imageSize.value = Size(decoded.width.<span class="hl-func">toDouble</span>(), decoded.height.<span class="hl-func">toDouble</span>());
+
+    <span class="hl-comment">// Jalankan YOLO — confidence di atas 40%, IoU NMS 30%</span>
+    <span class="hl-keyword">final</span> result = <span class="hl-keyword">await</span> _vision.<span class="hl-func">yoloOnImage</span>(
+      bytesList: bytes,
+      imageHeight: decoded.height,
+      imageWidth: decoded.width,
+      iouThreshold: <span class="hl-number">0.3</span>,
+      confThreshold: <span class="hl-number">0.4</span>,
+      classThreshold: <span class="hl-number">0.5</span>,
+    );
+
+    detections.<span class="hl-func">assignAll</span>(result);
+    isLoading.value = <span class="hl-keyword">false</span>;
+  }
+}</code></pre>
+            </div>
+
+            <div class="info-box">
+                <div class="info-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                    <strong>Apa Itu Threshold di YOLO?</strong>
+                </div>
+                <p>&bull; <strong>confThreshold</strong> — minimum confidence agar deteksi dianggap valid (semakin tinggi = lebih sedikit false positive).<br>&bull; <strong>iouThreshold</strong> — di atas berapa IoU dua kotak dianggap "menumpuk" dan salah satu dibuang oleh NMS.<br>&bull; <strong>classThreshold</strong> — minimum probabilitas <em>kelas</em> dari hasil softmax. Biasanya cukup 0.5.</p>
+            </div>
+
+            <h3 style="margin-top: 2rem; margin-bottom: 0.5rem; color: var(--accent-flutter);">Step 4: Buat UI dengan Overlay Bounding Box</h3>
+            <p class="content-text">UI menampilkan gambar dengan kotak deteksi di atasnya. Kita pakai <code>Stack</code> + <code>CustomPaint</code>.</p>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">lib/yolo_page.dart</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-keyword">import</span> <span class="hl-string">'package:flutter/material.dart'</span>;
+<span class="hl-keyword">import</span> <span class="hl-string">'package:get/get.dart'</span>;
+<span class="hl-keyword">import</span> <span class="hl-string">'package:image_picker/image_picker.dart'</span>;
+<span class="hl-keyword">import</span> <span class="hl-string">'yolo_controller.dart'</span>;
+
+<span class="hl-keyword">class</span> <span class="hl-func">YoloPage</span> <span class="hl-keyword">extends</span> StatelessWidget {
+  <span class="hl-keyword">const</span> <span class="hl-func">YoloPage</span>({<span class="hl-keyword">super</span>.key});
+
+  @override
+  Widget <span class="hl-func">build</span>(BuildContext context) {
+    <span class="hl-keyword">final</span> c = Get.<span class="hl-func">put</span>(YoloController());
+
+    <span class="hl-keyword">return</span> Scaffold(
+      appBar: AppBar(title: <span class="hl-keyword">const</span> Text(<span class="hl-string">'Deteksi Objek YOLO'</span>)),
+      body: Padding(
+        padding: <span class="hl-keyword">const</span> EdgeInsets.<span class="hl-func">all</span>(<span class="hl-number">16</span>),
+        child: Column(children: [
+          Expanded(
+            child: Obx(() {
+              <span class="hl-keyword">if</span> (c.selectedImage.value == <span class="hl-keyword">null</span>) {
+                <span class="hl-keyword">return</span> <span class="hl-keyword">const</span> Center(child: Text(<span class="hl-string">'Pilih gambar untuk dideteksi'</span>));
+              }
+              <span class="hl-keyword">return</span> LayoutBuilder(builder: (_, cons) {
+                <span class="hl-keyword">return</span> Stack(children: [
+                  Image.<span class="hl-func">file</span>(c.selectedImage.value!, fit: BoxFit.contain),
+                  <span class="hl-comment">// Gambar bounding box di atas image</span>
+                  ...c.detections.<span class="hl-func">map</span>((d) =&gt; <span class="hl-func">_buildBox</span>(d, cons.biggest, c.imageSize.value)),
+                ]);
+              });
+            }),
+          ),
+          <span class="hl-keyword">const</span> SizedBox(height: <span class="hl-number">16</span>),
+          Obx(() =&gt; c.isLoading.value
+              ? <span class="hl-keyword">const</span> CircularProgressIndicator()
+              : Text(<span class="hl-string">'${c.detections.length} objek terdeteksi'</span>)),
+          <span class="hl-keyword">const</span> SizedBox(height: <span class="hl-number">12</span>),
+          Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+            ElevatedButton.<span class="hl-func">icon</span>(
+              onPressed: () =&gt; c.<span class="hl-func">pickAndDetect</span>(ImageSource.camera),
+              icon: <span class="hl-keyword">const</span> Icon(Icons.camera_alt),
+              label: <span class="hl-keyword">const</span> Text(<span class="hl-string">'Kamera'</span>),
+            ),
+            <span class="hl-keyword">const</span> SizedBox(width: <span class="hl-number">12</span>),
+            OutlinedButton.<span class="hl-func">icon</span>(
+              onPressed: () =&gt; c.<span class="hl-func">pickAndDetect</span>(ImageSource.gallery),
+              icon: <span class="hl-keyword">const</span> Icon(Icons.photo_library),
+              label: <span class="hl-keyword">const</span> Text(<span class="hl-string">'Galeri'</span>),
+            ),
+          ]),
+        ]),
+      ),
+    );
+  }
+
+  Widget <span class="hl-func">_buildBox</span>(Map d, Size canvas, Size orig) {
+    <span class="hl-comment">// Skala koordinat dari ukuran gambar asli ke ukuran canvas</span>
+    <span class="hl-keyword">final</span> sx = canvas.width / orig.width;
+    <span class="hl-keyword">final</span> sy = canvas.height / orig.height;
+
+    <span class="hl-keyword">final</span> box = d[<span class="hl-string">'box'</span>] <span class="hl-keyword">as</span> List;
+    <span class="hl-keyword">final</span> x1 = (box[<span class="hl-number">0</span>] <span class="hl-keyword">as</span> num).<span class="hl-func">toDouble</span>() * sx;
+    <span class="hl-keyword">final</span> y1 = (box[<span class="hl-number">1</span>] <span class="hl-keyword">as</span> num).<span class="hl-func">toDouble</span>() * sy;
+    <span class="hl-keyword">final</span> w = ((box[<span class="hl-number">2</span>] <span class="hl-keyword">as</span> num).<span class="hl-func">toDouble</span>() - (box[<span class="hl-number">0</span>] <span class="hl-keyword">as</span> num).<span class="hl-func">toDouble</span>()) * sx;
+    <span class="hl-keyword">final</span> h = ((box[<span class="hl-number">3</span>] <span class="hl-keyword">as</span> num).<span class="hl-func">toDouble</span>() - (box[<span class="hl-number">1</span>] <span class="hl-keyword">as</span> num).<span class="hl-func">toDouble</span>()) * sy;
+
+    <span class="hl-keyword">return</span> Positioned(
+      left: x1, top: y1, width: w, height: h,
+      child: Container(
+        decoration: BoxDecoration(
+          border: Border.<span class="hl-func">all</span>(color: Colors.greenAccent, width: <span class="hl-number">2</span>),
+        ),
+        child: Align(
+          alignment: Alignment.topLeft,
+          child: Container(
+            color: Colors.greenAccent,
+            padding: <span class="hl-keyword">const</span> EdgeInsets.<span class="hl-func">symmetric</span>(horizontal: <span class="hl-number">4</span>),
+            child: Text(<span class="hl-string">'${d['tag']} ${(d['box'][4] * 100).toStringAsFixed(0)}%'</span>,
+                style: <span class="hl-keyword">const</span> TextStyle(color: Colors.black, fontSize: <span class="hl-number">12</span>)),
+          ),
+        ),
+      ),
+    );
+  }
+}</code></pre>
+            </div>
+
+            <h3 style="margin-top: 2rem; margin-bottom: 0.5rem; color: var(--accent-flutter);">Step 5: main.dart</h3>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">lib/main.dart</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code>import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'yolo_page.dart';
+
+void main() =&gt; runApp(const MyApp());
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+  @override
+  Widget build(BuildContext context) {
+    return GetMaterialApp(
+      title: 'Deteksi Objek YOLO',
+      home: const YoloPage(),
+    );
+  }
+}</code></pre>
+            </div>
+
+            <p class="content-text">Jalankan <code>flutter run</code>, ambil foto dengan beberapa objek (misal foto orang dan kursi), dan amati kotak hijau yang muncul dengan label kelas + persentase.</p>
 
             <div class="info-box" style="margin-top: 2rem;">
                 <div class="info-box-header">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
-                    <strong>Membawa YOLO ke Flutter</strong>
+                    <strong>Pengembangan Lanjut</strong>
                 </div>
-                <p>Untuk menjalankan model YOLO (seperti YOLOv8) di aplikasi Flutter, biasanya model asli (misal format PyTorch <code>.pt</code>) harus dieksport ke format <strong>TensorFlow Lite (<code>.tflite</code>)</strong>. Di Flutter, package <code>tflite_flutter</code> digunakan untuk membaca model tersebut, lalu kita memerlukan script tambahan di sisi Dart untuk mengolah output tensor menjadi Bounding Box yang bisa digambar menggunakan <code>CustomPaint</code> di atas layar kamera <em>(Realtime)</em>.</p>
+                <p>&bull; <strong>Realtime kamera</strong> — package <code>flutter_vision</code> juga punya <code>yoloOnFrame()</code> untuk diproses dari stream kamera.<br>&bull; <strong>Custom dataset</strong> — train model YOLOv8 sendiri di Google Colab dengan dataset Anda (misal: deteksi rambu lalu lintas Indonesia), lalu export ke TFLite.<br>&bull; <strong>GPU acceleration</strong> — set <code>useGpu: true</code> di <code>loadYoloModel</code> untuk performa lebih kencang (hanya jalan di device yang support).</p>
             </div>
 
             <!-- Nav -->
             <div class="content-nav">
                 <div class="content-nav-item">
-                    <a href="/flutter-advanced/tflite-ondevice.html" class="nav-btn nav-btn-prev">
+                    <a href="/flutter-advanced/tm-pose.html" class="nav-btn nav-btn-prev">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
-                        <div><span class="nav-label">Sebelumnya</span><span class="nav-name">TFLite & On-Device ML</span></div>
+                        <div><span class="nav-label">Sebelumnya</span><span class="nav-name">Pose Project</span></div>
                     </a>
                 </div>
                 <div class="content-nav-item">
-                    <a href="/flutter-advanced/google-stitch.html" class="nav-btn nav-btn-next">
-                        <div><span class="nav-label">Selanjutnya</span><span class="nav-name">Google Stitch</span></div>
+                    <a href="/flutter-advanced/ai-features.html" class="nav-btn nav-btn-next">
+                        <div><span class="nav-label">Selanjutnya</span><span class="nav-name">AI-Powered Features (ML Kit)</span></div>
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
                     </a>
                 </div>
@@ -123,5 +357,16 @@
     </main>
 
     <script src="/flutter-advanced/course-layout.js"></script>
+    <script>
+    function copyCode(btn) {
+        const codeBlock = btn.closest('.code-block').querySelector('code');
+        navigator.clipboard.writeText(codeBlock.textContent).then(() => {
+            btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>';
+            setTimeout(() => {
+                btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+            }, 2000);
+        });
+    }
+    </script>
 </body>
 </html>

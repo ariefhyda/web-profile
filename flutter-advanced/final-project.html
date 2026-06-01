@@ -38,7 +38,7 @@
             </div>
 
             <header class="content-header">
-                <h1 class="content-title">Modul 7: Final Project Advanced</h1>
+                <h1 class="content-title">Modul 6: Final Project Advanced</h1>
                 <div class="content-meta">
                     <div class="meta-pill">
                         <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 5V8.5L10.5 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/></svg>
@@ -102,42 +102,46 @@
 
 
             <h2 class="content-heading">Fase 2: Setup Project (Minggu 1)</h2>
-            <p class="content-text">Buat project Flutter baru dan siapkan struktur folder yang rapi:</p>
+            <p class="content-text">Buat project Flutter baru dengan struktur <strong>flat</strong> — tanpa folder services/models/widgets. Semua file ada langsung di <code>lib/</code> supaya mudah dinavigasi.</p>
 
             <div class="code-block">
                 <div class="code-block-header">
                     <div class="code-block-dots"><span></span><span></span><span></span></div>
-                    <span class="code-block-filename">Struktur Project</span>
+                    <span class="code-block-filename">Terminal</span>
+                </div>
+                <pre class="code-block-body"><code>flutter create smart_plant_app
+cd smart_plant_app
+flutter pub add get tflite_flutter image_picker image \
+  google_mlkit_text_recognition shared_preferences share_plus</code></pre>
+            </div>
+
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">Struktur Project (Flat GetX)</span>
                     <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
                 </div>
-                <pre class="code-block-body"><code><span class="hl-comment"># Struktur project yang direkomendasikan</span>
-smart_plant_app/
-+-- assets/
-|   +-- ml/
-|       +-- plant_model.tflite     <span class="hl-comment"># Model klasifikasi tanaman</span>
-|       +-- plant_labels.txt       <span class="hl-comment"># Label kelas tanaman</span>
-+-- lib/
-|   +-- main.dart
-|   +-- app/
-|   |   +-- routes.dart
-|   |   +-- theme.dart
-|   +-- services/
-|   |   +-- classifier_service.dart  <span class="hl-comment"># TFLite inference</span>
-|   |   +-- ocr_service.dart         <span class="hl-comment"># Text recognition</span>
-|   |   +-- camera_service.dart       <span class="hl-comment"># Camera management</span>
-|   +-- models/
-|   |   +-- plant.dart
-|   |   +-- scan_result.dart
-|   +-- pages/
-|   |   +-- home_page.dart
-|   |   +-- scan_page.dart
-|   |   +-- result_page.dart
-|   |   +-- history_page.dart
-|   +-- widgets/
-|       +-- confidence_bar.dart
-|       +-- plant_card.dart
-+-- pubspec.yaml</code></pre>
+                <pre class="code-block-body"><code>smart_plant_app/
+├── assets/ml/
+│   ├── plant_model.tflite     <span class="hl-comment"># Model klasifikasi tanaman</span>
+│   └── plant_labels.txt       <span class="hl-comment"># Daftar nama tanaman</span>
+└── lib/
+    ├── main.dart              <span class="hl-comment"># GetMaterialApp</span>
+    ├── home_page.dart         <span class="hl-comment"># Menu utama (Scan / Riwayat)</span>
+    ├── scan_controller.dart   <span class="hl-comment"># Logika TFLite + OCR</span>
+    ├── scan_page.dart         <span class="hl-comment"># UI scan tanaman</span>
+    ├── result_page.dart       <span class="hl-comment"># Tampilkan hasil + info</span>
+    └── history_page.dart      <span class="hl-comment"># Daftar riwayat scan</span></code></pre>
             </div>
+
+            <div class="info-box">
+                <div class="info-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                    <strong>Kenapa Flat Structure?</strong>
+                </div>
+                <p>Untuk proyek skala kecil-menengah seperti final project (≤10 file), folder service/model/widget justru menambah <em>cognitive load</em>. Cukup beri <strong>nama file yang jelas</strong> dan biarkan flat. Saat project membesar, baru pisahkan ke folder.</p>
+            </div>
+
             <div class="code-block">
                 <div class="code-block-header">
                     <div class="code-block-dots"><span></span><span></span><span></span></div>
@@ -145,19 +149,17 @@ smart_plant_app/
                     <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
                 </div>
                 <pre class="code-block-body"><code><span class="hl-keyword">name</span>: smart_plant_app
-<span class="hl-keyword">description</span>: Aplikasi identifikasi tanaman dengan AI
 
 <span class="hl-keyword">dependencies</span>:
   flutter:
     sdk: flutter
-  tflite_flutter: ^<span class="hl-number">0.11.0</span>
-  image_picker: ^<span class="hl-number">1.0.0</span>
-  image: ^<span class="hl-number">4.1.0</span>
-  camera: ^<span class="hl-number">0.11.0</span>
-  google_mlkit_text_recognition: ^<span class="hl-number">0.12.0</span>
-  path_provider: ^<span class="hl-number">2.1.0</span>
-  sqflite: ^<span class="hl-number">2.3.0</span>         <span class="hl-comment"># Local database untuk history</span>
-  share_plus: ^<span class="hl-number">7.0.0</span>       <span class="hl-comment"># Share hasil scan</span>
+  get: ^<span class="hl-number">4.6.6</span>                     <span class="hl-comment"># state management (.obs + Obx)</span>
+  tflite_flutter: ^<span class="hl-number">0.11.0</span>          <span class="hl-comment"># jalankan model TFLite</span>
+  image_picker: ^<span class="hl-number">1.0.0</span>             <span class="hl-comment"># ambil foto dari kamera/galeri</span>
+  image: ^<span class="hl-number">4.1.0</span>                    <span class="hl-comment"># resize gambar untuk preprocess</span>
+  google_mlkit_text_recognition: ^<span class="hl-number">0.13.0</span>  <span class="hl-comment"># OCR untuk baca label</span>
+  shared_preferences: ^<span class="hl-number">2.2.0</span>       <span class="hl-comment"># simpan riwayat scan lokal</span>
+  share_plus: ^<span class="hl-number">7.0.0</span>               <span class="hl-comment"># share hasil ke sosial media</span>
 
 <span class="hl-keyword">flutter</span>:
   assets:
@@ -167,15 +169,23 @@ smart_plant_app/
 
 
             <h2 class="content-heading">Fase 3: Implementasi Fitur (Minggu 2)</h2>
-            <p class="content-text">Implementasikan fitur-fitur berikut secara bertahap:</p>
+            <p class="content-text">Implementasikan bertahap. Setiap file kecil dan punya tanggung jawab tunggal:</p>
             <ol class="content-list">
-                <li><strong>ClassifierService</strong> (Hari 1-2)<br>Implementasi dari Modul 3. Load model, preprocess gambar, jalankan inferensi. Test dengan gambar statis terlebih dahulu.</li>
-                <li><strong>Camera &amp; Gallery Integration</strong> (Hari 2-3)<br>Halaman scan dengan pilihan kamera dan galeri. Tampilkan preview gambar sebelum klasifikasi.</li>
-                <li><strong>Result Page</strong> (Hari 3-4)<br>Tampilkan hasil klasifikasi dengan confidence bar yang visual. Tambahkan informasi tanaman (deskripsi, tips perawatan).</li>
-                <li><strong>Fitur ML Kit</strong> (Hari 4-5)<br>Tambahkan OCR untuk membaca label tanaman, atau barcode scanner untuk scan QR code info tanaman.</li>
-                <li><strong>History &amp; Persistence</strong> (Hari 5-6)<br>Simpan hasil scan ke database lokal (sqflite). Tampilkan riwayat scan dengan thumbnail dan tanggal.</li>
-                <li><strong>Share Feature</strong> (Hari 6-7)<br>Fitur share hasil scan ke media sosial menggunakan <code>share_plus</code>.</li>
+                <li><strong><code>scan_controller.dart</code></strong> (Hari 1-2)<br>Pakai pola yang sama dari Modul 2.1: load TFLite, preprocess gambar 224×224, jalankan inferensi. Pakai variabel <code>.obs</code> untuk hasil dan loading state. Test dulu dari galeri saja.</li>
+                <li><strong><code>scan_page.dart</code></strong> (Hari 2-3)<br>UI scan dengan tombol Kamera/Galeri. Pakai <code>Obx</code> untuk preview gambar dan progress. Saat hasil siap, <code>Get.to(() =&gt; ResultPage())</code>.</li>
+                <li><strong><code>result_page.dart</code></strong> (Hari 3-4)<br>Terima hasil via <code>Get.arguments</code>. Tampilkan confidence bar (<code>LinearProgressIndicator</code>) + info tanaman dari Map konstan di kode.</li>
+                <li><strong>OCR (ML Kit)</strong> (Hari 4-5)<br>Tambahkan tombol "Baca Label" di <code>scan_page</code> — buka kamera dan pakai <code>TextRecognizer</code> dari Modul 4 untuk OCR nama tanaman di label.</li>
+                <li><strong>History via SharedPreferences</strong> (Hari 5-6)<br>Simpan setiap hasil scan (nama + tanggal) ke <code>SharedPreferences</code> sebagai List JSON. <code>history_page.dart</code> menampilkannya pakai <code>ListView</code>.</li>
+                <li><strong>Share</strong> (Hari 6-7)<br>Tombol share di <code>result_page</code> &rarr; <code>Share.share('Saya scan: $nama (${confidence}%)')</code> via <code>share_plus</code>.</li>
             </ol>
+
+            <div class="info-box">
+                <div class="info-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                    <strong>Tips: Skeleton main.dart</strong>
+                </div>
+                <p>Gunakan <code>GetMaterialApp</code> di <code>main.dart</code> agar bisa pakai <code>Get.to()</code>, <code>Get.arguments</code>, dan <code>Get.snackbar()</code> tanpa <code>context</code>. Routing manual seperti <code>Get.to(() =&gt; ResultPage(), arguments: hasil)</code> sudah cukup — tidak perlu pakai <code>GetX</code> routing terstruktur (<code>routes:</code> + <code>getPages:</code>).</p>
+            </div>
 
             <h2 class="content-heading">Fase 4: Polish &amp; Deploy (Minggu 3)</h2>
             <ol class="content-list">
@@ -204,10 +214,10 @@ smart_plant_app/
 <span class="hl-comment">// [ ] Minimal 1 fitur ML Kit (OCR/Face/Barcode)</span>
 
 <span class="hl-comment">// [Architecture]</span>
-<span class="hl-comment">// [ ] Service layer terpisah dari UI</span>
-<span class="hl-comment">// [ ] Proper dispose untuk semua ML resource</span>
-<span class="hl-comment">// [ ] Error handling yang informatif</span>
-<span class="hl-comment">// [ ] Loading state saat processing</span>
+<span class="hl-comment">// [ ] Logika ML di GetxController, UI hanya pakai Obx</span>
+<span class="hl-comment">// [ ] Interpreter / detector di-close di onClose()</span>
+<span class="hl-comment">// [ ] Error handling yang informatif (Get.snackbar)</span>
+<span class="hl-comment">// [ ] Loading state pakai isLoading.obs</span>
 
 <span class="hl-comment">// [UI/UX]</span>
 <span class="hl-comment">// [ ] Material Design 3 / desain modern</span>
@@ -241,9 +251,9 @@ smart_plant_app/
                             <td style="padding:10px;">Model TFLite berfungsi + minimal 1 fitur ML Kit</td>
                         </tr>
                         <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
-                            <td style="padding:10px;">Architecture &amp; Code Quality</td>
+                            <td style="padding:10px;">Code Quality (GetX flat)</td>
                             <td style="text-align:center; padding:10px;"><strong>25%</strong></td>
-                            <td style="padding:10px;">Separation of concerns, dispose pattern, error handling</td>
+                            <td style="padding:10px;">Logika di controller (<code>.obs</code>), UI reaktif via <code>Obx</code>, dispose di <code>onClose()</code>, error handling</td>
                         </tr>
                         <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
                             <td style="padding:10px;">UI/UX Design</td>
@@ -289,9 +299,9 @@ smart_plant_app/
 
             <div class="content-nav">
                 <div class="content-nav-item">
-                    <a href="/flutter-advanced/ai-features.html" class="nav-btn nav-btn-prev">
+                    <a href="/flutter-advanced/google-stitch.html" class="nav-btn nav-btn-prev">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
-                        <div><span class="nav-label">Sebelumnya</span><span class="nav-name">AI-Powered Features</span></div>
+                        <div><span class="nav-label">Sebelumnya</span><span class="nav-name">Google Stitch</span></div>
                     </a>
                 </div>
                 <div class="content-nav-item">

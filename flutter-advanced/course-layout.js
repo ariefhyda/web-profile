@@ -26,9 +26,14 @@ const courseConfig = {
             ]
         },
         {
-            group: "Implementasi ML",
+            group: "Google ML Kit",
             items: [
-                { title: "TFLite & On-Device ML", url: "/flutter-advanced/tflite-ondevice.html", icon: "3" }
+                { title: "Google ML Kit", url: "/flutter-advanced/mlkit.html", icon: "3" },
+                { title: "Text Recognition (OCR)", url: "/flutter-advanced/mlkit-ocr.html", icon: "3.1" },
+                { title: "Face Detection", url: "/flutter-advanced/mlkit-face.html", icon: "3.2" },
+                { title: "Barcode & QR Code Scanning", url: "/flutter-advanced/mlkit-barcode.html", icon: "3.3" },
+                { title: "Smart Recommendations", url: "/flutter-advanced/mlkit-recommendations.html", icon: "3.4" },
+                { title: "Object Detection", url: "/flutter-advanced/mlkit-object.html", icon: "3.5" }
             ]
         },
         {
@@ -38,10 +43,9 @@ const courseConfig = {
             ]
         },
         {
-            group: "Google Stitch & AI",
+            group: "Google Stitch",
             items: [
                 { title: "Google Stitch", url: "/flutter-advanced/google-stitch.html", icon: "5" },
-                { title: "AI-Powered Features", url: "/flutter-advanced/ai-features.html", icon: "6" }
             ]
         },
         {

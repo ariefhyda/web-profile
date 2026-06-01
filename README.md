@@ -35,13 +35,22 @@ Proyek ini adalah sebuah platform web terintegrasi yang berfungsi ganda sebagai 
 ```
 
 ## 💻 Cara Menjalankan Secara Lokal
-Gunakan *development server* apa saja yang memastikan agar semua path URL *absolute* dapat terpecahkan (resolved) secara optimal:
 
-Bila memiliki **Node.js**, Anda dapat langsung menggunakan `serve`:
+> ⚠️ **Wajib dijalankan dari folder root proyek** (`web-interaktif/`), bukan dari subfolder dan **bukan** dengan klik dua kali file HTML (`file://`). Situs ini memakai *absolute path* (`/style.css`, `/datamining/index.html`, dll), sehingga CSS dan navigasi antar-modul akan rusak bila tidak di-*serve* dari root.
+
+**Opsi 1 — Node.js (`serve`):**
 ```cmd
 npx -y serve . -p 3000
 ```
-Buka tautan lokal: `http://localhost:3000`
+
+**Opsi 2 — Python (tanpa Node.js):**
+```cmd
+python -m http.server 3000
+```
+
+Lalu buka di browser: `http://localhost:3000`
+
+> 💡 Catatan: perintahnya adalah `npx -y serve .` — **bukan** `npx run`. Kata `serve` adalah nama paket static server-nya, `.` berarti serve dari direktori saat ini, dan `-p 3000` menentukan port.
 
 ---
 *Dibuat oleh Arif Hidayah untuk kemajuan edukasi teknologi.*

@@ -112,40 +112,35 @@
             </ul>
 
             <h2 class="content-heading" id="implementasi-flutter">Langkah Praktikum 2: Implementasi di Flutter dengan GetX</h2>
-            <p class="content-text">Kita akan membangun aplikasi klasifikasi audio menggunakan arsitektur folder standar dari <strong>GetCLI</strong>. Terdapat dua fitur utama: Klasifikasi dari Upload Audio (.wav) dan Realtime dari Mikrofon.</p>
-            
-            <h3 style="margin-top: 2rem; margin-bottom: 0.5rem; color: var(--accent-flutter);">Step 1: Persiapan Proyek & Dependencies</h3>
-            <p class="content-text">Pastikan Anda sudah menginstal <code>get_cli</code> secara global. Buat proyek baru dan masuk ke foldernya:</p>
+            <p class="content-text">Kita akan membuat <strong>project baru</strong> dengan struktur sederhana — flat, tanpa folder modules/bindings/routes seperti pola GetCLI. Hanya 5 file di folder <code>lib/</code>: <code>main.dart</code>, <code>home_page.dart</code>, dan dua pasang controller+page untuk upload dan realtime.</p>
+
+            <h3 style="margin-top: 2rem; margin-bottom: 0.5rem; color: var(--accent-flutter);">Step 1: Buat Project & Dependencies</h3>
             <div class="code-block">
                 <div class="code-block-header">
                     <div class="code-block-dots"><span></span><span></span><span></span></div>
                     <span class="code-block-filename">Terminal</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
                 </div>
-                <pre class="code-block-body"><code>get create project:klasifikasi_audio
-cd klasifikasi_audio</code></pre>
-            </div>
-            
-            <p class="content-text">Salin model Teachable Machine Anda (<code>soundclassifier_with_metadata.tflite</code> dan <code>labels.txt</code>) ke dalam folder <code>assets/ml/</code>. Kemudian, instal package yang dibutuhkan:</p>
-            <div class="code-block">
-                <div class="code-block-header">
-                    <div class="code-block-dots"><span></span><span></span><span></span></div>
-                    <span class="code-block-filename">Terminal</span>
-                </div>
-                <pre class="code-block-body"><code>flutter pub add get tflite_flutter permission_handler record file_picker</code></pre>
+                <pre class="code-block-body"><code>flutter create klasifikasi_audio
+cd klasifikasi_audio
+flutter pub add get tflite_flutter permission_handler record file_picker</code></pre>
             </div>
 
-            <h3 style="margin-top: 2rem; margin-bottom: 0.5rem; color: var(--accent-flutter);">Step 2: Konfigurasi Pubspec & Android</h3>
-            <p class="content-text">Tambahkan aset ke dalam konfigurasi <code>pubspec.yaml</code>:</p>
+            <p class="content-text">Buat folder <code>assets/ml/</code> dan salin file <code>soundclassifier_with_metadata.tflite</code> + <code>labels.txt</code> dari Teachable Machine ke folder tersebut.</p>
+
+            <h3 style="margin-top: 2rem; margin-bottom: 0.5rem; color: var(--accent-flutter);">Step 2: Konfigurasi pubspec & Android</h3>
+            <p class="content-text">Daftarkan aset di <code>pubspec.yaml</code>:</p>
             <div class="code-block">
                 <div class="code-block-header">
                     <div class="code-block-dots"><span></span><span></span><span></span></div>
                     <span class="code-block-filename">pubspec.yaml</span>
                 </div>
-                <pre class="code-block-body"><code>  assets:
+                <pre class="code-block-body"><code>flutter:
+  assets:
     - assets/ml/labels.txt
     - assets/ml/soundclassifier_with_metadata.tflite</code></pre>
             </div>
-            <p class="content-text"><strong>Konfigurasi Android:</strong> Tambahkan izin mikrofon di <code>android/app/src/main/AndroidManifest.xml</code> sebelum tag <code>&lt;application&gt;</code>:</p>
+            <p class="content-text">Tambahkan izin mikrofon di <code>android/app/src/main/AndroidManifest.xml</code> (sebelum tag <code>&lt;application&gt;</code>):</p>
             <div class="code-block">
                 <div class="code-block-header">
                     <div class="code-block-dots"><span></span><span></span><span></span></div>
@@ -153,65 +148,85 @@ cd klasifikasi_audio</code></pre>
                 </div>
                 <pre class="code-block-body"><code>&lt;uses-permission android:name="android.permission.RECORD_AUDIO" /&gt;</code></pre>
             </div>
-            <p class="content-text">Buka <code>android/app/build.gradle.kts</code> dan perbarui nilai <code>compileSdk</code>, <code>minSdk</code>, dan <code>ndkVersion</code>:</p>
+            <p class="content-text">Buka <code>android/app/build.gradle.kts</code> dan set <code>minSdk = 23</code> agar TFLite dapat berjalan.</p>
+
+            <h3 style="margin-top: 2rem; margin-bottom: 0.5rem; color: var(--accent-flutter);">Step 3: Struktur Folder yang Kita Buat</h3>
             <div class="code-block">
                 <div class="code-block-header">
                     <div class="code-block-dots"><span></span><span></span><span></span></div>
-                    <span class="code-block-filename">build.gradle.kts</span>
+                    <span class="code-block-filename">Struktur Folder</span>
                 </div>
-                <pre class="code-block-body"><code>android {
-    namespace = "com.example.klasifikasi_audio"
-    compileSdk = 36
-    ndkVersion = "27.0.12077973"
-    
-    defaultConfig {
-        minSdk = 23
-    }
-}</code></pre>
+                <pre class="code-block-body"><code>klasifikasi_audio/
+├── assets/ml/
+│   ├── soundclassifier_with_metadata.tflite
+│   └── labels.txt
+└── lib/
+    ├── main.dart
+    ├── home_page.dart
+    ├── upload_controller.dart
+    ├── upload_page.dart
+    ├── realtime_controller.dart
+    └── realtime_page.dart</code></pre>
             </div>
 
-            <h3 style="margin-top: 2rem; margin-bottom: 0.5rem; color: var(--accent-flutter);">Step 3: Membuat Modul GetX</h3>
-            <p class="content-text">Gunakan GetCLI untuk membuat modul (Halaman) baru untuk fitur upload audio dan realtime audio:</p>
+            <h3 style="margin-top: 2rem; margin-bottom: 0.5rem; color: var(--accent-flutter);">Step 4: Tulis Kode</h3>
+            <p class="content-text"><strong>A. main.dart — entry point</strong></p>
             <div class="code-block">
                 <div class="code-block-header">
                     <div class="code-block-dots"><span></span><span></span><span></span></div>
-                    <span class="code-block-filename">Terminal</span>
-                </div>
-                <pre class="code-block-body"><code>get create page:upload_audio
-get create page:realtime_audio</code></pre>
-            </div>
-
-            <h3 style="margin-top: 2rem; margin-bottom: 0.5rem; color: var(--accent-flutter);">Step 4: Penulisan Kode Modul</h3>
-            <p class="content-text"><strong>A. Modul Home (Landing Page)</strong><br>Ubah <code>lib/app/modules/home/views/home_view.dart</code> agar menjadi menu pilihan klasifikasi:</p>
-            <div class="code-block">
-                <div class="code-block-header">
-                    <div class="code-block-dots"><span></span><span></span><span></span></div>
-                    <span class="code-block-filename">home_view.dart</span>
+                    <span class="code-block-filename">lib/main.dart</span>
                     <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
                 </div>
                 <pre class="code-block-body"><code>import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../../routes/app_pages.dart';
-import '../controllers/home_controller.dart';
+import 'home_page.dart';
 
-class HomeView extends GetView&lt;HomeController&gt; {
-  const HomeView({super.key});
+void main() =&gt; runApp(const MyApp());
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+  @override
+  Widget build(BuildContext context) {
+    return GetMaterialApp(
+      title: 'Klasifikasi Audio',
+      home: const HomePage(),
+    );
+  }
+}</code></pre>
+            </div>
+
+            <p class="content-text"><strong>B. home_page.dart — menu 2 tombol</strong></p>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">lib/home_page.dart</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code>import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'upload_page.dart';
+import 'realtime_page.dart';
+
+class HomePage extends StatelessWidget {
+  const HomePage({super.key});
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Audio Classification')),
+      appBar: AppBar(title: const Text('Klasifikasi Audio')),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            ElevatedButton(
-              onPressed: () =&gt; Get.toNamed(Routes.UPLOAD_AUDIO),
-              child: const Text('Klasifikasi dari Upload Audio'),
+            ElevatedButton.icon(
+              onPressed: () =&gt; Get.to(() =&gt; const UploadPage()),
+              icon: const Icon(Icons.upload_file),
+              label: const Text('Upload File Audio'),
             ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () =&gt; Get.toNamed(Routes.REALTIME_AUDIO),
-              child: const Text('Klasifikasi Audio Realtime'),
+            const SizedBox(height: 16),
+            ElevatedButton.icon(
+              onPressed: () =&gt; Get.to(() =&gt; const RealtimePage()),
+              icon: const Icon(Icons.mic),
+              label: const Text('Rekam Realtime'),
             ),
           ],
         ),
@@ -221,11 +236,11 @@ class HomeView extends GetView&lt;HomeController&gt; {
 }</code></pre>
             </div>
 
-            <p class="content-text"><strong>B. Modul Upload Audio</strong><br>Buka <code>lib/app/modules/upload_audio/controllers/upload_audio_controller.dart</code>:</p>
+            <p class="content-text"><strong>C. upload_controller.dart</strong> — logika baca .wav lalu klasifikasi:</p>
             <div class="code-block">
                 <div class="code-block-header">
                     <div class="code-block-dots"><span></span><span></span><span></span></div>
-                    <span class="code-block-filename">upload_audio_controller.dart</span>
+                    <span class="code-block-filename">lib/upload_controller.dart</span>
                     <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
                 </div>
                 <pre class="code-block-body" style="max-height: 400px; overflow-y: auto;"><code>import 'dart:io';
@@ -235,20 +250,20 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:tflite_flutter/tflite_flutter.dart';
 
-class UploadAudioController extends GetxController {
-  Interpreter? _interpreter;
-  List&lt;String&gt; _labels = [];
-
-  final selectedFileName = "No file selected".obs;
-  final predictedLabel = "Select a WAV file".obs;
+class UploadController extends GetxController {
+  // Variabel reaktif yang dipantau UI
+  final fileName = 'Belum ada file'.obs;
+  final label = '-'.obs;
   final confidence = 0.0.obs;
 
-  static const int _expectedInputSize = 15600;
+  Interpreter? _interpreter;
+  List&lt;String&gt; _labels = [];
+  static const int _inputSize = 15600; // 1 detik @ 16kHz
 
   @override
   void onInit() {
     super.onInit();
-    _loadModelAndLabels();
+    _load();
   }
 
   @override
@@ -257,136 +272,101 @@ class UploadAudioController extends GetxController {
     super.onClose();
   }
 
-  Future&lt;void&gt; _loadModelAndLabels() async {
-    try {
-      final labelData = await rootBundle.loadString('assets/ml/labels.txt');
-      _labels = labelData.split('\n').where((line) =&gt; line.isNotEmpty)
-          .map((line) =&gt; line.split(' ').sublist(1).join(' ')).toList();
-
-      _interpreter = await Interpreter.fromAsset('assets/ml/soundclassifier_with_metadata.tflite');
-    } catch (e) {
-      predictedLabel.value = "Failed to load model: $e";
-    }
+  Future&lt;void&gt; _load() async {
+    _interpreter = await Interpreter.fromAsset(
+        'assets/ml/soundclassifier_with_metadata.tflite');
+    final raw = await rootBundle.loadString('assets/ml/labels.txt');
+    // Format Teachable Machine: "0 Tepuk" → ambil "Tepuk"
+    _labels = raw.split('\n')
+        .where((l) =&gt; l.trim().isNotEmpty)
+        .map((l) =&gt; l.split(' ').sublist(1).join(' '))
+        .toList();
   }
 
-  Future&lt;void&gt; pickAndClassifyFile() async {
-    try {
-      FilePickerResult? result = await FilePicker.pickFiles(type: FileType.audio);
+  Future&lt;void&gt; pickAndClassify() async {
+    final result = await FilePicker.platform.pickFiles(type: FileType.audio);
+    if (result == null || result.files.isEmpty) return;
 
-      if (result != null && result.files.isNotEmpty) {
-        String? path = result.files.first.path;
-        if (path != null) {
-          selectedFileName.value = result.files.first.name;
-          predictedLabel.value = "Processing...";
-          confidence.value = 0.0;
+    final path = result.files.first.path;
+    if (path == null) return;
+    fileName.value = result.files.first.name;
+    label.value = 'Memproses...';
 
-          File file = File(path);
-          Uint8List bytes = await file.readAsBytes();
+    // Lewati 44 byte header WAV, baca data PCM 16-bit
+    final bytes = await File(path).readAsBytes();
+    final pcm = bytes.sublist(44).buffer
+        .asInt16List(bytes.offsetInBytes + 44, (bytes.length - 44) ~/ 2);
 
-          int headerSize = 44; // WAV header
-          if (bytes.length &lt;= headerSize) {
-            predictedLabel.value = "Invalid audio file";
-            return;
-          }
-
-          Uint8List audioData = bytes.sublist(headerSize);
-          Int16List int16Data = audioData.buffer.asInt16List(audioData.offsetInBytes, audioData.lengthInBytes ~/ 2);
-
-          List&lt;int&gt; samplesToProcess = [];
-          if (int16Data.length &gt;= _expectedInputSize) {
-            samplesToProcess = int16Data.sublist(0, _expectedInputSize);
-          } else {
-            samplesToProcess = int16Data.toList();
-            while (samplesToProcess.length &lt; _expectedInputSize) {
-              samplesToProcess.add(0);
-            }
-          }
-
-          _runInference(samplesToProcess);
-        }
-      }
-    } catch (e) {
-      predictedLabel.value = "Error picking file: $e";
+    // Ambil 15600 sample pertama, kalau kurang isi nol
+    final samples = List&lt;int&gt;.filled(_inputSize, 0);
+    for (var i = 0; i &lt; _inputSize && i &lt; pcm.length; i++) {
+      samples[i] = pcm[i];
     }
+    _runModel(samples);
   }
 
-  void _runInference(List&lt;int&gt; pcmData) {
-    if (_interpreter == null || _labels.isEmpty) return;
+  void _runModel(List&lt;int&gt; pcm) {
+    if (_interpreter == null) return;
 
-    List&lt;double&gt; inputData = pcmData.map((e) =&gt; e / 32768.0).toList();
-    var input = [inputData];
-    var output = List.filled(1, List.filled(_labels.length, 0.0));
+    // Normalisasi int16 ke float [-1, 1]
+    final input = [pcm.map((e) =&gt; e / 32768.0).toList()];
+    final output = List.filled(1, List.filled(_labels.length, 0.0));
+    _interpreter!.run(input, output);
 
-    try {
-      _interpreter!.run(input, output);
-      List&lt;double&gt; probabilities = output[0];
-      
-      double maxProb = 0.0;
-      int maxIndex = -1;
-      for (int i = 0; i &lt; probabilities.length; i++) {
-        if (probabilities[i] &gt; maxProb) {
-          maxProb = probabilities[i];
-          maxIndex = i;
-        }
-      }
-
-      if (maxIndex != -1) {
-        predictedLabel.value = _labels[maxIndex];
-        confidence.value = maxProb;
-      }
-    } catch (e) {
-      predictedLabel.value = "Inference error";
+    // Ambil index dengan probabilitas tertinggi
+    final probs = output[0];
+    var bestIdx = 0;
+    for (var i = 1; i &lt; probs.length; i++) {
+      if (probs[i] &gt; probs[bestIdx]) bestIdx = i;
     }
+    label.value = _labels[bestIdx];
+    confidence.value = probs[bestIdx];
   }
 }</code></pre>
             </div>
 
-            <p class="content-text">Buka <code>lib/app/modules/upload_audio/views/upload_audio_view.dart</code>:</p>
+            <p class="content-text"><strong>D. upload_page.dart</strong> — UI sederhana dengan <code>Obx</code>:</p>
             <div class="code-block">
                 <div class="code-block-header">
                     <div class="code-block-dots"><span></span><span></span><span></span></div>
-                    <span class="code-block-filename">upload_audio_view.dart</span>
+                    <span class="code-block-filename">lib/upload_page.dart</span>
                     <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
                 </div>
-                <pre class="code-block-body" style="max-height: 400px; overflow-y: auto;"><code>import 'package:flutter/material.dart';
+                <pre class="code-block-body"><code>import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../controllers/upload_audio_controller.dart';
+import 'upload_controller.dart';
 
-class UploadAudioView extends GetView&lt;UploadAudioController&gt; {
-  const UploadAudioView({super.key});
+class UploadPage extends StatelessWidget {
+  const UploadPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final c = Get.put(UploadController());
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Upload Audio Classification')),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.audio_file, size: 100, color: Colors.blueAccent),
-              const SizedBox(height: 16),
-              Obx(() =&gt; Text(controller.selectedFileName.value, style: const TextStyle(color: Colors.grey))),
-              const SizedBox(height: 32),
-              Obx(() =&gt; Text(controller.predictedLabel.value, style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold))),
-              const SizedBox(height: 16),
-              Obx(() =&gt; controller.confidence.value &gt; 0
-                  ? Column(
-                      children: [
-                        Text('Confidence: ${(controller.confidence.value * 100).toStringAsFixed(1)}%'),
-                        LinearProgressIndicator(value: controller.confidence.value, color: Colors.deepPurple),
-                      ],
-                    )
-                  : const SizedBox.shrink()),
-              const SizedBox(height: 48),
-              ElevatedButton.icon(
-                onPressed: controller.pickAndClassifyFile,
-                icon: const Icon(Icons.upload_file),
-                label: const Text('Pilih Audio (.wav)'),
-              ),
-            ],
-          ),
+      appBar: AppBar(title: const Text('Upload Audio')),
+      body: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.audio_file, size: 80, color: Colors.blueAccent),
+            const SizedBox(height: 16),
+            Obx(() =&gt; Text(c.fileName.value, style: const TextStyle(color: Colors.grey))),
+            const SizedBox(height: 24),
+            Obx(() =&gt; Text(c.label.value,
+                style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold))),
+            const SizedBox(height: 12),
+            Obx(() =&gt; c.confidence.value &gt; 0
+                ? LinearProgressIndicator(value: c.confidence.value)
+                : const SizedBox.shrink()),
+            const SizedBox(height: 32),
+            ElevatedButton.icon(
+              onPressed: c.pickAndClassify,
+              icon: const Icon(Icons.upload_file),
+              label: const Text('Pilih file .wav'),
+            ),
+          ],
         ),
       ),
     );
@@ -394,11 +374,11 @@ class UploadAudioView extends GetView&lt;UploadAudioController&gt; {
 }</code></pre>
             </div>
 
-            <p class="content-text"><strong>C. Modul Realtime Audio</strong><br>Buka <code>lib/app/modules/realtime_audio/controllers/realtime_audio_controller.dart</code>:</p>
+            <p class="content-text"><strong>E. realtime_controller.dart</strong> — stream mic + klasifikasi tiap ±1 detik:</p>
             <div class="code-block">
                 <div class="code-block-header">
                     <div class="code-block-dots"><span></span><span></span><span></span></div>
-                    <span class="code-block-filename">realtime_audio_controller.dart</span>
+                    <span class="code-block-filename">lib/realtime_controller.dart</span>
                     <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
                 </div>
                 <pre class="code-block-body" style="max-height: 400px; overflow-y: auto;"><code>import 'dart:async';
@@ -409,177 +389,154 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:record/record.dart';
 import 'package:tflite_flutter/tflite_flutter.dart';
 
-class RealtimeAudioController extends GetxController {
-  final _audioRecorder = AudioRecorder();
-  StreamSubscription&lt;Uint8List&gt;? _audioStreamSubscription;
-  Interpreter? _interpreter;
-  List&lt;String&gt; _labels = [];
-
+class RealtimeController extends GetxController {
   final isRecording = false.obs;
-  final predictedLabel = "Loading...".obs;
+  final label = 'Tekan mulai'.obs;
   final confidence = 0.0.obs;
 
-  static const int _sampleRate = 16000;
-  static const int _expectedInputSize = 15600;
-  
-  List&lt;int&gt; _audioBuffer = [];
+  final _recorder = AudioRecorder();
+  StreamSubscription&lt;Uint8List&gt;? _sub;
+  Interpreter? _interpreter;
+  List&lt;String&gt; _labels = [];
+  final List&lt;int&gt; _buffer = [];
+
+  static const int _inputSize = 15600; // 1 detik @ 16kHz
 
   @override
   void onInit() {
     super.onInit();
-    _loadModelAndLabels();
+    _load();
   }
 
   @override
   void onClose() {
-    _stopRecording();
-    _audioRecorder.dispose();
+    _stop();
+    _recorder.dispose();
     _interpreter?.close();
     super.onClose();
   }
 
-  Future&lt;void&gt; _loadModelAndLabels() async {
-    try {
-      final labelData = await rootBundle.loadString('assets/ml/labels.txt');
-      _labels = labelData.split('\n').where((line) =&gt; line.isNotEmpty)
-          .map((line) =&gt; line.split(' ').sublist(1).join(' ')).toList();
-
-      _interpreter = await Interpreter.fromAsset('assets/ml/soundclassifier_with_metadata.tflite');
-      predictedLabel.value = "Ready to record";
-    } catch (e) {
-      predictedLabel.value = "Failed to load model";
-    }
+  Future&lt;void&gt; _load() async {
+    _interpreter = await Interpreter.fromAsset(
+        'assets/ml/soundclassifier_with_metadata.tflite');
+    final raw = await rootBundle.loadString('assets/ml/labels.txt');
+    _labels = raw.split('\n')
+        .where((l) =&gt; l.trim().isNotEmpty)
+        .map((l) =&gt; l.split(' ').sublist(1).join(' '))
+        .toList();
   }
 
-  Future&lt;void&gt; toggleRecording() async {
+  Future&lt;void&gt; toggle() async {
     if (isRecording.value) {
-      await _stopRecording();
+      await _stop();
     } else {
-      await _startRecording();
+      await _start();
     }
   }
 
-  Future&lt;void&gt; _startRecording() async {
-    try {
-      var status = await Permission.microphone.request();
-      if (status != PermissionStatus.granted) {
-        predictedLabel.value = "Microphone permission denied";
-        return;
-      }
-
-      if (await _audioRecorder.hasPermission()) {
-        final stream = await _audioRecorder.startStream(const RecordConfig(
-          encoder: AudioEncoder.pcm16bits,
-          sampleRate: _sampleRate,
-          numChannels: 1,
-        ));
-
-        _audioBuffer.clear();
-        isRecording.value = true;
-        predictedLabel.value = "Listening...";
-
-        _audioStreamSubscription = stream.listen((Uint8List data) {
-          _processAudioData(data);
-        });
-      }
-    } catch (e) {
-      predictedLabel.value = "Error starting record: $e";
+  Future&lt;void&gt; _start() async {
+    final granted = await Permission.microphone.request().isGranted;
+    if (!granted) {
+      label.value = 'Izin mikrofon ditolak';
+      return;
     }
+
+    final stream = await _recorder.startStream(const RecordConfig(
+      encoder: AudioEncoder.pcm16bits,
+      sampleRate: 16000,
+      numChannels: 1,
+    ));
+
+    _buffer.clear();
+    isRecording.value = true;
+    label.value = 'Mendengarkan...';
+
+    _sub = stream.listen((data) {
+      // Setiap chunk PCM 16-bit, dorong ke buffer
+      final pcm = data.buffer.asInt16List(
+          data.offsetInBytes, data.lengthInBytes ~/ 2);
+      _buffer.addAll(pcm);
+
+      // Setiap kali buffer punya cukup sample untuk 1 detik audio
+      if (_buffer.length &gt;= _inputSize) {
+        final samples = _buffer.sublist(_buffer.length - _inputSize);
+        // sliding window: simpan setengah, geser
+        _buffer.removeRange(0, _buffer.length - _inputSize ~/ 2);
+        _runModel(samples);
+      }
+    });
   }
 
-  Future&lt;void&gt; _stopRecording() async {
-    await _audioStreamSubscription?.cancel();
-    _audioStreamSubscription = null;
-    await _audioRecorder.stop();
+  Future&lt;void&gt; _stop() async {
+    await _sub?.cancel();
+    _sub = null;
+    await _recorder.stop();
     isRecording.value = false;
-    predictedLabel.value = "Ready to record";
+    label.value = 'Tekan mulai';
     confidence.value = 0.0;
   }
 
-  void _processAudioData(Uint8List data) {
-    Int16List int16Data = data.buffer.asInt16List(data.offsetInBytes, data.lengthInBytes ~/ 2);
-    _audioBuffer.addAll(int16Data);
+  void _runModel(List&lt;int&gt; pcm) {
+    if (_interpreter == null) return;
+    final input = [pcm.map((e) =&gt; e / 32768.0).toList()];
+    final output = List.filled(1, List.filled(_labels.length, 0.0));
+    _interpreter!.run(input, output);
 
-    if (_audioBuffer.length &gt;= _expectedInputSize) {
-      List&lt;int&gt; samplesToProcess = _audioBuffer.sublist(_audioBuffer.length - _expectedInputSize);
-      _audioBuffer = _audioBuffer.sublist(_audioBuffer.length - (_expectedInputSize ~/ 2));
-      _runInference(samplesToProcess);
+    final probs = output[0];
+    var best = 0;
+    for (var i = 1; i &lt; probs.length; i++) {
+      if (probs[i] &gt; probs[best]) best = i;
     }
-  }
-
-  void _runInference(List&lt;int&gt; pcmData) {
-    if (_interpreter == null || _labels.isEmpty) return;
-
-    List&lt;double&gt; inputData = pcmData.map((e) =&gt; e / 32768.0).toList();
-    var input = [inputData];
-    var output = List.filled(1, List.filled(_labels.length, 0.0));
-
-    try {
-      _interpreter!.run(input, output);
-      List&lt;double&gt; probabilities = output[0];
-      
-      double maxProb = 0.0;
-      int maxIndex = -1;
-      for (int i = 0; i &lt; probabilities.length; i++) {
-        if (probabilities[i] &gt; maxProb) {
-          maxProb = probabilities[i];
-          maxIndex = i;
-        }
-      }
-
-      if (maxIndex != -1) {
-        predictedLabel.value = _labels[maxIndex];
-        confidence.value = maxProb;
-      }
-    } catch (e) {}
+    label.value = _labels[best];
+    confidence.value = probs[best];
   }
 }</code></pre>
             </div>
 
-            <p class="content-text">Buka <code>lib/app/modules/realtime_audio/views/realtime_audio_view.dart</code>:</p>
+            <p class="content-text"><strong>F. realtime_page.dart</strong>:</p>
             <div class="code-block">
                 <div class="code-block-header">
                     <div class="code-block-dots"><span></span><span></span><span></span></div>
-                    <span class="code-block-filename">realtime_audio_view.dart</span>
+                    <span class="code-block-filename">lib/realtime_page.dart</span>
                     <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
                 </div>
-                <pre class="code-block-body" style="max-height: 400px; overflow-y: auto;"><code>import 'package:flutter/material.dart';
+                <pre class="code-block-body"><code>import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../controllers/realtime_audio_controller.dart';
+import 'realtime_controller.dart';
 
-class RealtimeAudioView extends GetView&lt;RealtimeAudioController&gt; {
-  const RealtimeAudioView({super.key});
+class RealtimePage extends StatelessWidget {
+  const RealtimePage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final c = Get.put(RealtimeController());
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Realtime Audio Classification')),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Obx(() =&gt; Icon(controller.isRecording.value ? Icons.mic : Icons.mic_none, size: 100, color: controller.isRecording.value ? Colors.red : Colors.grey)),
-              const SizedBox(height: 32),
-              Obx(() =&gt; Text(controller.predictedLabel.value, style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold))),
-              const SizedBox(height: 16),
-              Obx(() =&gt; controller.confidence.value &gt; 0
-                  ? Column(
-                      children: [
-                        Text('Confidence: ${(controller.confidence.value * 100).toStringAsFixed(1)}%'),
-                        LinearProgressIndicator(value: controller.confidence.value, color: Colors.deepPurple),
-                      ],
-                    )
-                  : const SizedBox.shrink()),
-              const SizedBox(height: 48),
-              Obx(() =&gt; ElevatedButton.icon(
-                onPressed: controller.toggleRecording,
-                icon: Icon(controller.isRecording.value ? Icons.stop : Icons.play_arrow),
-                label: Text(controller.isRecording.value ? 'Stop Recording' : 'Start Recording'),
-              )),
-            ],
-          ),
+      appBar: AppBar(title: const Text('Realtime Audio')),
+      body: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Obx(() =&gt; Icon(
+                  c.isRecording.value ? Icons.mic : Icons.mic_none,
+                  size: 100,
+                  color: c.isRecording.value ? Colors.red : Colors.grey,
+                )),
+            const SizedBox(height: 32),
+            Obx(() =&gt; Text(c.label.value,
+                style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold))),
+            const SizedBox(height: 12),
+            Obx(() =&gt; c.confidence.value &gt; 0
+                ? LinearProgressIndicator(value: c.confidence.value)
+                : const SizedBox.shrink()),
+            const SizedBox(height: 32),
+            Obx(() =&gt; ElevatedButton.icon(
+                  onPressed: c.toggle,
+                  icon: Icon(c.isRecording.value ? Icons.stop : Icons.play_arrow),
+                  label: Text(c.isRecording.value ? 'Stop' : 'Mulai'),
+                )),
+          ],
         ),
       ),
     );
@@ -587,8 +544,16 @@ class RealtimeAudioView extends GetView&lt;RealtimeAudioController&gt; {
 }</code></pre>
             </div>
 
+            <div class="info-box">
+                <div class="info-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                    <strong>Konsep penting: Sliding Window</strong>
+                </div>
+                <p>Mic kita stream terus-menerus, tapi model hanya menerima <strong>15600 sample</strong> (≈1 detik @ 16kHz). Jadi kita tampung di buffer. Tiap kali buffer sudah cukup, ambil 1 detik terakhir, jalankan model, lalu sisakan setengah agar suara berikutnya overlap — supaya tepuk yang jatuh di pinggir window tetap terdeteksi.</p>
+            </div>
+
             <h3 style="margin-top: 2rem; margin-bottom: 0.5rem; color: var(--accent-flutter);">Step 5: Menjalankan Aplikasi</h3>
-            <p class="content-text">Sekarang arsitektur modular Anda sudah lengkap. Hubungkan device (yang mendukung mikrofon dan penyimpanan) dan jalankan <code>flutter run</code>. Anda akan masuk ke Landing Page untuk memilih antara mengetes model menggunakan berkas audio <code>.wav</code> (Upload) atau Realtime melalui mikrofon!</p>
+            <p class="content-text">Hubungkan HP fisik (emulator biasanya tidak punya mic) lalu jalankan <code>flutter run</code>. Anda akan disambut halaman menu dengan 2 tombol — upload atau realtime. Coba dan lihat label + confidence-bar berubah otomatis.</p>
 
             <div class="info-box" style="background: rgba(255, 107, 107, 0.05); border-color: var(--accent-laravel); margin-top: 2rem;">
                 <div class="info-box-header" style="color: var(--accent-laravel);">

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pose Project — Teachable Machine — Arif Hidayah</title>
-    <meta name="description" content="Tutorial membuat model klasifikasi gerakan tubuh (pose) dengan Teachable Machine dan implementasinya di Flutter.">
+    <meta name="description" content="Tutorial membuat model klasifikasi gerakan tubuh (pose) dengan Teachable Machine dan implementasinya di Flutter dengan GetX.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -45,63 +45,314 @@
                 </div>
             </header>
 
-            <p class="content-text">Pose Project menggunakan model <strong>PoseNet</strong> untuk mengekstraksi koordinat titik kunci tubuh (keypoints) seperti mata, telinga, bahu, siku, pergelangan tangan, pinggul, lutut, dan pergelangan kaki. Model ini sangat efektif untuk aplikasi kesehatan atau olahraga.</p>
+            <p class="content-text">Pose Project menggunakan model <strong>PoseNet</strong> untuk mengekstraksi titik kunci tubuh (mata, telinga, bahu, siku, pergelangan tangan, pinggul, lutut, kaki) lalu meng-klasifikasi pose berdasarkan koordinat titik-titik tersebut. Sangat cocok untuk aplikasi kebugaran, fisioterapi, atau game gerak.</p>
 
-            <h2 class="content-heading">1. Tutorial Membuat Model Pose</h2>
-            <p class="content-text">Kita akan melatih model untuk mendeteksi gerakan <strong>Squat</strong> vs <strong>Stand</strong>.</p>
-            
-            <ol class="content-list">
-                <li><strong>Persiapan:</strong> Pilih <strong>Pose Project</strong> di Teachable Machine.</li>
-                <li><strong>Pengumpulan Data:</strong> 
-                    <ul>
-                        <li>Pastikan kamera menunjukkan seluruh tubuh (kepala hingga kaki).</li>
-                        <li>Rekam kelas "Berdiri" dengan berbagai posisi.</li>
-                        <li>Rekam kelas "Squat" (jongkok) dengan berbagai kedalaman.</li>
-                    </ul>
-                </li>
-                <li><strong>Magic of PoseNet:</strong> Perhatikan titik-titik warna pada tubuh Anda di browser. Teachable Machine tidak belajar dari gambar pixel, melainkan dari <strong>koordinat titik-titik tersebut</strong>.</li>
-                <li><strong>Training & Export:</strong> Train model dan export ke TFLite.</li>
-            </ol>
+            <h2 class="content-heading">Langkah Praktikum 1: Membuat Model Pose</h2>
+            <p class="content-text">Kita akan melatih model untuk mengenali dua pose: <strong>Berdiri</strong> dan <strong>Squat</strong>.</p>
 
-            <h2 class="content-heading">2. Implementasi: Gambar/Video Statis</h2>
-            <p class="content-text">Analisis pose pada video yang sudah direkam sebelumnya:</p>
-            
+            <h3 style="margin-top: 2rem; margin-bottom: 0.5rem; color: var(--accent-flutter);">Step 1: Persiapan</h3>
+            <p class="content-text">Buka <a href="https://teachablemachine.withgoogle.com" target="_blank" style="color: var(--accent-flutter);">Teachable Machine</a> &rarr; pilih <strong>Pose Project</strong> &rarr; <strong>Standard pose model</strong>.</p>
+
+            <h3 style="margin-top: 2rem; margin-bottom: 0.5rem; color: var(--accent-flutter);">Step 2: Pengumpulan Data</h3>
+            <div class="data-collection-grid">
+                <div class="data-card">
+                    <div class="data-card-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="3"/><path d="M6 22V11l6-2 6 2v11"/></svg>
+                    </div>
+                    <div class="data-card-content">
+                        <h3>Definisi Kelas</h3>
+                        <p>Buat 2 kelas: <strong>Berdiri</strong> dan <strong>Squat</strong>. Tambahkan kelas <em>Background</em> bila ingin lebih akurat.</p>
+                    </div>
+                </div>
+                <div class="data-card">
+                    <div class="data-card-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                    </div>
+                    <div class="data-card-content">
+                        <h3>Posisi Kamera</h3>
+                        <p>Pastikan <strong>seluruh tubuh</strong> (kepala sampai kaki) masuk frame. Berdiri agak jauh dari webcam.</p>
+                    </div>
+                </div>
+                <div class="data-card">
+                    <div class="data-card-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>
+                    </div>
+                    <div class="data-card-content">
+                        <h3>Variasi Sudut</h3>
+                        <p>Ambil minimal 100 sample tiap kelas, dengan variasi sudut (depan, samping) dan kedalaman squat.</p>
+                    </div>
+                </div>
+            </div>
+
             <div class="info-box">
                 <div class="info-box-header">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
-                    <strong>Workflow Video Analysis</strong>
+                    <strong>Apa yang Sebenarnya Dipelajari Model?</strong>
                 </div>
-                <p>1. User mengunggah file video.<br>
-                   2. Aplikasi memecah video menjadi frame per frame.<br>
-                   3. PoseNet mengekstraksi keypoints dari setiap frame.<br>
-                   4. Klasifikasi dilakukan berdasarkan perubahan koordinat keypoints dari waktu ke waktu.</p>
+                <p>Berbeda dengan Image Project yang belajar dari piksel, Pose Project belajar dari <strong>koordinat 17 keypoint tubuh</strong>. PoseNet menggambar titik di siku, lutut, dst — dan model klasifikasi belajar pola <em>geometri</em>nya. Inilah kenapa pose model bisa bekerja meski pakaian dan latar berubah.</p>
             </div>
 
-            <h2 class="content-heading">3. Implementasi: Realtime (Body Tracking)</h2>
-            <p class="content-text">Ini adalah implementasi paling menarik — memberikan feedback instan saat user bergerak di depan kamera.</p>
+            <h3 style="margin-top: 2rem; margin-bottom: 0.5rem; color: var(--accent-flutter);">Step 3: Train & Export ke TFLite</h3>
+            <ol class="content-list">
+                <li>Klik <strong>Train Model</strong> dan tunggu sampai selesai.</li>
+                <li>Tes di panel <strong>Preview</strong>: berdiri kemudian squat, perhatikan persentase berubah.</li>
+                <li>Klik <strong>Export Model</strong> &rarr; tab <strong>TensorFlow Lite</strong> &rarr; pilih <strong>Floating point</strong> (model pose berbeda dengan image, gunakan float).</li>
+                <li>Unduh ZIP berisi <code>model.tflite</code> dan <code>labels.txt</code>.</li>
+            </ol>
 
+            <h2 class="content-heading" id="implementasi-flutter">Langkah Praktikum 2: Implementasi di Flutter dengan GetX</h2>
+            <p class="content-text">Kita buat project baru sederhana. Struktur flat (tanpa folder modules/bindings) — semua file ada di <code>lib/</code>.</p>
+
+            <div class="info-box">
+                <div class="info-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                    <strong>Pendekatan yang Kita Pakai</strong>
+                </div>
+                <p>Model pose Teachable Machine sebenarnya menerima <strong>gambar</strong> sebagai input (internalnya pakai PoseNet untuk ekstrak keypoint). Jadi flow Flutter-nya: ambil foto dari galeri/kamera &rarr; resize ke 257×257 (input standar PoseNet di Teachable Machine) &rarr; jalankan model &rarr; tampilkan label probabilitas.</p>
+            </div>
+
+            <h3 style="margin-top: 2rem; margin-bottom: 0.5rem; color: var(--accent-flutter);">Step 1: Buat Project & Dependencies</h3>
             <div class="code-block">
                 <div class="code-block-header">
                     <div class="code-block-dots"><span></span><span></span><span></span></div>
-                    <span class="code-block-filename">Pose Processing Logic</span>
+                    <span class="code-block-filename">Terminal</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
                 </div>
-                <pre class="code-block-body"><code><span class="hl-comment">// Mengambil koordinat keypoints</span>
-<span class="hl-keyword">var</span> pose = poseEstimator.estimate(cameraFrame);
-<span class="hl-keyword">var</span> leftKnee = pose.keypoints[<span class="hl-number">13</span>];
-<span class="hl-keyword">var</span> leftHip = pose.keypoints[<span class="hl-number">11</span>];
+                <pre class="code-block-body"><code>flutter create klasifikasi_pose
+cd klasifikasi_pose
+flutter pub add get tflite_flutter image_picker image</code></pre>
+            </div>
 
-<span class="hl-comment">// Hitung sudut atau deteksi posisi</span>
-<span class="hl-keyword">if</span> (calculateAngle(leftHip, leftKnee) < <span class="hl-number">90</span>) {
-  status = <span class="hl-string">"Squat Detected!"</span>;
+            <h3 style="margin-top: 2rem; margin-bottom: 0.5rem; color: var(--accent-flutter);">Step 2: Tambahkan Aset Model</h3>
+            <p class="content-text">Buat folder <code>assets/ml/</code>, salin <code>model.tflite</code> dan <code>labels.txt</code> ke dalamnya. Lalu daftarkan di <code>pubspec.yaml</code>:</p>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">pubspec.yaml</span>
+                </div>
+                <pre class="code-block-body"><code>flutter:
+  assets:
+    - assets/ml/model.tflite
+    - assets/ml/labels.txt</code></pre>
+            </div>
+
+            <h3 style="margin-top: 2rem; margin-bottom: 0.5rem; color: var(--accent-flutter);">Step 3: Buat Controller</h3>
+            <p class="content-text">Buat <code>lib/pose_controller.dart</code>. Semua state pakai variabel <code>.obs</code> agar UI otomatis reaktif.</p>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">lib/pose_controller.dart</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-keyword">import</span> <span class="hl-string">'dart:io'</span>;
+<span class="hl-keyword">import</span> <span class="hl-string">'package:flutter/services.dart'</span>;
+<span class="hl-keyword">import</span> <span class="hl-string">'package:get/get.dart'</span>;
+<span class="hl-keyword">import</span> <span class="hl-string">'package:image/image.dart'</span> <span class="hl-keyword">as</span> img;
+<span class="hl-keyword">import</span> <span class="hl-string">'package:image_picker/image_picker.dart'</span>;
+<span class="hl-keyword">import</span> <span class="hl-string">'package:tflite_flutter/tflite_flutter.dart'</span>;
+
+<span class="hl-keyword">class</span> <span class="hl-func">PoseController</span> <span class="hl-keyword">extends</span> GetxController {
+  <span class="hl-comment">// State reaktif</span>
+  <span class="hl-keyword">final</span> selectedImage = Rxn&lt;File&gt;();
+  <span class="hl-keyword">final</span> results = &lt;String, <span class="hl-keyword">double</span>&gt;{}.obs;
+  <span class="hl-keyword">final</span> isLoading = <span class="hl-keyword">false</span>.obs;
+
+  Interpreter? _interpreter;
+  List&lt;String&gt; _labels = [];
+  <span class="hl-keyword">final</span> _picker = ImagePicker();
+
+  <span class="hl-comment">// Pose model Teachable Machine pakai input 257x257 float</span>
+  <span class="hl-keyword">static const int</span> _inputSize = <span class="hl-number">257</span>;
+
+  @override
+  <span class="hl-keyword">void</span> <span class="hl-func">onInit</span>() {
+    <span class="hl-keyword">super</span>.onInit();
+    <span class="hl-func">_loadModel</span>();
+  }
+
+  @override
+  <span class="hl-keyword">void</span> <span class="hl-func">onClose</span>() {
+    _interpreter?.<span class="hl-func">close</span>();
+    <span class="hl-keyword">super</span>.onClose();
+  }
+
+  Future&lt;<span class="hl-keyword">void</span>&gt; <span class="hl-func">_loadModel</span>() <span class="hl-keyword">async</span> {
+    _interpreter = <span class="hl-keyword">await</span> Interpreter.<span class="hl-func">fromAsset</span>(<span class="hl-string">'assets/ml/model.tflite'</span>);
+    <span class="hl-keyword">final</span> raw = <span class="hl-keyword">await</span> rootBundle.<span class="hl-func">loadString</span>(<span class="hl-string">'assets/ml/labels.txt'</span>);
+    _labels = raw.<span class="hl-func">split</span>(<span class="hl-string">'\n'</span>)
+        .<span class="hl-func">where</span>((l) =&gt; l.<span class="hl-func">trim</span>().isNotEmpty)
+        .<span class="hl-func">map</span>((l) =&gt; l.<span class="hl-func">replaceAll</span>(RegExp(<span class="hl-string">r'^\d+\s*'</span>), <span class="hl-string">''</span>))
+        .<span class="hl-func">toList</span>();
+  }
+
+  Future&lt;<span class="hl-keyword">void</span>&gt; <span class="hl-func">pickAndClassify</span>(ImageSource src) <span class="hl-keyword">async</span> {
+    <span class="hl-keyword">final</span> picked = <span class="hl-keyword">await</span> _picker.<span class="hl-func">pickImage</span>(source: src);
+    <span class="hl-keyword">if</span> (picked == <span class="hl-keyword">null</span>) <span class="hl-keyword">return</span>;
+
+    selectedImage.value = File(picked.path);
+    isLoading.value = <span class="hl-keyword">true</span>;
+    results.<span class="hl-func">clear</span>();
+
+    <span class="hl-keyword">await</span> <span class="hl-func">_classify</span>(selectedImage.value!);
+    isLoading.value = <span class="hl-keyword">false</span>;
+  }
+
+  Future&lt;<span class="hl-keyword">void</span>&gt; <span class="hl-func">_classify</span>(File file) <span class="hl-keyword">async</span> {
+    <span class="hl-keyword">if</span> (_interpreter == <span class="hl-keyword">null</span>) <span class="hl-keyword">return</span>;
+
+    <span class="hl-comment">// Resize gambar ke 257x257</span>
+    <span class="hl-keyword">final</span> raw = img.<span class="hl-func">decodeImage</span>(file.<span class="hl-func">readAsBytesSync</span>())!;
+    <span class="hl-keyword">final</span> resized = img.<span class="hl-func">copyResize</span>(raw, width: _inputSize, height: _inputSize);
+
+    <span class="hl-comment">// Konversi piksel jadi float [-1.0 .. 1.0] (sesuai PoseNet)</span>
+    <span class="hl-keyword">final</span> input = List.<span class="hl-func">generate</span>(<span class="hl-number">1</span>, (_) =&gt;
+      List.<span class="hl-func">generate</span>(_inputSize, (y) =&gt;
+        List.<span class="hl-func">generate</span>(_inputSize, (x) {
+          <span class="hl-keyword">final</span> p = resized.<span class="hl-func">getPixel</span>(x, y);
+          <span class="hl-keyword">return</span> [
+            (p.r - <span class="hl-number">127.5</span>) / <span class="hl-number">127.5</span>,
+            (p.g - <span class="hl-number">127.5</span>) / <span class="hl-number">127.5</span>,
+            (p.b - <span class="hl-number">127.5</span>) / <span class="hl-number">127.5</span>,
+          ];
+        })));
+
+    <span class="hl-comment">// Output: probabilitas tiap kelas pose</span>
+    <span class="hl-keyword">final</span> output = List.<span class="hl-func">filled</span>(<span class="hl-number">1</span>, List.<span class="hl-func">filled</span>(_labels.length, <span class="hl-number">0.0</span>));
+    _interpreter!.<span class="hl-func">run</span>(input, output);
+
+    <span class="hl-keyword">final</span> map = &lt;String, <span class="hl-keyword">double</span>&gt;{};
+    <span class="hl-keyword">for</span> (<span class="hl-keyword">var</span> i = <span class="hl-number">0</span>; i &lt; _labels.length; i++) {
+      map[_labels[i]] = output[<span class="hl-number">0</span>][i];
+    }
+    <span class="hl-keyword">final</span> sorted = Map.<span class="hl-func">fromEntries</span>(
+      map.entries.<span class="hl-func">toList</span>()..<span class="hl-func">sort</span>((a, b) =&gt; b.value.<span class="hl-func">compareTo</span>(a.value)),
+    );
+    results.<span class="hl-func">assignAll</span>(sorted);
+  }
 }</code></pre>
             </div>
 
+            <div class="info-box">
+                <div class="info-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                    <strong>Kenapa Normalisasi <code>(p - 127.5) / 127.5</code>?</strong>
+                </div>
+                <p>PoseNet dilatih dengan gambar yang nilai pikselnya dinormalisasi ke rentang <strong>[-1, 1]</strong>. Rumusnya: <code>(piksel - 127.5) / 127.5</code> mengubah angka 0-255 menjadi -1 sampai 1. Kalau salah preprocess, hasilnya akan ngaco walau model jalan tanpa error.</p>
+            </div>
+
+            <h3 style="margin-top: 2rem; margin-bottom: 0.5rem; color: var(--accent-flutter);">Step 4: Buat Halaman UI</h3>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">lib/pose_page.dart</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-keyword">import</span> <span class="hl-string">'package:flutter/material.dart'</span>;
+<span class="hl-keyword">import</span> <span class="hl-string">'package:get/get.dart'</span>;
+<span class="hl-keyword">import</span> <span class="hl-string">'package:image_picker/image_picker.dart'</span>;
+<span class="hl-keyword">import</span> <span class="hl-string">'pose_controller.dart'</span>;
+
+<span class="hl-keyword">class</span> <span class="hl-func">PosePage</span> <span class="hl-keyword">extends</span> StatelessWidget {
+  <span class="hl-keyword">const</span> <span class="hl-func">PosePage</span>({<span class="hl-keyword">super</span>.key});
+
+  @override
+  Widget <span class="hl-func">build</span>(BuildContext context) {
+    <span class="hl-keyword">final</span> c = Get.<span class="hl-func">put</span>(PoseController());
+
+    <span class="hl-keyword">return</span> Scaffold(
+      appBar: AppBar(title: <span class="hl-keyword">const</span> Text(<span class="hl-string">'Klasifikasi Pose'</span>)),
+      body: SingleChildScrollView(
+        padding: <span class="hl-keyword">const</span> EdgeInsets.<span class="hl-func">all</span>(<span class="hl-number">20</span>),
+        child: Column(children: [
+          Obx(() =&gt; c.selectedImage.value == <span class="hl-keyword">null</span>
+              ? Container(
+                  height: <span class="hl-number">300</span>,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade200,
+                    borderRadius: BorderRadius.<span class="hl-func">circular</span>(<span class="hl-number">16</span>),
+                  ),
+                  child: <span class="hl-keyword">const</span> Icon(Icons.accessibility_new, size: <span class="hl-number">100</span>, color: Colors.grey),
+                )
+              : ClipRRect(
+                  borderRadius: BorderRadius.<span class="hl-func">circular</span>(<span class="hl-number">16</span>),
+                  child: Image.<span class="hl-func">file</span>(c.selectedImage.value!, height: <span class="hl-number">300</span>, fit: BoxFit.cover),
+                )),
+          <span class="hl-keyword">const</span> SizedBox(height: <span class="hl-number">20</span>),
+
+          Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+            ElevatedButton.<span class="hl-func">icon</span>(
+              onPressed: () =&gt; c.<span class="hl-func">pickAndClassify</span>(ImageSource.camera),
+              icon: <span class="hl-keyword">const</span> Icon(Icons.camera_alt),
+              label: <span class="hl-keyword">const</span> Text(<span class="hl-string">'Kamera'</span>),
+            ),
+            <span class="hl-keyword">const</span> SizedBox(width: <span class="hl-number">12</span>),
+            OutlinedButton.<span class="hl-func">icon</span>(
+              onPressed: () =&gt; c.<span class="hl-func">pickAndClassify</span>(ImageSource.gallery),
+              icon: <span class="hl-keyword">const</span> Icon(Icons.photo_library),
+              label: <span class="hl-keyword">const</span> Text(<span class="hl-string">'Galeri'</span>),
+            ),
+          ]),
+          <span class="hl-keyword">const</span> SizedBox(height: <span class="hl-number">24</span>),
+
+          Obx(() {
+            <span class="hl-keyword">if</span> (c.isLoading.value) <span class="hl-keyword">return</span> <span class="hl-keyword">const</span> CircularProgressIndicator();
+            <span class="hl-keyword">return</span> Column(
+              children: c.results.entries.<span class="hl-func">map</span>((e) =&gt; Padding(
+                padding: <span class="hl-keyword">const</span> EdgeInsets.<span class="hl-func">symmetric</span>(vertical: <span class="hl-number">6</span>),
+                child: Row(children: [
+                  Expanded(flex: <span class="hl-number">3</span>, child: Text(e.key,
+                      style: <span class="hl-keyword">const</span> TextStyle(fontWeight: FontWeight.w600))),
+                  Expanded(
+                    flex: <span class="hl-number">7</span>,
+                    child: LinearProgressIndicator(value: e.value, minHeight: <span class="hl-number">14</span>),
+                  ),
+                  <span class="hl-keyword">const</span> SizedBox(width: <span class="hl-number">12</span>),
+                  Text(<span class="hl-string">'${(e.value * 100).toStringAsFixed(1)}%'</span>),
+                ]),
+              )).<span class="hl-func">toList</span>(),
+            );
+          }),
+        ]),
+      ),
+    );
+  }
+}</code></pre>
+            </div>
+
+            <h3 style="margin-top: 2rem; margin-bottom: 0.5rem; color: var(--accent-flutter);">Step 5: main.dart</h3>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">lib/main.dart</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code>import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'pose_page.dart';
+
+void main() =&gt; runApp(const MyApp());
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+  @override
+  Widget build(BuildContext context) {
+    return GetMaterialApp(
+      title: 'Klasifikasi Pose',
+      home: const PosePage(),
+    );
+  }
+}</code></pre>
+            </div>
+
+            <p class="content-text">Jalankan <code>flutter run</code>. Buka kamera, ambil foto pose berdiri dan squat, lalu lihat probabilitasnya bergerak.</p>
+
+            <h2 class="content-heading">Pengembangan Lanjut (Opsional)</h2>
             <div class="info-box" style="background: rgba(167, 139, 250, 0.05); border-color: var(--accent-datamining);">
                 <div class="info-box-header" style="color: var(--accent-datamining);">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
-                    <strong>Visual Feedback</strong>
+                    <strong>Ide Lanjutan: Skeleton Overlay</strong>
                 </div>
-                <p>Sangat disarankan untuk menggambar <strong>skeleton</strong> (rangka) di atas preview kamera menggunakan <code>CustomPainter</code> agar user tahu bahwa tubuh mereka terdeteksi dengan benar oleh sistem.</p>
+                <p>Setelah app dasar jalan, Anda bisa upgrade dengan menggambar <strong>skeleton</strong> di atas gambar menggunakan <code>CustomPainter</code>. Untuk mendapatkan koordinat keypoint, gunakan package <code>google_mlkit_pose_detection</code> — ia langsung memberi koordinat siku, lutut, pinggul, dst. yang siap digambar.</p>
             </div>
 
             <!-- Nav -->
@@ -113,8 +364,8 @@
                     </a>
                 </div>
                 <div class="content-nav-item">
-                    <a href="/flutter-advanced/tflite-ondevice.html" class="nav-btn nav-btn-next">
-                        <div><span class="nav-label">Selanjutnya</span><span class="nav-name">TFLite & On-Device ML</span></div>
+                    <a href="/flutter-advanced/yolo.html" class="nav-btn nav-btn-next">
+                        <div><span class="nav-label">Selanjutnya</span><span class="nav-name">YOLO (Object Detection)</span></div>
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
                     </a>
                 </div>
@@ -123,5 +374,16 @@
     </main>
 
     <script src="/flutter-advanced/course-layout.js"></script>
+    <script>
+    function copyCode(btn) {
+        const codeBlock = btn.closest('.code-block').querySelector('code');
+        navigator.clipboard.writeText(codeBlock.textContent).then(() => {
+            btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>';
+            setTimeout(() => {
+                btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+            }, 2000);
+        });
+    }
+    </script>
 </body>
 </html>
