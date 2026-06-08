@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lifecycle & Manajemen Container — Arif Hidayah</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/docker/course.css">
+
+    <style>
+        .sm-flow { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; justify-content: center; margin-bottom: 18px; }
+        .sm-node {
+            border: 1.5px solid var(--border-color); border-radius: 9px; padding: 10px 16px; text-align: center;
+            min-width: 92px; transition: all 0.3s ease; background: rgba(255,255,255,0.03);
+        }
+        .sm-node .sn { font-weight: 700; font-size: 0.85rem; color: #fff; }
+        .sm-node .sd { font-size: 0.66rem; color: var(--text-muted); margin-top: 2px; }
+        .sm-arrow { color: var(--text-muted); font-size: 1.1rem; }
+        .sm-node.active { transform: scale(1.06); box-shadow: 0 0 0 4px rgba(255,255,255,0.06); }
+        .sm-node.active[data-s="created"] { border-color: #64748b; background: rgba(100,116,139,0.18); }
+        .sm-node.active[data-s="running"] { border-color: #4ade80; background: rgba(74,222,128,0.16); }
+        .sm-node.active[data-s="paused"]  { border-color: #fbbc2e; background: rgba(251,188,46,0.16); }
+        .sm-node.active[data-s="exited"]  { border-color: #94a3b8; background: rgba(148,163,184,0.16); }
+        .sm-node.active[data-s="removed"] { border-color: #ef4444; background: rgba(239,68,68,0.16); }
+        .sm-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+    </style>
+</head>
+<body>
+    <div class="bg-grid" aria-hidden="true"></div>
+    <nav class="navbar scrolled" id="navbar"></nav>
+    <div class="mobile-menu" id="mobileMenu"></div>
+
+    <main class="course-layout">
+        <aside class="course-sidebar" id="courseSidebar"></aside>
+
+        <article class="course-content">
+            <div class="breadcrumb">
+                <a href="../index.html">Home</a><span>›</span>
+                <a href="index.html">Docker</a><span>›</span>
+                <span style="color: var(--text-primary);">Lifecycle Container</span>
+            </div>
+
+            <header class="content-header">
+                <h1 class="content-title">Modul 5: Lifecycle & Manajemen Container</h1>
+                <div class="content-meta">
+                    <div class="meta-pill">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 5V8.5L10.5 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/></svg>
+                        <span>Estimasi: 40 Menit</span>
+                    </div>
+                    <div class="meta-pill">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="10" rx="1" stroke="currentColor" stroke-width="1.5"/><path d="M5 7h6M5 10h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                        <span>Praktikum</span>
+                    </div>
+                </div>
+            </header>
+
+            <p class="content-text">
+                Sebuah container melewati beberapa <strong>status</strong> selama hidupnya: dibuat, berjalan, di-pause, berhenti, hingga dihapus. Memahami transisi antar status — dan perintah mana yang sah pada status tertentu — adalah inti dari mengelola container sehari-hari.
+            </p>
+
+            <h2 class="content-heading">1. Status Container</h2>
+            <ol class="content-list">
+                <li><strong>Created</strong> — Container sudah dibuat dari image (<code>docker create</code>) tetapi belum dijalankan.</li>
+                <li><strong>Running</strong> — Proses utama container sedang berjalan (<code>docker run</code> / <code>start</code>).</li>
+                <li><strong>Paused</strong> — Proses dibekukan sementara (<code>docker pause</code>); memori tetap dipertahankan.</li>
+                <li><strong>Exited / Stopped</strong> — Proses berhenti (<code>docker stop</code>). Data di dalam container <em>masih ada</em> dan bisa di-<code>start</code> lagi.</li>
+                <li><strong>Removed</strong> — Container dihapus permanen (<code>docker rm</code>). Lapisan writable-nya hilang.</li>
+            </ol>
+
+            <h2 class="content-heading">2. Simulasi State Machine</h2>
+            <p class="content-text">
+                Coba kelola siklus hidup container <code>web</code> di bawah. <strong>Tombol yang tidak valid akan otomatis nonaktif</strong> sesuai status saat ini — misalnya Anda tidak bisa <code>rm</code> container yang sedang <em>running</em> (harus di-<code>stop</code> dulu). Amati log untuk melihat perintah yang dijalankan.
+            </p>
+
+            <!-- INTERACTIVE: container state machine -->
+            <div class="demo-box">
+                <div class="demo-header">
+                    <span class="demo-title">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/></svg>
+                        Container Lifecycle: <code style="font-size:0.9em">web</code>
+                    </span>
+                    <div class="demo-controls">
+                        <span class="demo-label">Status:</span>
+                        <strong id="curState" style="color:#94a3b8; font-family:'JetBrains Mono',monospace;">none</strong>
+                    </div>
+                </div>
+                <div class="demo-body">
+                    <div class="sm-flow">
+                        <div class="sm-node" data-s="created"><div class="sn">Created</div><div class="sd">dibuat</div></div>
+                        <span class="sm-arrow">→</span>
+                        <div class="sm-node" data-s="running"><div class="sn">Running</div><div class="sd">berjalan</div></div>
+                        <span class="sm-arrow">⇄</span>
+                        <div class="sm-node" data-s="paused"><div class="sn">Paused</div><div class="sd">dibekukan</div></div>
+                        <span class="sm-arrow">→</span>
+                        <div class="sm-node" data-s="exited"><div class="sn">Exited</div><div class="sd">berhenti</div></div>
+                        <span class="sm-arrow">→</span>
+                        <div class="sm-node" data-s="removed"><div class="sn">Removed</div><div class="sd">dihapus</div></div>
+                    </div>
+                    <div class="sm-actions" id="smActions"></div>
+                    <div class="demo-status" id="smLog" style="margin-top: 16px; min-height: 80px;"></div>
+                </div>
+            </div>
+
+            <div class="info-box">
+                <div class="info-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                    <strong>stop vs rm</strong>
+                </div>
+                <p><code>stop</code> hanya menghentikan proses — container & datanya tetap ada, bisa dihidupkan lagi. <code>rm</code> menghapus container beserta lapisan writable-nya. Inilah mengapa data penting tidak boleh disimpan di dalam container (bahas di modul Volume).</p>
+            </div>
+
+            <div class="content-nav">
+                <div class="content-nav-item">
+                    <a href="dockerfile.html" class="nav-btn nav-btn-prev">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                        <div><span class="nav-label">Sebelumnya</span><span class="nav-name">Image & Dockerfile</span></div>
+                    </a>
+                </div>
+                <div class="content-nav-item">
+                    <a href="volumes.html" class="nav-btn nav-btn-next">
+                        <div><span class="nav-label">Selanjutnya</span><span class="nav-name">Volume & Persistensi Data</span></div>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </a>
+                </div>
+            </div>
+        </article>
+    </main>
+
+    <script src="/docker/course-layout.js"></script>
+    <script>
+    function playVideo() { alert('Video belum tersedia.'); }
+    function copyCode(btn) {
+        const codeBlock = btn.closest('.code-block').querySelector('code');
+        navigator.clipboard.writeText(codeBlock.textContent).then(() => {
+            btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>';
+            setTimeout(() => { btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>'; }, 2000);
+        });
+    }
+
+    // ---- Interactive: container state machine ----
+    (function () {
+        // action -> { from: [states], to: state, cmd, desc }
+        const ACTIONS = [
+            { id: 'run',     label: 'run',     from: ['none', 'removed'], to: 'running', cmd: 'docker run -d --name web nginx', desc: 'membuat lalu langsung menjalankan container.' },
+            { id: 'start',   label: 'start',   from: ['created', 'exited'], to: 'running', cmd: 'docker start web', desc: 'menghidupkan kembali container yang berhenti.' },
+            { id: 'pause',   label: 'pause',   from: ['running'], to: 'paused', cmd: 'docker pause web', desc: 'membekukan seluruh proses di dalam container.' },
+            { id: 'unpause', label: 'unpause', from: ['paused'], to: 'running', cmd: 'docker unpause web', desc: 'melanjutkan proses yang dibekukan.' },
+            { id: 'stop',    label: 'stop',    from: ['running', 'paused'], to: 'exited', cmd: 'docker stop web', desc: 'menghentikan container secara halus (SIGTERM).' },
+            { id: 'restart', label: 'restart', from: ['running', 'exited'], to: 'running', cmd: 'docker restart web', desc: 'menghentikan lalu menjalankan ulang container.' },
+            { id: 'rm',      label: 'rm',      from: ['created', 'exited'], to: 'removed', cmd: 'docker rm web', desc: 'menghapus container permanen.' }
+        ];
+        const ALL_STATES = ['created', 'running', 'paused', 'exited', 'removed'];
+        let state = 'none';
+
+        const actionsEl = document.getElementById('smActions');
+        const logEl = document.getElementById('smLog');
+        const curEl = document.getElementById('curState');
+        const stateColor = { none: '#94a3b8', created: '#64748b', running: '#4ade80', paused: '#fbbc2e', exited: '#94a3b8', removed: '#ef4444' };
+
+        // build buttons once
+        ACTIONS.forEach(a => {
+            const btn = document.createElement('button');
+            btn.className = 'btn-demo' + (a.id === 'rm' ? ' danger' : a.id === 'run' || a.id === 'start' || a.id === 'unpause' || a.id === 'restart' ? '' : ' ghost');
+            btn.id = 'act-' + a.id;
+            btn.textContent = a.label;
+            btn.addEventListener('click', () => doAction(a));
+            actionsEl.appendChild(btn);
+        });
+
+        function highlight() {
+            document.querySelectorAll('.sm-node').forEach(n => n.classList.toggle('active', n.dataset.s === state));
+            curEl.textContent = state;
+            curEl.style.color = stateColor[state];
+        }
+        function refresh() {
+            ACTIONS.forEach(a => { document.getElementById('act-' + a.id).disabled = !a.from.includes(state); });
+            highlight();
+        }
+        function log(html, cls) {
+            const d = document.createElement('div');
+            if (cls) d.className = cls;
+            d.innerHTML = html;
+            logEl.appendChild(d); logEl.scrollTop = logEl.scrollHeight;
+        }
+        function doAction(a) {
+            if (!a.from.includes(state)) return;
+            log(`<span class="term-prompt">$</span> <span class="term-cmd">${a.cmd}</span>`);
+            const prev = state;
+            state = a.to;
+            log(`<span class="term-ok">✓</span> ${a.desc} <span class="term-dim">(${prev} → ${state})</span>`);
+            refresh();
+        }
+
+        log('Container belum ada. Mulai dengan menekan tombol <span class="term-cmd">run</span>.', 'term-dim');
+        refresh();
+    })();
+    </script>
+</body>
+</html>

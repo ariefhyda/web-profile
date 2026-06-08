@@ -375,8 +375,69 @@
                 Dalam praktiknya, kita seringkali tidak tahu berapa nilai K (jumlah cluster) yang paling tepat. Salah satu cara paling umum adalah menggunakan <strong>Elbow Method</strong> (Metode Siku).
             </p>
             <p class="content-text">
-                Kita menjalankan K-Means berulang kali dengan nilai K yang berbeda (misal K=1 sampai 10), lalu menghitung <strong>WCSS (Within-Cluster Sum of Squares)</strong>, yaitu total kuadrat jarak antara setiap titik dengan centroidnya. Saat diplot ke grafik, kita mencari "siku" (<em>elbow</em>)—titik di mana penurunan WCSS mulai melambat secara drastis.
+                Idenya: kita menjalankan K-Means berulang kali dengan nilai K yang berbeda (misal K = 1 sampai 10), lalu untuk setiap K kita menghitung <strong>WCSS (Within-Cluster Sum of Squares)</strong> — total kuadrat jarak setiap titik ke centroid clusternya.
             </p>
+
+            <h3 style="margin-top: 24px; margin-bottom: 4px;">Rumus WCSS</h3>
+            <p class="content-text">
+                WCSS untuk sebuah nilai K dihitung dengan menjumlahkan kuadrat jarak seluruh titik ke centroid masing-masing cluster:
+            </p>
+            <div class="math-expr" style="color: #60a5fa;">
+                WCSS(K) = Σ<sub>j=1</sub><sup>K</sup> &nbsp; Σ<sub>x&#7522; &isin; C&#8331;</sub> &nbsp; ‖ x&#7522; &minus; &mu;&#8331; ‖&sup2;
+            </div>
+            <p class="content-text" style="font-size: 0.95rem;">
+                dengan <strong>C&#8331;</strong> = himpunan titik pada cluster ke-<em>j</em>, dan <strong>&mu;&#8331;</strong> = centroid cluster ke-<em>j</em>. Di scikit-learn nilai ini tersedia langsung melalui atribut <code>kmeans.inertia_</code>.
+            </p>
+
+            <h3 style="margin-top: 24px; margin-bottom: 4px;">Cara membaca grafiknya</h3>
+            <p class="content-text">
+                Saat WCSS diplot terhadap K, nilainya selalu turun seiring K bertambah (semakin banyak cluster, semakin dekat titik ke centroidnya — pada K = jumlah data, WCSS = 0). Yang kita cari adalah <strong>"siku" (elbow)</strong>: titik di mana penurunan WCSS mulai melambat drastis. Setelah siku itu, menambah cluster hanya memberi sedikit perbaikan, jadi K di siku tersebut dianggap optimal.
+            </p>
+            <div class="info-box">
+                <div class="info-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                    <strong>Cara cepat menemukan siku secara otomatis</strong>
+                </div>
+                <p class="content-text" style="margin-top: 8px;">
+                    Hitung selisih penurunan WCSS antar-K. Siku berada di K di mana <em>penurunan</em> WCSS anjlok paling tajam dibanding penurunan berikutnya — yaitu K dengan <strong>selisih kedua (second difference)</strong> terbesar:
+                </p>
+                <div class="math-expr" style="margin-top: 12px;">
+                    Δ&#8321;(K) = WCSS(K&minus;1) &minus; WCSS(K)<br>
+                    Δ&#8322;(K) = Δ&#8321;(K) &minus; Δ&#8321;(K+1)&nbsp;&nbsp; → &nbsp;pilih K dengan Δ&#8322; terbesar
+                </div>
+            </div>
+
+            <h3 style="margin-top: 24px; margin-bottom: 4px;">Interactive: Grafik Elbow</h3>
+            <p class="content-text">
+                Pilih salah satu dataset latihan, lalu klik <strong>Hitung WCSS</strong>. Grafik akan memplot WCSS untuk K = 1 sampai 8 dan menandai titik siku secara otomatis. Perhatikan bagaimana kurva "menekuk" di nilai K yang ideal.
+            </p>
+
+            <div class="interactive-container">
+                <div class="interactive-header">
+                    <div>
+                        <h3 style="margin-bottom: 4px;">Elbow Method Explorer</h3>
+                        <p style="color: var(--text-secondary); font-size: 0.85rem;">WCSS dihitung nyata dari dataset terpilih (rata-rata beberapa kali run).</p>
+                    </div>
+                    <div class="controls">
+                        <label class="control-label">
+                            Dataset:
+                            <select id="elbowDataset" class="control-input" style="width: auto;" onchange="runElbow()">
+                                <option value="mall">Segmentasi Pelanggan (ideal K=3)</option>
+                                <option value="mahasiswa">Pola Belajar Mahasiswa (ideal K=2)</option>
+                            </select>
+                        </label>
+                        <button class="btn-action btn-primary" onclick="runElbow()">Hitung WCSS</button>
+                    </div>
+                </div>
+
+                <div class="canvas-wrapper">
+                    <canvas id="elbowCanvas" width="700" height="400"></canvas>
+                </div>
+
+                <div class="status-bar" id="elbowStatus">
+                    <span class="status-badge">Status</span> Klik "Hitung WCSS" untuk memplot grafik Elbow.
+                </div>
+            </div>
 
             <h2 class="content-heading" style="margin-top: 40px;">Dataset untuk Latihan</h2>
             <p class="content-text">
@@ -819,6 +880,183 @@ df[<span class="hl-string">'Cluster'</span>] = y_kmeans
 
         // Initial setup
         generateData();
+
+        /* ===================== ELBOW METHOD CHART ===================== */
+        const elbowDatasets = {
+            mall: [
+                [15,39],[16,35],[17,40],[18,6],[55,50],[58,55],
+                [60,52],[62,48],[95,83],[98,88],[100,85],[103,90]
+            ],
+            mahasiswa: [
+                [2,50],[3,55],[4,58],[5,60],[3,52],
+                [14,88],[15,90],[16,92],[18,95],[17,91]
+            ]
+        };
+
+        function normalize(data) {
+            // Min-Max normalization per feature so distance isn't dominated by large scales
+            const dims = data[0].length;
+            const mins = [], maxs = [];
+            for (let d = 0; d < dims; d++) {
+                mins[d] = Math.min(...data.map(p => p[d]));
+                maxs[d] = Math.max(...data.map(p => p[d]));
+            }
+            return data.map(p => p.map((v, d) => {
+                const range = maxs[d] - mins[d];
+                return range === 0 ? 0 : (v - mins[d]) / range;
+            }));
+        }
+
+        function dist2(a, b) {
+            let s = 0;
+            for (let i = 0; i < a.length; i++) s += (a[i] - b[i]) ** 2;
+            return s;
+        }
+
+        function kmeansWCSS(data, k) {
+            // Returns WCSS for given k; runs a few times and keeps the best (lowest)
+            let best = Infinity;
+            for (let attempt = 0; attempt < 8; attempt++) {
+                // init: pick k distinct random points
+                const idx = [...Array(data.length).keys()].sort(() => Math.random() - 0.5).slice(0, k);
+                let centroids = idx.map(i => [...data[i]]);
+                let assign = new Array(data.length).fill(0);
+
+                for (let iter = 0; iter < 50; iter++) {
+                    let changed = false;
+                    // assignment
+                    for (let p = 0; p < data.length; p++) {
+                        let bestC = 0, bestD = Infinity;
+                        for (let c = 0; c < k; c++) {
+                            const d = dist2(data[p], centroids[c]);
+                            if (d < bestD) { bestD = d; bestC = c; }
+                        }
+                        if (assign[p] !== bestC) { assign[p] = bestC; changed = true; }
+                    }
+                    // update
+                    const dims = data[0].length;
+                    const sums = Array.from({length: k}, () => new Array(dims).fill(0));
+                    const counts = new Array(k).fill(0);
+                    for (let p = 0; p < data.length; p++) {
+                        counts[assign[p]]++;
+                        for (let d = 0; d < dims; d++) sums[assign[p]][d] += data[p][d];
+                    }
+                    for (let c = 0; c < k; c++) {
+                        if (counts[c] > 0) centroids[c] = sums[c].map(s => s / counts[c]);
+                    }
+                    if (!changed && iter > 0) break;
+                }
+                // compute WCSS
+                let wcss = 0;
+                for (let p = 0; p < data.length; p++) wcss += dist2(data[p], centroids[assign[p]]);
+                if (wcss < best) best = wcss;
+            }
+            return best;
+        }
+
+        function findElbow(wcss) {
+            // second-difference heuristic over interior K values (index 1..n-2)
+            let bestK = 1, bestVal = -Infinity;
+            for (let i = 1; i < wcss.length - 1; i++) {
+                const d2 = (wcss[i - 1] - wcss[i]) - (wcss[i] - wcss[i + 1]);
+                if (d2 > bestVal) { bestVal = d2; bestK = i + 1; } // +1 -> K value (K starts at 1)
+            }
+            return bestK;
+        }
+
+        function runElbow() {
+            const key = document.getElementById('elbowDataset').value;
+            const raw = elbowDatasets[key];
+            const data = normalize(raw);
+
+            const maxK = 8;
+            const wcss = [];
+            for (let k = 1; k <= maxK; k++) wcss.push(kmeansWCSS(data, k));
+
+            const elbowK = findElbow(wcss);
+            drawElbow(wcss, elbowK);
+
+            const status = document.getElementById('elbowStatus');
+            status.innerHTML = `<span class="status-badge">Hasil</span> Siku terdeteksi di <strong>K = ${elbowK}</strong>. WCSS turun tajam sampai K=${elbowK}, lalu melandai.`;
+        }
+
+        function drawElbow(wcss, elbowK) {
+            const c = document.getElementById('elbowCanvas');
+            const g = c.getContext('2d');
+            const W = c.width, H = c.height;
+            const padL = 70, padR = 30, padT = 30, padB = 50;
+            const plotW = W - padL - padR, plotH = H - padT - padB;
+
+            g.fillStyle = '#0f172a';
+            g.fillRect(0, 0, W, H);
+
+            const n = wcss.length;
+            const maxW = Math.max(...wcss);
+            const xFor = i => padL + (n === 1 ? 0 : (plotW * i) / (n - 1));
+            const yFor = v => padT + plotH - (maxW === 0 ? 0 : (plotH * v) / maxW);
+
+            // grid + axes
+            g.strokeStyle = 'rgba(255,255,255,0.08)';
+            g.lineWidth = 1;
+            g.fillStyle = 'rgba(255,255,255,0.5)';
+            g.font = "12px 'JetBrains Mono', monospace";
+            g.textAlign = 'right';
+            for (let t = 0; t <= 4; t++) {
+                const yv = (maxW * t) / 4;
+                const y = yFor(yv);
+                g.beginPath(); g.moveTo(padL, y); g.lineTo(W - padR, y); g.stroke();
+                g.fillText(yv.toFixed(1), padL - 8, y + 4);
+            }
+            // x labels (K)
+            g.textAlign = 'center';
+            for (let i = 0; i < n; i++) {
+                g.fillText('K=' + (i + 1), xFor(i), H - padB + 20);
+            }
+
+            // axis titles
+            g.fillStyle = 'rgba(255,255,255,0.7)';
+            g.fillText('Jumlah Cluster (K)', padL + plotW / 2, H - 8);
+            g.save();
+            g.translate(18, padT + plotH / 2);
+            g.rotate(-Math.PI / 2);
+            g.fillText('WCSS (inertia)', 0, 0);
+            g.restore();
+
+            // line
+            g.strokeStyle = '#a78bfa';
+            g.lineWidth = 2.5;
+            g.beginPath();
+            wcss.forEach((v, i) => {
+                const x = xFor(i), y = yFor(v);
+                if (i === 0) g.moveTo(x, y); else g.lineTo(x, y);
+            });
+            g.stroke();
+
+            // points
+            wcss.forEach((v, i) => {
+                const x = xFor(i), y = yFor(v);
+                const isElbow = (i + 1) === elbowK;
+                g.beginPath();
+                g.arc(x, y, isElbow ? 8 : 4, 0, Math.PI * 2);
+                g.fillStyle = isElbow ? '#4ade80' : '#a78bfa';
+                g.fill();
+            });
+
+            // elbow marker
+            const ex = xFor(elbowK - 1), ey = yFor(wcss[elbowK - 1]);
+            g.strokeStyle = '#4ade80';
+            g.setLineDash([5, 4]);
+            g.lineWidth = 1.5;
+            g.beginPath(); g.moveTo(ex, ey); g.lineTo(ex, H - padB); g.stroke();
+            g.setLineDash([]);
+            g.fillStyle = '#4ade80';
+            g.font = "bold 13px 'JetBrains Mono', monospace";
+            g.textAlign = 'center';
+            g.fillText('◀ Elbow (K=' + elbowK + ')', ex + 60, ey - 12);
+        }
+
+        // initial render of elbow chart
+        runElbow();
 
         function copyCode(btn) {
             const codeBlock = btn.closest('.code-block').querySelector('code');

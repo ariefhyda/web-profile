@@ -24,6 +24,8 @@
     --accent-cv-glow: rgba(34, 211, 238, 0.15);
     --accent-ws: #10b981;
     --accent-ws-glow: rgba(16, 185, 129, 0.15);
+    --accent-docker: #2496ed;
+    --accent-docker-glow: rgba(36, 150, 237, 0.15);
 
     --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
     --gradient-hero: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -774,6 +776,7 @@ img {
 .card-glow-datamining { background: var(--accent-datamining-glow); }
 .card-glow-cv { background: var(--accent-cv-glow); }
 .card-glow-ws { background: var(--accent-ws-glow); }
+.card-glow-docker { background: var(--accent-docker-glow); }
 
 .card-content {
     position: relative;
@@ -824,6 +827,12 @@ img {
     background: rgba(16, 185, 129, 0.1);
     color: var(--accent-ws);
     border: 1px solid rgba(16, 185, 129, 0.15);
+}
+
+.card-icon-docker {
+    background: rgba(36, 150, 237, 0.1);
+    color: var(--accent-docker);
+    border: 1px solid rgba(36, 150, 237, 0.15);
 }
 
 .card-badge {
@@ -916,6 +925,7 @@ img {
 #card-datamining .card-link:hover { color: var(--accent-datamining); }
 #card-cv .card-link:hover { color: var(--accent-cv); }
 #card-ws .card-link:hover { color: var(--accent-ws); }
+#card-docker .card-link:hover { color: var(--accent-docker); }
 
 .card-pattern {
     position: absolute;

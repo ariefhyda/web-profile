@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pengantar Docker & Kontainerisasi — Arif Hidayah</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/docker/course.css">
+
+    <style>
+        .vm-compare { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+        .stack-col {
+            background: rgba(0,0,0,0.25); border: 1px solid var(--border-color);
+            border-radius: 10px; padding: 14px; display: flex; flex-direction: column; gap: 6px;
+        }
+        .stack-col > h4 {
+            margin: 0 0 6px; font-size: 0.95rem; text-align: center; color: #fff;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .apps-row { display: flex; gap: 6px; }
+        .app-card { flex: 1; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+        .blk {
+            border-radius: 6px; font-size: 0.66rem; font-weight: 600; text-align: center;
+            display: flex; align-items: center; justify-content: center; color: #fff;
+            padding: 4px 2px; line-height: 1.2; overflow: hidden;
+        }
+        .blk-app { background: #2496ed; height: 34px; }
+        .blk-bin { background: #475569; height: 22px; }
+        .blk-os  { background: #d97706; height: 60px; }
+        .blk-engine { background: #1d4ed8; height: 30px; }
+        .blk-host { background: #334155; height: 28px; }
+        .blk-hyper { background: #7c3aed; height: 28px; }
+        .blk-infra { background: #1e293b; height: 32px; border: 1px dashed rgba(255,255,255,0.12); }
+        .vm-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 14px; }
+        .stat-tile {
+            background: rgba(0,0,0,0.3); border: 1px solid var(--border-color);
+            border-radius: 8px; padding: 12px; text-align: center;
+        }
+        .stat-tile .v { font-size: 1.25rem; font-weight: 800; font-family: 'JetBrains Mono', monospace; }
+        .stat-tile .l { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; margin-top: 4px; }
+        .v-vm { color: #f59e0b; }
+        .v-ct { color: var(--accent-docker); }
+        @media (max-width: 640px) { .vm-compare { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+    <div class="bg-grid" aria-hidden="true"></div>
+
+    <nav class="navbar scrolled" id="navbar"></nav>
+    <div class="mobile-menu" id="mobileMenu"></div>
+
+    <main class="course-layout">
+        <aside class="course-sidebar" id="courseSidebar"></aside>
+
+        <article class="course-content">
+            <div class="breadcrumb">
+                <a href="../index.html">Home</a>
+                <span>›</span>
+                <a href="index.html">Docker</a>
+                <span>›</span>
+                <span style="color: var(--text-primary);">Pengantar Docker</span>
+            </div>
+
+            <header class="content-header">
+                <h1 class="content-title">Modul 1: Pengantar Docker & Kontainerisasi</h1>
+                <div class="content-meta">
+                    <div class="meta-pill">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 5V8.5L10.5 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/></svg>
+                        <span>Estimasi: 40 Menit</span>
+                    </div>
+                    <div class="meta-pill">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="10" rx="1" stroke="currentColor" stroke-width="1.5"/><path d="M5 7h6M5 10h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                        <span>Teori & Konsep Dasar</span>
+                    </div>
+                </div>
+            </header>
+
+            <div class="video-container">
+                <div class="video-placeholder" id="videoWrapper">
+                    <div class="video-overlay" id="videoOverlay">
+                        <div class="play-btn" onclick="playVideo()">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                        </div>
+                        <h3 style="font-weight: 600; margin-top: 16px; color: white;">Video Kuliah: Mengapa Docker?</h3>
+                        <p style="color: rgba(255,255,255,0.6); font-size: 0.85rem; margin-top: 6px;">Klik untuk memutar</p>
+                    </div>
+                </div>
+            </div>
+
+            <p class="content-text">
+                Selamat datang di kelas <strong>Docker</strong>. Sebelum menyentuh perintah teknis, kita perlu memahami <em>masalah</em> apa yang sebenarnya ingin dipecahkan oleh Docker. Pemahaman ini akan membuat seluruh modul berikutnya terasa jauh lebih masuk akal.
+            </p>
+
+            <h2 class="content-heading">1. Masalah Klasik: "It Works on My Machine"</h2>
+            <p class="content-text">
+                Pernahkah Anda membuat aplikasi yang berjalan sempurna di laptop sendiri, tetapi <strong>error</strong> saat dijalankan di komputer teman atau di server? Penyebabnya hampir selalu sama: <strong>perbedaan environment</strong> — versi bahasa pemrograman berbeda, library yang hilang, konfigurasi sistem operasi tidak sama, atau variabel lingkungan yang lupa di-set.
+            </p>
+            <div class="info-box">
+                <div class="info-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                    <strong>Inti Persoalan</strong>
+                </div>
+                <p>Aplikasi tidak hidup sendirian. Ia bergantung pada <em>dependency</em> dan <em>environment</em> di sekelilingnya. Docker menyatukan aplikasi <strong>beserta seluruh dependensinya</strong> ke dalam satu paket terstandar yang dijamin berjalan sama di mana pun — laptop dosen, laptop mahasiswa, maupun server produksi.</p>
+            </div>
+
+            <h2 class="content-heading">2. Apa itu Docker?</h2>
+            <p class="content-text">
+                <strong>Docker</strong> adalah platform <em>open-source</em> untuk membangun, mengirim, dan menjalankan aplikasi di dalam unit terisolasi yang ringan dan portabel bernama <strong>container</strong> (kontainer). Analogi paling populer datang dari dunia logistik: sebelum ada peti kemas standar, memuat barang ke kapal sangat rumit karena bentuk barang berbeda-beda. Setelah ada <strong>peti kemas (container) standar</strong>, apa pun isinya, cara mengangkut dan menumpuknya jadi seragam.
+            </p>
+            <p class="content-text">
+                Docker membawa ide yang sama ke dunia software: apa pun bahasa atau framework aplikasi Anda (PHP, Python, Node.js, Java), setelah dikemas menjadi container, cara menjalankannya selalu sama.
+            </p>
+
+            <h2 class="content-heading">3. Tiga Istilah Kunci</h2>
+            <ol class="content-list">
+                <li><strong>Image</strong> — Cetak biru (<em>blueprint</em>) aplikasi: berisi kode, runtime, library, dan konfigurasi. Bersifat read-only, mirip "file installer" atau "resep masakan".</li>
+                <li><strong>Container</strong> — Hasil <em>menjalankan</em> sebuah image. Ini adalah instance aktif aplikasi yang sedang berjalan. Dari satu image bisa lahir banyak container, layaknya banyak kue dari satu resep.</li>
+                <li><strong>Registry</strong> — Gudang penyimpanan image (misalnya <em>Docker Hub</em>), tempat kita mengunduh (<code>pull</code>) atau mengunggah (<code>push</code>) image agar bisa dibagikan.</li>
+            </ol>
+
+            <h2 class="content-heading">4. Container vs Virtual Machine (VM)</h2>
+            <p class="content-text">
+                Banyak yang mengira container itu sama dengan Virtual Machine. Keduanya memang sama-sama mengisolasi aplikasi, tetapi cara kerjanya sangat berbeda. <strong>VM memvirtualisasikan perangkat keras</strong> sehingga setiap VM membawa <em>Guest OS</em>-nya sendiri yang berat. Sementara <strong>container memvirtualisasikan sistem operasi</strong> — semua container berbagi kernel Host OS yang sama melalui Docker Engine, sehingga jauh lebih ramping.
+            </p>
+            <p class="content-text">
+                Geser jumlah aplikasi pada simulasi di bawah, lalu amati bagaimana tumpukan (<em>stack</em>), total ukuran, dan waktu startup berubah drastis antara kedua pendekatan.
+            </p>
+
+            <!-- INTERACTIVE: Container vs VM -->
+            <div class="demo-box">
+                <div class="demo-header">
+                    <span class="demo-title">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+                        Simulasi: Kontainer vs Virtual Machine
+                    </span>
+                    <div class="demo-controls">
+                        <label class="demo-label" for="appCount">Jumlah Aplikasi:</label>
+                        <input type="range" id="appCount" class="demo-range" min="1" max="5" value="3">
+                        <strong id="appCountLabel" style="color: var(--accent-docker); width: 18px; text-align:center;">3</strong>
+                    </div>
+                </div>
+                <div class="demo-body">
+                    <div class="vm-compare">
+                        <div class="stack-col">
+                            <h4>🖥️ Virtual Machine</h4>
+                            <div class="apps-row" id="vmApps"></div>
+                            <div class="blk blk-hyper">Hypervisor</div>
+                            <div class="blk blk-infra">Infrastruktur (Server Fisik)</div>
+                        </div>
+                        <div class="stack-col">
+                            <h4>📦 Container (Docker)</h4>
+                            <div class="apps-row" id="ctApps"></div>
+                            <div class="blk blk-engine">Docker Engine</div>
+                            <div class="blk blk-host">Host OS (berbagi Kernel)</div>
+                            <div class="blk blk-infra">Infrastruktur (Server Fisik)</div>
+                        </div>
+                    </div>
+                    <div class="vm-stats">
+                        <div class="stat-tile"><div class="v v-vm" id="vmSize">6.0 GB</div><div class="l">Ukuran VM</div></div>
+                        <div class="stat-tile"><div class="v v-vm" id="vmBoot">~90 dtk</div><div class="l">Startup VM</div></div>
+                        <div class="stat-tile"><div class="v v-vm" id="vmGuest">3×</div><div class="l">Guest OS</div></div>
+                        <div class="stat-tile"><div class="v v-ct" id="ctSize">240 MB</div><div class="l">Ukuran Container</div></div>
+                        <div class="stat-tile"><div class="v v-ct" id="ctBoot">~1.5 dtk</div><div class="l">Startup Container</div></div>
+                        <div class="stat-tile"><div class="v v-ct" id="ctGuest">0×</div><div class="l">Guest OS</div></div>
+                    </div>
+                </div>
+                <p class="demo-hint">* Angka bersifat ilustratif untuk menggambarkan perbedaan skala overhead. Perhatikan: menambah aplikasi membuat VM membengkak karena tiap VM menggandakan Guest OS, sedangkan container tetap ramping karena berbagi kernel.</p>
+            </div>
+
+            <table class="cmp-table">
+                <thead>
+                    <tr><th>Aspek</th><th>Virtual Machine</th><th>Container</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Isolasi</td><td>Hardware (penuh)</td><td>Proses & OS-level</td></tr>
+                    <tr><td>Ukuran</td><td>Gigabytes (GB)</td><td>Megabytes (MB)</td></tr>
+                    <tr><td>Waktu start</td><td>Puluhan detik–menit</td><td>Milidetik–detik</td></tr>
+                    <tr><td>Guest OS</td><td>Wajib, tiap VM punya sendiri</td><td>Tidak ada (berbagi kernel host)</td></tr>
+                    <tr><td>Portabilitas</td><td>Berat untuk dipindah</td><td>Sangat portabel</td></tr>
+                </tbody>
+            </table>
+
+            <div class="info-box warning">
+                <div class="info-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg>
+                    <strong>Bukan Saling Menggantikan</strong>
+                </div>
+                <p>Container <em>tidak selalu</em> menggantikan VM. Keduanya sering dipakai bersama: container dijalankan <strong>di dalam</strong> VM di lingkungan cloud untuk menggabungkan isolasi keras VM dengan efisiensi container.</p>
+            </div>
+
+            <h2 class="content-heading">5. Mengapa Mahasiswa Perlu Belajar Docker?</h2>
+            <div class="pro-con-grid">
+                <div class="pro-card">
+                    <h4>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                        Keuntungan
+                    </h4>
+                    <ul>
+                        <li><strong>Konsisten</strong> — hilang sudah alasan "di laptop saya jalan kok".</li>
+                        <li><strong>Cepat di-setup</strong> — environment kompleks siap dalam hitungan detik.</li>
+                        <li><strong>Ringan</strong> — bisa menjalankan banyak service di satu laptop.</li>
+                        <li><strong>Skill industri</strong> — standar wajib di dunia DevOps & cloud.</li>
+                    </ul>
+                </div>
+                <div class="con-card">
+                    <h4>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                        Tantangan
+                    </h4>
+                    <ul>
+                        <li>Kurva belajar konsep baru (image, layer, volume).</li>
+                        <li>Perlu pembiasaan dengan antarmuka <em>command line</em>.</li>
+                        <li>Keamanan & networking butuh perhatian ekstra di produksi.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="content-nav">
+                <div class="content-nav-item"></div>
+                <div class="content-nav-item">
+                    <a href="arsitektur.html" class="nav-btn nav-btn-next">
+                        <div>
+                            <span class="nav-label">Selanjutnya</span>
+                            <span class="nav-name">Arsitektur Docker</span>
+                        </div>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </a>
+                </div>
+            </div>
+        </article>
+    </main>
+
+    <script src="/docker/course-layout.js"></script>
+    <script>
+    function playVideo() { alert('Video belum tersedia. Silakan ganti elemen ini dengan embed YouTube.'); }
+    function copyCode(btn) {
+        const codeBlock = btn.closest('.code-block').querySelector('code');
+        navigator.clipboard.writeText(codeBlock.textContent).then(() => {
+            btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>';
+            setTimeout(() => { btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>'; }, 2000);
+        });
+    }
+
+    // ---- Interactive: Container vs VM ----
+    (function () {
+        const slider = document.getElementById('appCount');
+        const label = document.getElementById('appCountLabel');
+        const vmApps = document.getElementById('vmApps');
+        const ctApps = document.getElementById('ctApps');
+
+        const PER_VM_GB = 2.0;     // tiap VM bawa Guest OS penuh
+        const PER_CT_MB = 80;      // tiap container hanya app + libs
+        const VM_BOOT = 30;        // detik per VM (boot OS)
+        const CT_BOOT = 0.5;       // detik per container
+
+        function render(n) {
+            label.textContent = n;
+
+            // VM: tiap app = App / Bins / Guest OS (berat)
+            vmApps.innerHTML = '';
+            for (let i = 0; i < n; i++) {
+                vmApps.insertAdjacentHTML('beforeend',
+                    `<div class="app-card">
+                        <div class="blk blk-app">App ${i + 1}</div>
+                        <div class="blk blk-bin">Bins/Libs</div>
+                        <div class="blk blk-os">Guest OS</div>
+                    </div>`);
+            }
+            // Container: tiap app = App / Bins (ramping, tanpa Guest OS)
+            ctApps.innerHTML = '';
+            for (let i = 0; i < n; i++) {
+                ctApps.insertAdjacentHTML('beforeend',
+                    `<div class="app-card">
+                        <div class="blk blk-app">App ${i + 1}</div>
+                        <div class="blk blk-bin">Bins/Libs</div>
+                    </div>`);
+            }
+
+            // Stats
+            const vmSize = (n * PER_VM_GB).toFixed(1) + ' GB';
+            const ctTotalMb = n * PER_CT_MB;
+            const ctSize = ctTotalMb >= 1000 ? (ctTotalMb / 1000).toFixed(2) + ' GB' : ctTotalMb + ' MB';
+            document.getElementById('vmSize').textContent = vmSize;
+            document.getElementById('ctSize').textContent = ctSize;
+            document.getElementById('vmBoot').textContent = '~' + (n * VM_BOOT) + ' dtk';
+            document.getElementById('ctBoot').textContent = '~' + (n * CT_BOOT).toFixed(1) + ' dtk';
+            document.getElementById('vmGuest').textContent = n + '×';
+            document.getElementById('ctGuest').textContent = '0×';
+        }
+
+        slider.addEventListener('input', e => render(parseInt(e.target.value)));
+        render(parseInt(slider.value));
+    })();
+    </script>
+</body>
+</html>

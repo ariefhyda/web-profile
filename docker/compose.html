@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Docker Compose — Arif Hidayah</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/docker/course.css">
+
+    <style>
+        .svc-row { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; align-items: stretch; }
+        .svc-card {
+            border: 1.5px solid var(--border-color); border-radius: 10px; padding: 14px; min-width: 140px; flex: 1;
+            background: rgba(255,255,255,0.03); transition: all 0.3s ease; position: relative;
+        }
+        .svc-card .sname { font-weight: 700; color: #fff; font-size: 0.92rem; display: flex; align-items: center; gap: 6px; }
+        .svc-card .simg { font-family: 'JetBrains Mono', monospace; font-size: 0.68rem; color: var(--text-muted); margin-top: 3px; }
+        .svc-card .sport { font-family: 'JetBrains Mono', monospace; font-size: 0.68rem; color: var(--accent-docker); margin-top: 6px; }
+        .svc-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 0.66rem; font-weight: 700; margin-top: 8px; padding: 2px 8px; border-radius: 100px; }
+        .dotled { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
+        .st-pending  { background: rgba(148,163,184,0.15); color: #94a3b8; }
+        .st-pending  .dotled { background: #94a3b8; }
+        .st-starting { background: rgba(251,188,46,0.16); color: #fbbc2e; }
+        .st-starting .dotled { background: #fbbc2e; animation: blink 0.7s infinite; }
+        .st-healthy  { background: rgba(74,222,128,0.16); color: #4ade80; }
+        .st-healthy  .dotled { background: #4ade80; }
+        .st-down     { background: rgba(239,68,68,0.14); color: #ef4444; }
+        .st-down     .dotled { background: #ef4444; }
+        @keyframes blink { 50% { opacity: 0.25; } }
+        .svc-card.healthy { border-color: rgba(74,222,128,0.4); }
+        .svc-card.starting { border-color: rgba(251,188,46,0.4); }
+        .dep-tag { font-size: 0.6rem; color: var(--text-muted); position: absolute; top: 8px; right: 10px; }
+    </style>
+</head>
+<body>
+    <div class="bg-grid" aria-hidden="true"></div>
+    <nav class="navbar scrolled" id="navbar"></nav>
+    <div class="mobile-menu" id="mobileMenu"></div>
+
+    <main class="course-layout">
+        <aside class="course-sidebar" id="courseSidebar"></aside>
+
+        <article class="course-content">
+            <div class="breadcrumb">
+                <a href="../index.html">Home</a><span>›</span>
+                <a href="index.html">Docker</a><span>›</span>
+                <span style="color: var(--text-primary);">Docker Compose</span>
+            </div>
+
+            <header class="content-header">
+                <h1 class="content-title">Modul 8: Docker Compose</h1>
+                <div class="content-meta">
+                    <div class="meta-pill">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 5V8.5L10.5 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/></svg>
+                        <span>Estimasi: 50 Menit</span>
+                    </div>
+                    <div class="meta-pill">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="10" rx="1" stroke="currentColor" stroke-width="1.5"/><path d="M5 7h6M5 10h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                        <span>Praktikum</span>
+                    </div>
+                </div>
+            </header>
+
+            <p class="content-text">
+                Aplikasi nyata jarang terdiri dari satu container. Biasanya ada web server, backend API, database, cache, dan lainnya. Menjalankan semuanya satu per satu dengan <code>docker run</code> panjang itu melelahkan dan rawan salah. <strong>Docker Compose</strong> memungkinkan kita mendefinisikan seluruh <em>stack</em> dalam satu berkas <code>docker-compose.yml</code>, lalu menjalankannya dengan satu perintah.
+            </p>
+
+            <h2 class="content-heading">1. Berkas docker-compose.yml</h2>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">docker-compose.yml</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)" title="Copy">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                    </button>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-keyword">services</span>:
+  <span class="hl-func">db</span>:
+    <span class="hl-keyword">image</span>: postgres:16
+    <span class="hl-keyword">environment</span>:
+      POSTGRES_PASSWORD: <span class="hl-string">secret</span>
+    <span class="hl-keyword">volumes</span>:
+      - dbdata:/var/lib/postgresql/data
+  <span class="hl-func">api</span>:
+    <span class="hl-keyword">build</span>: ./api
+    <span class="hl-keyword">depends_on</span>:
+      - db
+  <span class="hl-func">web</span>:
+    <span class="hl-keyword">image</span>: nginx
+    <span class="hl-keyword">ports</span>:
+      - <span class="hl-string">"8080:80"</span>
+    <span class="hl-keyword">depends_on</span>:
+      - api
+
+<span class="hl-keyword">volumes</span>:
+  <span class="hl-func">dbdata</span>:</code></pre>
+            </div>
+
+            <h2 class="content-heading">2. Simulasi <code>compose up</code></h2>
+            <p class="content-text">
+                Klik <strong>compose up</strong> dan amati: Compose menghormati <code>depends_on</code> sehingga service dinyalakan dalam urutan yang benar — <strong>db → api → web</strong>. Semua otomatis tergabung dalam satu jaringan, sehingga bisa saling memanggil lewat nama service. Coba juga ubah jumlah replika <code>web</code>.
+            </p>
+
+            <!-- INTERACTIVE: compose orchestrator -->
+            <div class="demo-box">
+                <div class="demo-header">
+                    <span class="demo-title">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="8" y="14" width="7" height="7" rx="1"/></svg>
+                        Compose Orchestrator
+                    </span>
+                    <div class="demo-controls">
+                        <label class="demo-label">replika web:</label>
+                        <select class="demo-select" id="scaleSel">
+                            <option>1</option><option>2</option><option>3</option>
+                        </select>
+                        <button class="btn-demo" id="bUp">▲ compose up</button>
+                        <button class="btn-demo ghost" id="bDown" disabled>▼ compose down</button>
+                    </div>
+                </div>
+                <div class="demo-body">
+                    <div class="svc-row" id="svcRow"></div>
+                    <div class="demo-status" id="composeLog" style="margin-top: 16px; min-height: 80px;"></div>
+                </div>
+                <p class="demo-hint">🔗 Semua service berada di satu network default. Service <code>api</code> dapat terhubung ke database cukup dengan hostname <code>db</code> — tidak perlu IP.</p>
+            </div>
+
+            <h2 class="content-heading">3. Perintah Compose Penting</h2>
+            <table class="cmp-table">
+                <thead><tr><th>Perintah</th><th>Fungsi</th></tr></thead>
+                <tbody>
+                    <tr><td><code>docker compose up -d</code></td><td>Jalankan seluruh service di background</td></tr>
+                    <tr><td><code>docker compose down</code></td><td>Hentikan & hapus semua container + network</td></tr>
+                    <tr><td><code>docker compose ps</code></td><td>Status service dalam project</td></tr>
+                    <tr><td><code>docker compose logs -f</code></td><td>Pantau log semua service secara real-time</td></tr>
+                    <tr><td><code>docker compose up --build</code></td><td>Build ulang image sebelum menjalankan</td></tr>
+                </tbody>
+            </table>
+
+            <div class="info-box">
+                <div class="info-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    <strong>Selamat! 🎉</strong>
+                </div>
+                <p>Anda telah menyelesaikan seluruh modul Docker — dari konsep container, image & Dockerfile, lifecycle, volume, networking, hingga orkestrasi dengan Compose. Langkah selanjutnya: terapkan pada proyek nyata Anda, lalu pelajari deployment & CI/CD.</p>
+            </div>
+
+            <div class="content-nav">
+                <div class="content-nav-item">
+                    <a href="networking.html" class="nav-btn nav-btn-prev">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                        <div><span class="nav-label">Sebelumnya</span><span class="nav-name">Docker Networking</span></div>
+                    </a>
+                </div>
+                <div class="content-nav-item">
+                    <a href="index.html" class="nav-btn nav-btn-next">
+                        <div><span class="nav-label">Selesai</span><span class="nav-name">Kembali ke Modul 1</span></div>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </a>
+                </div>
+            </div>
+        </article>
+    </main>
+
+    <script src="/docker/course-layout.js"></script>
+    <script>
+    function playVideo() { alert('Video belum tersedia.'); }
+    function copyCode(btn) {
+        const codeBlock = btn.closest('.code-block').querySelector('code');
+        navigator.clipboard.writeText(codeBlock.textContent).then(() => {
+            btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>';
+            setTimeout(() => { btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>'; }, 2000);
+        });
+    }
+
+    // ---- Interactive: compose orchestrator ----
+    (function () {
+        const svcRow = document.getElementById('svcRow');
+        const logEl = document.getElementById('composeLog');
+        const bUp = document.getElementById('bUp');
+        const bDown = document.getElementById('bDown');
+        const scaleSel = document.getElementById('scaleSel');
+
+        const BASE = [
+            { key: 'db',  icon: '🗄️', image: 'postgres:16', port: ':5432', dep: '—' },
+            { key: 'api', icon: '⚙️', image: 'build ./api', port: ':3000', dep: 'db' },
+            { key: 'web', icon: '🌐', image: 'nginx',       port: '8080→80', dep: 'api' }
+        ];
+        let busy = false, isUp = false;
+
+        function instances() {
+            const n = parseInt(scaleSel.value);
+            const list = [];
+            BASE.forEach(s => {
+                if (s.key === 'web' && n > 1) {
+                    for (let i = 1; i <= n; i++) list.push({ ...s, label: 'web-' + i });
+                } else {
+                    list.push({ ...s, label: s.key });
+                }
+            });
+            return list;
+        }
+
+        function render(states) {
+            svcRow.innerHTML = instances().map(s => {
+                const st = states[s.label] || 'pending';
+                const txt = { pending: 'pending', starting: 'starting…', healthy: 'healthy', down: 'stopped' }[st];
+                return `<div class="svc-card ${st}">
+                    <span class="dep-tag">depends: ${s.dep}</span>
+                    <div class="sname">${s.icon} ${s.label}</div>
+                    <div class="simg">${s.image}</div>
+                    <div class="sport">${s.port}</div>
+                    <div class="svc-badge st-${st}"><span class="dotled"></span>${txt}</div>
+                </div>`;
+            }).join('');
+        }
+        function log(html, cls) {
+            const d = document.createElement('div'); if (cls) d.className = cls; d.innerHTML = html;
+            logEl.appendChild(d); logEl.scrollTop = logEl.scrollHeight;
+        }
+        const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+        async function up() {
+            if (busy) return;
+            busy = true; bUp.disabled = true; scaleSel.disabled = true;
+            const states = {};
+            instances().forEach(s => states[s.label] = 'pending');
+            render(states);
+            logEl.innerHTML = '<span class="term-cmd">$ docker compose up</span>';
+            log('Network "app_default" created', 'term-dim');
+            log('Volume "app_dbdata" created', 'term-dim');
+
+            for (const s of instances()) {
+                states[s.label] = 'starting'; render(states);
+                log(`<span class="term-warn">⏳</span> Starting <strong>${s.label}</strong> ${s.dep !== '—' ? '<span class="term-dim">(menunggu ' + s.dep + ' healthy)</span>' : ''}`);
+                await sleep(800);
+                states[s.label] = 'healthy'; render(states);
+                log(`<span class="term-ok">✓</span> Container app-${s.label}-1  <span class="term-ok">Healthy</span>`);
+            }
+            log('<span class="term-ok">✔ Semua service berjalan.</span> Akses aplikasi di http://localhost:8080', 'term-ok');
+            isUp = true; busy = false; bDown.disabled = false;
+        }
+
+        async function down() {
+            if (busy) return;
+            busy = true; bDown.disabled = true;
+            const states = {};
+            instances().forEach(s => states[s.label] = 'healthy');
+            logEl.innerHTML = '<span class="term-cmd">$ docker compose down</span>';
+            const rev = instances().reverse();
+            for (const s of rev) {
+                states[s.label] = 'down'; render(states);
+                log(`<span class="term-err">✗</span> Stopping & removing <strong>${s.label}</strong>`);
+                await sleep(420);
+            }
+            log('Network "app_default" removed', 'term-dim');
+            isUp = false; busy = false; bUp.disabled = false; scaleSel.disabled = false;
+        }
+
+        bUp.addEventListener('click', up);
+        bDown.addEventListener('click', down);
+        scaleSel.addEventListener('change', () => { if (!isUp) render({}); });
+
+        render({});
+        log('Stack belum berjalan. Klik <span class="term-cmd">▲ compose up</span> untuk menyalakan db, api, dan web sekaligus.', 'term-dim');
+    })();
+    </script>
+</body>
+</html>

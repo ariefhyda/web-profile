@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arsitektur Docker — Arif Hidayah</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/docker/course.css">
+
+    <style>
+        .arch-flow { display: flex; align-items: stretch; gap: 10px; flex-wrap: wrap; }
+        .arch-zone {
+            flex: 1; min-width: 180px; display: flex; flex-direction: column; gap: 8px;
+            border: 1px dashed var(--border-color); border-radius: 10px; padding: 12px;
+        }
+        .arch-zone-title {
+            font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em;
+            color: var(--text-muted); text-align: center; font-weight: 700; margin-bottom: 2px;
+        }
+        .arch-node {
+            background: rgba(255,255,255,0.03); border: 1.5px solid var(--border-color);
+            border-radius: 8px; padding: 12px; text-align: center; transition: all 0.3s ease;
+        }
+        .arch-node .nname { font-weight: 700; font-size: 0.9rem; color: #fff; }
+        .arch-node .ndesc { font-size: 0.72rem; color: var(--text-muted); margin-top: 3px; }
+        .arch-node.active {
+            border-color: var(--accent-docker); background: rgba(36, 150, 237, 0.14);
+            box-shadow: 0 0 0 4px rgba(36,150,237,0.12); transform: translateY(-2px);
+        }
+        .arch-node.active .nname { color: var(--accent-docker); }
+        .arch-host { gap: 8px; border-color: rgba(36,150,237,0.35); }
+        .arch-connector {
+            align-self: center; color: var(--text-muted); font-size: 1.4rem; padding: 0 2px;
+            display: flex; align-items: center;
+        }
+        @media (max-width: 720px) { .arch-connector { transform: rotate(90deg); } .arch-zone { width: 100%; } }
+    </style>
+</head>
+<body>
+    <div class="bg-grid" aria-hidden="true"></div>
+    <nav class="navbar scrolled" id="navbar"></nav>
+    <div class="mobile-menu" id="mobileMenu"></div>
+
+    <main class="course-layout">
+        <aside class="course-sidebar" id="courseSidebar"></aside>
+
+        <article class="course-content">
+            <div class="breadcrumb">
+                <a href="../index.html">Home</a><span>›</span>
+                <a href="index.html">Docker</a><span>›</span>
+                <span style="color: var(--text-primary);">Arsitektur Docker</span>
+            </div>
+
+            <header class="content-header">
+                <h1 class="content-title">Modul 2: Arsitektur Docker</h1>
+                <div class="content-meta">
+                    <div class="meta-pill">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 5V8.5L10.5 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/></svg>
+                        <span>Estimasi: 35 Menit</span>
+                    </div>
+                    <div class="meta-pill">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="10" rx="1" stroke="currentColor" stroke-width="1.5"/><path d="M5 7h6M5 10h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                        <span>Teori & Konsep</span>
+                    </div>
+                </div>
+            </header>
+
+            <p class="content-text">
+                Docker memakai arsitektur <strong>client–server</strong>. Saat Anda mengetik perintah <code>docker</code> di terminal, Anda sebenarnya hanya menggunakan <em>client</em> yang mengirim instruksi ke sebuah program server yang bekerja di latar belakang. Memahami pembagian peran ini adalah kunci untuk tidak bingung ketika sesuatu tidak berjalan.
+            </p>
+
+            <h2 class="content-heading">1. Komponen Utama</h2>
+            <ol class="content-list">
+                <li><strong>Docker Client (CLI)</strong> — Perintah <code>docker run</code>, <code>docker pull</code>, dsb. Client menerjemahkan perintah Anda menjadi panggilan <em>REST API</em> dan mengirimnya ke daemon.</li>
+                <li><strong>Docker Daemon (<code>dockerd</code>)</strong> — "Otak" Docker yang berjalan sebagai background service. Ia membangun image, menjalankan container, mengatur network & volume. Client dan daemon berkomunikasi lewat <em>socket</em> atau jaringan.</li>
+                <li><strong>Docker Images</strong> — Penyimpanan image hasil <code>build</code> atau <code>pull</code>, tersimpan lokal di host.</li>
+                <li><strong>Docker Containers</strong> — Instance image yang sedang berjalan, dikelola sepenuhnya oleh daemon.</li>
+                <li><strong>Registry</strong> — Server penyimpanan image jarak jauh, seperti <em>Docker Hub</em>. Daemon menarik (<code>pull</code>) atau mendorong (<code>push</code>) image ke sini.</li>
+            </ol>
+
+            <div class="info-box">
+                <div class="info-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                    <strong>Poin Penting</strong>
+                </div>
+                <p>Client tidak pernah menjalankan container secara langsung. Ia hanya "menitipkan perintah" ke <strong>daemon</strong>. Itulah mengapa jika service <code>dockerd</code> mati, semua perintah <code>docker</code> akan gagal walau aplikasinya benar.</p>
+            </div>
+
+            <h2 class="content-heading">2. Simulasi Alur Perintah</h2>
+            <p class="content-text">
+                Pilih salah satu perintah di bawah. Amati bagaimana instruksi mengalir antar komponen — dari Client, ke Daemon, mungkin ke Registry, lalu menjadi Container. Panel log akan menjelaskan tiap langkah secara berurutan.
+            </p>
+
+            <!-- INTERACTIVE: Architecture flow -->
+            <div class="demo-box">
+                <div class="demo-header">
+                    <span class="demo-title">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 17l6-6-6-6M12 19h8"/></svg>
+                        Visualizer Alur Arsitektur
+                    </span>
+                    <div class="demo-controls">
+                        <button class="cmd-chip" data-cmd="pull">docker pull nginx</button>
+                        <button class="cmd-chip" data-cmd="run">docker run nginx</button>
+                        <button class="cmd-chip" data-cmd="build">docker build -t app .</button>
+                        <button class="cmd-chip" data-cmd="ps">docker ps</button>
+                    </div>
+                </div>
+                <div class="demo-body">
+                    <div class="arch-flow">
+                        <div class="arch-zone">
+                            <div class="arch-zone-title">Client</div>
+                            <div class="arch-node" id="n-client" style="margin: auto 0;">
+                                <div class="nname">Docker CLI</div>
+                                <div class="ndesc">terminal <code style="font-size:0.95em">docker ...</code></div>
+                            </div>
+                        </div>
+                        <div class="arch-connector">⇄</div>
+                        <div class="arch-zone arch-host">
+                            <div class="arch-zone-title">Docker Host</div>
+                            <div class="arch-node" id="n-daemon">
+                                <div class="nname">Docker Daemon</div>
+                                <div class="ndesc">dockerd</div>
+                            </div>
+                            <div class="arch-node" id="n-images">
+                                <div class="nname">Images</div>
+                                <div class="ndesc">cache lokal</div>
+                            </div>
+                            <div class="arch-node" id="n-containers">
+                                <div class="nname">Containers</div>
+                                <div class="ndesc">instance berjalan</div>
+                            </div>
+                        </div>
+                        <div class="arch-connector">⇄</div>
+                        <div class="arch-zone">
+                            <div class="arch-zone-title">Cloud</div>
+                            <div class="arch-node" id="n-registry" style="margin: auto 0;">
+                                <div class="nname">Registry</div>
+                                <div class="ndesc">Docker Hub</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="demo-status" id="archLog" style="margin-top: 16px; min-height: 96px;">▶ Pilih sebuah perintah di atas untuk memulai simulasi...</div>
+                </div>
+            </div>
+
+            <div class="content-nav">
+                <div class="content-nav-item">
+                    <a href="index.html" class="nav-btn nav-btn-prev">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                        <div><span class="nav-label">Sebelumnya</span><span class="nav-name">Pengantar Docker</span></div>
+                    </a>
+                </div>
+                <div class="content-nav-item">
+                    <a href="perintah-dasar.html" class="nav-btn nav-btn-next">
+                        <div><span class="nav-label">Selanjutnya</span><span class="nav-name">Instalasi & Perintah Dasar</span></div>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </a>
+                </div>
+            </div>
+        </article>
+    </main>
+
+    <script src="/docker/course-layout.js"></script>
+    <script>
+    function playVideo() { alert('Video belum tersedia.'); }
+    function copyCode(btn) {
+        const codeBlock = btn.closest('.code-block').querySelector('code');
+        navigator.clipboard.writeText(codeBlock.textContent).then(() => {
+            btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>';
+            setTimeout(() => { btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>'; }, 2000);
+        });
+    }
+
+    // ---- Interactive: Architecture flow ----
+    (function () {
+        const log = document.getElementById('archLog');
+        const chips = document.querySelectorAll('.cmd-chip');
+        const nodes = {
+            client: document.getElementById('n-client'),
+            daemon: document.getElementById('n-daemon'),
+            images: document.getElementById('n-images'),
+            containers: document.getElementById('n-containers'),
+            registry: document.getElementById('n-registry')
+        };
+
+        const flows = {
+            pull: [
+                { node: 'client', text: 'CLI mengirim perintah <span class="term-cmd">pull nginx</span> ke daemon via REST API.' },
+                { node: 'daemon', text: 'Daemon menerima permintaan & mengecek cache image lokal.' },
+                { node: 'images', text: 'Image <span class="term-cmd">nginx</span> belum ada di lokal. ❌' },
+                { node: 'registry', text: 'Daemon meminta image ke Registry (Docker Hub).' },
+                { node: 'registry', text: 'Registry mengirim balik layer-layer image. ⬇️' },
+                { node: 'images', text: 'Daemon menyimpan image ke cache lokal.' },
+                { node: 'images', text: '<span class="term-ok">Selesai ✓</span> Image nginx siap dipakai.' }
+            ],
+            run: [
+                { node: 'client', text: 'CLI mengirim perintah <span class="term-cmd">run nginx</span> ke daemon.' },
+                { node: 'daemon', text: 'Daemon mengecek apakah image nginx tersedia lokal.' },
+                { node: 'images', text: 'Image ditemukan di cache. ✓ (jika tidak ada, daemon akan pull dulu)' },
+                { node: 'containers', text: 'Daemon membuat container baru dari image tersebut.' },
+                { node: 'containers', text: 'Alokasi filesystem, network, lalu jalankan proses utama.' },
+                { node: 'containers', text: '<span class="term-ok">Selesai ✓</span> Container berstatus RUNNING.' }
+            ],
+            build: [
+                { node: 'client', text: 'CLI mengirim <span class="term-cmd">build context</span> + Dockerfile ke daemon.' },
+                { node: 'daemon', text: 'Daemon mengeksekusi instruksi Dockerfile satu per satu.' },
+                { node: 'daemon', text: 'Tiap instruksi menghasilkan sebuah <span class="term-warn">layer</span>.' },
+                { node: 'images', text: 'Layer-layer disusun menjadi image baru bernama <span class="term-cmd">app</span>.' },
+                { node: 'images', text: '<span class="term-ok">Selesai ✓</span> Image app:latest tersimpan lokal.' }
+            ],
+            ps: [
+                { node: 'client', text: 'CLI mengirim permintaan <span class="term-cmd">ps</span> (daftar container).' },
+                { node: 'daemon', text: 'Daemon membaca state seluruh container yang dikelolanya.' },
+                { node: 'containers', text: 'Mengumpulkan info container ber-status running.' },
+                { node: 'client', text: '<span class="term-ok">Selesai ✓</span> Daftar dikembalikan & ditampilkan di terminal.' }
+            ]
+        };
+
+        let running = false;
+
+        function clearActive() {
+            Object.values(nodes).forEach(n => n.classList.remove('active'));
+        }
+
+        async function play(cmd) {
+            if (running) return;
+            running = true;
+            chips.forEach(c => c.style.pointerEvents = 'none');
+            clearActive();
+            log.innerHTML = '';
+            const steps = flows[cmd];
+            for (let i = 0; i < steps.length; i++) {
+                const s = steps[i];
+                clearActive();
+                nodes[s.node].classList.add('active');
+                log.insertAdjacentHTML('beforeend',
+                    `<div><span class="term-prompt">${String(i + 1).padStart(2, '0')} ›</span> ${s.text}</div>`);
+                log.scrollTop = log.scrollHeight;
+                await new Promise(r => setTimeout(r, 900));
+            }
+            await new Promise(r => setTimeout(r, 500));
+            clearActive();
+            chips.forEach(c => c.style.pointerEvents = 'auto');
+            running = false;
+        }
+
+        chips.forEach(c => c.addEventListener('click', () => play(c.dataset.cmd)));
+    })();
+    </script>
+</body>
+</html>
