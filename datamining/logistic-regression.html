@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logistic Regression — Data Mining — Arif Hidayah</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/datamining/course.css">
+    <style>
+        :root {
+            --primary-color: var(--accent-datamining);
+            --primary-glow: var(--accent-datamining-glow);
+            --surface-light: var(--bg-secondary);
+            --bg-color: var(--bg-primary);
+        }
+
+        .formula-box {
+            background-color: var(--surface-light);
+            padding: 24px; border-radius: 8px; text-align: center;
+            margin-bottom: 24px; border: 1px solid var(--border-color); overflow-x: auto;
+        }
+        .formula-box span { font-family: 'JetBrains Mono', monospace; font-size: 1.05rem; }
+
+        .viz-section {
+            margin: 32px 0; background: rgba(167, 139, 250, 0.04);
+            border: 1px solid var(--border-color); border-radius: 16px;
+            padding: 32px 20px; display: flex; flex-direction: column; align-items: center;
+        }
+        .viz-section svg { max-width: 100%; height: auto; }
+        .viz-legend {
+            display: flex; gap: 20px; flex-wrap: wrap; justify-content: center;
+            margin-top: 20px; font-size: 0.85rem; color: var(--text-secondary);
+        }
+        .viz-legend span { display: inline-flex; align-items: center; gap: 8px; }
+        .swatch { width: 18px; height: 4px; border-radius: 2px; display: inline-block; }
+
+        .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 24px 0; }
+        .compare-card { background: var(--surface-light); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; }
+        .compare-card h4 { color: var(--text-primary); margin-bottom: 10px; }
+        .compare-card ul { margin-left: 18px; color: var(--text-secondary); line-height: 1.8; font-size: 0.92rem; }
+        @media (max-width: 600px) { .compare-grid { grid-template-columns: 1fr; } }
+
+        /* Interactive controls */
+        .interactive-box {
+            margin: 24px 0 32px; background: var(--surface-light);
+            border: 1px solid var(--border-color); border-radius: 16px; padding: 28px 24px;
+            display: flex; flex-direction: column; align-items: center;
+        }
+        .controls { display: flex; flex-wrap: wrap; gap: 28px; justify-content: center; margin-bottom: 8px; width: 100%; }
+        .control { display: flex; flex-direction: column; gap: 8px; min-width: 260px; }
+        .control label { font-size: 0.85rem; color: var(--text-secondary); display: flex; justify-content: space-between; gap: 12px; }
+        .control label b { color: var(--accent-datamining); font-family: 'JetBrains Mono', monospace; }
+        .control input[type=range] { width: 100%; accent-color: var(--accent-datamining); cursor: pointer; }
+        .metric-row { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; margin-top: 20px; }
+        .metric { background: rgba(0,0,0,0.22); border: 1px solid var(--border-color); border-radius: 10px; padding: 12px 18px; text-align: center; min-width: 110px; }
+        .metric .val { font-size: 1.35rem; font-weight: 800; color: var(--accent-datamining); font-family: 'JetBrains Mono', monospace; }
+        .metric .lbl { font-size: 0.72rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 2px; }
+        .verdict { margin-top: 18px; font-size: 1.1rem; font-weight: 800; text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="bg-grid" aria-hidden="true"></div>
+
+    <nav class="navbar scrolled" id="navbar"></nav>
+    <div class="mobile-menu" id="mobileMenu"></div>
+
+    <main class="course-layout">
+        <aside class="course-sidebar" id="courseSidebar"></aside>
+
+        <article class="course-content">
+
+            <div class="breadcrumb">
+                <a href="../index.html">Home</a>
+                <span>›</span>
+                <a href="index.html">Data Mining</a>
+                <span>›</span>
+                <span style="color: var(--text-primary);">Logistic Regression</span>
+            </div>
+
+            <header class="content-header">
+                <h1 class="content-title">Modul 18: Logistic Regression</h1>
+                <div class="content-meta">
+                    <div class="meta-pill">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 5V8.5L10.5 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/></svg>
+                        <span>Estimasi: 50 Menit</span>
+                    </div>
+                    <div class="meta-pill">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="10" rx="1" stroke="currentColor" stroke-width="1.5"/><path d="M5 7h6M5 10h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                        <span>Teori & Perhitungan</span>
+                    </div>
+                </div>
+            </header>
+
+            <p class="content-text">
+                Meskipun namanya mengandung kata "regression", <strong>Logistic Regression</strong> sebenarnya adalah algoritma <strong>klasifikasi</strong>. Ia memprediksi <strong>probabilitas</strong> sebuah data masuk ke suatu kelas (mis. lulus/gagal, spam/bukan, sakit/sehat) — sebuah nilai antara 0 dan 1.
+            </p>
+
+            <div class="info-box">
+                <div class="info-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                    <strong>Kenapa Bukan Linear Regression?</strong>
+                </div>
+                <p>
+                    Linear regression menghasilkan nilai dari −∞ sampai +∞, sehingga tidak cocok untuk probabilitas (yang harus 0–1). Logistic Regression "menekuk" output garis linear lewat <strong>fungsi sigmoid</strong> agar selalu berada di rentang 0–1.
+                </p>
+            </div>
+
+            <h2 class="content-heading">Fungsi Sigmoid</h2>
+            <p class="content-text">
+                Inti dari logistic regression adalah fungsi sigmoid (logistik). Ia mengubah skor linear <code>z = b₀ + b₁X</code> menjadi probabilitas berbentuk huruf "S".
+            </p>
+            <div class="formula-box">
+                <span>σ(z) = 1 / (1 + e<sup>−z</sup>)&nbsp;&nbsp;&nbsp;dengan&nbsp;&nbsp;&nbsp;z = b₀ + b₁X</span>
+            </div>
+
+            <h2 class="content-heading">Visualisasi Kurva Sigmoid</h2>
+            <p class="content-text">
+                Perhatikan: saat z besar positif, σ(z) → 1; saat z besar negatif, σ(z) → 0; tepat di z = 0, σ(z) = 0.5. Garis putus-putus pada 0.5 adalah <strong>ambang keputusan (decision boundary)</strong> default.
+            </p>
+            <div class="viz-section">
+                <svg viewBox="0 0 420 300" width="420" role="img" aria-label="Kurva fungsi sigmoid">
+                    <!-- axes -->
+                    <line x1="50" y1="40" x2="50" y2="260" stroke="#606078" stroke-width="1.5"/>
+                    <line x1="50" y1="260" x2="400" y2="260" stroke="#606078" stroke-width="1.5"/>
+                    <!-- gridline at 0.5 -->
+                    <line x1="50" y1="150" x2="400" y2="150" stroke="#606078" stroke-width="1" stroke-dasharray="4 4"/>
+                    <!-- threshold at z=0 -->
+                    <line x1="220" y1="40" x2="220" y2="260" stroke="#f59e0b" stroke-width="1" stroke-dasharray="4 4"/>
+
+                    <!-- labels -->
+                    <text x="20" y="45"  fill="#9494a8" font-size="11" font-family="Inter, sans-serif">1.0</text>
+                    <text x="20" y="155" fill="#9494a8" font-size="11" font-family="Inter, sans-serif">0.5</text>
+                    <text x="20" y="263" fill="#9494a8" font-size="11" font-family="Inter, sans-serif">0.0</text>
+                    <text x="210" y="278" fill="#f59e0b" font-size="11" font-family="Inter, sans-serif">z=0</text>
+                    <text x="390" y="278" fill="#9494a8" font-size="11" font-family="Inter, sans-serif">z</text>
+
+                    <!-- sigmoid curve -->
+                    <polyline points="50,259 107,256 163,234 192,201 220,150 248,99 277,66 333,44 390,41"
+                              fill="none" stroke="#a78bfa" stroke-width="3"/>
+
+                    <!-- point at z=0, sigma=0.5 -->
+                    <circle cx="220" cy="150" r="6" fill="#4ade80"/>
+                </svg>
+                <div class="viz-legend">
+                    <span><i class="swatch" style="background:#a78bfa;"></i> σ(z)</span>
+                    <span><i class="swatch" style="background:#606078;"></i> Ambang 0.5</span>
+                    <span><i class="swatch" style="background:#f59e0b;"></i> Decision boundary</span>
+                </div>
+            </div>
+
+            <h2 class="content-heading">Aturan Keputusan</h2>
+            <ol class="content-list">
+                <li>Jika <strong>σ(z) ≥ 0.5</strong> → prediksi <strong>kelas 1</strong> (positif).</li>
+                <li>Jika <strong>σ(z) &lt; 0.5</strong> → prediksi <strong>kelas 0</strong> (negatif).</li>
+            </ol>
+            <p class="content-text">
+                Ambang 0.5 bisa digeser sesuai kebutuhan. Contohnya pada diagnosis penyakit, kita mungkin menurunkan ambang agar lebih sensitif (menangkap lebih banyak kasus positif walau ada false alarm).
+            </p>
+
+            <h2 class="content-heading">Studi Kasus: Lulus Berdasarkan Jam Belajar</h2>
+            <p class="content-text">
+                Misalkan model terlatih menghasilkan koefisien <code>b₀ = −4</code> dan <code>b₁ = 1.5</code>. Mari hitung probabilitas lulus untuk beberapa nilai jam belajar (X).
+            </p>
+            <div class="info-box" style="background: rgba(167, 139, 250, 0.05); border-color: rgba(167, 139, 250, 0.2);">
+                <div class="info-box-header" style="color: var(--accent-datamining);">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                    <strong>Perhitungan</strong>
+                </div>
+                <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.88rem; background: rgba(0,0,0,0.2); padding: 16px; border-radius: 8px; line-height: 2;">
+                    X = 1 jam → z = −4 + 1.5(1) = −2.5 → σ = 0.076 → <strong style="color:#f87171;">GAGAL</strong><br>
+                    X = 2.67 jam → z = 0 → σ = 0.50 → <strong style="color:#f59e0b;">batas keputusan</strong><br>
+                    X = 4 jam → z = −4 + 1.5(4) = 2.0 → σ = 0.881 → <strong style="color:#4ade80;">LULUS</strong>
+                </div>
+            </div>
+
+            <div class="info-box" style="background: rgba(84, 197, 248, 0.05); border-color: rgba(84, 197, 248, 0.2);">
+                <div class="info-box-header" style="color: var(--accent-flutter);">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14"/></svg>
+                    <strong>Odds & Log-Odds</strong>
+                </div>
+                <p>
+                    Koefisien b₁ ditafsirkan melalui <strong>odds ratio</strong>. Persamaan logistik setara dengan <code>ln(p / (1−p)) = b₀ + b₁X</code> — artinya logistic regression sebenarnya memodelkan <em>log-odds</em> secara linear. Tiap kenaikan satu unit X mengalikan odds dengan <code>e<sup>b₁</sup></code>.
+                </p>
+            </div>
+
+            <h2 class="content-heading">Fungsi Biaya: Log-Loss</h2>
+            <p class="content-text">
+                Logistic regression tidak memakai MSE, melainkan <strong>Binary Cross-Entropy (Log-Loss)</strong>. Fungsi ini menghukum prediksi yang percaya diri tetapi salah dengan sangat berat, dan dioptimalkan menggunakan <em>Gradient Descent</em> (atau <em>Maximum Likelihood Estimation</em>).
+            </p>
+            <div class="formula-box">
+                <span>Loss = −[ y·log(p) + (1−y)·log(1−p) ]</span>
+            </div>
+
+            <h2 class="content-heading">Linear vs Logistic Regression</h2>
+            <div class="compare-grid">
+                <div class="compare-card">
+                    <h4 style="color: var(--accent-flutter);">Linear Regression</h4>
+                    <ul>
+                        <li>Output: nilai kontinu (−∞ … +∞)</li>
+                        <li>Tugas: regresi (prediksi angka)</li>
+                        <li>Fungsi biaya: MSE</li>
+                        <li>Garis lurus</li>
+                    </ul>
+                </div>
+                <div class="compare-card">
+                    <h4 style="color: var(--accent-datamining);">Logistic Regression</h4>
+                    <ul>
+                        <li>Output: probabilitas (0 … 1)</li>
+                        <li>Tugas: klasifikasi</li>
+                        <li>Fungsi biaya: Log-Loss</li>
+                        <li>Kurva sigmoid (S)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h2 class="content-heading">Interaktif: Prediksi Lulus</h2>
+            <p class="content-text">
+                Pakai model dari studi kasus (<code>b₀ = −4</code>, <code>b₁ = 1.5</code>). Geser <strong>jam belajar (X)</strong> dan lihat penanda bergerak di kurva sigmoid, lengkap dengan nilai <strong>z</strong>, <strong>probabilitas</strong>, dan keputusan akhir LULUS/GAGAL.
+            </p>
+
+            <div class="interactive-box">
+                <div class="controls">
+                    <div class="control">
+                        <label>Jam Belajar (X) <b id="logXVal">4.0</b></label>
+                        <input type="range" id="logX" min="0" max="6" step="0.1" value="4.0" oninput="logUpdate()">
+                    </div>
+                </div>
+
+                <svg id="logSvg" viewBox="0 0 420 300" width="420" role="img" aria-label="Interaktif kurva sigmoid">
+                    <line x1="50" y1="40" x2="50" y2="260" stroke="#606078" stroke-width="1.5"/>
+                    <line x1="50" y1="260" x2="400" y2="260" stroke="#606078" stroke-width="1.5"/>
+                    <line x1="50" y1="150" x2="400" y2="150" stroke="#606078" stroke-width="1" stroke-dasharray="4 4"/>
+                    <text x="20" y="45"  fill="#9494a8" font-size="11" font-family="Inter, sans-serif">1.0</text>
+                    <text x="20" y="155" fill="#9494a8" font-size="11" font-family="Inter, sans-serif">0.5</text>
+                    <text x="20" y="263" fill="#9494a8" font-size="11" font-family="Inter, sans-serif">0.0</text>
+                    <text x="390" y="278" fill="#9494a8" font-size="11" font-family="Inter, sans-serif">z</text>
+
+                    <polyline points="50,259 107,256 163,234 192,201 220,150 248,99 277,66 333,44 390,41"
+                              fill="none" stroke="#a78bfa" stroke-width="3"/>
+
+                    <!-- movable guides + marker -->
+                    <line id="logGV" x1="0" y1="0" x2="0" y2="260" stroke="#f59e0b" stroke-width="1" stroke-dasharray="4 4"/>
+                    <line id="logGH" x1="50" y1="0" x2="0" y2="0" stroke="#f59e0b" stroke-width="1" stroke-dasharray="4 4"/>
+                    <circle id="logMarker" cx="0" cy="0" r="7" fill="#4ade80" stroke="#0a0a0f" stroke-width="2"/>
+                </svg>
+
+                <div class="metric-row">
+                    <div class="metric"><div class="val" id="logZ">2.00</div><div class="lbl">z = b₀+b₁X</div></div>
+                    <div class="metric"><div class="val" id="logP">88%</div><div class="lbl">Probabilitas σ(z)</div></div>
+                </div>
+                <div class="verdict" id="logVerdict"></div>
+            </div>
+
+            <h2 class="content-heading">Implementasi di Python</h2>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">logistic_regression_sklearn.py</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-keyword">import</span> numpy <span class="hl-keyword">as</span> np
+<span class="hl-keyword">from</span> sklearn.linear_model <span class="hl-keyword">import</span> LogisticRegression
+
+<span class="hl-comment"># Jam belajar (X) dan hasil (0=gagal, 1=lulus)</span>
+X = np.<span class="hl-func">array</span>([[<span class="hl-number">0.5</span>], [<span class="hl-number">1</span>], [<span class="hl-number">1.5</span>], [<span class="hl-number">2</span>], [<span class="hl-number">3</span>], [<span class="hl-number">4</span>], [<span class="hl-number">5</span>]])
+y = np.<span class="hl-func">array</span>([<span class="hl-number">0</span>, <span class="hl-number">0</span>, <span class="hl-number">0</span>, <span class="hl-number">0</span>, <span class="hl-number">1</span>, <span class="hl-number">1</span>, <span class="hl-number">1</span>])
+
+model = <span class="hl-func">LogisticRegression</span>()
+model.<span class="hl-func">fit</span>(X, y)
+
+<span class="hl-comment"># Probabilitas kelas 1 (lulus) untuk 4 jam belajar</span>
+prob = model.<span class="hl-func">predict_proba</span>([[<span class="hl-number">4</span>]])[<span class="hl-number">0</span>][<span class="hl-number">1</span>]
+<span class="hl-func">print</span>(f<span class="hl-string">"P(lulus | 4 jam) = {prob:.2f}"</span>)
+<span class="hl-func">print</span>(<span class="hl-string">"Prediksi kelas  :"</span>, model.<span class="hl-func">predict</span>([[<span class="hl-number">4</span>]])[<span class="hl-number">0</span>])
+
+<span class="hl-comment"># Koefisien hasil pelatihan</span>
+<span class="hl-func">print</span>(<span class="hl-string">"b0:"</span>, model.intercept_[<span class="hl-number">0</span>], <span class="hl-string">"| b1:"</span>, model.coef_[<span class="hl-number">0</span>][<span class="hl-number">0</span>])</code></pre>
+            </div>
+
+            <p class="content-text" style="margin: 32px 0; padding: 20px; background: rgba(74, 222, 128, 0.05); border: 1px solid rgba(74, 222, 128, 0.3); border-radius: 8px;">
+                🎉 <strong>Selamat!</strong> Anda telah menuntaskan seluruh materi Data Mining — mulai dari pengantar, preprocessing, klasifikasi, clustering, association rule, hingga regresi. Gunakan tombol di bawah untuk kembali ke daftar modul.
+            </p>
+
+            <div class="content-nav">
+                <div class="content-nav-item">
+                    <a href="/datamining/linear-regression.html" class="nav-btn nav-btn-prev">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                        <div><span class="nav-label">Sebelumnya</span><span class="nav-name">Linear Regression</span></div>
+                    </a>
+                </div>
+                <div class="content-nav-item">
+                    <a href="/datamining/index.html" class="nav-btn nav-btn-next" style="background: var(--accent-datamining); color: #0f172a; border-color: var(--accent-datamining);">
+                        <div><span class="nav-label">Selesai</span><span class="nav-name" style="font-weight: 800;">Kembali ke Index</span></div>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                    </a>
+                </div>
+            </div>
+
+        </article>
+    </main>
+
+    <script src="/datamining/course-layout.js"></script>
+    <script>
+        // ---- Interaktif: sigmoid logistic regression ----
+        const LOG_B0 = -4, LOG_B1 = 1.5;
+        const LOG_Z2PX = z => 220 + z * (170 / 6);   // z=-6..6 -> 50..390
+        const LOG_S2PY = s => 260 - s * 220;         // sigma 0..1 -> 260..40
+
+        function logUpdate() {
+            const X = parseFloat(document.getElementById('logX').value);
+            document.getElementById('logXVal').textContent = X.toFixed(1);
+
+            const z = LOG_B0 + LOG_B1 * X;
+            const sig = 1 / (1 + Math.exp(-z));
+            const px = LOG_Z2PX(z), py = LOG_S2PY(sig);
+
+            const marker = document.getElementById('logMarker');
+            marker.setAttribute('cx', px); marker.setAttribute('cy', py);
+            const gv = document.getElementById('logGV');
+            gv.setAttribute('x1', px); gv.setAttribute('x2', px); gv.setAttribute('y1', py); gv.setAttribute('y2', 260);
+            const gh = document.getElementById('logGH');
+            gh.setAttribute('x2', px); gh.setAttribute('y1', py); gh.setAttribute('y2', py);
+
+            document.getElementById('logZ').textContent = z.toFixed(2);
+            document.getElementById('logP').textContent = Math.round(sig * 100) + '%';
+
+            const verdict = document.getElementById('logVerdict');
+            if (sig >= 0.5) {
+                marker.setAttribute('fill', '#4ade80');
+                verdict.innerHTML = '✅ σ(z) ≥ 0.5 → <span style="color:#4ade80;">LULUS</span>';
+            } else {
+                marker.setAttribute('fill', '#f87171');
+                verdict.innerHTML = '❌ σ(z) &lt; 0.5 → <span style="color:#f87171;">GAGAL</span>';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', logUpdate);
+
+        function copyCode(btn) {
+            const codeBlock = btn.closest('.code-block').querySelector('code');
+            navigator.clipboard.writeText(codeBlock.textContent).then(() => {
+                btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>';
+                setTimeout(() => {
+                    btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+                }, 2000);
+            });
+        }
+        function playVideo() {
+            alert('Video belum tersedia. Silahkan upload video atau masukkan URL YouTube.');
+        }
+    </script>
+</body>
+</html>

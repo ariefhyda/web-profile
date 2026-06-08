@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Random Forest — Data Mining — Arif Hidayah</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/datamining/course.css">
+    <style>
+        :root {
+            --primary-color: var(--accent-datamining);
+            --primary-glow: var(--accent-datamining-glow);
+            --surface-light: var(--bg-secondary);
+            --bg-color: var(--bg-primary);
+        }
+
+        .formula-box {
+            background-color: var(--surface-light);
+            padding: 24px; border-radius: 8px; text-align: center;
+            margin-bottom: 24px; border: 1px solid var(--border-color); overflow-x: auto;
+        }
+        .formula-box span { font-family: 'JetBrains Mono', monospace; font-size: 1.1rem; }
+
+        /* Ensemble diagram */
+        .forest-diagram {
+            margin: 32px 0;
+            background: rgba(167, 139, 250, 0.04);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 32px 20px;
+        }
+        .forest-row { display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 16px; }
+        .forest-trees { display: flex; justify-content: center; gap: 18px; flex-wrap: wrap; margin: 8px 0; }
+        .mini-tree {
+            background: var(--surface-light);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 16px;
+            width: 130px;
+            text-align: center;
+        }
+        .mini-tree svg { display: block; margin: 0 auto 10px; }
+        .tree-vote {
+            font-weight: 700; font-size: 0.85rem; padding: 4px 10px; border-radius: 6px; display: inline-block;
+        }
+        .vote-yes { background: rgba(74, 222, 128, 0.15); color: #4ade80; }
+        .vote-no  { background: rgba(248, 113, 113, 0.15); color: #f87171; }
+        .flow-arrow { text-align: center; color: var(--accent-datamining); font-size: 1.6rem; margin: 4px 0; }
+
+        .data-chip {
+            display: inline-block; background: rgba(167,139,250,0.1);
+            border: 1px solid rgba(167,139,250,0.25); color: var(--text-primary);
+            padding: 10px 18px; border-radius: 10px; font-weight: 600;
+        }
+        .final-vote {
+            margin-top: 16px; text-align: center;
+            background: rgba(74, 222, 128, 0.08);
+            border: 1px solid rgba(74, 222, 128, 0.3);
+            border-radius: 12px; padding: 16px;
+        }
+
+        /* Interactive */
+        .rf-sim { text-align: center; }
+        .btn-vote {
+            background: var(--accent-datamining); color: #0f172a; border: none;
+            padding: 10px 22px; border-radius: 8px; font-weight: 700; cursor: pointer;
+            margin-top: 8px; transition: filter 0.2s ease;
+        }
+        .btn-vote:hover { filter: brightness(1.1); }
+
+        .dataset-table-container {
+            margin: 24px 0 32px; overflow-x: auto; border-radius: 12px;
+            border: 1px solid var(--border-color); background-color: var(--surface-light);
+        }
+        .dataset-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; text-align: left; }
+        .dataset-table th {
+            background-color: rgba(167, 139, 250, 0.1); color: var(--text-primary);
+            font-weight: 600; padding: 12px 16px; border-bottom: 2px solid var(--border-color); white-space: nowrap;
+        }
+        .dataset-table td { padding: 10px 16px; border-bottom: 1px solid var(--border-color); color: var(--text-secondary); }
+        .dataset-table tr:last-child td { border-bottom: none; }
+    </style>
+</head>
+<body>
+    <div class="bg-grid" aria-hidden="true"></div>
+
+    <nav class="navbar scrolled" id="navbar"></nav>
+    <div class="mobile-menu" id="mobileMenu"></div>
+
+    <main class="course-layout">
+        <aside class="course-sidebar" id="courseSidebar"></aside>
+
+        <article class="course-content">
+
+            <div class="breadcrumb">
+                <a href="../index.html">Home</a>
+                <span>›</span>
+                <a href="index.html">Data Mining</a>
+                <span>›</span>
+                <span style="color: var(--text-primary);">Random Forest</span>
+            </div>
+
+            <header class="content-header">
+                <h1 class="content-title">Modul 10: Random Forest</h1>
+                <div class="content-meta">
+                    <div class="meta-pill">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 5V8.5L10.5 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/></svg>
+                        <span>Estimasi: 50 Menit</span>
+                    </div>
+                    <div class="meta-pill">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="10" rx="1" stroke="currentColor" stroke-width="1.5"/><path d="M5 7h6M5 10h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                        <span>Teori & Interaktif</span>
+                    </div>
+                </div>
+            </header>
+
+            <p class="content-text">
+                <strong>Random Forest</strong> adalah metode <em>ensemble</em> yang menggabungkan banyak <strong>Decision Tree</strong> menjadi satu "hutan". Idenya sederhana namun kuat: alih-alih mengandalkan satu pohon yang mungkin <em>overfitting</em>, kita membangun ratusan pohon yang berbeda lalu mengambil <strong>suara terbanyak</strong> (voting) sebagai keputusan akhir.
+            </p>
+
+            <div class="info-box">
+                <div class="info-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                    <strong>Wisdom of the Crowd</strong>
+                </div>
+                <p>
+                    Satu pohon bisa salah, tetapi gabungan banyak pohon yang dilatih secara berbeda cenderung saling mengoreksi kesalahan. Inilah prinsip <em>"kebijaksanaan kerumunan"</em> — error acak masing-masing pohon saling meniadakan, menyisakan pola yang benar.
+                </p>
+            </div>
+
+            <h2 class="content-heading">Dua Sumber Keacakan</h2>
+            <p class="content-text">
+                Agar pohon-pohon tidak identik, Random Forest menyuntikkan keacakan di dua tempat:
+            </p>
+            <ol class="content-list">
+                <li><strong>Bagging (Bootstrap Aggregating)</strong> — Setiap pohon dilatih pada sampel acak dari data (diambil <em>dengan pengembalian</em>), sehingga tiap pohon melihat versi data yang sedikit berbeda.</li>
+                <li><strong>Feature Randomness</strong> — Pada setiap percabangan, pohon hanya boleh memilih dari subset fitur acak (biasanya √(total fitur)), bukan semua fitur. Ini membuat pohon-pohon lebih beragam (dekorelasi).</li>
+            </ol>
+
+            <h2 class="content-heading">Cara Kerja: Dari Data ke Voting</h2>
+            <div class="forest-diagram">
+                <div class="forest-row">
+                    <div class="data-chip">📊 Dataset Training</div>
+                </div>
+                <div class="flow-arrow">↓ &nbsp; bootstrap sampling &nbsp; ↓</div>
+                <div class="forest-trees">
+                    <div class="mini-tree">
+                        <svg width="60" height="50" viewBox="0 0 60 50" fill="none" stroke="#a78bfa" stroke-width="2"><circle cx="30" cy="8" r="5"/><line x1="30" y1="13" x2="15" y2="28"/><line x1="30" y1="13" x2="45" y2="28"/><circle cx="15" cy="33" r="5"/><circle cx="45" cy="33" r="5"/></svg>
+                        <div>Tree 1</div>
+                        <span class="tree-vote vote-yes">YES</span>
+                    </div>
+                    <div class="mini-tree">
+                        <svg width="60" height="50" viewBox="0 0 60 50" fill="none" stroke="#a78bfa" stroke-width="2"><circle cx="30" cy="8" r="5"/><line x1="30" y1="13" x2="15" y2="28"/><line x1="30" y1="13" x2="45" y2="28"/><circle cx="15" cy="33" r="5"/><circle cx="45" cy="33" r="5"/></svg>
+                        <div>Tree 2</div>
+                        <span class="tree-vote vote-yes">YES</span>
+                    </div>
+                    <div class="mini-tree">
+                        <svg width="60" height="50" viewBox="0 0 60 50" fill="none" stroke="#a78bfa" stroke-width="2"><circle cx="30" cy="8" r="5"/><line x1="30" y1="13" x2="15" y2="28"/><line x1="30" y1="13" x2="45" y2="28"/><circle cx="15" cy="33" r="5"/><circle cx="45" cy="33" r="5"/></svg>
+                        <div>Tree 3</div>
+                        <span class="tree-vote vote-no">NO</span>
+                    </div>
+                    <div class="mini-tree">
+                        <svg width="60" height="50" viewBox="0 0 60 50" fill="none" stroke="#a78bfa" stroke-width="2"><circle cx="30" cy="8" r="5"/><line x1="30" y1="13" x2="15" y2="28"/><line x1="30" y1="13" x2="45" y2="28"/><circle cx="15" cy="33" r="5"/><circle cx="45" cy="33" r="5"/></svg>
+                        <div>Tree 4</div>
+                        <span class="tree-vote vote-yes">YES</span>
+                    </div>
+                </div>
+                <div class="flow-arrow">↓ &nbsp; majority voting &nbsp; ↓</div>
+                <div class="final-vote">
+                    <p style="color: var(--text-secondary); margin-bottom: 6px;">Hasil: 3 suara <strong style="color:#4ade80;">YES</strong> vs 1 suara <strong style="color:#f87171;">NO</strong></p>
+                    <p style="font-size: 1.3rem; font-weight: 800; color: #4ade80;">Keputusan Akhir → YES</p>
+                </div>
+            </div>
+
+            <div class="info-box" style="background: rgba(84, 197, 248, 0.05); border-color: rgba(84, 197, 248, 0.2);">
+                <div class="info-box-header" style="color: var(--accent-flutter);">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                    <strong>Klasifikasi vs Regresi</strong>
+                </div>
+                <p>
+                    Untuk <strong>klasifikasi</strong>, hasil akhir = kelas dengan suara terbanyak (<em>majority vote</em>). Untuk <strong>regresi</strong>, hasil akhir = <strong>rata-rata</strong> prediksi dari semua pohon.
+                </p>
+            </div>
+
+            <h2 class="content-heading">Out-of-Bag (OOB) Error</h2>
+            <p class="content-text">
+                Karena bootstrap mengambil sampel dengan pengembalian, rata-rata ~37% data tidak terpilih untuk setiap pohon. Data "tertinggal" ini disebut <strong>Out-of-Bag</strong> dan bisa dipakai sebagai data validasi gratis — tiap pohon diuji pada data yang tidak ia lihat saat training, tanpa perlu memisahkan data test secara eksplisit.
+            </p>
+
+            <h2 class="content-heading">Interaktif: Simulasi Voting</h2>
+            <p class="content-text">
+                Klik tombol untuk menjalankan 5 pohon. Tiap pohon memberi suara secara acak, lalu Random Forest mengambil keputusan mayoritas.
+            </p>
+
+            <div class="forest-diagram rf-sim">
+                <div class="forest-trees" id="simTrees"></div>
+                <button class="btn-vote" onclick="runForest()">🌲 Jalankan Hutan</button>
+                <div class="final-vote" id="simResult" style="display:none;"></div>
+            </div>
+
+            <h2 class="content-heading">Feature Importance</h2>
+            <p class="content-text">
+                Bonus penting dari Random Forest: ia bisa memberi tahu <strong>fitur mana yang paling berpengaruh</strong>. Fitur yang sering dipakai untuk percabangan dan menghasilkan penurunan <em>impurity</em> besar mendapat skor kepentingan tinggi — sangat berguna untuk seleksi fitur.
+            </p>
+
+            <h2 class="content-heading">Implementasi di Python</h2>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">random_forest_sklearn.py</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-keyword">from</span> sklearn.ensemble <span class="hl-keyword">import</span> RandomForestClassifier
+<span class="hl-keyword">from</span> sklearn.model_selection <span class="hl-keyword">import</span> train_test_split
+<span class="hl-keyword">from</span> sklearn.datasets <span class="hl-keyword">import</span> load_iris
+
+X, y = <span class="hl-func">load_iris</span>(return_X_y=<span class="hl-keyword">True</span>)
+X_train, X_test, y_train, y_test = <span class="hl-func">train_test_split</span>(X, y, test_size=<span class="hl-number">0.2</span>, random_state=<span class="hl-number">42</span>)
+
+<span class="hl-comment"># n_estimators = jumlah pohon, max_features = fitur acak per split</span>
+rf = <span class="hl-func">RandomForestClassifier</span>(
+    n_estimators=<span class="hl-number">200</span>,
+    max_features=<span class="hl-string">'sqrt'</span>,
+    oob_score=<span class="hl-keyword">True</span>,
+    random_state=<span class="hl-number">42</span>
+)
+rf.<span class="hl-func">fit</span>(X_train, y_train)
+
+<span class="hl-func">print</span>(<span class="hl-string">"Akurasi test:"</span>, rf.<span class="hl-func">score</span>(X_test, y_test))
+<span class="hl-func">print</span>(<span class="hl-string">"OOB score   :"</span>, rf.oob_score_)
+
+<span class="hl-comment"># Tingkat kepentingan tiap fitur</span>
+<span class="hl-keyword">for</span> nama, skor <span class="hl-keyword">in</span> <span class="hl-func">zip</span>(<span class="hl-string">"sepalL sepalW petalL petalW"</span>.<span class="hl-func">split</span>(), rf.feature_importances_):
+    <span class="hl-func">print</span>(f<span class="hl-string">"{nama}: {skor:.3f}"</span>)</code></pre>
+            </div>
+
+            <div class="content-nav">
+                <div class="content-nav-item">
+                    <a href="/datamining/svm.html" class="nav-btn nav-btn-prev">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                        <div><span class="nav-label">Sebelumnya</span><span class="nav-name">Support Vector Machine (SVM)</span></div>
+                    </a>
+                </div>
+                <div class="content-nav-item">
+                    <a href="/datamining/evaluasi-model.html" class="nav-btn nav-btn-next">
+                        <div><span class="nav-label">Selanjutnya</span><span class="nav-name">Evaluasi Model</span></div>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </a>
+                </div>
+            </div>
+
+        </article>
+    </main>
+
+    <script src="/datamining/course-layout.js"></script>
+    <script>
+        function runForest() {
+            const container = document.getElementById('simTrees');
+            const result = document.getElementById('simResult');
+            container.innerHTML = '';
+            let yes = 0;
+            const votes = [];
+            for (let i = 1; i <= 5; i++) {
+                const v = Math.random() > 0.45 ? 'YES' : 'NO';
+                if (v === 'YES') yes++;
+                votes.push(v);
+                container.insertAdjacentHTML('beforeend', `
+                    <div class="mini-tree">
+                        <svg width="60" height="50" viewBox="0 0 60 50" fill="none" stroke="#a78bfa" stroke-width="2"><circle cx="30" cy="8" r="5"/><line x1="30" y1="13" x2="15" y2="28"/><line x1="30" y1="13" x2="45" y2="28"/><circle cx="15" cy="33" r="5"/><circle cx="45" cy="33" r="5"/></svg>
+                        <div>Tree ${i}</div>
+                        <span class="tree-vote ${v === 'YES' ? 'vote-yes' : 'vote-no'}">${v}</span>
+                    </div>
+                `);
+            }
+            const no = 5 - yes;
+            const winner = yes > no ? 'YES' : 'NO';
+            const color = winner === 'YES' ? '#4ade80' : '#f87171';
+            result.style.display = 'block';
+            result.innerHTML = `
+                <p style="color: var(--text-secondary); margin-bottom: 6px;">Hasil: ${yes} suara <strong style="color:#4ade80;">YES</strong> vs ${no} suara <strong style="color:#f87171;">NO</strong></p>
+                <p style="font-size: 1.3rem; font-weight: 800; color: ${color};">Keputusan Mayoritas → ${winner}</p>
+            `;
+        }
+
+        function copyCode(btn) {
+            const codeBlock = btn.closest('.code-block').querySelector('code');
+            navigator.clipboard.writeText(codeBlock.textContent).then(() => {
+                btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>';
+                setTimeout(() => {
+                    btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+                }, 2000);
+            });
+        }
+        function playVideo() {
+            alert('Video belum tersedia. Silahkan upload video atau masukkan URL YouTube.');
+        }
+    </script>
+</body>
+</html>

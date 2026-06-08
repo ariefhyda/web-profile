@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apriori — Data Mining — Arif Hidayah</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/datamining/course.css">
+    <style>
+        :root {
+            --primary-color: var(--accent-datamining);
+            --primary-glow: var(--accent-datamining-glow);
+            --surface-light: var(--bg-secondary);
+            --bg-color: var(--bg-primary);
+        }
+
+        .formula-box {
+            background-color: var(--surface-light);
+            padding: 24px; border-radius: 8px; text-align: center;
+            margin-bottom: 24px; border: 1px solid var(--border-color); overflow-x: auto;
+        }
+        .formula-box span { font-family: 'JetBrains Mono', monospace; font-size: 1.05rem; }
+
+        .dataset-table-container {
+            margin: 24px 0 32px; overflow-x: auto; border-radius: 12px;
+            border: 1px solid var(--border-color); background-color: var(--surface-light);
+        }
+        .dataset-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; text-align: left; }
+        .dataset-table th {
+            background-color: rgba(167, 139, 250, 0.1); color: var(--text-primary);
+            font-weight: 600; padding: 12px 16px; border-bottom: 2px solid var(--border-color); white-space: nowrap;
+        }
+        .dataset-table td { padding: 10px 16px; border-bottom: 1px solid var(--border-color); color: var(--text-secondary); }
+        .dataset-table tr:last-child td { border-bottom: none; }
+        .dataset-table tr:hover { background-color: rgba(255,255,255,0.02); }
+        .row-removed td { opacity: 0.45; text-decoration: line-through; }
+        .row-kept { background: rgba(74, 222, 128, 0.06); }
+
+        .item-tag {
+            display: inline-block; background: rgba(167,139,250,0.12);
+            border: 1px solid rgba(167,139,250,0.3); color: var(--text-primary);
+            padding: 2px 8px; border-radius: 6px; margin: 2px; font-size: 0.8rem; font-weight: 600;
+        }
+        .step-pill {
+            display: inline-block; background: var(--accent-datamining); color: #0f172a;
+            font-weight: 700; padding: 4px 12px; border-radius: 20px; font-size: 0.85rem; margin-bottom: 12px;
+        }
+
+        /* Interactive rule builder */
+        .interactive-box {
+            margin: 24px 0 32px; background: var(--surface-light);
+            border: 1px solid var(--border-color); border-radius: 16px; padding: 28px 24px;
+        }
+        .rule-builder { display: flex; align-items: center; justify-content: center; gap: 20px; flex-wrap: wrap; }
+        .rule-group { background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); border-radius: 12px; padding: 16px 20px; min-width: 200px; }
+        .rule-group h4 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--accent-datamining); margin-bottom: 12px; }
+        .rule-group label { display: flex; align-items: center; gap: 8px; color: var(--text-secondary); padding: 5px 0; cursor: pointer; font-size: 0.95rem; }
+        .rule-group input { accent-color: var(--accent-datamining); width: 16px; height: 16px; cursor: pointer; }
+        .rule-arrow { font-size: 2rem; color: var(--accent-datamining); font-weight: 800; }
+        .rule-text { text-align: center; margin-top: 18px; font-family: 'JetBrains Mono', monospace; color: var(--text-primary); font-size: 0.95rem; }
+        .metric-row { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; margin-top: 18px; }
+        .metric { background: rgba(0,0,0,0.22); border: 1px solid var(--border-color); border-radius: 10px; padding: 12px 18px; text-align: center; min-width: 110px; }
+        .metric .val { font-size: 1.35rem; font-weight: 800; color: var(--accent-datamining); font-family: 'JetBrains Mono', monospace; }
+        .metric .lbl { font-size: 0.72rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 2px; }
+        .sim-msg { text-align: center; margin-top: 16px; font-size: 0.92rem; min-height: 1.3em; color: var(--text-secondary); }
+    </style>
+</head>
+<body>
+    <div class="bg-grid" aria-hidden="true"></div>
+
+    <nav class="navbar scrolled" id="navbar"></nav>
+    <div class="mobile-menu" id="mobileMenu"></div>
+
+    <main class="course-layout">
+        <aside class="course-sidebar" id="courseSidebar"></aside>
+
+        <article class="course-content">
+
+            <div class="breadcrumb">
+                <a href="../index.html">Home</a>
+                <span>›</span>
+                <a href="index.html">Data Mining</a>
+                <span>›</span>
+                <span style="color: var(--text-primary);">Apriori</span>
+            </div>
+
+            <header class="content-header">
+                <h1 class="content-title">Modul 15: Association Rule — Algoritma Apriori</h1>
+                <div class="content-meta">
+                    <div class="meta-pill">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 5V8.5L10.5 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/></svg>
+                        <span>Estimasi: 55 Menit</span>
+                    </div>
+                    <div class="meta-pill">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="10" rx="1" stroke="currentColor" stroke-width="1.5"/><path d="M5 7h6M5 10h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                        <span>Teori & Studi Kasus</span>
+                    </div>
+                </div>
+            </header>
+
+            <p class="content-text">
+                <strong>Association Rule Mining</strong> mencari hubungan "jika-maka" antar item dalam data transaksi. Contoh klasiknya adalah <strong>Market Basket Analysis</strong>: <em>"Jika pelanggan membeli roti dan susu, kemungkinan besar ia juga membeli telur."</em> Aturan ini ditulis sebagai <code>{Roti, Susu} → {Telur}</code>.
+            </p>
+
+            <div class="info-box">
+                <div class="info-box-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                    <strong>Tiga Metrik Kunci</strong>
+                </div>
+                <p>
+                    &bull; <strong>Support</strong> — Seberapa sering itemset muncul di seluruh transaksi.<br>
+                    &bull; <strong>Confidence</strong> — Seberapa sering aturan benar (probabilitas konsekuen jika anteseden ada).<br>
+                    &bull; <strong>Lift</strong> — Seberapa kuat hubungan dibanding kebetulan. Lift &gt; 1 = korelasi positif.
+                </p>
+            </div>
+
+            <h2 class="content-heading">Rumus Metrik</h2>
+            <div class="formula-box">
+                <span>Support(A) = (Transaksi memuat A) / (Total transaksi)</span>
+            </div>
+            <div class="formula-box">
+                <span>Confidence(A → B) = Support(A ∪ B) / Support(A)</span>
+            </div>
+            <div class="formula-box">
+                <span>Lift(A → B) = Confidence(A → B) / Support(B)</span>
+            </div>
+
+            <h2 class="content-heading">Studi Kasus: Data Transaksi</h2>
+            <p class="content-text">
+                Misalkan kita punya 5 transaksi di sebuah minimarket. Kita akan mencari pola dengan <strong>minimum support = 2 transaksi (40%)</strong>.
+            </p>
+
+            <div class="dataset-table-container">
+                <table class="dataset-table">
+                    <thead>
+                        <tr><th>Transaksi</th><th>Item yang Dibeli</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>T1</td><td><span class="item-tag">Roti</span><span class="item-tag">Susu</span></td></tr>
+                        <tr><td>T2</td><td><span class="item-tag">Roti</span><span class="item-tag">Telur</span><span class="item-tag">Bir</span></td></tr>
+                        <tr><td>T3</td><td><span class="item-tag">Susu</span><span class="item-tag">Telur</span><span class="item-tag">Bir</span></td></tr>
+                        <tr><td>T4</td><td><span class="item-tag">Roti</span><span class="item-tag">Susu</span><span class="item-tag">Telur</span><span class="item-tag">Bir</span></td></tr>
+                        <tr><td>T5</td><td><span class="item-tag">Roti</span><span class="item-tag">Susu</span><span class="item-tag">Telur</span></td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="info-box" style="background: rgba(84, 197, 248, 0.05); border-color: rgba(84, 197, 248, 0.2);">
+                <div class="info-box-header" style="color: var(--accent-flutter);">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                    <strong>Prinsip Apriori (Apriori Property)</strong>
+                </div>
+                <p>
+                    "Jika sebuah itemset <em>jarang</em> (tidak frequent), maka semua superset-nya pasti juga jarang." Prinsip ini memungkinkan kita <strong>memangkas (pruning)</strong> banyak kandidat tanpa menghitungnya — inti efisiensi Apriori.
+                </p>
+            </div>
+
+            <h2 class="content-heading">Langkah 1 — Itemset 1 Item (C1 → L1)</h2>
+            <p class="content-text">Hitung support tiap item. Buang yang &lt; minimum support (2).</p>
+            <div class="dataset-table-container">
+                <table class="dataset-table">
+                    <thead><tr><th>Item</th><th>Count</th><th>Status</th></tr></thead>
+                    <tbody>
+                        <tr class="row-kept"><td>Roti</td><td>4</td><td>✅ Lolos</td></tr>
+                        <tr class="row-kept"><td>Susu</td><td>4</td><td>✅ Lolos</td></tr>
+                        <tr class="row-kept"><td>Telur</td><td>4</td><td>✅ Lolos</td></tr>
+                        <tr class="row-kept"><td>Bir</td><td>3</td><td>✅ Lolos</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <p class="content-text">Semua item lolos. <strong>L1 = {Roti, Susu, Telur, Bir}</strong>.</p>
+
+            <h2 class="content-heading">Langkah 2 — Itemset 2 Item (C2 → L2)</h2>
+            <p class="content-text">Gabungkan pasangan dari L1 lalu hitung support-nya.</p>
+            <div class="dataset-table-container">
+                <table class="dataset-table">
+                    <thead><tr><th>Pasangan Item</th><th>Count</th><th>Status</th></tr></thead>
+                    <tbody>
+                        <tr class="row-kept"><td>{Roti, Susu}</td><td>3</td><td>✅ Lolos</td></tr>
+                        <tr class="row-kept"><td>{Roti, Telur}</td><td>3</td><td>✅ Lolos</td></tr>
+                        <tr class="row-kept"><td>{Roti, Bir}</td><td>2</td><td>✅ Lolos</td></tr>
+                        <tr class="row-kept"><td>{Susu, Telur}</td><td>3</td><td>✅ Lolos</td></tr>
+                        <tr class="row-kept"><td>{Susu, Bir}</td><td>2</td><td>✅ Lolos</td></tr>
+                        <tr class="row-kept"><td>{Telur, Bir}</td><td>3</td><td>✅ Lolos</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <p class="content-text" style="font-size: 0.9rem; color: var(--text-muted);">Semua pasangan memiliki count ≥ 2 sehingga semuanya lolos menjadi <strong>L2</strong>.</p>
+
+            <h2 class="content-heading">Langkah 3 — Itemset 3 Item (C3 → L3)</h2>
+            <p class="content-text">Gabungkan menjadi triplet. Hanya kandidat yang seluruh sub-pasangannya frequent yang perlu dihitung.</p>
+            <div class="dataset-table-container">
+                <table class="dataset-table">
+                    <thead><tr><th>Triplet</th><th>Count</th><th>Status</th></tr></thead>
+                    <tbody>
+                        <tr class="row-kept"><td>{Roti, Susu, Telur}</td><td>2</td><td>✅ Lolos</td></tr>
+                        <tr class="row-kept"><td>{Susu, Telur, Bir}</td><td>2</td><td>✅ Lolos</td></tr>
+                        <tr class="row-removed"><td>{Roti, Susu, Bir}</td><td>1</td><td>❌ Dibuang</td></tr>
+                        <tr class="row-kept"><td>{Roti, Telur, Bir}</td><td>2</td><td>✅ Lolos</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h2 class="content-heading">Langkah 4 — Bangun Aturan & Hitung Confidence</h2>
+            <p class="content-text">
+                Dari itemset frequent <strong>{Roti, Susu, Telur}</strong> (support = 2/5 = 0.4), kita turunkan aturan dan hitung kekuatannya.
+            </p>
+
+            <div class="info-box" style="background: rgba(167, 139, 250, 0.05); border-color: rgba(167, 139, 250, 0.2);">
+                <div class="info-box-header" style="color: var(--accent-datamining);">
+                    <span class="step-pill">Contoh Aturan</span>
+                </div>
+                <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; background: rgba(0,0,0,0.2); padding: 16px; border-radius: 8px; line-height: 2;">
+                    Aturan: {Roti, Susu} → {Telur}<br>
+                    Support({Roti,Susu,Telur}) = 2/5 = 0.40<br>
+                    Support({Roti,Susu})       = 3/5 = 0.60<br>
+                    Confidence = 0.40 / 0.60 = <strong style="color: var(--accent-datamining);">0.67 (67%)</strong><br>
+                    Lift = 0.67 / Support(Telur) = 0.67 / 0.80 = <strong style="color:#4ade80;">0.83</strong>
+                </div>
+            </div>
+            <p class="content-text">
+                Confidence 67% cukup baik, tetapi <strong>Lift = 0.83 (&lt; 1)</strong> menandakan bahwa membeli Roti+Susu justru sedikit <em>menurunkan</em> peluang membeli Telur dibanding rata-rata. Inilah mengapa Lift penting: confidence tinggi belum tentu berarti korelasi nyata.
+            </p>
+
+            <h2 class="content-heading">Interaktif: Kalkulator Aturan Asosiasi</h2>
+            <p class="content-text">
+                Susun aturan Anda sendiri dari 5 transaksi di atas. Centang item di sisi <strong>JIKA</strong> dan <strong>MAKA</strong>, lalu lihat <strong>support</strong>, <strong>confidence</strong>, dan <strong>lift</strong>-nya dihitung secara langsung.
+            </p>
+
+            <div class="interactive-box">
+                <div class="rule-builder">
+                    <div class="rule-group" id="aprAnte">
+                        <h4>JIKA membeli</h4>
+                        <label><input type="checkbox" class="apr-ante" value="Roti" checked onchange="aprCalc()"> Roti</label>
+                        <label><input type="checkbox" class="apr-ante" value="Susu" checked onchange="aprCalc()"> Susu</label>
+                        <label><input type="checkbox" class="apr-ante" value="Telur" onchange="aprCalc()"> Telur</label>
+                        <label><input type="checkbox" class="apr-ante" value="Bir" onchange="aprCalc()"> Bir</label>
+                    </div>
+                    <div class="rule-arrow">→</div>
+                    <div class="rule-group" id="aprCons">
+                        <h4>MAKA membeli</h4>
+                        <label><input type="checkbox" class="apr-cons" value="Roti" onchange="aprCalc()"> Roti</label>
+                        <label><input type="checkbox" class="apr-cons" value="Susu" onchange="aprCalc()"> Susu</label>
+                        <label><input type="checkbox" class="apr-cons" value="Telur" checked onchange="aprCalc()"> Telur</label>
+                        <label><input type="checkbox" class="apr-cons" value="Bir" onchange="aprCalc()"> Bir</label>
+                    </div>
+                </div>
+
+                <div class="rule-text" id="aprRule">—</div>
+                <div class="metric-row">
+                    <div class="metric"><div class="val" id="aprSupport">–</div><div class="lbl">Support</div></div>
+                    <div class="metric"><div class="val" id="aprConf">–</div><div class="lbl">Confidence</div></div>
+                    <div class="metric"><div class="val" id="aprLift">–</div><div class="lbl">Lift</div></div>
+                </div>
+                <div class="sim-msg" id="aprMsg"></div>
+            </div>
+
+            <h2 class="content-heading">Implementasi di Python</h2>
+            <p class="content-text">
+                Pustaka <code>mlxtend</code> menyediakan implementasi Apriori yang siap pakai bersama <code>pandas</code>.
+            </p>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <div class="code-block-dots"><span></span><span></span><span></span></div>
+                    <span class="code-block-filename">apriori_mlxtend.py</span>
+                    <button class="code-copy-btn" onclick="copyCode(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                </div>
+                <pre class="code-block-body"><code><span class="hl-keyword">import</span> pandas <span class="hl-keyword">as</span> pd
+<span class="hl-keyword">from</span> mlxtend.preprocessing <span class="hl-keyword">import</span> TransactionEncoder
+<span class="hl-keyword">from</span> mlxtend.frequent_patterns <span class="hl-keyword">import</span> apriori, association_rules
+
+dataset = [
+    [<span class="hl-string">'Roti'</span>, <span class="hl-string">'Susu'</span>],
+    [<span class="hl-string">'Roti'</span>, <span class="hl-string">'Telur'</span>, <span class="hl-string">'Bir'</span>],
+    [<span class="hl-string">'Susu'</span>, <span class="hl-string">'Telur'</span>, <span class="hl-string">'Bir'</span>],
+    [<span class="hl-string">'Roti'</span>, <span class="hl-string">'Susu'</span>, <span class="hl-string">'Telur'</span>, <span class="hl-string">'Bir'</span>],
+    [<span class="hl-string">'Roti'</span>, <span class="hl-string">'Susu'</span>, <span class="hl-string">'Telur'</span>],
+]
+
+<span class="hl-comment"># 1. Ubah ke format one-hot (True/False per item)</span>
+te = <span class="hl-func">TransactionEncoder</span>()
+arr = te.<span class="hl-func">fit</span>(dataset).<span class="hl-func">transform</span>(dataset)
+df = pd.<span class="hl-func">DataFrame</span>(arr, columns=te.columns_)
+
+<span class="hl-comment"># 2. Cari frequent itemset (min support 40%)</span>
+freq = <span class="hl-func">apriori</span>(df, min_support=<span class="hl-number">0.4</span>, use_colnames=<span class="hl-keyword">True</span>)
+
+<span class="hl-comment"># 3. Bangun aturan dengan confidence minimal 60%</span>
+rules = <span class="hl-func">association_rules</span>(freq, metric=<span class="hl-string">"confidence"</span>, min_threshold=<span class="hl-number">0.6</span>)
+<span class="hl-func">print</span>(rules[[<span class="hl-string">'antecedents'</span>, <span class="hl-string">'consequents'</span>, <span class="hl-string">'support'</span>, <span class="hl-string">'confidence'</span>, <span class="hl-string">'lift'</span>]])</code></pre>
+            </div>
+
+            <div class="content-nav">
+                <div class="content-nav-item">
+                    <a href="/datamining/dbscan.html" class="nav-btn nav-btn-prev">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                        <div><span class="nav-label">Sebelumnya</span><span class="nav-name">DBSCAN</span></div>
+                    </a>
+                </div>
+                <div class="content-nav-item">
+                    <a href="/datamining/fp-growth.html" class="nav-btn nav-btn-next">
+                        <div><span class="nav-label">Selanjutnya</span><span class="nav-name">FP-Growth</span></div>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </a>
+                </div>
+            </div>
+
+        </article>
+    </main>
+
+    <script src="/datamining/course-layout.js"></script>
+    <script>
+        // ---- Interaktif: kalkulator aturan asosiasi ----
+        const APR_TX = [
+            ['Roti','Susu'],
+            ['Roti','Telur','Bir'],
+            ['Susu','Telur','Bir'],
+            ['Roti','Susu','Telur','Bir'],
+            ['Roti','Susu','Telur']
+        ];
+        const aprSupCount = items => APR_TX.filter(t => items.every(i => t.includes(i))).length;
+
+        function aprCalc() {
+            const ante = [...document.querySelectorAll('.apr-ante:checked')].map(c => c.value);
+            const cons = [...document.querySelectorAll('.apr-cons:checked')].map(c => c.value);
+            const rule = document.getElementById('aprRule');
+            const msg = document.getElementById('aprMsg');
+            const elS = document.getElementById('aprSupport');
+            const elC = document.getElementById('aprConf');
+            const elL = document.getElementById('aprLift');
+
+            const reset = () => { elS.textContent = '–'; elC.textContent = '–'; elL.textContent = '–'; };
+
+            if (!ante.length || !cons.length) {
+                rule.textContent = '—'; reset();
+                msg.textContent = 'Pilih minimal satu item di sisi JIKA dan MAKA.';
+                msg.style.color = 'var(--text-secondary)';
+                return;
+            }
+            const overlap = ante.filter(a => cons.includes(a));
+            if (overlap.length) {
+                rule.innerHTML = `{${ante.join(', ')}} → {${cons.join(', ')}}`;
+                reset();
+                msg.innerHTML = `⚠️ Item <strong>${overlap.join(', ')}</strong> tidak boleh ada di kedua sisi.`;
+                msg.style.color = '#f59e0b';
+                return;
+            }
+
+            const N = APR_TX.length;
+            const sAB = aprSupCount([...ante, ...cons]) / N;
+            const sA = aprSupCount(ante) / N;
+            const sB = aprSupCount(cons) / N;
+            const conf = sAB / sA;
+            const lift = conf / sB;
+
+            rule.innerHTML = `{${ante.join(', ')}} → {${cons.join(', ')}}`;
+            elS.textContent = sAB.toFixed(2);
+            elC.textContent = Math.round(conf * 100) + '%';
+            elL.textContent = lift.toFixed(2);
+
+            if (lift > 1.05) {
+                msg.innerHTML = '✅ <strong>Lift &gt; 1</strong> — korelasi positif: item-item ini cenderung dibeli bersama.';
+                msg.style.color = '#4ade80';
+            } else if (lift < 0.95) {
+                msg.innerHTML = '🔻 <strong>Lift &lt; 1</strong> — korelasi negatif: kehadiran satu justru menurunkan peluang yang lain.';
+                msg.style.color = '#f87171';
+            } else {
+                msg.innerHTML = '➖ <strong>Lift ≈ 1</strong> — item-item ini relatif independen (kebetulan).';
+                msg.style.color = 'var(--text-secondary)';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', aprCalc);
+
+        function copyCode(btn) {
+            const codeBlock = btn.closest('.code-block').querySelector('code');
+            navigator.clipboard.writeText(codeBlock.textContent).then(() => {
+                btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>';
+                setTimeout(() => {
+                    btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+                }, 2000);
+            });
+        }
+        function playVideo() {
+            alert('Video belum tersedia. Silahkan upload video atau masukkan URL YouTube.');
+        }
+    </script>
+</body>
+</html>

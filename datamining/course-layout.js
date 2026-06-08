@@ -34,14 +34,31 @@ const courseConfig = {
                 { title: "K-Nearest Neighbors (KNN)", url: "/datamining/knn.html", icon: "6" },
                 { title: "Naïve Bayes", url: "/datamining/naive-bayes.html", icon: "7" },
                 { title: "Decision Tree (C4.5)", url: "/datamining/decision-tree.html", icon: "8" },
-                { title: "Evaluasi Model", url: "/datamining/evaluasi-model.html", icon: "9" }
+                { title: "Support Vector Machine (SVM)", url: "/datamining/svm.html", icon: "9" },
+                { title: "Random Forest", url: "/datamining/random-forest.html", icon: "10" },
+                { title: "Evaluasi Model", url: "/datamining/evaluasi-model.html", icon: "11" }
             ]
         },
         {
             group: "Clustering",
             items: [
-                { title: "K-Means Clustering", url: "/datamining/kmeans.html", icon: "10" },
-                { title: "Hierarchical Clustering", url: "/datamining/hierarchical.html", icon: "11" }
+                { title: "K-Means Clustering", url: "/datamining/kmeans.html", icon: "12" },
+                { title: "Hierarchical Clustering", url: "/datamining/hierarchical.html", icon: "13" },
+                { title: "DBSCAN", url: "/datamining/dbscan.html", icon: "14" }
+            ]
+        },
+        {
+            group: "Association Rule",
+            items: [
+                { title: "Apriori", url: "/datamining/apriori.html", icon: "15" },
+                { title: "FP-Growth", url: "/datamining/fp-growth.html", icon: "16" }
+            ]
+        },
+        {
+            group: "Regression",
+            items: [
+                { title: "Linear Regression", url: "/datamining/linear-regression.html", icon: "17" },
+                { title: "Logistic Regression", url: "/datamining/logistic-regression.html", icon: "18" }
             ]
         }
     ]
