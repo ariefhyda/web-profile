@@ -22,6 +22,7 @@ const courseConfig = {
             items: [
                 { title: "Variabel & Tipe Data", url: "/flutter/variabel.html", icon: "3" },
                 { title: "Function & OOP", url: "/flutter/fungsi-oop.html", icon: "4" },
+                { title: "Game: OOP Quest", url: "/flutter/oop-quest.html", icon: "🎮" },
                 { title: "Collection & Async", url: "/flutter/collection-async.html", icon: "5" }
             ]
         },

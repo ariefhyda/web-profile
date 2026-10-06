@@ -1,0 +1,1363 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game: OOP Quest — Arif Hidayah</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/flutter/course.css">
+    <style>
+    /* === OOP Quest (khusus halaman ini) === */
+    .oq-hud { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; padding: 14px 20px; border-bottom: 1px solid var(--border-color); background: rgba(0, 0, 0, 0.2); font-size: 0.85rem; color: var(--text-secondary); }
+    .oq-hud strong { color: var(--text-primary); }
+    .oq-bar { flex: 1; min-width: 120px; height: 8px; border-radius: 4px; background: rgba(255, 255, 255, 0.06); overflow: hidden; }
+    .oq-bar i { display: block; height: 100%; background: linear-gradient(90deg, var(--accent-datamining), var(--accent-flutter)); border-radius: 4px; transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
+    .oq-body { padding: 24px; user-select: none; -webkit-user-select: none; transition: filter 0.15s; }
+    .oq-body.oq-veil { filter: blur(16px); pointer-events: none; }
+    .oq-viol { color: #f87171; }
+    .oq-hud .oq-viol strong { color: #f87171; }
+    .oq-alert { display: none; padding: 12px 20px; border-bottom: 1px solid rgba(248, 113, 113, 0.35); background: rgba(248, 113, 113, 0.1); color: #f1c4c4; font-size: 0.88rem; line-height: 1.6; }
+    .oq-alert.show { display: block; animation: oq-shake 0.4s; }
+    .oq-alert strong { color: #f87171; margin-right: 6px; }
+
+    .oq-btn { display: inline-flex; align-items: center; gap: 8px; padding: 11px 22px; border-radius: var(--radius-sm); border: 1px solid transparent; background: var(--accent-datamining); color: #14101f; font: inherit; font-size: 0.92rem; font-weight: 700; cursor: pointer; transition: var(--transition-fast); }
+    .oq-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(167, 139, 250, 0.3); }
+    .oq-btn-ghost { background: transparent; border-color: var(--border-color-hover); color: var(--text-secondary); font-weight: 600; }
+    .oq-btn-ghost:hover { color: var(--text-primary); border-color: var(--accent-datamining); box-shadow: none; }
+    .oq-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 20px; }
+
+    /* Peta level */
+    .oq-home { display: grid; grid-template-columns: minmax(0, 1fr) 240px; gap: 28px; align-items: start; }
+    .oq-levels { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .oq-level { display: flex; gap: 12px; align-items: center; text-align: left; padding: 14px 16px; border-radius: var(--radius-md); border: 1px solid var(--border-color); background: rgba(255, 255, 255, 0.02); color: var(--text-primary); font: inherit; cursor: pointer; transition: var(--transition-fast); }
+    .oq-level:hover:not(:disabled) { border-color: var(--accent-datamining); background: rgba(167, 139, 250, 0.06); transform: translateY(-2px); }
+    .oq-level:disabled { opacity: 0.45; cursor: not-allowed; }
+    .oq-level.current { border-color: rgba(167, 139, 250, 0.5); box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.1); }
+    .oq-level-icon { width: 42px; height: 42px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; border-radius: var(--radius-sm); background: rgba(255, 255, 255, 0.05); }
+    .oq-level-info { flex: 1; min-width: 0; }
+    .oq-level-num { display: block; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); }
+    .oq-level-title { display: block; font-size: 0.95rem; font-weight: 700; }
+    .oq-level-tag { display: block; font-size: 0.78rem; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .oq-level-state { font-size: 0.78rem; font-weight: 700; color: var(--accent-datamining); text-align: right; white-space: nowrap; }
+    .oq-level-state small { display: block; font-weight: 500; color: var(--text-muted); }
+    .oq-stars { color: #fbbf24; letter-spacing: 2px; }
+    .oq-stars i { font-style: normal; color: rgba(255, 255, 255, 0.15); }
+    .oq-win { margin-bottom: 20px; padding: 16px 20px; border-radius: var(--radius-md); border: 1px solid rgba(52, 211, 153, 0.35); background: rgba(52, 211, 153, 0.07); color: #b8b8cc; font-size: 0.92rem; line-height: 1.7; }
+    .oq-win strong { color: #34d399; }
+
+    /* Ponsel pratinjau */
+    .oq-phone-wrap { text-align: center; }
+    .oq-phone-cap { margin-top: 12px; font-size: 0.78rem; color: var(--text-muted); line-height: 1.6; }
+    .oq-phone { width: 220px; margin: 0 auto; padding: 8px; border-radius: 30px; background: #1c1c28; border: 1px solid rgba(255, 255, 255, 0.12); box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5); }
+    .oq-screen { position: relative; min-height: 400px; border-radius: 23px; overflow: hidden; background: #f4f5fa; color: #1f2333; text-align: left; font-size: 0.72rem; padding-bottom: 56px; }
+    .oq-p-body { padding: 10px; display: flex; flex-direction: column; gap: 8px; }
+    .oq-p-lock { padding: 9px; border: 1.5px dashed #c3c7d6; border-radius: 10px; color: #9aa0b5; font-size: 0.68rem; font-weight: 600; text-align: center; }
+    .oq-p-lock.oq-p-appbar { border-radius: 0; border-width: 0 0 1.5px; padding: 14px 9px; }
+    .oq-part.oq-p-appbar { padding: 14px 12px; background: #0468d7; color: #fff; font-weight: 700; font-size: 0.85rem; }
+    .oq-p-banner { padding: 7px 10px; border-radius: 8px; background: #dcfce7; color: #166534; font-weight: 600; }
+    .oq-p-card { display: flex; align-items: center; gap: 8px; padding: 9px; border-radius: 10px; background: #fff; box-shadow: 0 1px 4px rgba(20, 30, 60, 0.1); }
+    .oq-p-card > div { flex: 1; min-width: 0; line-height: 1.35; }
+    .oq-p-card small { display: block; color: #7b8198; font-size: 0.64rem; }
+    .oq-p-stack { display: flex; flex-direction: column; gap: 8px; }
+    .oq-p-ava { width: 28px; height: 28px; flex-shrink: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: #54c5f8; color: #fff; font-weight: 700; }
+    .oq-p-chip { padding: 3px 7px; border-radius: 20px; background: #ede9fe; color: #6d28d9; font-size: 0.62rem; font-weight: 700; white-space: nowrap; }
+    .oq-p-chip-lock { background: transparent; border: 1.5px dashed #c3c7d6; color: #9aa0b5; }
+    .oq-p-row { display: flex; align-items: center; justify-content: space-between; gap: 6px; padding: 8px 9px; border-radius: 10px; background: #fff; box-shadow: 0 1px 4px rgba(20, 30, 60, 0.1); }
+    .oq-p-row .star { color: #f59e0b; font-size: 0.95rem; }
+    .oq-p-row .btn { padding: 4px 10px; border-radius: 6px; background: #0468d7; color: #fff; font-weight: 700; font-size: 0.64rem; }
+    .oq-p-anim { display: flex; align-items: center; gap: 8px; padding: 8px 9px; border-radius: 10px; background: #fff; box-shadow: 0 1px 4px rgba(20, 30, 60, 0.1); }
+    .oq-p-spin { width: 16px; height: 16px; border-radius: 4px; background: linear-gradient(135deg, #54c5f8, #0468d7); animation: oq-spin 2.4s linear infinite; }
+    .oq-p-fabwrap { position: absolute; right: 10px; bottom: 10px; left: 10px; display: flex; align-items: center; justify-content: space-between; }
+    .oq-p-lock.oq-p-fabwrap { display: block; }
+    .oq-p-fab { width: 38px; height: 38px; border: none; border-radius: 12px; background: #0468d7; color: #fff; font-size: 1.2rem; font-weight: 700; cursor: pointer; box-shadow: 0 4px 10px rgba(4, 104, 215, 0.4); transition: transform 0.15s; }
+    .oq-p-fab:active { transform: scale(0.9); }
+    .oq-pulse { animation: oq-pulse 1.6s ease-in-out infinite; }
+    .oq-new { animation: oq-pop 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s both; outline: 2px solid #a78bfa; outline-offset: 2px; }
+    @keyframes oq-spin { to { transform: rotate(360deg); } }
+    @keyframes oq-pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(84, 197, 248, 0.6); } 50% { box-shadow: 0 0 0 6px rgba(84, 197, 248, 0); } }
+    @keyframes oq-pop { from { transform: scale(0.6); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    @keyframes oq-shake { 20%, 60% { transform: translateX(-5px); } 40%, 80% { transform: translateX(5px); } }
+
+    /* Arena tantangan */
+    .oq-top { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 20px; font-size: 0.82rem; color: var(--text-secondary); }
+    .oq-top .oq-btn { padding: 7px 12px; font-size: 0.8rem; }
+    .oq-top-title { font-weight: 700; color: var(--text-primary); }
+    .oq-steps { display: flex; gap: 6px; margin-left: auto; }
+    .oq-steps i { width: 26px; height: 6px; border-radius: 3px; background: rgba(255, 255, 255, 0.08); }
+    .oq-steps i.done { background: #34d399; }
+    .oq-steps i.now { background: var(--accent-datamining); }
+    .oq-kind { display: inline-block; margin-bottom: 8px; padding: 3px 10px; border-radius: 20px; background: rgba(167, 139, 250, 0.12); color: var(--accent-datamining); font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; }
+    .oq-h { font-size: 1.2rem; font-weight: 700; margin-bottom: 8px; }
+    .oq-q { font-size: 0.96rem; color: #c5c5d4; line-height: 1.7; margin-bottom: 4px; }
+    .oq-q code, .oq-fb code, .oq-note code, .oq-points code { font-family: 'JetBrains Mono', monospace; font-size: 0.85em; padding: 1px 6px; border-radius: 4px; background: rgba(255, 255, 255, 0.07); color: #e2e8f0; }
+    .oq-body .code-block { margin: 16px 0 20px; }
+    .oq-points { margin: 12px 0 0 18px; color: #c5c5d4; font-size: 0.92rem; line-height: 1.8; }
+    .oq-note { padding: 14px 18px; border-radius: var(--radius-md); border: 1px solid rgba(84, 197, 248, 0.25); background: rgba(84, 197, 248, 0.06); color: #b8b8cc; font-size: 0.9rem; line-height: 1.7; }
+    .oq-note strong { color: var(--accent-flutter); }
+
+    .oq-options { display: grid; gap: 10px; margin-top: 16px; }
+    .oq-opt { display: flex; align-items: center; gap: 12px; text-align: left; padding: 12px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border-color-hover); background: rgba(255, 255, 255, 0.02); color: var(--text-primary); font: inherit; font-size: 0.92rem; line-height: 1.5; white-space: pre-line; cursor: pointer; transition: var(--transition-fast); }
+    .oq-opt.mono { font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; }
+    .oq-opt:hover:not(:disabled) { border-color: var(--accent-datamining); background: rgba(167, 139, 250, 0.06); }
+    .oq-opt:disabled { cursor: default; }
+    .oq-opt-key { width: 24px; height: 24px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: rgba(255, 255, 255, 0.07); font-family: 'Inter', sans-serif; font-size: 0.72rem; font-weight: 700; color: var(--text-secondary); }
+    .oq-opt.ok, .oq-bucket.ok { border-color: #34d399; background: rgba(52, 211, 153, 0.1); }
+    .oq-opt.bad, .oq-bucket.bad { border-color: #f87171; background: rgba(248, 113, 113, 0.08); opacity: 0.7; animation: oq-shake 0.4s; }
+
+    .oq-slot { display: inline-block; min-width: 76px; padding: 1px 10px; margin: 0 1px; border-radius: 6px; border: 1.5px dashed rgba(167, 139, 250, 0.6); background: rgba(167, 139, 250, 0.08); color: #fff; font: inherit; font-weight: 600; text-align: center; cursor: pointer; vertical-align: baseline; }
+    .oq-slot.active { border-style: solid; box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.25); }
+    .oq-slot.filled { border-style: solid; background: rgba(167, 139, 250, 0.2); }
+    .oq-slot.ok { border-color: #34d399; background: rgba(52, 211, 153, 0.18); }
+    .oq-slot.bad { border-color: #f87171; background: rgba(248, 113, 113, 0.18); }
+    .oq-bank { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+    .oq-token { padding: 8px 14px; border-radius: var(--radius-sm); border: 1px solid var(--border-color-hover); background: rgba(255, 255, 255, 0.05); color: var(--text-primary); font-family: 'JetBrains Mono', monospace; font-size: 0.84rem; font-weight: 600; cursor: pointer; transition: var(--transition-fast); }
+    .oq-token:hover:not(:disabled) { border-color: var(--accent-datamining); transform: translateY(-2px); }
+    .oq-token:disabled { opacity: 0.25; cursor: default; }
+
+    .oq-card { margin: 18px 0 14px; padding: 26px 20px; border-radius: var(--radius-md); border: 1px solid rgba(167, 139, 250, 0.35); background: rgba(167, 139, 250, 0.06); text-align: center; font-size: 1.05rem; font-weight: 600; line-height: 1.6; overflow-wrap: anywhere; animation: oq-pop 0.35s both; }
+    .oq-card.mono { font-family: 'JetBrains Mono', monospace; font-size: 0.92rem; }
+    .oq-card small { display: block; margin-bottom: 8px; font-family: 'Inter', sans-serif; font-size: 0.7rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; }
+    .oq-buckets { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 10px; }
+    .oq-bucket { padding: 14px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-color-hover); background: rgba(255, 255, 255, 0.03); color: var(--text-primary); font: inherit; font-size: 0.9rem; font-weight: 700; cursor: pointer; transition: var(--transition-fast); }
+    .oq-bucket:hover:not(:disabled) { border-color: var(--accent-datamining); transform: translateY(-2px); }
+    .oq-bucket:disabled { cursor: default; }
+
+    .oq-fb { margin-top: 16px; padding: 14px 18px; border-radius: var(--radius-md); font-size: 0.9rem; line-height: 1.7; color: #c5c5d4; }
+    .oq-fb:empty { display: none; }
+    .oq-fb strong { display: block; margin-bottom: 2px; }
+    .oq-fb.ok { border: 1px solid rgba(52, 211, 153, 0.35); background: rgba(52, 211, 153, 0.07); }
+    .oq-fb.ok strong { color: #34d399; }
+    .oq-fb.bad { border: 1px solid rgba(248, 113, 113, 0.35); background: rgba(248, 113, 113, 0.06); }
+    .oq-fb.bad strong { color: #f87171; }
+    .oq-fb .oq-btn { margin-top: 12px; }
+
+    .oq-done { display: grid; grid-template-columns: minmax(0, 1fr) 240px; gap: 28px; align-items: center; }
+    .oq-done .oq-stars { font-size: 2.2rem; }
+    .oq-done-xp { margin: 6px 0 16px; color: var(--text-secondary); font-size: 0.92rem; }
+
+    @media (max-width: 860px) {
+        .oq-home, .oq-done { grid-template-columns: minmax(0, 1fr); }
+    }
+    @media (max-width: 560px) {
+        .oq-body { padding: 16px; }
+        .oq-levels { grid-template-columns: minmax(0, 1fr); }
+        .oq-steps { margin-left: 0; width: 100%; }
+        .oq-steps i { flex: 1; }
+        .oq-buckets { grid-auto-flow: row; }
+    }
+    </style>
+</head>
+<body>
+    <div class="bg-grid" aria-hidden="true"></div>
+    <nav class="navbar scrolled" id="navbar">
+        <!-- Navbar content injected by course-layout.js -->
+    </nav>
+
+    <div class="mobile-menu" id="mobileMenu">
+        <!-- Mobile menu content injected by course-layout.js -->
+    </div>
+
+
+    <main class="course-layout">
+        <aside class="course-sidebar" id="courseSidebar">
+            <!-- Sidebar content injected by course-layout.js -->
+        </aside>
+
+
+        <article class="course-content">
+            <div class="breadcrumb">
+                <a href="../index.html">Home</a><span>›</span>
+                <a href="/flutter/index.html">Flutter</a><span>›</span>
+                <span style="color: var(--text-primary);">Game: OOP Quest</span>
+            </div>
+
+            <header class="content-header">
+                <h1 class="content-title">Game: OOP Quest — Kuasai OOP Dart Sambil Bermain</h1>
+                <div class="content-meta">
+                    <div class="meta-pill"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 5V8.5L10.5 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/></svg><span>Estimasi: 30–45 Menit</span></div>
+                    <div class="meta-pill"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="10" rx="1" stroke="currentColor" stroke-width="1.5"/><path d="M5 7h6M5 10h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><span>8 Level • 25 Tantangan</span></div>
+                </div>
+            </header>
+
+            <p class="content-text">Setelah mempelajari teori di <a href="/flutter/fungsi-oop.html" style="color: var(--accent-datamining);">Modul 4: Function & OOP</a>, saatnya menguji pemahaman Anda. Di game ini Anda berperan sebagai <strong>developer junior</strong> yang ditugaskan membangun aplikasi <strong>KampusKu</strong>. Setiap konsep OOP yang Anda kuasai akan membuka satu fitur baru pada aplikasi di layar ponsel.</p>
+
+            <div class="info-box">
+                <div class="info-box-header"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg><strong>Cara Bermain</strong></div>
+                <p>Setiap level dibuka dengan <strong>briefing</strong> singkat, lalu diikuti tantangan: <strong>Lengkapi Kode</strong> (klik kotak kosong, lalu klik potongan kode yang tepat), <strong>Tebak Output</strong>, dan <strong>Sortir Kilat</strong>. Jawaban benar pada percobaan pertama bernilai <strong>100 XP</strong>; percobaan berikutnya bernilai lebih kecil. Level bisa diulang kapan saja untuk memperbaiki bintang, dan progres tersimpan otomatis di browser ini.</p>
+            </div>
+
+            <div class="info-box">
+                <div class="info-box-header"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg><strong>Aturan Fair Play</strong></div>
+                <p>Kerjakan tantangan dengan kemampuan sendiri. Selama tantangan berlangsung, game mengawasi tiga hal: <strong>menyalin soal</strong> (copy/cut), <strong>tangkapan layar</strong>, dan <strong>meninggalkan halaman</strong> (pindah tab atau membuka aplikasi lain, misalnya untuk bertanya ke AI). Setiap pelanggaran <strong>mengurangi 25 XP</strong> dari total Anda dan tercatat permanen pada papan skor. Khusus meninggalkan halaman, satu kali pertama hanya diberi peringatan. Membaca briefing dan penjelasan jawaban tidak diawasi.</p>
+            </div>
+
+            <div class="interactive-box" id="oqBox">
+                <div class="interactive-header">
+                    <div class="interactive-title">🎮 OOP Quest: Bangun Aplikasi KampusKu</div>
+                    <div class="interactive-controls">
+                        <button class="control-input" id="oqReset">Reset Progres</button>
+                    </div>
+                </div>
+                <div class="oq-hud" id="oqHud"></div>
+                <div class="oq-alert" id="oqAlert" role="alert"></div>
+                <div class="oq-body" id="oqBody"></div>
+                <div class="interactive-footer">Tips: baca penjelasan setelah setiap jawaban — di situlah hubungan antara konsep OOP dan kode Flutter dijelaskan.</div>
+            </div>
+
+            <h2 class="content-heading">Peta Konsep: dari OOP ke Flutter</h2>
+            <p class="content-text">Gunakan daftar berikut sebagai rangkuman setelah menamatkan game. Setiap konsep OOP di Dart punya padanan langsung yang Anda tulis setiap hari saat membuat aplikasi Flutter.</p>
+            <ol class="content-list">
+                <li><strong>Class & Object</strong> — setiap widget adalah object: <code>Text('Halo')</code> membuat object dari class <code>Text</code>.</li>
+                <li><strong>Constructor</strong> — named parameter (<code>Container(width: 100)</code>), <code>const</code>, dan <code>factory fromJson</code> untuk data API.</li>
+                <li><strong>Encapsulation</strong> — awalan <code>_</code> pada <code>_HomePageState</code> dan variabel state seperti <code>_counter</code>.</li>
+                <li><strong>Inheritance</strong> — <code>extends StatelessWidget</code> / <code>extends StatefulWidget</code> pada setiap halaman.</li>
+                <li><strong>Polymorphism</strong> — <code>@override Widget build()</code>, dan <code>List&lt;Widget&gt;</code> yang berisi beragam jenis widget.</li>
+                <li><strong>Abstraction & Interface</strong> — pola repository: <code>abstract class</code> sebagai kontrak, <code>implements</code> untuk versi API dan versi tes.</li>
+                <li><strong>Mixin</strong> — <code>with SingleTickerProviderStateMixin</code> saat membuat animasi.</li>
+                <li><strong>static, final, copyWith, enum, generics</strong> — <code>Colors.blue</code>, field widget yang <code>final</code>, <code>TextStyle.copyWith()</code>, dan <code>State&lt;T&gt;</code>.</li>
+            </ol>
+
+            <!-- Nav -->
+            <div class="content-nav">
+                <div class="content-nav-item">
+                    <a href="/flutter/fungsi-oop.html" class="nav-btn nav-btn-prev">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                        <div><span class="nav-label">Sebelumnya</span><span class="nav-name">Function & OOP</span></div>
+                    </a>
+                </div>
+                <div class="content-nav-item">
+                    <a href="/flutter/collection-async.html" class="nav-btn nav-btn-next">
+                        <div><span class="nav-label">Selanjutnya</span><span class="nav-name">Collection & Async</span></div>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </a>
+                </div>
+            </div>
+        </article>
+    </main>
+
+    <script src="/flutter/course-layout.js"></script>
+    <script>
+    // Navigation logic handled by course-layout.js
+
+    // ============================================
+    // OOP Quest — data level
+    // Pada field `code`, §n§ menandai kotak kosong ke-n.
+    // ============================================
+    const OOP_LEVELS = [
+        {
+            id: 1, icon: '🧬', title: 'Class & Object', tag: 'Cetak biru dan hasil cetakannya',
+            analogi: 'Class ibarat <strong>cetakan kue</strong>, object adalah <strong>kue</strong> yang dihasilkannya. Satu cetakan bisa menghasilkan banyak kue, dan setiap kue boleh punya isi (data) yang berbeda.',
+            points: ['<strong>Property</strong> — data yang dimiliki object.', '<strong>Constructor</strong> — dipanggil saat object dibuat.', '<strong>Method</strong> — aksi yang bisa dilakukan object.'],
+            file: 'class_object.dart',
+            code: `class Mahasiswa {
+  String nama;              // property
+  Mahasiswa(this.nama);     // constructor
+
+  void sapa() => print('Halo, $nama');  // method
+}
+
+void main() {
+  var a = Mahasiswa('Budi');  // object pertama
+  var b = Mahasiswa('Siti');  // object kedua
+  a.sapa();                   // Halo, Budi
+}`,
+            flutter: 'Setiap widget adalah object dari sebuah class. Menulis <code>Text(\'Halo\')</code> berarti membuat satu object dari class <code>Text</code>.',
+            unlock: 'Kartu profil Budi — satu object dari class Mahasiswa.',
+            challenges: [
+                {
+                    type: 'sort', title: 'Cetak Biru atau Hasil Cetakan?', mono: true,
+                    q: 'Tentukan apakah potongan kode berikut mendefinisikan <strong>class</strong> atau membuat <strong>object</strong>.',
+                    buckets: ['Class (cetak biru)', 'Object (instance)'],
+                    items: [
+                        { t: 'class Mobil { }', b: 0, why: 'Diawali keyword <code>class</code> — ini definisi cetak biru, belum ada object yang dibuat.' },
+                        { t: "Mobil('Avanza')", b: 1, why: 'Memanggil constructor menghasilkan satu object baru.' },
+                        { t: "Text('Halo Dunia')", b: 1, why: 'Di Flutter, ini membuat object widget dari class <code>Text</code>.' },
+                        { t: 'class ProfilCard extends StatelessWidget { }', b: 0, why: 'Ini definisi class widget baru. Object-nya baru ada saat Anda menulis <code>ProfilCard()</code>.' },
+                        { t: 'EdgeInsets.all(16)', b: 1, why: 'Named constructor tetap menghasilkan object, yaitu object <code>EdgeInsets</code>.' }
+                    ]
+                },
+                {
+                    type: 'fill', title: 'Rakit Class Pertama',
+                    q: 'Lengkapi kode agar program mencetak <code>Halo, Budi</code>.',
+                    code: `§0§ Mahasiswa {
+  String nama;
+  Mahasiswa(this.nama);
+
+  §1§ sapa() => print('Halo, $nama');
+}
+
+void main() {
+  var mhs = §2§('Budi');
+  mhs.§3§();
+}`,
+                    answers: ['class', 'void', 'Mahasiswa', 'sapa'],
+                    distractors: ['object', 'function', 'def', 'nama'],
+                    hint: 'Object dibuat dengan memanggil nama class-nya, lalu method dipanggil dengan tanda titik.',
+                    explain: '<code>class</code> mendefinisikan cetak biru, <code>Mahasiswa(\'Budi\')</code> membuat object, dan <code>mhs.sapa()</code> memanggil method milik object tersebut.'
+                },
+                {
+                    type: 'quiz', title: 'Tebak Output', mono: true,
+                    q: 'Apa yang dicetak program berikut?',
+                    code: `class Lampu {
+  bool menyala = false;
+}
+
+void main() {
+  var ruangTamu = Lampu();
+  var dapur = Lampu();
+  ruangTamu.menyala = true;
+  print(dapur.menyala);
+}`,
+                    options: ['false', 'true', 'null', 'Error'], answer: 0,
+                    hint: 'Perhatikan: lampu mana yang dinyalakan, dan lampu mana yang dicetak?',
+                    explain: 'Setiap object punya salinan property-nya sendiri. Menyalakan lampu ruang tamu tidak mengubah lampu dapur.'
+                }
+            ]
+        },
+        {
+            id: 2, icon: '🏭', title: 'Constructor', tag: 'Pabrik pembuat object',
+            analogi: 'Constructor ibarat <strong>formulir pemesanan</strong>: menentukan data apa yang wajib diisi dan apa yang boleh dikosongkan ketika sebuah object dibuat.',
+            points: ['<strong>Named parameter</strong> <code>{}</code> — dipanggil dengan nama, urutan bebas.', '<strong>required</strong> — wajib diisi; selain itu beri nilai default.', '<strong>factory</strong> — constructor khusus, misalnya membuat object dari JSON.'],
+            file: 'constructor.dart',
+            code: `class Produk {
+  final String nama;
+  final int stok;
+
+  // named parameter + nilai default
+  const Produk({required this.nama, this.stok = 0});
+
+  // factory: membuat object dari data JSON (hasil API)
+  factory Produk.fromJson(Map<String, dynamic> json) {
+    return Produk(nama: json['nama'], stok: json['stok']);
+  }
+}`,
+            flutter: 'Hampir semua widget memakai named parameter: <code>Container(width: 100, color: Colors.blue)</code>. Sementara <code>fromJson</code> Anda tulis setiap kali mengambil data dari REST API.',
+            unlock: 'Dua kartu baru (Siti & Andi) — banyak object dari satu constructor yang sama.',
+            challenges: [
+                {
+                    type: 'fill', title: 'Formulir Pemesanan',
+                    q: 'Buat <code>nama</code> wajib diisi, dan <code>stok</code> otomatis bernilai 0 bila tidak diisi.',
+                    code: `class Produk {
+  final String nama;
+  final int stok;
+
+  Produk({ §0§ this.nama, this.stok = §1§ });
+}
+
+void main() {
+  var p = Produk(§2§: 'Kopi');
+  print(p.stok);  // 0
+}`,
+                    answers: ['required', '0', 'nama'],
+                    distractors: ['optional', 'wajib', 'null', 'stok'],
+                    hint: 'Named parameter dipanggil dengan format namaParameter: nilai.',
+                    explain: '<code>required</code> memaksa pemanggil mengisi <code>nama</code>, sedangkan <code>this.stok = 0</code> memberi nilai default. Pola ini persis seperti constructor widget Flutter.'
+                },
+                {
+                    type: 'quiz', title: 'Panggil Widget dengan Benar', mono: true,
+                    q: 'Constructor <code>Text</code> berbentuk <code>Text(String data, {TextStyle? style})</code>. Pemanggilan mana yang benar?',
+                    options: ["Text('Halo', style: TextStyle(fontSize: 20))", "Text(data: 'Halo', style: TextStyle(fontSize: 20))", "Text('Halo', TextStyle(fontSize: 20))", "Text('Halo', fontSize: 20)"], answer: 0,
+                    hint: 'data berada di luar kurung kurawal (positional), sedangkan style berada di dalamnya (named).',
+                    explain: '<code>data</code> adalah positional parameter sehingga diisi langsung, sedangkan <code>style</code> adalah named parameter sehingga harus ditulis <code>style: ...</code>.'
+                },
+                {
+                    type: 'fill', title: 'Dari JSON Menjadi Object',
+                    q: 'Lengkapi constructor yang mengubah data JSON dari API menjadi object <code>User</code>.',
+                    code: `class User {
+  final String nama;
+  User({required this.nama});
+
+  §0§ User.§1§(Map<String, dynamic> json) {
+    return User(nama: json[§2§]);
+  }
+}
+
+void main() {
+  var data = {'nama': 'Budi'};
+  var u = User.fromJson(data);
+  print(u.nama);  // Budi
+}`,
+                    answers: ['factory', 'fromJson', "'nama'"],
+                    distractors: ['static', 'toJson', 'nama', 'void'],
+                    hint: 'Lihat bagaimana constructor ini dipanggil di dalam main().',
+                    explain: '<code>factory</code> adalah constructor yang boleh memakai <code>return</code>. <code>fromJson</code> adalah nama konvensi yang dipakai di hampir semua proyek Flutter untuk membaca respons API.'
+                }
+            ]
+        },
+        {
+            id: 3, icon: '🔐', title: 'Encapsulation', tag: 'Lindungi data di dalam brankas',
+            analogi: 'Seperti <strong>mesin ATM</strong>: Anda tidak bisa membuka brankasnya langsung, hanya lewat tombol resmi yang punya aturan. Data disembunyikan, akses diatur.',
+            points: ['Awalan <code>_</code> membuat property/method <strong>private</strong> (hanya terlihat di file yang sama).', '<strong>Getter</strong> — pintu resmi untuk membaca.', '<strong>Setter</strong> / method — pintu resmi untuk mengubah, lengkap dengan validasi.'],
+            file: 'encapsulation.dart',
+            code: `class Rekening {
+  double _saldo = 0;            // private
+
+  double get saldo => _saldo;   // getter: hanya baca
+
+  void setor(double jumlah) {
+    if (jumlah > 0) _saldo += jumlah;   // ada validasi
+  }
+}`,
+            flutter: 'Pada <code>class _CounterState extends State&lt;Counter&gt;</code>, garis bawah membuat State hanya bisa diakses dari file itu sendiri. Variabel state seperti <code>int _counter</code> juga dibuat private.',
+            unlock: 'Chip IPK — data private yang hanya bisa dibaca lewat getter.',
+            challenges: [
+                {
+                    type: 'fill', title: 'Kunci Brankasnya',
+                    q: 'Jadikan saldo private, lalu sediakan getter dan setter dengan validasi.',
+                    code: `class Rekening {
+  double §0§ = 0;
+
+  double §1§ saldo => _saldo;
+
+  §2§ saldo(double nilai) {
+    if (nilai >= 0) _saldo = nilai;
+  }
+}`,
+                    answers: ['_saldo', 'get', 'set'],
+                    distractors: ['private saldo', 'saldo', 'return', 'void'],
+                    hint: 'Dart tidak punya keyword private — cukup satu karakter di depan nama.',
+                    explain: 'Awalan <code>_</code> menyembunyikan <code>_saldo</code>. Dunia luar hanya mengenal <code>saldo</code> lewat <code>get</code> dan <code>set</code>, sehingga nilai negatif bisa ditolak.'
+                },
+                {
+                    type: 'quiz', title: 'Tebak Output', mono: true,
+                    q: 'Apa yang dicetak program berikut?',
+                    code: `class Suhu {
+  int _celsius = 25;
+
+  int get celsius => _celsius;
+
+  set celsius(int nilai) {
+    if (nilai >= -273) _celsius = nilai;
+  }
+}
+
+void main() {
+  var s = Suhu();
+  s.celsius = -500;
+  print(s.celsius);
+}`,
+                    options: ['25', '-500', '-273', 'Error'], answer: 0,
+                    hint: 'Apakah -500 lolos dari pemeriksaan di dalam setter?',
+                    explain: 'Setter menolak -500 karena tidak memenuhi syarat <code>nilai >= -273</code>, sehingga <code>_celsius</code> tetap 25. Inilah manfaat encapsulation: data tidak bisa dirusak dari luar.'
+                },
+                {
+                    type: 'quiz', title: 'Garis Bawah di Flutter',
+                    q: 'Di Flutter kita sering menulis <code>class _HomePageState extends State&lt;HomePage&gt;</code>. Apa arti garis bawah di depan nama class tersebut?',
+                    options: ['Class hanya bisa diakses dari dalam file (library) yang sama', 'Class tersebut otomatis menjadi abstract', 'Class tersebut tidak bisa dibuat object-nya', 'Hanya gaya penamaan, tidak ada pengaruhnya'], answer: 0,
+                    hint: 'Aturannya sama dengan garis bawah pada nama variabel.',
+                    explain: 'Awalan <code>_</code> berlaku untuk class, variabel, maupun method: semuanya menjadi private pada level file. State sengaja disembunyikan karena hanya widget pemiliknya yang perlu mengenalnya.'
+                }
+            ]
+        },
+        {
+            id: 4, icon: '🌳', title: 'Inheritance', tag: 'Mewarisi kemampuan dari parent',
+            analogi: 'Seorang <strong>anak mewarisi</strong> sifat orang tuanya, lalu boleh menambah kemampuan baru miliknya sendiri. Tidak perlu menulis ulang apa yang sudah ada di parent.',
+            points: ['<code>extends</code> — mewarisi property & method dari <strong>satu</strong> parent class.', '<code>super</code> — merujuk ke parent (constructor maupun method-nya).'],
+            file: 'inheritance.dart',
+            code: `class Hewan {
+  String nama;
+  Hewan(this.nama);
+  void makan() => print('$nama makan');
+}
+
+class Kucing extends Hewan {
+  Kucing(String nama) : super(nama);   // teruskan ke parent
+  void mengeong() => print('Meong!');
+}
+
+void main() {
+  var k = Kucing('Milo');
+  k.makan();      // diwarisi dari Hewan
+  k.mengeong();   // milik Kucing sendiri
+}`,
+            flutter: 'Setiap halaman yang Anda buat adalah class turunan: <code>class HomePage extends StatelessWidget</code>. Anda mewarisi seluruh kemampuan widget dan cukup menulis method <code>build()</code>.',
+            unlock: 'AppBar KampusKu — halaman Anda kini resmi turunan StatelessWidget.',
+            challenges: [
+                {
+                    type: 'fill', title: 'Sambungkan Garis Keturunan',
+                    q: 'Jadikan <code>Motor</code> turunan dari <code>Kendaraan</code>, lalu terapkan pola yang sama pada widget Flutter.',
+                    code: `class Kendaraan {
+  String merk;
+  Kendaraan(this.merk);
+  void jalan() => print('$merk melaju');
+}
+
+class Motor §0§ Kendaraan {
+  Motor(String merk) : §1§(merk);
+}
+
+// Di Flutter, polanya sama persis:
+class HomePage §2§ StatelessWidget {
+  // method build() ditulis di sini
+}`,
+                    answers: ['extends', 'super', 'extends'],
+                    distractors: ['implements', 'this', 'inherits', 'parent'],
+                    hint: 'Satu keyword untuk mewarisi, satu keyword untuk memanggil constructor parent.',
+                    explain: '<code>extends</code> membuat hubungan parent–child, dan <code>super(merk)</code> meneruskan data ke constructor parent. Membuat halaman Flutter memakai pola yang sama persis.'
+                },
+                {
+                    type: 'quiz', title: 'Tebak Output', mono: true,
+                    q: 'Apa yang dicetak program berikut?',
+                    code: `class Karyawan {
+  void kerja() => print('Bekerja');
+}
+
+class Programmer extends Karyawan {
+  @override
+  void kerja() {
+    super.kerja();
+    print('Ngoding');
+  }
+}
+
+void main() {
+  Programmer().kerja();
+}`,
+                    options: ['Bekerja\nNgoding', 'Ngoding', 'Ngoding\nBekerja', 'Bekerja'], answer: 0,
+                    hint: 'super.kerja() menjalankan versi milik parent terlebih dahulu.',
+                    explain: '<code>super.kerja()</code> menjalankan method milik parent, baru kemudian kode tambahan milik child. Pola ini Anda pakai di Flutter pada <code>super.initState()</code> dan <code>super.dispose()</code>.'
+                },
+                {
+                    type: 'sort', title: 'Pilih Parent yang Tepat',
+                    q: 'Untuk setiap kebutuhan tampilan, class mana yang sebaiknya di-<code>extends</code>?',
+                    buckets: ['StatelessWidget', 'StatefulWidget'],
+                    items: [
+                        { t: 'Logo dan judul aplikasi yang tidak pernah berubah', b: 0, why: 'Tidak ada data yang berubah, jadi cukup <code>StatelessWidget</code>.' },
+                        { t: 'Tombol like yang berubah warna saat ditekan', b: 1, why: 'Ada state (disukai / belum) yang berubah, sehingga butuh <code>StatefulWidget</code>.' },
+                        { t: "Halaman 'Tentang Kami' berisi teks statis", b: 0, why: 'Tampilan statis tanpa interaksi yang mengubah data.' },
+                        { t: 'Counter yang angkanya bertambah setiap diklik', b: 1, why: 'Angka counter adalah state yang berubah lewat <code>setState()</code>.' },
+                        { t: "Form login dengan checkbox 'Ingat saya'", b: 1, why: 'Status centang checkbox perlu disimpan sebagai state.' }
+                    ]
+                }
+            ]
+        },
+        {
+            id: 5, icon: '🎭', title: 'Polymorphism', tag: 'Satu perintah, banyak bentuk',
+            analogi: 'Tombol <strong>▶ play</strong> yang sama bekerja berbeda di pemutar musik dan pemutar video. Satu perintah, tetapi tiap object meresponsnya dengan caranya sendiri.',
+            points: ['<code>@override</code> — child menulis ulang method milik parent.', 'Object child boleh disimpan dalam variabel bertipe parent.', 'Saat method dipanggil, Dart menjalankan versi milik <strong>object sebenarnya</strong>.'],
+            file: 'polymorphism.dart',
+            code: `class Hewan {
+  void suara() => print('...');
+}
+
+class Kucing extends Hewan {
+  @override
+  void suara() => print('Meong');
+}
+
+class Anjing extends Hewan {
+  @override
+  void suara() => print('Guk');
+}
+
+void main() {
+  List<Hewan> daftar = [Kucing(), Anjing()];
+  for (var h in daftar) {
+    h.suara();   // Meong, lalu Guk
+  }
+}`,
+            flutter: 'Flutter memanggil <code>build()</code> pada semua widget tanpa peduli jenisnya, dan tiap widget meng-override <code>build()</code> dengan caranya sendiri. Karena itu <code>children: [Text(...), Icon(...)]</code> bisa dicampur dalam satu <code>List&lt;Widget&gt;</code>.',
+            unlock: 'Baris berisi Text, Icon, dan Button — berbeda jenis, tetapi semuanya Widget.',
+            challenges: [
+                {
+                    type: 'quiz', title: 'Tebak Output', mono: true,
+                    q: 'Apa yang dicetak program berikut?',
+                    code: `class Bentuk {
+  String nama() => 'Bentuk';
+}
+
+class Lingkaran extends Bentuk {
+  @override
+  String nama() => 'Lingkaran';
+}
+
+class Segitiga extends Bentuk { }
+
+void main() {
+  List<Bentuk> daftar = [Lingkaran(), Segitiga()];
+  for (var b in daftar) {
+    print(b.nama());
+  }
+}`,
+                    options: ['Lingkaran\nBentuk', 'Bentuk\nBentuk', 'Lingkaran\nSegitiga', 'Error: Segitiga tidak punya nama()'], answer: 0,
+                    hint: 'Segitiga tidak meng-override nama(). Versi siapa yang dipakainya?',
+                    explain: '<code>Lingkaran</code> memakai versi miliknya sendiri, sedangkan <code>Segitiga</code> tidak meng-override sehingga memakai versi warisan dari <code>Bentuk</code>.'
+                },
+                {
+                    type: 'fill', title: 'Method Paling Terkenal di Flutter',
+                    q: 'Lengkapi widget berikut agar menampilkan teks di layar.',
+                    code: `class SalamWidget extends StatelessWidget {
+  const SalamWidget({super.key});
+
+  §0§
+  Widget §1§(BuildContext context) {
+    §2§ Text('Halo Flutter!');
+  }
+}`,
+                    answers: ['@override', 'build', 'return'],
+                    distractors: ['@overwrite', 'render', 'print', 'create'],
+                    hint: 'Method ini dipanggil Flutter setiap kali widget perlu digambar.',
+                    explain: 'Setiap widget meng-<code>@override</code> method <code>build()</code> milik parent-nya. Flutter cukup memanggil <code>build()</code> — hasilnya berbeda untuk tiap widget. Itulah polymorphism.'
+                },
+                {
+                    type: 'quiz', title: 'Mengapa Boleh Dicampur?',
+                    q: 'Parameter <code>children</code> bertipe <code>List&lt;Widget&gt;</code>. Mengapa <code>Text</code>, <code>Icon</code>, dan <code>ElevatedButton</code> boleh berada dalam satu list?',
+                    code: `Column(
+  children: [
+    Text('Judul'),
+    Icon(Icons.star),
+    ElevatedButton(onPressed: () {}, child: Text('OK')),
+  ],
+)`,
+                    options: ['Karena ketiganya turunan dari Widget, sehingga bisa diperlakukan sebagai Widget', 'Karena List di Dart boleh diisi tipe apa saja tanpa aturan', 'Karena ketiganya memakai mixin yang sama', 'Karena Column mengubah semua isinya menjadi String'], answer: 0,
+                    hint: 'Ingat contoh List<Hewan> yang berisi Kucing dan Anjing.',
+                    explain: 'Sama seperti <code>List&lt;Hewan&gt;</code> yang berisi <code>Kucing</code> dan <code>Anjing</code>: object child selalu bisa diperlakukan sebagai tipe parent-nya.'
+                }
+            ]
+        },
+        {
+            id: 6, icon: '📜', title: 'Abstraction & Interface', tag: 'Kontrak yang wajib dipenuhi',
+            analogi: 'Abstract class ibarat <strong>kontrak kerja</strong>: menyebutkan <em>apa</em> yang harus dikerjakan, bukan <em>bagaimana</em> caranya. Seperti stopkontak — alat apa pun bisa dipakai asalkan colokannya sesuai.',
+            points: ['<code>abstract class</code> — tidak bisa dibuat object-nya, boleh berisi method tanpa isi.', '<code>extends</code> — mewarisi sekaligus mengisi method yang masih kosong.', '<code>implements</code> — hanya mengambil kontraknya; <strong>semua</strong> method wajib ditulis ulang.'],
+            file: 'abstraction.dart',
+            code: `abstract class Pembayaran {
+  void bayar(int jumlah);   // tanpa isi: wajib di-override
+}
+
+class Gopay extends Pembayaran {
+  @override
+  void bayar(int jumlah) => print('Gopay: Rp$jumlah');
+}
+
+class Transfer implements Pembayaran {
+  @override
+  void bayar(int jumlah) => print('Transfer: Rp$jumlah');
+}`,
+            flutter: 'Pola <strong>repository</strong>: <code>abstract class UserRepository</code> menjadi kontrak, lalu ada versi API untuk data asli dan versi palsu untuk testing. <code>StatelessWidget</code> sendiri adalah abstract class yang mewajibkan Anda menulis <code>build()</code>.',
+            unlock: 'Banner "Data dimuat via Repository" — sumber data kini mengikuti sebuah kontrak.',
+            challenges: [
+                {
+                    type: 'fill', title: 'Tulis Kontraknya',
+                    q: 'Jadikan <code>Bentuk</code> sebuah kontrak, lalu penuhi kontrak itu di class <code>Persegi</code>.',
+                    code: `§0§ class Bentuk {
+  double luas();   // method tanpa isi
+}
+
+class Persegi §1§ Bentuk {
+  double sisi;
+  Persegi(this.sisi);
+
+  §2§
+  double luas() => sisi * sisi;
+}`,
+                    answers: ['abstract', ['extends', 'implements'], '@override'],
+                    distractors: ['interface', 'with', 'final'],
+                    hint: 'Method tanpa isi hanya boleh berada di class yang ditandai dengan satu keyword khusus.',
+                    explain: 'Method tanpa isi hanya boleh ada di <code>abstract class</code>. Class turunannya wajib mengisinya dengan <code>@override</code> — di sini <code>extends</code> maupun <code>implements</code> sama-sama benar.'
+                },
+                {
+                    type: 'quiz', title: 'Apa yang Terjadi?',
+                    q: 'Apa yang terjadi saat program berikut dijalankan?',
+                    code: `abstract class Bentuk {
+  double luas();
+}
+
+void main() {
+  var b = Bentuk();
+  print(b.luas());
+}`,
+                    options: ['Error kompilasi: abstract class tidak bisa dibuat object-nya', 'Mencetak 0.0', 'Mencetak null', 'Berjalan normal tanpa mencetak apa pun'], answer: 0,
+                    hint: 'Bisakah sebuah kontrak dijalankan tanpa ada pihak yang mengerjakannya?',
+                    explain: 'Abstract class hanyalah kontrak yang belum lengkap, sehingga Dart menolak <code>Bentuk()</code>. Anda harus membuat object dari class turunannya, misalnya <code>Persegi(4)</code>.'
+                },
+                {
+                    type: 'fill', title: 'Repository Palsu untuk Testing',
+                    q: 'Buat versi palsu dari repository agar aplikasi bisa dites tanpa koneksi internet.',
+                    code: `abstract class UserRepository {
+  Future<String> ambilNama();
+}
+
+// Versi palsu untuk testing, tanpa internet
+class FakeUserRepository §0§ UserRepository {
+  @override
+  §1§ ambilNama() async => 'Budi (data tes)';
+}
+
+void main() async {
+  §2§ repo = FakeUserRepository();
+  print(await repo.ambilNama());
+}`,
+                    answers: [['implements', 'extends'], 'Future<String>', 'UserRepository'],
+                    distractors: ['String', 'with', 'abstract'],
+                    hint: 'Tipe kembalian harus sama dengan kontraknya, dan variabel boleh bertipe kontrak.',
+                    explain: 'Variabel <code>repo</code> bertipe kontrak (<code>UserRepository</code>), sehingga isinya bisa ditukar antara versi API dan versi palsu tanpa mengubah kode lain. Inilah dasar arsitektur aplikasi Flutter yang mudah dites.'
+                }
+            ]
+        },
+        {
+            id: 7, icon: '🧩', title: 'Mixin', tag: 'Pasang kemampuan tambahan',
+            analogi: 'Mixin seperti <strong>skill pack</strong> di game: bisa dipasang ke karakter mana pun tanpa mengubah garis keturunannya. Satu class hanya boleh punya <strong>satu</strong> parent, tetapi boleh memasang <strong>banyak</strong> mixin.',
+            points: ['<code>mixin</code> — mendefinisikan paket kemampuan.', '<code>with</code> — memasang satu atau lebih mixin ke sebuah class.'],
+            file: 'mixin.dart',
+            code: `mixin BisaTerbang {
+  void terbang() => print('Terbang!');
+}
+
+mixin BisaBerenang {
+  void berenang() => print('Berenang!');
+}
+
+class Hewan { }
+
+class Bebek extends Hewan with BisaTerbang, BisaBerenang { }
+
+void main() {
+  var donald = Bebek();
+  donald.terbang();
+  donald.berenang();
+}`,
+            flutter: 'Saat membuat animasi Anda akan menulis <code>class _MyState extends State&lt;MyPage&gt; with SingleTickerProviderStateMixin</code>. Mixin itu memberi State kemampuan menjadi <code>vsync</code> bagi <code>AnimationController</code>.',
+            unlock: 'Avatar berdenyut & logo berputar — animasi berkat kemampuan dari mixin.',
+            challenges: [
+                {
+                    type: 'fill', title: 'Pasang Skill Pack',
+                    q: 'Buat <code>Bebek</code> menjadi turunan <code>Hewan</code> yang bisa terbang sekaligus berenang.',
+                    code: `§0§ BisaTerbang {
+  void terbang() => print('Terbang!');
+}
+
+mixin BisaBerenang {
+  void berenang() => print('Berenang!');
+}
+
+class Hewan { }
+
+class Bebek §1§ Hewan §2§ BisaTerbang, BisaBerenang { }`,
+                    answers: ['mixin', 'extends', 'with'],
+                    distractors: ['class', 'implements', 'abstract'],
+                    hint: 'Urutannya selalu: parent dulu, baru kemampuan tambahan.',
+                    explain: 'Urutannya selalu <code>extends</code> dahulu, baru <code>with</code>. Bebek hanya punya satu parent (<code>Hewan</code>) tetapi mendapat dua kemampuan tambahan sekaligus.'
+                },
+                {
+                    type: 'sort', title: 'extends, implements, atau with?',
+                    q: 'Pilih keyword yang paling cocok untuk setiap situasi.',
+                    buckets: ['extends', 'implements', 'with'],
+                    items: [
+                        { t: 'Mewarisi seluruh kode dari SATU parent class', b: 0, why: '<code>extends</code> mewarisi implementasi, dan hanya boleh dari satu parent.' },
+                        { t: 'Menempelkan kemampuan dari BANYAK sumber sekaligus', b: 2, why: '<code>with</code> boleh diikuti banyak mixin, dipisahkan koma.' },
+                        { t: 'Menandatangani kontrak: semua method wajib ditulis ulang', b: 1, why: '<code>implements</code> hanya mengambil kontraknya, bukan isi kodenya.' },
+                        { t: 'class HomePage ___ StatelessWidget', b: 0, why: 'Halaman mewarisi kemampuan widget dari <code>StatelessWidget</code>.' },
+                        { t: 'State<MyPage> ___ SingleTickerProviderStateMixin', b: 2, why: 'Namanya saja sudah berakhiran Mixin — dipasang dengan <code>with</code>.' },
+                        { t: 'class FakeApi ___ ApiService   (versi palsu untuk testing)', b: 1, why: 'Versi palsu tidak butuh kode aslinya, cukup memenuhi kontraknya.' }
+                    ]
+                },
+                {
+                    type: 'quiz', title: 'Rahasia vsync: this',
+                    q: 'Mengapa <code>vsync: this</code> boleh ditulis pada kode berikut?',
+                    code: `class _LogoState extends State<Logo>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: Duration(seconds: 2),
+    );
+  }
+}`,
+                    options: ['Karena mixin menambahkan kemampuan TickerProvider ke _LogoState, sehingga object ini (this) memenuhi syarat vsync', 'Karena semua class di Dart otomatis bisa menjadi vsync', 'Karena this selalu merujuk ke AnimationController', 'Karena State<Logo> adalah abstract class'], answer: 0,
+                    hint: 'Coba bayangkan baris "with ..." dihapus — apakah this masih memenuhi syarat?',
+                    explain: '<code>vsync</code> membutuhkan sebuah <code>TickerProvider</code>. Berkat mixin, object State ini kini memiliki kemampuan tersebut, sehingga cukup menyerahkan dirinya sendiri (<code>this</code>).'
+                }
+            ]
+        },
+        {
+            id: 8, icon: '👑', title: 'Jurus Flutter', tag: 'Boss level: static, final, copyWith, enum, State',
+            analogi: 'Level terakhir. Inilah jurus-jurus OOP yang <strong>setiap hari</strong> muncul di kode Flutter — lalu Anda harus menggabungkan semuanya untuk merakit sebuah <code>StatefulWidget</code> utuh.',
+            points: ['<code>static</code> — milik class, bukan milik object. Diakses tanpa membuat object.', '<code>final</code> — hanya bisa diisi sekali (immutable).', '<code>copyWith</code> — menyalin object sambil mengganti sebagian nilainya.', '<code>enum</code> dan generics <code>&lt;T&gt;</code> — pilihan nilai yang terbatas, dan class yang bekerja untuk banyak tipe.'],
+            file: 'jurus_flutter.dart',
+            code: `class Tema {
+  static const warnaUtama = 'biru';   // milik class
+}
+
+class User {
+  final String nama;   // final: tidak bisa diubah
+  final int umur;
+  const User({required this.nama, required this.umur});
+
+  // salin object dengan sebagian nilai baru
+  User copyWith({String? nama, int? umur}) {
+    return User(
+      nama: nama ?? this.nama,
+      umur: umur ?? this.umur,
+    );
+  }
+}
+
+void main() {
+  print(Tema.warnaUtama);          // tanpa membuat object
+  var a = User(nama: 'Budi', umur: 20);
+  var b = a.copyWith(umur: 21);    // Budi, 21
+}`,
+            flutter: '<code>Colors.blue</code> dan <code>Icons.home</code> adalah <code>static</code>. Field widget selalu <code>final</code>. <code>copyWith</code> dipakai pada <code>TextStyle</code>, <code>ThemeData</code>, dan state management. <code>State&lt;T&gt;</code> serta <code>List&lt;Widget&gt;</code> adalah generics.',
+            unlock: 'Tombol + yang benar-benar berfungsi — StatefulWidget dengan setState(). Coba klik!',
+            challenges: [
+                {
+                    type: 'quiz', title: 'Tebak Output: static', mono: true,
+                    q: 'Apa yang dicetak program berikut?',
+                    code: `class Pengunjung {
+  static int total = 0;
+  String nama;
+
+  Pengunjung(this.nama) {
+    total++;
+  }
+}
+
+void main() {
+  Pengunjung('Ani');
+  Pengunjung('Budi');
+  Pengunjung('Cici');
+  print(Pengunjung.total);
+}`,
+                    options: ['3', '1', '0', 'Error'], answer: 0,
+                    hint: 'Variabel static hanya ada satu dan dipakai bersama oleh semua object.',
+                    explain: '<code>static</code> berarti hanya ada <strong>satu</strong> variabel <code>total</code> yang dipakai bersama oleh semua object, dan diakses lewat nama class: <code>Pengunjung.total</code>.'
+                },
+                {
+                    type: 'fill', title: 'Salin dengan Perubahan',
+                    q: 'Lengkapi class immutable berikut beserta method penyalinnya.',
+                    code: `class Profil {
+  §0§ String nama;
+  final int level;
+  const Profil({required this.nama, required this.level});
+
+  Profil §1§({String? nama, int? level}) {
+    return Profil(
+      nama: nama §2§ this.nama,
+      level: level ?? this.level,
+    );
+  }
+}
+
+void main() {
+  var lama = Profil(nama: 'Budi', level: 1);
+  var baru = lama.copyWith(level: 2);
+  print(baru.nama);  // Budi
+}`,
+                    answers: ['final', 'copyWith', '??'],
+                    distractors: ['var', 'static', '||', 'clone'],
+                    hint: 'Operator yang dicari berarti: pakai nilai kiri, tetapi jika null pakai nilai kanan.',
+                    explain: 'Karena field-nya <code>final</code>, object tidak bisa diubah — kita membuat salinan baru. Operator <code>??</code> berarti "pakai nilai baru, tetapi jika null pakai nilai lama".'
+                },
+                {
+                    type: 'quiz', title: 'Mengapa enum?',
+                    q: 'Mengapa status pesanan lebih baik ditulis sebagai <code>enum</code> daripada String seperti <code>\'diproses\'</code>?',
+                    code: `enum StatusPesanan { diproses, dikirim, selesai }
+
+String label(StatusPesanan s) {
+  switch (s) {
+    case StatusPesanan.diproses: return 'Sedang diproses';
+    case StatusPesanan.dikirim:  return 'Dalam perjalanan';
+    case StatusPesanan.selesai:  return 'Pesanan tiba';
+  }
+}`,
+                    options: ['Pilihan nilainya terbatas dan diperiksa compiler, sehingga salah ketik langsung ketahuan', 'Karena enum lebih cepat diketik daripada String', 'Karena String tidak bisa dipakai di dalam switch', 'Karena enum otomatis tersimpan ke database'], answer: 0,
+                    hint: "Apa yang terjadi bila Anda salah mengetik 'dikrim' sebagai String?",
+                    explain: 'Salah ketik <code>\'dikrim\'</code> pada String baru ketahuan saat aplikasi berjalan, sedangkan <code>StatusPesanan.dikrim</code> langsung ditolak compiler.'
+                },
+                {
+                    type: 'fill', title: 'BOSS: Rakit StatefulWidget',
+                    q: 'Gabungkan semua yang sudah Anda pelajari: inheritance, generics, encapsulation, dan polymorphism dalam satu widget counter.',
+                    code: `class CounterPage extends §0§ {
+  const CounterPage({super.key});
+
+  @override
+  State<CounterPage> createState() => _CounterPageState();
+}
+
+class _CounterPageState extends State<§1§> {
+  int §2§ = 0;
+
+  void _tambah() {
+    §3§(() {
+      _count++;
+    });
+  }
+
+  §4§
+  Widget build(BuildContext context) {
+    return Text('Jumlah: $_count');
+  }
+}`,
+                    answers: ['StatefulWidget', 'CounterPage', '_count', 'setState', '@override'],
+                    distractors: ['StatelessWidget', 'count', 'build', 'State'],
+                    hint: 'Widget yang datanya berubah butuh parent yang berbeda, dan perubahan data harus dibungkus satu fungsi khusus.',
+                    explain: 'Satu widget, lima konsep: <strong>inheritance</strong> (<code>extends</code>), <strong>generics</strong> (<code>State&lt;CounterPage&gt;</code>), <strong>encapsulation</strong> (<code>_count</code>), <strong>polymorphism</strong> (<code>@override build</code>), dan <code>setState()</code> yang diwarisi dari class <code>State</code>.'
+                }
+            ]
+        }
+    ];
+
+    // ============================================
+    // OOP Quest — mesin game
+    // ============================================
+    (function () {
+        const STORE_KEY = 'oopQuestFlutter.v1';
+        const KIND = { quiz: 'Pilih Jawaban', fill: 'Lengkapi Kode', sort: 'Sortir Kilat' };
+        const RANKS = [[0.95, '👑 OOP Master'], [0.75, '⚡ Senior Engineer'], [0.5, '💙 Flutter Developer'], [0.25, '🚀 Junior Developer'], [0, '🌱 Pemula Dart']];
+        const KEYWORDS = new Set('class abstract mixin enum extends implements with void int double bool String var final const static late return required this super factory get set for in if else switch case async await true false null'.split(' '));
+        const FUNCS = new Set(['print', 'setState']);
+        // Pengurangan XP per pelanggaran; freeLeaves = jumlah peringatan gratis saat meninggalkan halaman
+        const CHEAT = { copy: 25, screenshot: 25, leave: 25, freeLeaves: 1 };
+
+        const box = document.getElementById('oqBox');
+        const hud = document.getElementById('oqHud');
+        const body = document.getElementById('oqBody');
+        const resetBtn = document.getElementById('oqReset');
+
+        let save = loadSave();
+        let run = null;
+
+        function emptySave() {
+            return { best: {}, taps: 0, viol: 0, penalty: 0, leaves: 0 };
+        }
+        function loadSave() {
+            try {
+                const s = JSON.parse(localStorage.getItem(STORE_KEY));
+                if (s && typeof s.best === 'object') return { ...emptySave(), ...s };
+            } catch (e) { /* penyimpanan tidak tersedia */ }
+            return emptySave();
+        }
+        function persist() {
+            try { localStorage.setItem(STORE_KEY, JSON.stringify(save)); } catch (e) { /* abaikan */ }
+        }
+
+        const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        const shuffle = arr => {
+            const a = arr.slice();
+            for (let i = a.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [a[i], a[j]] = [a[j], a[i]];
+            }
+            return a;
+        };
+        const has = id => save.best[id] != null;
+        const unlocked = id => id === 1 || has(id - 1);
+        const maxOf = level => level.challenges.length * 100;
+        const TOTAL_MAX = OOP_LEVELS.reduce((n, l) => n + maxOf(l), 0);
+        const starCount = (score, max) => score / max >= 0.85 ? 3 : score / max >= 0.6 ? 2 : 1;
+        const starsHtml = n => `<span class="oq-stars">${'★'.repeat(n)}<i>${'★'.repeat(3 - n)}</i></span>`;
+
+        // Pewarnaan sintaks Dart sederhana memakai class .hl-* dari course.css
+        function highlight(src, slotHtml) {
+            const re = /(\/\/[^\n]*)|('(?:[^'\\\n]|\\.)*')|(@override)|\b(\d+(?:\.\d+)?)\b|\b([A-Za-z_]\w*)\b|§(\d+)§/g;
+            let out = '', last = 0, m;
+            while ((m = re.exec(src))) {
+                out += esc(src.slice(last, m.index));
+                last = re.lastIndex;
+                if (m[1]) out += `<span class="hl-comment">${esc(m[1])}</span>`;
+                else if (m[2]) out += `<span class="hl-string">${esc(m[2])}</span>`;
+                else if (m[3]) out += `<span class="hl-keyword">${m[3]}</span>`;
+                else if (m[4]) out += `<span class="hl-number">${m[4]}</span>`;
+                else if (m[5]) out += KEYWORDS.has(m[5]) ? `<span class="hl-keyword">${m[5]}</span>` : FUNCS.has(m[5]) ? `<span class="hl-func">${m[5]}</span>` : m[5];
+                else out += slotHtml ? slotHtml(+m[6]) : '';
+            }
+            return out + esc(src.slice(last));
+        }
+        const codeBlock = (code, file, slotHtml) => `
+            <div class="code-block">
+                <div class="code-block-header"><div class="code-block-dots"><span></span><span></span><span></span></div><span class="code-block-filename">${file}</span></div>
+                <pre class="code-block-body"><code>${highlight(code, slotHtml)}</code></pre>
+            </div>`;
+
+        // ---------- HUD & ponsel ----------
+        function renderHud() {
+            const xp = Math.max(0, OOP_LEVELS.reduce((n, l) => n + (save.best[l.id] || 0), 0) - save.penalty);
+            const done = OOP_LEVELS.filter(l => has(l.id)).length;
+            const ratio = xp / TOTAL_MAX;
+            const rank = done === 0 ? RANKS[RANKS.length - 1][1] : RANKS.find(r => ratio >= r[0])[1];
+            hud.innerHTML = `
+                <span>Pangkat: <strong>${rank}</strong></span>
+                <span>XP: <strong>${xp}</strong> / ${TOTAL_MAX}</span>
+                <span>Level: <strong>${done}</strong> / ${OOP_LEVELS.length}</span>
+                ${save.viol ? `<span class="oq-viol">Pelanggaran: <strong>${save.viol}</strong> (−${save.penalty} XP)</span>` : ''}
+                <div class="oq-bar"><i style="width:${Math.round(ratio * 100)}%"></i></div>`;
+        }
+
+        function phone(newId) {
+            const fresh = n => n === newId ? ' oq-new' : '';
+            const part = (n, html, cls) => has(n)
+                ? `<div class="oq-part ${cls}${fresh(n)}">${html}</div>`
+                : `<div class="oq-p-lock ${cls}">🔒 Level ${n}</div>`;
+            const card = (inisial, nama, nim, extra) => `<div class="oq-p-card"><span class="oq-p-ava${inisial === 'B' && has(7) ? ' oq-pulse' : ''}">${inisial}</span><div><b>${nama}</b><small>${nim}</small></div>${extra || ''}</div>`;
+            const ipk = has(3) ? `<span class="oq-p-chip${fresh(3)}">IPK 3.75</span>` : '<span class="oq-p-chip oq-p-chip-lock">🔒 Lv 3</span>';
+            return `
+                <div class="oq-phone"><div class="oq-screen">
+                    ${part(4, 'KampusKu', 'oq-p-appbar')}
+                    <div class="oq-p-body">
+                        ${part(6, '✓ Data dimuat via Repository', 'oq-p-banner')}
+                        ${part(1, card('B', 'Budi', 'NIM 2021001', ipk), '')}
+                        ${part(2, card('S', 'Siti', 'NIM 2021002') + card('A', 'Andi', 'NIM 2021003'), 'oq-p-stack')}
+                        ${part(5, '<span>Text</span><span class="star">★</span><span class="btn">Button</span>', 'oq-p-row')}
+                        ${part(7, '<span class="oq-p-spin"></span><span>Animasi aktif</span>', 'oq-p-anim')}
+                    </div>
+                    ${part(8, `<span>Diklik: <b id="oqTaps">${save.taps}</b>×</span><button class="oq-p-fab" data-action="fab" aria-label="Tambah">+</button>`, 'oq-p-fabwrap')}
+                </div></div>`;
+        }
+
+        // ---------- Peta level ----------
+        function renderHome() {
+            run = null;
+            renderHud();
+            const allDone = OOP_LEVELS.every(l => has(l.id));
+            const nextId = (OOP_LEVELS.find(l => !has(l.id)) || {}).id;
+            const cards = OOP_LEVELS.map(l => {
+                const open = unlocked(l.id);
+                const state = has(l.id)
+                    ? `${starsHtml(starCount(save.best[l.id], maxOf(l)))}<small>${save.best[l.id]} / ${maxOf(l)} XP</small>`
+                    : open ? 'Mulai →' : '🔒';
+                return `
+                    <button class="oq-level${l.id === nextId ? ' current' : ''}" data-action="open" data-level="${l.id}" ${open ? '' : 'disabled'}>
+                        <span class="oq-level-icon">${l.icon}</span>
+                        <span class="oq-level-info">
+                            <span class="oq-level-num">Level ${l.id}</span>
+                            <span class="oq-level-title">${l.title}</span>
+                            <span class="oq-level-tag">${l.tag}</span>
+                        </span>
+                        <span class="oq-level-state">${state}</span>
+                    </button>`;
+            }).join('');
+            body.innerHTML = `
+                ${allDone ? '<div class="oq-win"><strong>🎉 Selamat, aplikasi KampusKu selesai dibangun!</strong> Anda telah menamatkan seluruh konsep OOP Dart yang dipakai di Flutter. Ulangi level yang belum mendapat tiga bintang untuk meraih pangkat tertinggi.</div>' : ''}
+                <div class="oq-home">
+                    <div class="oq-levels">${cards}</div>
+                    <div class="oq-phone-wrap">
+                        ${phone()}
+                        <p class="oq-phone-cap">Aplikasi <strong>KampusKu</strong> terbangun seiring level yang Anda selesaikan.</p>
+                    </div>
+                </div>`;
+        }
+
+        // ---------- Arena ----------
+        const cur = () => run.level.challenges[run.idx];
+
+        function topBar() {
+            const steps = run.level.challenges.map((_, i) => `<i class="${i < run.idx ? 'done' : i === run.idx ? 'now' : ''}"></i>`).join('');
+            return `
+                <div class="oq-top">
+                    <button class="oq-btn oq-btn-ghost" data-action="home">← Peta Level</button>
+                    <span class="oq-top-title">${run.level.icon} Level ${run.level.id}: ${run.level.title}</span>
+                    <span>XP level ini: <strong>${run.score}</strong></span>
+                    <div class="oq-steps">${steps}</div>
+                </div>`;
+        }
+
+        function focusStage() {
+            const r = box.getBoundingClientRect();
+            if (r.top < 0 || r.top > window.innerHeight * 0.5) box.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function openLevel(id) {
+            const level = OOP_LEVELS.find(l => l.id === id);
+            if (!level || !unlocked(id)) return;
+            run = { level, idx: -1, score: 0, ch: null };
+            body.innerHTML = `
+                ${topBar()}
+                <span class="oq-kind">Briefing</span>
+                <h3 class="oq-h">${level.title} — ${level.tag}</h3>
+                <p class="oq-q">${level.analogi}</p>
+                <ul class="oq-points">${level.points.map(p => `<li>${p}</li>`).join('')}</ul>
+                ${codeBlock(level.code, level.file)}
+                <div class="oq-note"><strong>💙 Di Flutter:</strong> ${level.flutter}</div>
+                <div class="oq-actions"><button class="oq-btn" data-action="next">Mulai Tantangan →</button></div>`;
+            focusStage();
+        }
+
+        function renderChallenge() {
+            const c = cur();
+            const head = `
+                ${topBar()}
+                <span class="oq-kind">${KIND[c.type]} • ${run.idx + 1} / ${run.level.challenges.length}</span>
+                <h3 class="oq-h">${c.title}</h3>
+                <p class="oq-q">${c.q}</p>`;
+            if (c.type === 'quiz') {
+                run.ch = { attempts: 0, solved: false };
+                const opts = shuffle(c.options.map((text, i) => ({ text, i })));
+                body.innerHTML = `${head}
+                    ${c.code ? codeBlock(c.code, 'main.dart') : ''}
+                    <div class="oq-options">${opts.map((o, k) => `<button class="oq-opt${c.mono ? ' mono' : ''}" data-action="opt" data-i="${o.i}"><span class="oq-opt-key">${'ABCD'[k]}</span><span>${esc(o.text)}</span></button>`).join('')}</div>
+                    <div class="oq-fb" id="oqFb"></div>`;
+            } else if (c.type === 'fill') {
+                const texts = c.answers.map(a => [].concat(a)[0]).concat(c.distractors);
+                run.ch = { attempts: 0, solved: false, active: 0, slots: c.answers.map(() => null), marks: [], tokens: shuffle(texts) };
+                body.innerHTML = `${head}<div id="oqFill"></div><div class="oq-fb" id="oqFb"></div>`;
+                renderFill();
+            } else {
+                run.ch = { i: 0, correct: 0, answered: false, items: shuffle(c.items) };
+                body.innerHTML = `${head}<div id="oqSort"></div><div class="oq-fb" id="oqFb"></div>`;
+                renderSort();
+            }
+            focusStage();
+        }
+
+        function feedback(kind, title, text, withNext) {
+            const fb = document.getElementById('oqFb');
+            fb.className = 'oq-fb ' + kind;
+            fb.innerHTML = `<strong>${title}</strong>${text || ''}${withNext ? `<div><button class="oq-btn" data-action="next">${withNext} →</button></div>` : ''}`;
+            if (withNext) fb.querySelector('button').focus({ preventScroll: true });
+            const r = fb.getBoundingClientRect();
+            if (r.bottom > window.innerHeight) fb.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        }
+
+        function solve(score, text) {
+            run.ch.solved = true;
+            run.score += score;
+            const last = run.idx === run.level.challenges.length - 1;
+            feedback('ok', `✓ Benar! +${score} XP`, text, last ? 'Selesaikan Level' : 'Lanjut');
+            body.querySelector('.oq-top strong').textContent = run.score;
+        }
+
+        const attemptScore = () => [100, 50, 25][Math.min(run.ch.attempts, 2)];
+
+        // ---------- Pilih jawaban ----------
+        function pickOption(btn) {
+            const c = cur(), ch = run.ch;
+            if (ch.solved || btn.disabled) return;
+            if (+btn.dataset.i === c.answer) {
+                btn.classList.add('ok');
+                body.querySelectorAll('.oq-opt').forEach(b => { b.disabled = true; });
+                solve(attemptScore(), c.explain);
+            } else {
+                btn.classList.add('bad');
+                btn.disabled = true;
+                ch.attempts++;
+                feedback('bad', '✗ Belum tepat, coba lagi.', c.hint ? 'Petunjuk: ' + esc(c.hint) : '');
+            }
+        }
+
+        // ---------- Lengkapi kode ----------
+        function renderFill() {
+            const c = cur(), ch = run.ch;
+            const used = new Set(ch.slots.filter(t => t != null));
+            const slot = i => {
+                const t = ch.slots[i];
+                const cls = (t != null ? ' filled' : '') + (i === ch.active && !ch.solved ? ' active' : '') + (ch.marks[i] === true ? ' ok' : ch.marks[i] === false ? ' bad' : '');
+                return `<button class="oq-slot${cls}" data-action="slot" data-i="${i}" aria-label="Kotak kosong ${i + 1}">${t != null ? esc(ch.tokens[t]) : '&nbsp;'}</button>`;
+            };
+            document.getElementById('oqFill').innerHTML = `
+                ${codeBlock(c.code, 'main.dart', slot)}
+                <div class="oq-bank">${ch.tokens.map((t, k) => `<button class="oq-token" data-action="token" data-i="${k}" ${used.has(k) || ch.solved ? 'disabled' : ''}>${esc(t)}</button>`).join('')}</div>
+                ${ch.solved ? '' : '<button class="oq-btn" data-action="check">Periksa Jawaban</button>'}`;
+        }
+
+        function pickSlot(i) {
+            const ch = run.ch;
+            if (ch.solved) return;
+            ch.slots[i] = null;
+            ch.marks[i] = undefined;
+            ch.active = i;
+            renderFill();
+        }
+
+        function pickToken(k) {
+            const ch = run.ch;
+            if (ch.solved || ch.active == null) return;
+            ch.slots[ch.active] = k;
+            ch.marks[ch.active] = undefined;
+            const next = ch.slots.indexOf(null);
+            ch.active = next === -1 ? null : next;
+            renderFill();
+        }
+
+        function checkFill() {
+            const c = cur(), ch = run.ch;
+            if (ch.solved) return;
+            if (ch.slots.includes(null)) {
+                feedback('bad', 'Masih ada kotak yang kosong.', 'Klik kotak kosong pada kode, lalu pilih potongan kode yang sesuai.');
+                return;
+            }
+            ch.marks = ch.slots.map((t, i) => [].concat(c.answers[i]).includes(ch.tokens[t]));
+            if (ch.marks.every(Boolean)) {
+                const score = attemptScore();
+                ch.solved = true;
+                renderFill();
+                solve(score, c.explain);
+            } else {
+                ch.attempts++;
+                const wrong = ch.marks.filter(m => !m).length;
+                renderFill();
+                feedback('bad', `✗ ${wrong} kotak belum tepat (ditandai merah).`, `Klik kotak merah untuk menggantinya.${c.hint ? ' Petunjuk: ' + esc(c.hint) : ''}`);
+            }
+        }
+
+        // ---------- Sortir kilat ----------
+        function renderSort() {
+            const c = cur(), ch = run.ch, item = ch.items[ch.i];
+            document.getElementById('oqSort').innerHTML = `
+                <div class="oq-card${c.mono ? ' mono' : ''}"><small>Kartu ${ch.i + 1} dari ${ch.items.length}</small>${esc(item.t)}</div>
+                <div class="oq-buckets">${c.buckets.map((b, k) => `<button class="oq-bucket" data-action="bucket" data-i="${k}">${esc(b)}</button>`).join('')}</div>`;
+            document.getElementById('oqFb').className = 'oq-fb';
+            document.getElementById('oqFb').innerHTML = '';
+        }
+
+        function pickBucket(k) {
+            const c = cur(), ch = run.ch, item = ch.items[ch.i];
+            if (ch.answered) return;
+            ch.answered = true;
+            const right = k === item.b;
+            if (right) ch.correct++;
+            body.querySelectorAll('.oq-bucket').forEach((b, i) => {
+                b.disabled = true;
+                if (i === item.b) b.classList.add('ok');
+                else if (i === k) b.classList.add('bad');
+            });
+            const lastCard = ch.i === ch.items.length - 1;
+            if (!lastCard) {
+                feedback(right ? 'ok' : 'bad', right ? '✓ Tepat!' : `✗ Jawaban yang benar: ${esc(c.buckets[item.b])}`, item.why, 'Kartu Berikutnya');
+                document.querySelector('#oqFb button').dataset.action = 'sortNext';
+                return;
+            }
+            const score = Math.round(100 * ch.correct / ch.items.length);
+            run.ch.solved = true;
+            run.score += score;
+            const lastCh = run.idx === run.level.challenges.length - 1;
+            feedback(right ? 'ok' : 'bad', `${right ? '✓ Tepat!' : `✗ Jawaban yang benar: ${esc(c.buckets[item.b])}`} — ${ch.correct} dari ${ch.items.length} kartu benar, +${score} XP`, item.why, lastCh ? 'Selesaikan Level' : 'Lanjut');
+            body.querySelector('.oq-top strong').textContent = run.score;
+        }
+
+        // ---------- Level selesai ----------
+        function finishLevel() {
+            const level = run.level, score = run.score, max = maxOf(level);
+            const first = !has(level.id);
+            const prev = save.best[level.id] || 0;
+            save.best[level.id] = Math.max(prev, score);
+            persist();
+            renderHud();
+            const next = OOP_LEVELS.find(l => l.id === level.id + 1);
+            const record = !first && score > prev ? ' — rekor baru!' : !first && score < prev ? ` (rekor Anda: ${prev} XP)` : '';
+            run = null;
+            body.innerHTML = `
+                <div class="oq-done">
+                    <div>
+                        <span class="oq-kind">Level ${level.id} Selesai</span>
+                        <h3 class="oq-h">${level.icon} ${level.title}</h3>
+                        ${starsHtml(starCount(score, max))}
+                        <p class="oq-done-xp"><strong>${score}</strong> / ${max} XP${record}</p>
+                        <div class="oq-note"><strong>${first ? '📱 Fitur baru terbuka:' : '📱 Fitur level ini:'}</strong> ${level.unlock}</div>
+                        <div class="oq-actions">
+                            ${next ? `<button class="oq-btn" data-action="open" data-level="${next.id}">Level ${next.id}: ${next.title} →</button>` : '<button class="oq-btn" data-action="home">🎉 Lihat Hasil Akhir</button>'}
+                            <button class="oq-btn oq-btn-ghost" data-action="open" data-level="${level.id}">Ulangi Level</button>
+                            ${next ? '<button class="oq-btn oq-btn-ghost" data-action="home">Peta Level</button>' : ''}
+                        </div>
+                    </div>
+                    <div class="oq-phone-wrap">${phone(level.id)}</div>
+                </div>`;
+            focusStage();
+        }
+
+        function next() {
+            if (!run) return;
+            run.idx++;
+            if (run.idx >= run.level.challenges.length) finishLevel();
+            else renderChallenge();
+        }
+
+        // ---------- Fair play ----------
+        const alertBox = document.getElementById('oqAlert');
+        let alertTimer = null, away = false, lastPenalty = 0;
+        const inChallenge = () => !!run && run.idx >= 0 && !!run.ch && !run.ch.solved;
+
+        function warn(msg, xp) {
+            if (xp) {
+                // satu kejadian bisa memicu beberapa sinyal sekaligus (mis. PrintScreen + kehilangan fokus)
+                if (Date.now() - lastPenalty < 1500) return;
+                lastPenalty = Date.now();
+                save.viol++;
+                save.penalty += xp;
+                persist();
+                renderHud();
+            }
+            alertBox.innerHTML = `<strong>${xp ? `⚠ Pelanggaran: −${xp} XP.` : '⚠ Peringatan.'}</strong>${msg}`;
+            alertBox.classList.add('show');
+            clearTimeout(alertTimer);
+            alertTimer = setTimeout(() => alertBox.classList.remove('show'), 10000);
+        }
+
+        function leave() {
+            if (away) return;
+            away = true;
+            if (!inChallenge()) return;
+            body.classList.add('oq-veil');
+            save.leaves++;
+            persist();
+            if (save.leaves > CHEAT.freeLeaves) warn('Anda meninggalkan halaman saat tantangan berlangsung.', CHEAT.leave);
+            else warn('Anda meninggalkan halaman saat tantangan berlangsung. Jika terulang, XP akan dikurangi.');
+        }
+        function comeBack() {
+            away = false;
+            body.classList.remove('oq-veil');
+        }
+        window.addEventListener('blur', leave);
+        window.addEventListener('focus', comeBack);
+        document.addEventListener('visibilitychange', () => document.hidden ? leave() : comeBack());
+
+        ['copy', 'cut'].forEach(type => document.addEventListener(type, e => {
+            if (!inChallenge()) return;
+            e.preventDefault();
+            warn('Menyalin soal tidak diperbolehkan selama tantangan.', CHEAT.copy);
+        }));
+        document.addEventListener('keyup', e => {
+            if (e.key === 'PrintScreen' && inChallenge()) warn('Tangkapan layar terdeteksi.', CHEAT.screenshot);
+        });
+        box.addEventListener('contextmenu', e => e.preventDefault());
+        box.addEventListener('dragstart', e => e.preventDefault());
+
+        // ---------- Event ----------
+        body.addEventListener('click', e => {
+            const el = e.target.closest('[data-action]');
+            if (!el || el.disabled) return;
+            const i = +el.dataset.i;
+            switch (el.dataset.action) {
+                case 'open': openLevel(+el.dataset.level); break;
+                case 'home': renderHome(); focusStage(); break;
+                case 'next': next(); break;
+                case 'opt': pickOption(el); break;
+                case 'slot': pickSlot(i); break;
+                case 'token': pickToken(i); break;
+                case 'check': checkFill(); break;
+                case 'bucket': pickBucket(i); break;
+                case 'sortNext': run.ch.i++; run.ch.answered = false; renderSort(); break;
+                case 'fab':
+                    save.taps++;
+                    persist();
+                    document.getElementById('oqTaps').textContent = save.taps;
+                    break;
+            }
+        });
+
+        let resetArmed = null;
+        resetBtn.addEventListener('click', () => {
+            if (!resetArmed) {
+                resetBtn.textContent = 'Klik lagi untuk menghapus';
+                resetArmed = setTimeout(() => { resetArmed = null; resetBtn.textContent = 'Reset Progres'; }, 3000);
+                return;
+            }
+            clearTimeout(resetArmed);
+            resetArmed = null;
+            resetBtn.textContent = 'Reset Progres';
+            save = emptySave();
+            persist();
+            renderHome();
+        });
+
+        renderHome();
+    })();
+    </script>
+</body>
+</html>
